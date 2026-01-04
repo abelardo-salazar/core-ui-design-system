@@ -1,0 +1,137 @@
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Ubuntu', ui-sans-serif, system-ui, sans-serif;
+
+  --color-primary: var(--primary);
+  --color-primary-focus: var(--primary-focus);
+  --color-primary-content: var(--primary-content);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-focus: var(--secondary-focus);
+  --color-secondary-content: var(--secondary-content);
+
+  --color-accent: var(--accent);
+  --color-accent-focus: var(--accent-focus);
+  --color-accent-content: var(--accent-content);
+
+  --color-neutral: var(--neutral);
+  --color-neutral-focus: var(--neutral-focus);
+  --color-neutral-content: var(--neutral-content);
+
+  --color-base-100: var(--base-100);
+  --color-base-200: var(--base-200);
+  --color-base-300: var(--base-300);
+  --color-base-content: var(--base-content);
+
+  /* Feedback */
+  --color-info: var(--info);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+
+  --radius-box: var(--rounded-box);
+  --radius-btn: var(--rounded-btn);
+}
+
+@layer base {
+  :root {
+    --palette-navy: #302b6e;
+    --palette-navy-dark: #28245b;
+    --palette-lavender: #b7b1ff;
+    --palette-lavender-light: #cfcbff;
+
+    --palette-forest: #235e43;
+    --palette-forest-dark: #1c4b36;
+    --palette-mint: #2dd287;
+    --palette-mint-light: #40d692;
+
+    --palette-olive: #426020;
+    --palette-olive-dark: #354c19;
+    --palette-lime: #9ed261;
+    --palette-lime-light: #aad875;
+
+    --palette-gray-800: #282524;
+    --palette-pitch-black: #0d0c0c;
+    --palette-white: #ffffff;
+    --palette-off-white: #fcfcfc;
+    --palette-black: #000000;
+    --palette-black-soft: #141414;
+
+    /* Feedback Colors */
+    --palette-blue: #3b82f6;
+    --palette-green: #22c55e;
+    --palette-yellow: #eab308;
+    --palette-red: #ef4444;
+
+    --primary: var(--palette-navy);
+    --primary-focus: var(--palette-navy-dark);
+    --primary-content: var(--palette-white);
+
+    --secondary: var(--palette-forest);
+    --secondary-focus: var(--palette-forest-dark);
+    --secondary-content: var(--palette-white);
+
+    --accent: var(--palette-olive);
+    --accent-focus: var(--palette-olive-dark);
+    --accent-content: var(--palette-white);
+
+    --neutral: var(--palette-gray-800);
+    --neutral-focus: var(--palette-pitch-black);
+    --neutral-content: var(--palette-white);
+
+    --base-100: var(--palette-white);
+    --base-200: var(--palette-off-white);
+    --base-300: #f3f4f6;
+    --base-content: var(--palette-gray-800);
+
+    --info: var(--palette-blue);
+    --success: var(--palette-green);
+    --warning: var(--palette-yellow);
+    --error: var(--palette-red);
+
+    --rounded-box: 1rem;
+    --rounded-btn: 0.5rem;
+  }
+
+  /* --- DARK MODE OVERRIDES --- */
+  :root:has(.dark),
+  .dark {
+    color-scheme: dark;
+
+    --primary: var(--palette-lavender);
+    --primary-focus: var(--palette-lavender-light);
+    --primary-content: var(--palette-black);
+
+    --secondary: var(--palette-mint);
+    --secondary-focus: var(--palette-mint-light);
+    --secondary-content: var(--palette-black);
+
+    --accent: var(--palette-lime);
+    --accent-focus: var(--palette-lime-light);
+    --accent-content: var(--palette-black);
+
+    --neutral: var(--palette-white);
+    --neutral-focus: #e5e5e5;
+    --neutral-content: var(--palette-black);
+
+    --base-100: var(--palette-black-soft);
+    --base-200: #1f1f1f;
+    --base-300: #292929;
+    --base-content: var(--palette-white);
+  }
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+  }
+  body {
+    background-color: var(--base-100);
+    color: var(--base-content);
+    transition:
+      background-color 0.3s,
+      color 0.3s;
+  }
+}
