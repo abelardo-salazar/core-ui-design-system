@@ -30,3 +30,5 @@ storybook-static
 
 # Typescript
 *.tsbuildinfo
+
+CONTEXT_SYNC.md
