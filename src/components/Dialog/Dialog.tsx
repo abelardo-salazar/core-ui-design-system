@@ -1,14 +1,15 @@
 import * as React from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { Cross2Icon } from '@radix-ui/react-icons'; // Icono estándar de cierre
 import { cn } from '../../utils/cn';
 
-// 1. Root & Trigger (Exported directly from Radix)
+// 1. Root & Trigger
 const Dialog = DialogPrimitive.Root;
 const DialogTrigger = DialogPrimitive.Trigger;
 const DialogPortal = DialogPrimitive.Portal;
 const DialogClose = DialogPrimitive.Close;
 
-// 2. Overlay (The dark backdrop)
+// 2. Overlay
 const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
@@ -16,9 +17,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      // Fixed position covering screen, dark semi-transparent bg, blur effect
       'fixed inset-0 z-50 bg-black/80 backdrop-blur-sm',
-      // Animations using data-state attributes from Radix
       'data-[state=open]:animate-in data-[state=closed]:animate-out',
       'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
       className,
@@ -28,7 +27,7 @@ const DialogOverlay = React.forwardRef<
 ));
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
-// 3. Content (The actual modal box)
+// 3. Content
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
@@ -38,11 +37,8 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        // Positioning: Centered fixed
         'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4',
-        // Visuals: Border, Background, Shadow, Radius
         'border border-base-300 bg-base-100 p-6 shadow-lg duration-200 sm:rounded-box',
-        // Animations: Zoom/Scale/Fade effects
         'data-[state=open]:animate-in data-[state=closed]:animate-out',
         'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
         'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
@@ -53,23 +49,9 @@ const DialogContent = React.forwardRef<
       {...props}
     >
       {children}
-      {/* Close Button ("X" icon) */}
+
       <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-base-100 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-base-200 data-[state=open]:text-base-content/50">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="h-4 w-4"
-        >
-          <line x1="18" x2="6" y1="6" y2="18"></line>
-          <line x1="6" x2="18" y1="6" y2="18"></line>
-        </svg>
+        <Cross2Icon className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
