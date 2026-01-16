@@ -5,6 +5,7 @@
   "main": "./dist/core-ui.umd.js",
   "module": "./dist/core-ui.es.js",
   "types": "./dist/index.d.ts",
+  "description": "Sistema de diseño privado",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -78,5 +79,9 @@
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abelardo-salazar/core-ui-design-system.git"
   }
 }
