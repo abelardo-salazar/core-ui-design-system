@@ -1,8 +1,10 @@
 {
-  "name": "core-ui-design-system",
-  "private": true,
-  "version": "0.0.0",
+  "name": "@abelardo-salazar/core-ui-design-system",
+  "version": "0.3.0",
   "type": "module",
+  "main": "./dist/core-ui.umd.js",
+  "module": "./dist/core-ui.es.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -22,8 +24,6 @@
     "@radix-ui/react-switch": "^1.2.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0"
   },
@@ -56,6 +56,27 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4",
+    "vite-plugin-dts": "^4.5.4",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
     "vitest": "^4.0.16"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/core-ui.es.js",
+      "require": "./dist/core-ui.umd.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   }
 }
