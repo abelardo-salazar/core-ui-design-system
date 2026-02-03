@@ -615,8 +615,10 @@ Notas:
 
 - **Exports:** `Textarea`.
 - **Props principales:**
+  - `label?: string` — etiqueta accesible asociada al `textarea`.
   - `variant?: 'default' | 'error'` — controla la apariencia visual (implementado en `textareaVariants.ts`).
-  - `error?: boolean` — si es `true` fuerza la variante `error` y añade `aria-invalid`.
+  - `error?: string` — mensaje de error; activa la variante visual `error` y `aria-invalid`.
+  - `helperText?: string` — texto de ayuda descriptivo (vinculado mediante `aria-describedby`).
   - `className?: string` — clases Tailwind adicionales para ajustar tamaño/espaciado.
   - Acepta `React.TextareaHTMLAttributes<HTMLTextAreaElement>` y `VariantProps<typeof textareaVariants>`.
 
@@ -626,23 +628,21 @@ Uso (ejemplos):
 
 ```tsx
 // 1. Default
-<Textarea placeholder="Escribe tu comentario..." />
+<Textarea label="comentario" placeholder="Escribe tu comentario..." />
 
 // 2. Con error (visual y aria-invalid)
-<Textarea error placeholder="Este campo es obligatorio" />
+<Textarea label="comentario" error placeholder="Este campo es obligatorio" />
 
 // 3. Controlado
 const [value, setValue] = useState('');
-<Textarea value={value} onChange={(e) => setValue(e.target.value)} />
+<Textarea label="comentario" value={value} onChange={(e) => setValue(e.target.value)} />
 
 // 4. Personalizar filas y tamaño
-<Textarea rows={6} className="text-sm" />
+<Textarea label="comentario" rows={6} className="text-sm" />
 
 // 5. Deshabilitado
-<Textarea disabled value="No editable" />
+<Textarea label="comentario" disabled value="No editable" />
 ```
-
-Nota: para accesibilidad, envuelve el `Textarea` con un `label` o provee `aria-label` cuando no haya texto visible. Usa la prop `error` para indicar estados de validación visualmente y mantener `aria-invalid` consistente.
 
 ### Select — Uso y Props
 
