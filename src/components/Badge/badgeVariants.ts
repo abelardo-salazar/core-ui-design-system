@@ -12,9 +12,17 @@ export const badgeVariants = cva(
         outline: 'text-base-content border-base-content/20',
         ghost: 'border-transparent bg-base-200 text-base-content hover:bg-base-300',
       },
+
+      size: {
+        sm: 'h-8 px-3 text-xs',
+        md: 'h-10 px-4 py-2',
+        lg: 'h-12 px-8 text-base',
+        icon: 'h-10 w-10',
+      },
     },
     defaultVariants: {
       variant: 'default',
+      size: 'sm',
     },
   },
 );
