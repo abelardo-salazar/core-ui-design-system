@@ -49,7 +49,7 @@ const textVariants = cva('text-base-content', {
       md: 'text-base leading-7', // Optimized for readability
       lg: 'text-lg font-semibold',
       lead: 'text-xl text-base-content/80',
-      muted: 'text-sm text-base-content/60',
+      muted: 'text-sm text-base-content',
     },
     weight: {
       normal: 'font-normal',

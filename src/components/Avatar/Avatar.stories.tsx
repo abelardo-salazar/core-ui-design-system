@@ -21,7 +21,7 @@ export const UserProfile: Story = {
       </Avatar>
       <div className="flex flex-col">
         <span className="text-sm font-bold">Shadcn</span>
-        <span className="text-xs text-base-content/60">Creator</span>
+        <span className="text-xs text-base-content">Creator</span>
       </div>
     </div>
   ),

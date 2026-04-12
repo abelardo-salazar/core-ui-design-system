@@ -51,7 +51,7 @@ export const SettingsForm: StoryObj = {
         <div className="flex items-center justify-between space-x-2">
           <div className="flex flex-col space-y-1">
             <Text className="text-sm font-medium">Marketing Emails</Text>
-            <Text className="text-xs text-base-content/60">Receive offers and updates.</Text>
+            <Text className="text-xs text-base-content">Receive offers and updates.</Text>
           </div>
           <Switch />
         </div>
@@ -66,7 +66,7 @@ export const SettingsForm: StoryObj = {
             >
               Accept terms and conditions
             </label>
-            <Text className="text-xs text-base-content/60">
+            <Text className="text-xs text-base-content">
               You agree to our Terms of Service and Privacy Policy.
             </Text>
           </div>
