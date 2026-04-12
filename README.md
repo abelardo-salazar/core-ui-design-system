@@ -217,7 +217,7 @@ Uso (ejemplos):
 <Text size="sm">Pequeño texto auxiliar</Text>
 <Text size="md">Texto por defecto</Text>
 <Text size="lead">Lead paragraph con mayor tamaño</Text>
-<Text size="muted" weight="medium" className="text-base-content/60">Texto muted</Text>
+<Text size="muted" weight="medium" className="text-base-content">Texto muted</Text>
 
 // Usar 'as' para cambiar el elemento
 <Text as="span" className="font-medium">Inline label</Text>
