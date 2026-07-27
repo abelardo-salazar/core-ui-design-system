@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Slot } from '@radix-ui/react-slot';
+import { Slot, Slottable } from '@radix-ui/react-slot';
 import { ReloadIcon } from '@radix-ui/react-icons'; // Importamos el icono
 import { type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
@@ -27,29 +27,44 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       endIcon,
       children,
       disabled,
+      onClick,
       ...props
     },
     ref,
   ) => {
     const Comp = asChild ? Slot : 'button';
     const classes = cn(buttonVariants({ variant, size, fullWidth, className }));
+    const isDisabled = isLoading || disabled;
 
     if (asChild) {
+      const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        if (isDisabled) {
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
+        onClick?.(event);
+      };
+
       return (
         <Comp
-          className={classes}
+          className={cn(classes, isDisabled && 'pointer-events-none')}
           ref={ref}
-          aria-disabled={isLoading || disabled}
+          aria-disabled={isDisabled}
           data-loading={isLoading}
+          onClick={handleClick}
           {...props}
         >
-          {children}
+          {isLoading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
+          {!isLoading && startIcon && <span className="mr-2">{startIcon}</span>}
+          <Slottable>{children}</Slottable>
+          {!isLoading && endIcon && <span className="ml-2">{endIcon}</span>}
         </Comp>
       );
     }
 
     return (
-      <button className={classes} disabled={isLoading || disabled} ref={ref} {...props}>
+      <button className={classes} disabled={isDisabled} onClick={onClick} ref={ref} {...props}>
         {isLoading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
         {!isLoading && startIcon && <span className="mr-2">{startIcon}</span>}
         {children}
