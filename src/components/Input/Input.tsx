@@ -95,7 +95,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {error}
           </p>
         ) : helperText ? (
-          <p id={descriptionId} className="text-xs text-base-content">
+          <p id={descriptionId} className="text-xs text-base-content/50">
             {helperText}
           </p>
         ) : null}
