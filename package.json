@@ -8,6 +8,7 @@
   "description": "Sistema de diseño privado",
   "scripts": {
     "dev": "vite",
+    "test": "vitest run",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",

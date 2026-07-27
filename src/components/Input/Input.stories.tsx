@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, within } from 'storybook/test';
 import { Input } from './Input';
 
 const meta: Meta<typeof Input> = {
@@ -32,6 +33,12 @@ export const Default: Story = {
     placeholder: 'name@example.com',
     type: 'email',
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const input = canvas.getByPlaceholderText('name@example.com');
+    // El campo debe usar la superficie "en reposo" del DS, no el tono de hover/estado.
+    await expect(input.className.split(' ')).toContain('bg-base-100');
+  },
 };
 
 // 2. Con Error
@@ -41,6 +48,12 @@ export const WithError: Story = {
     defaultValue: 'admin',
     error: 'Este nombre de usuario ya está en uso.',
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const label = canvas.getByText('Username');
+    await expect(label.className.split(' ')).toContain('text-error');
+    await expect(label.className.split(' ')).not.toContain('text-base-content');
+  },
 };
 
 // 3. Con Helper Text
@@ -49,6 +62,11 @@ export const WithHelperText: Story = {
     label: 'Password',
     type: 'password',
     helperText: 'Debe tener al menos 8 caracteres.',
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const helper = canvas.getByText('Debe tener al menos 8 caracteres.');
+    await expect(helper.className.split(' ')).toContain('text-base-content/50');
   },
 };
 
