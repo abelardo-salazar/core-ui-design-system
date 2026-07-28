@@ -9,6 +9,7 @@ export * from './components/Checkbox';
 export * from './components/Dialog';
 export * from './components/Input';
 export * from './components/Layout'; // Container, Separator, SkipToContent
+export * from './components/Popover';
 export * from './components/Select';
 export * from './components/Sheet';
 export * from './components/Skeleton';
