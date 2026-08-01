@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, within } from 'storybook/test';
 import { Container } from './Container';
 import { Separator } from './Separator';
 import { SkipToContent } from './SkipToContent';
@@ -17,11 +18,12 @@ export default meta;
 export const PageExample: StoryObj = {
   render: () => (
     <div className="min-h-screen bg-base-100 relative">
-      {/* 1. Accessibility First */}
-      <SkipToContent />
-
       {/* 2. Header Simulation */}
-      <div className="border-b border-base-300 py-4">
+      <header className="border-b border-base-300 py-4">
+        {/* 1. Accessibility First. Posicionado absolute (ver SkipToContent.tsx), su lugar en
+            el DOM no afecta el layout visual; vive en el header para no quedar fuera de
+            cualquier landmark (axe: region). */}
+        <SkipToContent />
         <Container className="flex items-center justify-between">
           <Heading level="h4">My App</Heading>
           <nav className="flex gap-4 text-sm font-medium">
@@ -33,7 +35,7 @@ export const PageExample: StoryObj = {
             </a>
           </nav>
         </Container>
-      </div>
+      </header>
 
       {/* 3. Main Content */}
       <main id="main-content" className="py-8">
@@ -50,7 +52,10 @@ export const PageExample: StoryObj = {
 
           <div className="grid md:grid-cols-3 gap-6">
             <div className="md:col-span-2 space-y-4">
-              <Heading level="h3">Main Area</Heading>
+              {/* level mantiene el tamaño visual h3; as corrige el salto h1->h3 (axe: heading-order) */}
+              <Heading level="h3" as="h2">
+                Main Area
+              </Heading>
               <Card className="h-64 flex items-center justify-center bg-base-200/50">
                 <Text>Content Block 1</Text>
               </Card>
@@ -60,7 +65,9 @@ export const PageExample: StoryObj = {
             </div>
 
             <div className="space-y-4">
-              <Heading level="h3">Sidebar</Heading>
+              <Heading level="h3" as="h2">
+                Sidebar
+              </Heading>
               <div className="flex flex-col gap-4">
                 <div className="flex h-5 items-center space-x-4 text-sm">
                   <div>Blog</div>
@@ -79,4 +86,19 @@ export const PageExample: StoryObj = {
       </main>
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // axe: heading-order — "Main Area"/"Sidebar" saltaban de h1 a h3 sin pasar por h2.
+    await expect(canvas.getByRole('heading', { level: 1, name: 'Dashboard Layout' })).toBeInTheDocument();
+    const h2s = canvas.getAllByRole('heading', { level: 2 });
+    await expect(h2s.map((h) => h.textContent)).toEqual(['Main Area', 'Sidebar']);
+    // level sigue siendo h3 visualmente (mismo tamaño de fuente que antes).
+    await expect(h2s[0].className).toContain('text-2xl');
+
+    // axe: region — el header y el skip-link quedaban fuera de cualquier landmark.
+    const banner = canvas.getByRole('banner');
+    await expect(within(banner).getByText('My App')).toBeInTheDocument();
+    await expect(within(banner).getByRole('link', { name: 'Skip to content' })).toBeInTheDocument();
+  },
 };
