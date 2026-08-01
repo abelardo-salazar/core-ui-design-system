@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, within } from 'storybook/test';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from './Card';
 import { Button } from './Button';
 import { Textarea } from './Textarea';
@@ -31,9 +32,11 @@ export const SettingsForm: StoryObj = {
       <CardContent className="space-y-6">
         {/* Select Component */}
         <div className="space-y-2">
-          <Text className="text-sm font-medium">Email Frequency</Text>
+          <Text as="label" htmlFor="email-frequency" className="text-sm font-medium">
+            Email Frequency
+          </Text>
           <Select defaultValue="daily">
-            <SelectTrigger>
+            <SelectTrigger id="email-frequency">
               <SelectValue placeholder="Select frequency" />
             </SelectTrigger>
             <SelectContent>
@@ -50,10 +53,12 @@ export const SettingsForm: StoryObj = {
         {/* Switch Component */}
         <div className="flex items-center justify-between space-x-2">
           <div className="flex flex-col space-y-1">
-            <Text className="text-sm font-medium">Marketing Emails</Text>
+            <Text as="label" htmlFor="marketing-emails" className="text-sm font-medium">
+              Marketing Emails
+            </Text>
             <Text className="text-xs text-base-content">Receive offers and updates.</Text>
           </div>
-          <Switch />
+          <Switch id="marketing-emails" />
         </div>
 
         {/* Checkbox Component */}
@@ -83,4 +88,16 @@ export const SettingsForm: StoryObj = {
       </CardFooter>
     </Card>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // axe: button-name — el SelectTrigger (combobox) y el Switch no tenían nombre accesible;
+    // "Email Frequency"/"Marketing Emails" eran texto suelto sin htmlFor. El Checkbox de al
+    // lado ya usaba <label htmlFor> correctamente y por eso nunca apareció en el reporte.
+    await expect(canvas.getByLabelText('Email Frequency')).toHaveAttribute('role', 'combobox');
+    await expect(canvas.getByLabelText('Marketing Emails')).toHaveAttribute('role', 'switch');
+    await expect(canvas.getByLabelText('Accept terms and conditions')).toHaveAttribute(
+      'role',
+      'checkbox',
+    );
+  },
 };
