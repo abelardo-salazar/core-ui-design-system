@@ -68,6 +68,23 @@ export const Destructive: Story = {
     await expect(getComputedStyle(document.documentElement).getPropertyValue('--error-content')).toBe(
       '#000000',
     );
+
+    // Hover: --error-focus (fondo) es oscuro mientras --error (fondo base) es claro — al
+    // revés que en las demás variantes — así que el texto necesita SU PROPIO -focus-content,
+    // distinto del -content del estado base. Sin esto, texto negro sobre el hover oscuro cae
+    // a 3.25:1 (ver commit que introdujo --error-focus-content en index.css).
+    await expect(button.className.split(' ')).toContain('hover:text-error-focus-content');
+    await expect(
+      getComputedStyle(document.documentElement).getPropertyValue('--error-focus-content'),
+    ).toBe('#ffffff');
+
+    // Dark mode invierte cuál color necesita más contraste (--error-focus pasa a ser un rojo
+    // claro), así que --error-focus-content también se invierte: negro, no blanco.
+    document.documentElement.classList.add('dark');
+    await expect(
+      getComputedStyle(document.documentElement).getPropertyValue('--error-focus-content'),
+    ).toBe('#000000');
+    document.documentElement.classList.remove('dark');
   },
 };
 

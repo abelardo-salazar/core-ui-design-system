@@ -136,6 +136,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 
 La implementación usa `class-variance-authority` (`buttonVariants`) para combinar variantes y tamaños. Variantes por defecto: `variant: 'primary'`, `size: 'md'`.
 
+> **Nota sobre `variant="destructive"` y el token `--error-focus-content`:** en primary/secondary/accent/neutral, tanto el color base como su `-focus` (hover) son oscuros en modo claro, así que un solo `-content` (blanco) sirve como color de texto para los dos estados. `error` es el único color del sistema donde eso no es cierto: el base (`--error`, `#ef4444`) es claro pero el `-focus` (`--error-focus`, `#b91c1c` en claro / `#f87171` en oscuro) es oscuro — la relación se invierte. Por eso `destructive` es la única variante que necesita `hover:text-error-focus-content` además de `hover:bg-error-focus`; sin ese token, el texto (`text-error-content`, negro) cae a 3.25:1 sobre el fondo de hover. No es un descuido de copiar/pegar de las otras variantes — no lo agregues a primary/secondary/accent/neutral, ahí un solo `-content` ya cubre ambos estados. Ver `src/index.css` para el detalle y el cálculo de contraste en ambos temas.
+
 Uso (ejemplos):
 
 ```tsx
@@ -234,6 +236,8 @@ Nota: usa `className` para ajuste fino (color, margen, tracking). Para mantener 
   - Acepta `React.HTMLAttributes<HTMLDivElement>` (eventos y atributos HTML estándar).
 
 La implementación usa `class-variance-authority` con variantes definidas en `badgeVariants.ts`. La variante por defecto es `default`.
+
+> **Nota sobre `variant="destructive"` y el token `--error-focus-content`:** mismo caso que `Button` (`variant="destructive"`) — `error` es el único color del sistema donde el base es claro y su `-focus` (hover) es oscuro, así que el texto necesita un `-focus-content` propio (`hover:text-error-focus-content`) distinto del `-content` del estado base. Ver la nota en la sección de `Button` y `src/index.css` para el detalle completo.
 
 Uso (ejemplos):
 

@@ -8,7 +8,11 @@ export const badgeVariants = cva(
         default: 'border-transparent bg-primary text-primary-content hover:bg-primary-focus',
         secondary:
           'border-transparent bg-secondary text-secondary-content hover:bg-secondary-focus',
-        destructive: 'border-transparent bg-error text-error-content hover:bg-error-focus',
+        // hover:text-error-focus-content es necesario: --error es claro y --error-focus es
+        // oscuro (al revés que en las demás variantes), así que text-error-content (negro)
+        // solo da contraste suficiente en el estado base, no en hover. Ver index.css.
+        destructive:
+          'border-transparent bg-error text-error-content hover:bg-error-focus hover:text-error-focus-content',
         outline: 'text-base-content border-base-content/20',
         ghost: 'border-transparent bg-base-200 text-base-content hover:bg-base-300',
       },

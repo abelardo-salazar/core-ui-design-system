@@ -34,6 +34,7 @@
   --color-error: var(--error);
   --color-error-content: var(--error-content);
   --color-error-focus: var(--error-focus);
+  --color-error-focus-content: var(--error-focus-content);
 
   --radius-box: var(--rounded-box);
   --radius-btn: var(--rounded-btn);
@@ -101,6 +102,13 @@
        oscura para usar --error como color de texto sobre base-100. */
     --error-content: var(--palette-black);
     --error-focus: var(--palette-red-dark);
+    /* error es el único color del sistema donde el base es claro (#ef4444) y el -focus es
+       oscuro (--palette-red-dark): en primary/secondary/accent/neutral tanto el base como el
+       -focus son oscuros en modo claro, así que un solo -content (blanco) sirve para los dos
+       estados. Acá se invierte: --error-content (negro) da 5.58:1 sobre --error pero solo
+       3.25:1 sobre --error-focus, insuficiente. -focus-content es el texto para hover:bg-error-focus
+       específicamente — blanco da 6.47:1 sobre --palette-red-dark. */
+    --error-focus-content: var(--palette-white);
 
     --rounded-box: 1rem;
     --rounded-btn: 0.5rem;
@@ -136,6 +144,12 @@
        sigue dando contraste de sobra. --error-focus sí necesita un rojo más claro para
        leerse como texto sobre el base-100 oscuro. */
     --error-focus: var(--palette-red-light);
+    /* La inversión de --error-focus-content también se invierte entre temas: en modo oscuro
+       --error-focus pasa a ser un rojo claro (--palette-red-light, #f87171), así que el texto
+       de hover necesita ser negro (7.59:1) — blanco caería a 2.77:1. No es simetría por
+       casualidad: es la misma lógica de contraste aplicada al par de colores que corresponde
+       a cada tema. */
+    --error-focus-content: var(--palette-black);
   }
 }
 

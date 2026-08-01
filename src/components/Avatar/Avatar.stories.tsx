@@ -60,6 +60,21 @@ export const Badges: Story = {
     await expect(getComputedStyle(document.documentElement).getPropertyValue('--error-content')).toBe(
       '#000000',
     );
+
+    // Hover: mismo caso que Button destructive — --error-focus (fondo) es oscuro mientras
+    // --error (fondo base) es claro, así que hace falta -focus-content propio para el texto.
+    await expect(destructiveBadge.className.split(' ')).toContain('hover:text-error-focus-content');
+    await expect(
+      getComputedStyle(document.documentElement).getPropertyValue('--error-focus-content'),
+    ).toBe('#ffffff');
+
+    // Dark mode invierte cuál color necesita más contraste (--error-focus pasa a ser un rojo
+    // claro), así que --error-focus-content también se invierte: negro, no blanco.
+    document.documentElement.classList.add('dark');
+    await expect(
+      getComputedStyle(document.documentElement).getPropertyValue('--error-focus-content'),
+    ).toBe('#000000');
+    document.documentElement.classList.remove('dark');
   },
 };
 
