@@ -71,7 +71,7 @@ export const UserCard: Story = {
     <Card className="w-75">
       <CardHeader className="flex-row gap-4 items-center space-y-0">
         <Avatar className="h-12 w-12">
-          <AvatarImage src="https://github.com/google.png" />
+          <AvatarImage src="https://github.com/google.png" alt="Google Team logo" />
           <AvatarFallback>GL</AvatarFallback>
         </Avatar>
         <div className="flex flex-col gap-1">
@@ -86,4 +86,10 @@ export const UserCard: Story = {
       </CardHeader>
     </Card>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // axe: image-alt — AvatarImage se renderizaba sin alt (las otras dos stories de Avatar sí lo pasan).
+    // AvatarImage (Radix) solo monta el <img> una vez que la carga de red resuelve, de ahí el find* async.
+    await expect(await canvas.findByAltText('Google Team logo')).toBeInTheDocument();
+  },
 };
