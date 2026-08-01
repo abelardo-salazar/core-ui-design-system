@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, userEvent, within } from 'storybook/test';
 import {
   Dialog,
   DialogTrigger,
@@ -41,13 +42,13 @@ export const EditProfileExample: Story = {
         {/* Form Content */}
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <Text className="text-right" size="lg" weight="medium">
+            <Text as="label" htmlFor="name" className="text-right" size="lg" weight="medium">
               Name
             </Text>
             <Input id="name" defaultValue="Pedro Duarte" className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Text className="text-right" size="lg" weight="medium">
+            <Text as="label" htmlFor="username" className="text-right" size="lg" weight="medium">
               Username
             </Text>
             <Input id="username" defaultValue="@pedrodev" className="col-span-3" />
@@ -64,4 +65,17 @@ export const EditProfileExample: Story = {
       </DialogContent>
     </Dialog>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole('button', { name: 'Edit Profile' });
+    await userEvent.click(trigger);
+
+    const body = within(document.body);
+    const dialog = await body.findByRole('dialog');
+    const dialogScope = within(dialog);
+
+    // axe: label — los inputs no tenían label real, solo texto suelto sin htmlFor.
+    await expect(dialogScope.getByLabelText('Name')).toHaveValue('Pedro Duarte');
+    await expect(dialogScope.getByLabelText('Username')).toHaveValue('@pedrodev');
+  },
 };
