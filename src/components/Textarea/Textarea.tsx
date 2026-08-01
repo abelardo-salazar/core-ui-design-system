@@ -29,7 +29,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             htmlFor={textareaId}
             className={cn(
               'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
-              hasError ? 'text-error' : 'text-base-content',
+              hasError ? 'text-error-focus' : 'text-base-content',
             )}
           >
             {label}
@@ -47,11 +47,11 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         />
 
         {hasError ? (
-          <p id={errorId} className="text-xs text-error font-medium animate-pulse">
+          <p id={errorId} className="text-xs text-error-focus font-medium">
             {error}
           </p>
         ) : helperText ? (
-          <p id={descriptionId} className="text-xs text-base-content/50">
+          <p id={descriptionId} className="text-xs text-base-content/65">
             {helperText}
           </p>
         ) : null}

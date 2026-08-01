@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, within } from 'storybook/test';
 import { Button } from './Button';
 
 // Main story configuration
@@ -55,6 +56,18 @@ export const Destructive: Story = {
   args: {
     children: 'Delete Account',
     variant: 'destructive',
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const button = canvas.getByRole('button', { name: 'Delete Account' });
+    // El fixture de vitest-browser no expone las variables --color-* derivadas por
+    // @theme vía getComputedStyle (ni siquiera para tokens preexistentes como
+    // --color-primary-content), así que la aserción de contraste va sobre el token crudo
+    // que sí se define directamente en :root, más la clase que lo consume.
+    await expect(button.className.split(' ')).toContain('text-error-content');
+    await expect(getComputedStyle(document.documentElement).getPropertyValue('--error-content')).toBe(
+      '#000000',
+    );
   },
 };
 

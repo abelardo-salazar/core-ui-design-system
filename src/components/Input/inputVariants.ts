@@ -8,7 +8,7 @@ export const inputVariants = cva(
       // Visual state (borders and focus ring)
       variant: {
         default: 'border-base-300 focus-visible:ring-primary focus-visible:border-primary',
-        error: 'border-error focus-visible:ring-error text-error placeholder:text-error/50',
+        error: 'border-error focus-visible:ring-error text-error-focus placeholder:text-error/50',
       },
       // Sizes (height and padding)
       size: {

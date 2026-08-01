@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, within } from 'storybook/test';
 import { Avatar, AvatarImage, AvatarFallback } from './Avatar';
 import { Badge } from '../Badge';
 
@@ -50,6 +51,16 @@ export const Badges: Story = {
       <Badge variant="outline">Outline</Badge>
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const destructiveBadge = canvas.getByText('Removed');
+    // Mismo token error-content que Button destructive (ver Button.stories.tsx para el porqué
+    // de comprobar el custom property crudo en vez de getComputedStyle().color acá).
+    await expect(destructiveBadge.className.split(' ')).toContain('text-error-content');
+    await expect(getComputedStyle(document.documentElement).getPropertyValue('--error-content')).toBe(
+      '#000000',
+    );
+  },
 };
 
 // 4. Integración Real (Card + Avatar + Badge)

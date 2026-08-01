@@ -51,8 +51,22 @@ export const WithError: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const label = canvas.getByText('Username');
-    await expect(label.className.split(' ')).toContain('text-error');
+    // text-error (#ef4444) da 3.76:1 sobre blanco, insuficiente para AA (4.5:1).
+    // text-error-focus (--palette-red-dark) sí cumple. El fixture de vitest-browser no expone
+    // las variables --color-* derivadas por @theme vía getComputedStyle, así que se prueba
+    // contra el custom property crudo (--error-focus) más las clases que lo consumen.
+    await expect(label.className.split(' ')).toContain('text-error-focus');
     await expect(label.className.split(' ')).not.toContain('text-base-content');
+    await expect(getComputedStyle(document.documentElement).getPropertyValue('--error-focus')).toBe(
+      '#b91c1c',
+    );
+
+    const errorMessage = canvas.getByText('Este nombre de usuario ya está en uso.');
+    await expect(errorMessage.className.split(' ')).toContain('text-error-focus');
+    await expect(errorMessage.className.split(' ')).not.toContain('animate-pulse');
+
+    const input = canvas.getByDisplayValue('admin');
+    await expect(input.className.split(' ')).toContain('text-error-focus');
   },
 };
 
@@ -66,7 +80,8 @@ export const WithHelperText: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const helper = canvas.getByText('Debe tener al menos 8 caracteres.');
-    await expect(helper.className.split(' ')).toContain('text-base-content/50');
+    // /50 daba 3.09:1 sobre blanco, insuficiente. /65 sí cumple 4.5:1.
+    await expect(helper.className.split(' ')).toContain('text-base-content/65');
   },
 };
 
