@@ -32,6 +32,8 @@
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-error: var(--error);
+  --color-error-content: var(--error-content);
+  --color-error-focus: var(--error-focus);
 
   --radius-box: var(--rounded-box);
   --radius-btn: var(--rounded-btn);
@@ -66,6 +68,8 @@
     --palette-green: #22c55e;
     --palette-yellow: #eab308;
     --palette-red: #ef4444;
+    --palette-red-dark: #b91c1c;
+    --palette-red-light: #f87171;
 
     --primary: var(--palette-navy);
     --primary-focus: var(--palette-navy-dark);
@@ -92,6 +96,11 @@
     --success: var(--palette-green);
     --warning: var(--palette-yellow);
     --error: var(--palette-red);
+    /* Texto sobre --error necesita más contraste del que el rojo base da en superficies
+       claras/oscuras (WCAG 1.4.3): -content para texto sobre bg-error, -focus como variante
+       oscura para usar --error como color de texto sobre base-100. */
+    --error-content: var(--palette-black);
+    --error-focus: var(--palette-red-dark);
 
     --rounded-box: 1rem;
     --rounded-btn: 0.5rem;
@@ -122,6 +131,11 @@
     --base-200: #1f1f1f;
     --base-300: #292929;
     --base-content: var(--palette-white);
+
+    /* --error-content se queda en negro: el fondo --error no cambia entre temas y negro
+       sigue dando contraste de sobra. --error-focus sí necesita un rojo más claro para
+       leerse como texto sobre el base-100 oscuro. */
+    --error-focus: var(--palette-red-light);
   }
 }
 
