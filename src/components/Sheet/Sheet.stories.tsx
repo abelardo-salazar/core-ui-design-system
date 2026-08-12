@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import {
   Sheet,
   SheetTrigger,
@@ -61,16 +62,59 @@ const SheetDemo = ({ side }: { side: 'top' | 'right' | 'bottom' | 'left' }) => (
 
 export const Right: Story = {
   render: () => <SheetDemo side="right" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole('button', { name: 'right sheet' });
+
+    const body = within(document.body);
+    await expect(body.queryByRole('dialog')).not.toBeInTheDocument();
+
+    await userEvent.click(trigger);
+
+    // Sheet envuelve la misma primitiva de Radix Dialog, así que comparte el mismo
+    // set de aserciones de foco que Dialog.
+    const dialog = await body.findByRole('dialog');
+    await expect(dialog.className.split(' ')).toContain('right-0');
+    await expect(dialog.contains(document.activeElement)).toBe(true);
+
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(body.queryByRole('dialog')).not.toBeInTheDocument());
+    await expect(trigger).toHaveFocus();
+  },
 };
 
 export const Left: Story = {
   render: () => <SheetDemo side="left" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole('button', { name: 'left sheet' });
+    await userEvent.click(trigger);
+
+    const dialog = await within(document.body).findByRole('dialog');
+    await expect(dialog.className.split(' ')).toContain('left-0');
+  },
 };
 
 export const Top: Story = {
   render: () => <SheetDemo side="top" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole('button', { name: 'top sheet' });
+    await userEvent.click(trigger);
+
+    const dialog = await within(document.body).findByRole('dialog');
+    await expect(dialog.className.split(' ')).toContain('top-0');
+  },
 };
 
 export const Bottom: Story = {
   render: () => <SheetDemo side="bottom" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole('button', { name: 'bottom sheet' });
+    await userEvent.click(trigger);
+
+    const dialog = await within(document.body).findByRole('dialog');
+    await expect(dialog.className.split(' ')).toContain('bottom-0');
+  },
 };
