@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, within } from 'storybook/test';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { Button } from './Button';
 
 // Main story configuration
@@ -34,6 +34,34 @@ export const Default: Story = {
     children: 'Button UI',
     variant: 'primary',
     size: 'md',
+    onClick: fn(),
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const button = canvas.getByRole('button', { name: 'Button UI' });
+
+    // Caso nativo habilitado: el click debe disparar el onClick del consumidor
+    // tal cual se lo pasamos (la composición de handlers no debe romperse).
+    await userEvent.click(button);
+    await expect(args.onClick).toHaveBeenCalledOnce();
+  },
+};
+
+// 1b. Native disabled: el click no debe disparar el onClick del consumidor.
+export const Disabled: Story = {
+  args: {
+    children: 'Disabled button',
+    disabled: true,
+    onClick: fn(),
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const button = canvas.getByRole('button', { name: 'Disabled button' });
+
+    await expect(button).toBeDisabled();
+
+    await userEvent.click(button);
+    await expect(args.onClick).not.toHaveBeenCalled();
   },
 };
 
@@ -122,5 +150,43 @@ export const AsLink: Story = {
         story: 'Use `asChild` to render an `<a>` link while keeping the button styles.',
       },
     },
+  },
+};
+
+// 6. Polymorphism + isLoading: cubre los 3 fixes de la auditoría sobre asChild.
+// Usamos el mismo href real que AsLink: como el fix es justamente el preventDefault
+// antes de que el navegador navegue, el test nunca llega a abrir la URL.
+export const AsLinkLoading: Story = {
+  args: {
+    asChild: true,
+    isLoading: true,
+    onClick: fn(),
+    children: (
+      <a href="https://google.com" target="_blank" rel="noreferrer">
+        Go to Google
+      </a>
+    ),
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    // aria-disabled no quita el role="link" del elemento en el árbol de accesibilidad.
+    const link = canvas.getByRole('link', { name: 'Go to Google' });
+
+    await expect(link).toHaveAttribute('aria-disabled', 'true');
+    await expect(link.className.split(' ')).toContain('pointer-events-none');
+
+    // El fixture de vitest-browser no expone estilos derivados de utilidades de Tailwind vía
+    // getComputedStyle (mismo issue documentado en el story Destructive), así que la aserción
+    // queda en la clase; se verificó manualmente en Storybook con navegador real que opacity
+    // computa a 0.5 cuando aria-disabled="true".
+    await expect(link.className.split(' ')).toContain('aria-disabled:opacity-50');
+
+    // Fix de Slottable: el spinner no debe desaparecer cuando el child es un <a> (asChild).
+    await expect(link.querySelector('svg.animate-spin')).toBeInTheDocument();
+
+    // Fix de preventDefault: el click no debe disparar el onClick del consumidor
+    // ni navegar (pointer-events-none ya lo bloquea a nivel visual/click).
+    await userEvent.click(link);
+    await expect(args.onClick).not.toHaveBeenCalled();
   },
 };

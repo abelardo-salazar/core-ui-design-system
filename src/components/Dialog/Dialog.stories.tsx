@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import {
   Dialog,
   DialogTrigger,
@@ -68,14 +68,27 @@ export const EditProfileExample: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const trigger = canvas.getByRole('button', { name: 'Edit Profile' });
-    await userEvent.click(trigger);
 
     const body = within(document.body);
+    await expect(body.queryByRole('dialog')).not.toBeInTheDocument();
+
+    await userEvent.click(trigger);
+
     const dialog = await body.findByRole('dialog');
     const dialogScope = within(dialog);
 
     // axe: label — los inputs no tenían label real, solo texto suelto sin htmlFor.
     await expect(dialogScope.getByLabelText('Name')).toHaveValue('Pedro Duarte');
     await expect(dialogScope.getByLabelText('Username')).toHaveValue('@pedrodev');
+
+    // Radix mueve el foco dentro del contenido al abrir (FocusScope), delegado sin test hasta ahora.
+    await expect(dialog.contains(document.activeElement)).toBe(true);
+
+    // Escape cierra el diálogo (DismissableLayer de Radix).
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(body.queryByRole('dialog')).not.toBeInTheDocument());
+
+    // El foco vuelve al trigger tras cerrar (onCloseAutoFocus por defecto de Radix).
+    await expect(trigger).toHaveFocus();
   },
 };

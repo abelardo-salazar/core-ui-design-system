@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect } from 'storybook/test';
 import { Skeleton } from './Skeleton';
 // Asumimos que estos componentes ya existen de la Fase 1
 import { Card, CardContent, CardFooter, CardHeader } from '../Card';
@@ -19,6 +20,23 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     className: 'w-[100px] h-[20px] rounded-full',
+  },
+  play: async ({ canvasElement }) => {
+    const skeleton = canvasElement.querySelector('.animate-pulse') as HTMLElement;
+    await expect(skeleton).toBeInTheDocument();
+    await expect(skeleton.className.split(' ')).toContain('bg-base-300');
+
+    // Regresión: dark:bg-slate-200 llegó a ser idéntico al light mode. bg-base-300 depende de
+    // --base-300, que sí cambia entre temas. El fixture de vitest-browser no expone estilos
+    // derivados de utilidades de Tailwind vía getComputedStyle (mismo issue documentado en el
+    // story Destructive de Button), así que la aserción va sobre el token crudo definido
+    // directamente en :root / .dark, que sí es visible.
+    const lightValue = getComputedStyle(document.documentElement).getPropertyValue('--base-300');
+    document.documentElement.classList.add('dark');
+    const darkValue = getComputedStyle(document.documentElement).getPropertyValue('--base-300');
+    document.documentElement.classList.remove('dark');
+
+    await expect(darkValue.trim()).not.toBe(lightValue.trim());
   },
 };
 
