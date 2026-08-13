@@ -26,6 +26,12 @@ export const UserProfile: Story = {
       </div>
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // Fix del commit 8dd5b87 (axe: image-alt). Radix AvatarImage solo monta el <img> una vez
+    // que la carga resuelve, de ahí el find* async (ver UserCard más abajo para el mismo patrón).
+    await expect(await canvas.findByAltText('@shadcn')).toBeInTheDocument();
+  },
 };
 
 // 2. Fallback
@@ -39,6 +45,21 @@ export const FallbackState: Story = {
       <span className="text-sm">John Doe (No image)</span>
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // AvatarFallback se muestra mientras el status de carga no sea "loaded" (idle/loading/error
+    // por igual, verificado en el código de @radix-ui/react-avatar). Con un src que 404 dentro
+    // del propio origin (sin dependencia de red externa), el status nunca llega a "loaded".
+    await expect(canvas.getByText('JD')).toBeInTheDocument();
+
+    // Le damos tiempo al intento de carga (404) a resolver antes de confirmar la ausencia:
+    // AvatarImage (Radix) no renderiza el <img> en el DOM hasta que el status sea "loaded".
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    await expect(canvas.queryByAltText('@user')).not.toBeInTheDocument();
+    await expect(canvas.getByText('JD')).toBeInTheDocument();
+  },
 };
 
 // 3. Badges Showcase
