@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, within } from 'storybook/test';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './Card';
 import { Button } from '../Button';
 import { Input } from '../Input';
@@ -35,6 +36,28 @@ export const Simple: Story = {
       </CardFooter>
     </Card>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // CardTitle usa <h3> semánticamente.
+    await expect(canvas.getByRole('heading', { level: 3, name: 'Create project' })).toBeInTheDocument();
+    await expect(canvas.getByText('Deploy your new project in one-click.')).toBeInTheDocument();
+    await expect(
+      canvas.getByText('Your project will be deployed to the edge network instantly.'),
+    ).toBeInTheDocument();
+
+    // CardFooter: exportado pero sin ninguna mención en tests hasta ahora. Confirmamos que
+    // ambos botones comparten el mismo contenedor (compone correctamente) y que retiene sus
+    // clases base además de las que agrega el consumidor (className se mergea, no reemplaza).
+    const cancelButton = canvas.getByRole('button', { name: 'Cancel' });
+    const deployButton = canvas.getByRole('button', { name: 'Deploy' });
+    const footer = cancelButton.parentElement;
+
+    await expect(footer).toBe(deployButton.parentElement);
+    await expect(footer?.className.split(' ')).toEqual(
+      expect.arrayContaining(['flex', 'items-center', 'p-6', 'pt-0', 'justify-between']),
+    );
+  },
 };
 
 // 2. Interactive Card (Login Form simulation)
