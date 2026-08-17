@@ -1,14 +1,17 @@
 // src/index.ts
 // Exportar componentes
 import './index.css';
+export * from './components/AspectRatio';
 export * from './components/Avatar';
 export * from './components/Badge';
 export * from './components/Button';
 export * from './components/Calendar';
 export * from './components/Card';
 export * from './components/Checkbox';
+export * from './components/Chip';
 export * from './components/DatePicker';
 export * from './components/Dialog';
+export * from './components/Image';
 export * from './components/Input';
 export * from './components/Layout'; // Container, Separator, SkipToContent
 export * from './components/Popover';
