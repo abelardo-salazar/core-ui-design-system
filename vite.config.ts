@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import dts from 'vite-plugin-dts';
 import { resolve } from 'path';
 import tailwindcss from '@tailwindcss/vite';
+import { CLIENT_ENTRY_POINTS as CLIENT_ENTRY_POINTS_RELATIVE } from './scripts/client-entry-points.mjs';
 
 // Archivos fuente que declaran 'use client' porque usan hooks de React directamente
 // (Input, Textarea) o envuelven primitivas de Radix/Sonner marcadas 'use client'.
@@ -10,18 +11,12 @@ import tailwindcss from '@tailwindcss/vite';
 // no-entry (verificado en este repo: build con preserveModules:true + grep en dist/
 // dio 0 ocurrencias de "use client", ver commit de esta migración). Este plugin
 // reinyecta la directiva en el chunk exacto que le corresponde a cada archivo.
-const CLIENT_ENTRY_POINTS = [
-  'src/components/Input/Input.tsx',
-  'src/components/Textarea/Textarea.tsx',
-  'src/components/Dialog/Dialog.tsx',
-  'src/components/Sheet/Sheet.tsx',
-  'src/components/Select/Select.tsx',
-  'src/components/Checkbox/Checkbox.tsx',
-  'src/components/Switch/Switch.tsx',
-  'src/components/Avatar/Avatar.tsx',
-  'src/components/Toast/Toast.tsx',
-  'src/components/Tooltip/Tooltip.tsx',
-].map((p) => resolve(__dirname, p).replace(/\\/g, '/'));
+//
+// La lista en sí vive en scripts/client-entry-points.mjs (única fuente de verdad,
+// compartida con scripts/verify-client-directives.mjs) — no la dupliques acá.
+const CLIENT_ENTRY_POINTS = CLIENT_ENTRY_POINTS_RELATIVE.map((p) =>
+  resolve(__dirname, p).replace(/\\/g, '/'),
+);
 
 function preserveUseClientDirective(): Plugin {
   return {
@@ -70,6 +65,9 @@ export default defineConfig({
         '@radix-ui/react-select',
         '@radix-ui/react-switch',
         '@radix-ui/react-tooltip',
+        '@radix-ui/react-popover',
+        '@radix-ui/react-progress',
+        '@radix-ui/react-toggle',
         'sonner',
       ],
       plugins: [preserveUseClientDirective()],
