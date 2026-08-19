@@ -30,4 +30,5 @@ export const CLIENT_ENTRY_POINTS = [
   'src/components/Image/Image.tsx',
   'src/components/Popover/Popover.tsx',
   'src/components/Progress/Progress.tsx',
+  'src/components/DropdownMenu/DropdownMenu.tsx',
 ];
