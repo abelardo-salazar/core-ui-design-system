@@ -60,6 +60,7 @@ export default defineConfig({
         'react-dom',
         'react/jsx-runtime',
         '@radix-ui/react-dialog',
+        '@radix-ui/react-dropdown-menu',
         '@radix-ui/react-avatar',
         '@radix-ui/react-checkbox',
         '@radix-ui/react-select',
