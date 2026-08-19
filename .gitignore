@@ -32,4 +32,5 @@ storybook-static
 *.tsbuildinfo
 
 CONTEXT_SYNC.md
+STACK.md
 .npmrc
