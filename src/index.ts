@@ -1,6 +1,7 @@
 // src/index.ts
 // Exportar componentes
 import './index.css';
+export * from './components/Alert';
 export * from './components/AspectRatio';
 export * from './components/Avatar';
 export * from './components/Badge';
