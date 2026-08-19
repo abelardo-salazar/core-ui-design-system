@@ -20,6 +20,7 @@ const CLIENT_ENTRY_POINTS = [
   'src/components/Switch/Switch.tsx',
   'src/components/Avatar/Avatar.tsx',
   'src/components/Toast/Toast.tsx',
+  'src/components/Tooltip/Tooltip.tsx',
 ].map((p) => resolve(__dirname, p).replace(/\\/g, '/'));
 
 function preserveUseClientDirective(): Plugin {
@@ -68,6 +69,7 @@ export default defineConfig({
         '@radix-ui/react-checkbox',
         '@radix-ui/react-select',
         '@radix-ui/react-switch',
+        '@radix-ui/react-tooltip',
         'sonner',
       ],
       plugins: [preserveUseClientDirective()],
