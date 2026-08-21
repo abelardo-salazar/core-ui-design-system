@@ -32,4 +32,5 @@ export const CLIENT_ENTRY_POINTS = [
   'src/components/Progress/Progress.tsx',
   'src/components/DropdownMenu/DropdownMenu.tsx',
   'src/components/Tabs/Tabs.tsx',
+  'src/components/DataTable/DataTable.tsx',
 ];
