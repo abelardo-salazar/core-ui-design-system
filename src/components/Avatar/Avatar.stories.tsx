@@ -12,12 +12,19 @@ const meta: Meta<typeof Avatar> = {
 export default meta;
 type Story = StoryObj<typeof Avatar>;
 
+// PNG 1x1 embebido: sin dependencia de red externa ni de que Storybook esté sirviendo un
+// archivo local correctamente (mismo criterio aplicado en Image.stories.tsx). UserProfile y
+// UserCard usaban https://github.com/shadcn.png y https://github.com/google.png respectivamente
+// — causa del flake reportado durante la tarea de Tabs.
+const TINY_PNG =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+
 // 1. Avatar
 export const UserProfile: Story = {
   render: () => (
     <div className="flex items-center gap-4">
       <Avatar>
-        <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+        <AvatarImage src={TINY_PNG} alt="@shadcn" />
         <AvatarFallback>CN</AvatarFallback>
       </Avatar>
       <div className="flex flex-col">
@@ -107,7 +114,7 @@ export const UserCard: Story = {
     <Card className="w-75">
       <CardHeader className="flex-row gap-4 items-center space-y-0">
         <Avatar className="h-12 w-12">
-          <AvatarImage src="https://github.com/google.png" alt="Google Team logo" />
+          <AvatarImage src={TINY_PNG} alt="Google Team logo" />
           <AvatarFallback>GL</AvatarFallback>
         </Avatar>
         <div className="flex flex-col gap-1">
