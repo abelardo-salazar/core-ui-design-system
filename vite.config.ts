@@ -71,6 +71,7 @@ export default defineConfig({
         '@radix-ui/react-tabs',
         '@radix-ui/react-toggle',
         'sonner',
+        '@tanstack/react-table',
       ],
       plugins: [preserveUseClientDirective()],
       output: {
