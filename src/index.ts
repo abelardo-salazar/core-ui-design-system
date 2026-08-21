@@ -23,6 +23,7 @@ export * from './components/Select';
 export * from './components/Sheet';
 export * from './components/Skeleton';
 export * from './components/Switch';
+export * from './components/Tabs';
 export * from './components/Textarea';
 export * from './components/Toast';
 export * from './components/Tooltip';
