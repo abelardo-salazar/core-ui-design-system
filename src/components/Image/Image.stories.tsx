@@ -14,11 +14,18 @@ const meta: Meta<typeof Image> = {
 export default meta;
 type Story = StoryObj<typeof Image>;
 
+// PNG 1x1 embebido: sin dependencia de red externa ni de que Storybook esté sirviendo un
+// archivo local correctamente (a diferencia de una ruta como /broken-image.jpg, que acá
+// necesitamos que SIEMPRE cargue con éxito, no que falle). Causante del flake original: esta
+// story usaba https://github.com/shadcn.png, una imagen real por red.
+const TINY_PNG =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+
 // 1. Ciclo completo: Skeleton visible mientras carga -> imagen visible al cargar.
 export const LoadsSuccessfully: Story = {
   render: () => (
     <div className="h-32 w-32">
-      <Image src="https://github.com/shadcn.png" alt="Loaded photo" />
+      <Image src={TINY_PNG} alt="Loaded photo" />
     </div>
   ),
   play: async ({ canvasElement }) => {
