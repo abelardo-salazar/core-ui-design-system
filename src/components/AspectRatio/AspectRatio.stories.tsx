@@ -15,6 +15,14 @@ const meta: Meta<typeof AspectRatio> = {
 export default meta;
 type Story = StoryObj<typeof AspectRatio>;
 
+// PNG 1x1 embebido: sin dependencia de red externa (mismo valor ya usado en
+// Image.stories.tsx y Avatar.stories.tsx). Acá el riesgo era más directo que en esos dos
+// casos: Image (el propio del DS, no AvatarImage de Radix) se desmonta a sí misma si la
+// carga falla y no hay fallback, y la play de abajo usa getByAltText sin find*/waitFor —
+// un fallo de red externa habría hecho que ese assert síncrono no encontrara el <img>.
+const TINY_PNG =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+
 // 1. Ratio puro: verifica el mecanismo real (padding-bottom % que calcula la propia primitiva
 // de Radix a partir de ratio), no una medición de layout en vivo — getBoundingClientRect en el
 // runner headless de vitest-browser puede no reflejar aún el padding-bottom trick en el momento
@@ -50,7 +58,7 @@ export const WithImage: Story = {
   render: () => (
     <div style={{ width: 320 }}>
       <AspectRatio ratio={16 / 9}>
-        <Image src="https://github.com/shadcn.png" alt="Cover photo" />
+        <Image src={TINY_PNG} alt="Cover photo" />
       </AspectRatio>
     </div>
   ),
