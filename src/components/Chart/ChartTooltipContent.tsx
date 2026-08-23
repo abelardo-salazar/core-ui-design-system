@@ -2,8 +2,10 @@ import type { TooltipContentProps } from 'recharts';
 import type { ChartConfig } from './chartConfig';
 import { cn } from '../../utils/cn';
 
-export interface ChartTooltipContentProps
-  extends Pick<TooltipContentProps, 'active' | 'payload' | 'label'> {
+export interface ChartTooltipContentProps extends Pick<
+  TooltipContentProps,
+  'active' | 'payload' | 'label'
+> {
   className?: string;
   /** Mismo config pasado a ChartContainer — resuelve label y color por dataKey. */
   config: ChartConfig;
@@ -39,10 +41,21 @@ function ChartTooltipContent({
         className,
       )}
     >
-      {!hideLabel && label != null ? <p className="font-medium text-base-content">{label}</p> : null}
+      {!hideLabel && label != null ? (
+        <p className="font-medium text-base-content">{label}</p>
+      ) : null}
       <div className="grid gap-1">
         {payload.map((entry, index) => {
-          const key = String(entry.dataKey ?? entry.name ?? index);
+          // entry.name antes que entry.dataKey a propósito: para series cartesianas
+          // (Bar/Line/Area) ambos suelen coincidir (Recharts hace name = dataKey si no se
+          // pasa un `name` explícito, ver getTooltipNameProp en ChartUtils.js), pero para Pie
+          // dataKey es el mismo string en TODAS las porciones (el campo que indica el valor,
+          // ej. "value") — ahí la única key que distingue cada porción es `name` (resuelto
+          // por Recharts vía nameKey). Usar dataKey primero colapsaría todas las porciones de
+          // un Pie a una sola key inexistente en `config` (verificado con un Pie real: el
+          // payload trae dataKey:"value" repetido en cada entry, name:"design"/"engineering"
+          // distinto por entry).
+          const key = String(entry.name ?? entry.dataKey ?? index);
           const itemConfig = config[key];
           const itemLabel = itemConfig?.label ?? entry.name ?? key;
 
@@ -50,12 +63,17 @@ function ChartTooltipContent({
             <div key={key} className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-1.5">
                 <span
-                  className={cn('shrink-0 rounded-[2px]', indicator === 'dot' ? 'size-2' : 'h-0.5 w-3')}
+                  className={cn(
+                    'shrink-0 rounded-[2px]',
+                    indicator === 'dot' ? 'size-2' : 'h-0.5 w-3',
+                  )}
                   style={{ backgroundColor: `var(--color-${key})` }}
                 />
                 <span className="text-base-content/65">{itemLabel}</span>
               </div>
-              <span className="font-mono font-medium text-base-content">{String(entry.value ?? '')}</span>
+              <span className="font-mono font-medium text-base-content">
+                {String(entry.value ?? '')}
+              </span>
             </div>
           );
         })}

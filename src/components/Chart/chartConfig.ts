@@ -4,7 +4,14 @@ import type { ReactNode } from 'react';
 // no incluye `error`: ese token está reservado para estados de error (Alert, Button
 // destructive), no para diferenciar series de datos en un chart. Tampoco incluye `neutral`:
 // en modo oscuro `--neutral` es blanco puro, indistinguible del texto/ejes del chart.
-export const CHART_COLOR_TOKENS = ['primary', 'secondary', 'accent', 'success', 'warning', 'info'] as const;
+export const CHART_COLOR_TOKENS = [
+  'primary',
+  'secondary',
+  'accent',
+  'success',
+  'warning',
+  'info',
+] as const;
 
 export type ChartColorToken = (typeof CHART_COLOR_TOKENS)[number];
 
