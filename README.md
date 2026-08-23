@@ -1,10 +1,11 @@
--
-
 # Core UI Design System
 
-![Version](https://img.shields.io/badge/version-0.3.1-blue.svg)
+<!-- El badge de versión se actualiza a mano en cada bump (ver "version" en package.json) —
+     no hay automatización que lo sincronice. Si tocás package.json#version, actualizá esta
+     línea en el mismo commit. -->
+![Version](https://img.shields.io/badge/version-0.3.15-blue.svg)
 ![React](https://img.shields.io/badge/react-19.0.0+-61DAFB.svg)
-![TypeScript](https://img.shields.io/badge/typescript-5.0+-3178C6.svg)
+![TypeScript](https://img.shields.io/badge/typescript-5.9+-3178C6.svg)
 ![Private](https://img.shields.io/badge/registry-private-red.svg)
 
 **Core UI** es la biblioteca de componentes oficial para nuestros productos digitales. Construida sobre **React 19**, **Radix UI** y **Tailwind CSS v4**, ofrece componentes accesibles (A11y), ligeros y listos para producción.
@@ -24,9 +25,8 @@ Necesitas un **GitHub Personal Access Token (Classic)** con permisos de `read:pa
 Crea un archivo `.npmrc` en la raíz de tu proyecto (junto al `package.json`) y agrega las siguientes líneas:
 
 ```ini
-@abelardo-salazar:registry=[https://npm.pkg.github.com](https://npm.pkg.github.com)
-//[npm.pkg.github.com/:_authToken=TU_GITHUB_TOKEN_AQUI](https://npm.pkg.github.com/:_authToken=TU_GITHUB_TOKEN_AQUI)
-
+@abelardo-salazar:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=TU_GITHUB_TOKEN_AQUI
 ```
 
 > ⚠️ **IMPORTANTE:** Asegúrate de agregar `.npmrc` a tu `.gitignore` para no exponer tu token.
@@ -39,17 +39,30 @@ Una vez configurado el `.npmrc`, instala la librería como cualquier dependencia
 
 ```bash
 npm install @abelardo-salazar/core-ui-design-system
-
 ```
 
 ### Peer Dependencies
 
-Asegúrate de que tu proyecto use React 19:
+El paquete declara React, Radix UI, TanStack Table y Sonner como `peerDependencies` — tu proyecto debe instalarlos aparte (evita instancias duplicadas y permite que Next.js resuelva sus propias directivas `'use client'`). Instalá el set completo:
 
 ```bash
-npm install react@^19.0.0 react-dom@^19.0.0
-
+npm install react@^19.0.0 react-dom@^19.0.0 \
+  @radix-ui/react-avatar@^1.1.11 \
+  @radix-ui/react-checkbox@^1.3.3 \
+  @radix-ui/react-dialog@^1.1.15 \
+  @radix-ui/react-dropdown-menu@^2.1.24 \
+  @radix-ui/react-popover@^1.1.23 \
+  @radix-ui/react-progress@^1.1.16 \
+  @radix-ui/react-select@^2.2.6 \
+  @radix-ui/react-switch@^1.2.6 \
+  @radix-ui/react-tabs@^1.1.21 \
+  @radix-ui/react-toggle@^1.1.18 \
+  @radix-ui/react-tooltip@^1.2.16 \
+  @tanstack/react-table@9.1.2 \
+  sonner@^2.0.7
 ```
+
+> `recharts` (usado por `Chart`) **no** es peerDependency: viene bundleado dentro del propio paquete, no hace falta instalarlo aparte.
 
 ---
 
@@ -91,19 +104,36 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     - [Typography — Uso y Props](#typography--uso-y-props)
     - [Badge — Uso y Props](#badge--uso-y-props)
     - [Skeleton — Uso y Props](#skeleton--uso-y-props)
+    - [Chip — Uso y Props](#chip--uso-y-props)
+    - [Image — Uso y Props](#image--uso-y-props)
     - [🧬 Moléculas (Estructura)](#-moléculas-estructura)
     - [Layout — Uso y Props](#layout--uso-y-props)
     - [Card — Uso y Props](#card--uso-y-props)
     - [Dialog — Uso y Props](#dialog--uso-y-props)
     - [Sheet — Uso y Props](#sheet--uso-y-props)
+    - [AspectRatio — Uso y Props](#aspectratio--uso-y-props)
+    - [Tabs — Uso y Props](#tabs--uso-y-props)
+    - [🔲 Overlays](#-overlays)
+    - [Popover — Uso y Props](#popover--uso-y-props)
+    - [Tooltip — Uso y Props](#tooltip--uso-y-props)
+    - [DropdownMenu — Uso y Props](#dropdownmenu--uso-y-props)
     - [📝 Formularios (Forms)](#-formularios-forms)
     - [Checkbox — Uso y Props](#checkbox--uso-y-props)
     - [Input — Uso y Props](#input--uso-y-props)
     - [Textarea — Uso y Props](#textarea--uso-y-props)
     - [Select — Uso y Props](#select--uso-y-props)
     - [Switch — Uso y Props](#switch--uso-y-props)
+    - [Calendar — Uso y Props](#calendar--uso-y-props)
+    - [DatePicker — Uso y Props](#datepicker--uso-y-props)
     - [📢 Feedback (Notificaciones)](#-feedback-notificaciones)
     - [Toast — Uso y Props](#toast--uso-y-props)
+    - [Progress — Uso y Props](#progress--uso-y-props)
+    - [ProgressRing — Uso y Props](#progressring--uso-y-props)
+    - [Alert — Uso y Props](#alert--uso-y-props)
+    - [📊 Datos](#-datos)
+    - [Table — Uso y Props](#table--uso-y-props)
+    - [DataTable — Uso y Props](#datatable--uso-y-props)
+    - [Chart — Uso y Props](#chart--uso-y-props)
   - [💻 Desarrollo Local](#-desarrollo-local)
 
 ---
@@ -113,14 +143,16 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 ### 🧱 Átomos (Fundamentos)
 
 | Componente  | Descripción                   | Props clave                                                                                 |
-| :---------- | :---------------------------- | :------------------------------------------------------------------------------------------ |
+| :---------- | :----------------------------- | :------------------------------------------------------------------------------------------ |
 | `Button`    | Botón interactivo polimórfico | `variant`, `size`, `isLoading`, `asChild`, `fullWidth`, `startIcon`, `endIcon`, `className` |
 | `Heading`   | Títulos semánticos            | `level`, `as`, `className`                                                                  |
 | `Text`      | Párrafos y texto cuerpo       | `size`, `weight`, `as`, `className`                                                         |
-| `Badge`     | Etiquetas de estado           | `variant`, `className`                                                                      |
+| `Badge`     | Etiquetas de estado           | `variant`, `size`, `className`                                                              |
 | `Avatar`    | Imagen de perfil con fallback | `src`, `alt`, `fallback`, `className`                                                       |
 | `Separator` | Divisor visual                | `orientation`, `className`                                                                  |
 | `Skeleton`  | Placeholder de carga          | `className`                                                                                 |
+| `Chip`      | Etiqueta toggleable/removible | `variant`, `pressed`, `defaultPressed`, `onPressedChange`, `onRemove`, `removeLabel`         |
+| `Image`     | Imagen con estado de carga/error | `src`, `alt`, `fallback`, `containerClassName`                                            |
 
 ### Button — Uso y Props
 
@@ -232,10 +264,11 @@ Nota: usa `className` para ajuste fino (color, margen, tracking). Para mantener 
 - **Exports:** `Badge`.
 - **Props principales:**
   - `variant?: 'default' | 'secondary' | 'destructive' | 'outline' | 'ghost'` — define el estilo visual.
+  - `size?: 'sm' | 'md' | 'lg' | 'icon'` — define la altura y el padding (mismos nombres de tamaño que `Button`; default `'sm'`).
   - `className?: string` — clases adicionales (p. ej. para tamaño, espaciado o tipografía).
   - Acepta `React.HTMLAttributes<HTMLDivElement>` (eventos y atributos HTML estándar).
 
-La implementación usa `class-variance-authority` con variantes definidas en `badgeVariants.ts`. La variante por defecto es `default`.
+La implementación usa `class-variance-authority` con variantes definidas en `badgeVariants.ts`. Las variantes por defecto son `variant: 'default'`, `size: 'sm'`.
 
 > **Nota sobre `variant="destructive"` y el token `--error-focus-content`:** mismo caso que `Button` (`variant="destructive"`) — `error` es el único color del sistema donde el base es claro y su `-focus` (hover) es oscuro, así que el texto necesita un `-focus-content` propio (`hover:text-error-focus-content`) distinto del `-content` del estado base. Ver la nota en la sección de `Button` y `src/index.css` para el detalle completo.
 
@@ -263,7 +296,7 @@ Nota: usa `className` para ajustar padding/alto/texto; `badgeVariants` ya aplica
   - `className?: string` — define ancho/alto, border-radius y utilidades Tailwind para personalizar el placeholder.
   - Acepta `React.HTMLAttributes<HTMLDivElement>` (eventos y atributos HTML estándar).
 
-Descripción: componente ligero para placeholders en estados de carga. Aplica por defecto `animate-pulse rounded-md bg-slate-200 dark:bg-slate-200` y se usa para simular bloques de texto, imágenes o botones mientras se cargan datos. Para evitar salto de layout se recomienda usar patrones de carga que reserven el espacio final (por ejemplo, usar la estructura de `Card`).
+Descripción: componente ligero para placeholders en estados de carga. Aplica por defecto `animate-pulse rounded-md bg-base-300` — usa el token del DS (no un gris fijo), así que responde solo a modo oscuro sin necesitar una variante `dark:` explícita. Se usa para simular bloques de texto, imágenes o botones mientras se cargan datos. Para evitar salto de layout se recomienda usar patrones de carga que reserven el espacio final (por ejemplo, usar la estructura de `Card`).
 
 Uso (ejemplos):
 
@@ -303,14 +336,93 @@ Uso (ejemplos):
 
 Nota: usa `className` para ajustar dimensiones y `rounded-*` según el patrón (avatar, tarjeta, líneas de texto). Combina `Skeleton` con los contenedores reales (por ejemplo `Card`) para mantener el layout estable durante la carga.
 
+### Chip — Uso y Props
+
+- **Exports:** `Chip`.
+- **Props principales:**
+  - `variant?: 'default' | 'secondary' | 'outline' | 'ghost'` — estilo visual base (ver `chipVariants.ts`).
+  - `pressed?: boolean` / `defaultPressed?: boolean` — toggle controlado / no controlado.
+  - `onPressedChange?: (pressed: boolean) => void`.
+  - `onRemove?: () => void` — si se pasa, agrega un botón de cierre (✕) independiente del cuerpo del chip.
+  - `removeLabel?: string` (default `'Remove'`) — label accesible del botón de cierre.
+  - `disabled?: boolean`.
+  - `className?: string` y `React.HTMLAttributes<HTMLSpanElement>` (menos `onSelect`, reservado).
+
+**Comportamiento no obvio:** el cuerpo del Chip solo se vuelve interactivo (un `@radix-ui/react-toggle` real) si el consumidor participa del protocolo `pressed`/`defaultPressed`/`onPressedChange` — si no se pasa ninguno, el cuerpo es texto plano (`<span>`), sin foco ni rol de botón. El botón de cierre (`onRemove`) nunca queda anidado dentro del cuerpo: son dos elementos interactivos hermanos e independientes (anidar un `<button>` dentro de otro `<button>`/Toggle sería HTML inválido), cada uno con su propio foco — `Tab` los separa.
+
+Uso (ejemplos, extraídos de `Chip.stories.tsx`):
+
+```tsx
+// 1. Estático — sin Toggle ni botón de cierre
+<Chip>Static</Chip>
+
+// 2. Toggleable — cuerpo interactivo vía Radix Toggle real
+<Chip
+  defaultPressed={false}
+  onPressedChange={(pressed) => console.log(pressed)}
+  variant="outline"
+>
+  Design
+</Chip>
+
+// 3. Removable — un único botón de cierre, sin Toggle
+<Chip onRemove={() => console.log('removed')}>Design</Chip>
+
+// 4. Ambos — Toggle + botón de cierre, cada uno con su propio foco
+<Chip
+  defaultPressed={false}
+  onPressedChange={(pressed) => console.log(pressed)}
+  onRemove={() => console.log('removed')}
+>
+  Design
+</Chip>
+```
+
+Nota: el estado "on" del Toggle siempre gana sobre `variant` (`has-[[data-state=on]]:bg-primary`), mismo criterio que usan `Switch`/`Checkbox` para "esto está activo".
+
+### Image — Uso y Props
+
+- **Exports:** `Image`.
+- **Props principales:**
+  - `fallback?: React.ReactNode` — nodo a mostrar si la imagen falla al cargar (patrón compositivo, igual que `AvatarFallback`).
+  - `containerClassName?: string` — clases para el contenedor que envuelve el `<img>` y los estados de carga/error.
+  - Acepta `React.ImgHTMLAttributes<HTMLImageElement>` (`src`, `alt`, `className`, etc.).
+
+**Comportamiento no obvio:** mientras carga, muestra un `Skeleton` cubriendo el contenedor. Si la carga falla y no se pasó `fallback`, **no renderiza nada** — no hornea un ícono de "imagen rota" por default; es una decisión explícita, no un olvido. El `<img>` se desmonta al fallar (si no, quedaría invisible pero seguiría en el DOM). Si cambia `src`, vuelve a pasar por el ciclo completo de carga en vez de conservar el estado de la imagen anterior. Requiere `'use client'` (a diferencia de `Avatar`, no hay una primitiva de Radix disponible para una imagen rectangular; el estado de carga/error solo se puede conocer vía `onLoad`/`onError` del `<img>` nativo). Pensada para usarse dentro de `AspectRatio` u otro contenedor con tamaño explícito — llena `h-full w-full` de su contenedor.
+
+Uso (ejemplos, extraídos de `Image.stories.tsx`):
+
+```tsx
+// 1. Ciclo completo: Skeleton mientras carga -> imagen visible al cargar
+<div className="h-32 w-32">
+  <Image src="/photo.jpg" alt="Loaded photo" />
+</div>
+
+// 2. Error con fallback (compositivo, como AvatarFallback)
+<div className="h-32 w-32">
+  <Image
+    src="/broken-image.jpg"
+    alt="Broken"
+    fallback={<span className="flex h-full w-full items-center justify-center bg-base-200 text-xs">No image</span>}
+  />
+</div>
+
+// 3. Error sin fallback: no renderiza nada (comportamiento mínimo documentado)
+<div className="h-32 w-32">
+  <Image src="/broken-image.jpg" alt="Broken" />
+</div>
+```
+
 ### 🧬 Moléculas (Estructura)
 
 | Componente      | Descripción                | API & Composición                                                                                                  |
-| --------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| ---------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | **`Card`**      | Contenedor de información. | **Subcomponentes:** `<CardHeader>`, `<CardTitle>`, `<CardDescription>`, `<CardContent>`, `<CardFooter>`            |
 | **`Dialog`**    | Modal accesible.           | `open`: boolean; `onOpenChange`: (open: boolean) => void; **Subcomponentes:** `<DialogTrigger>`, `<DialogContent>` |
-| **`Sheet`**     | Panel lateral (Drawer).    | `side`: "top"                                                                                                      |
-| **`Container`** | Wrapper de layout.         | No props específicas. Limita el `max-width` automáticamente.                                                       |
+| **`Sheet`**     | Panel lateral (Drawer).    | `side`: "top" \| "right" \| "bottom" \| "left"                                                                     |
+| **`Container`** | Wrapper de layout.         | `size`: 'sm' \| 'md' \| 'lg' \| 'xl' \| 'full' — controla `max-width` (ver sección `Layout` para el detalle).       |
+| **`AspectRatio`** | Fuerza una relación de aspecto. | `ratio`: number (ej. `16 / 9`). Se compone con otro contenido (`Image`, etc.), no es una API todo-en-uno.      |
+| **`Tabs`**      | Navegación por pestañas.   | `defaultValue`/`value`/`onValueChange` en el root; **Subcomponentes:** `<TabsList>`, `<TabsTrigger>`, `<TabsContent>` |
 
 ### Layout — Uso y Props
 
@@ -528,15 +640,164 @@ Notas:
 - Usa `SheetTrigger` y `SheetClose` con `asChild` para integrar botones existentes sin perder estilos.
 - `SheetOverlay` maneja el backdrop; personalízalo con `className` si necesitas distinta opacidad o blur.
 
+### AspectRatio — Uso y Props
+
+- **Exports:** `AspectRatio`.
+- **Props principales:** `React.ComponentPropsWithoutRef<typeof AspectRatioPrimitive.Root>` (de `@radix-ui/react-aspect-ratio`) — principalmente `ratio?: number` (ej. `16 / 9`).
+
+Descripción: fuerza una relación de aspecto sobre su contenido usando CSS puro (el "padding-bottom trick" que resuelve la propia primitiva de Radix), sin hooks ni estado — no necesita `'use client'`. `AspectRatio` es un contenedor de composición, no una API todo-en-uno: se combina con otro contenido (por ejemplo `Image`), igual que `Popover`+`Calendar` se combinan para armar `DatePicker`.
+
+Uso (ejemplos, extraídos de `AspectRatio.stories.tsx`):
+
+```tsx
+// 1. Ratio puro, con contenido propio
+<div style={{ width: 320 }}>
+  <AspectRatio ratio={16 / 9}>
+    <div className="h-full w-full bg-primary" />
+  </AspectRatio>
+</div>
+
+// 2. AspectRatio + Image (patrón típico: portada/thumbnail)
+<div style={{ width: 320 }}>
+  <AspectRatio ratio={16 / 9}>
+    <Image src="/cover.jpg" alt="Cover photo" />
+  </AspectRatio>
+</div>
+```
+
+### Tabs — Uso y Props
+
+- **Exports:** `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent`.
+- **Props y comportamiento clave:**
+  - `Tabs` (root): `defaultValue?: string`, `value?: string`, `onValueChange?: (value: string) => void` — controlado o no controlado.
+  - `TabsList`: `className?: string` — contenedor tipo píldora (`bg-base-200`, `rounded-box`).
+  - `TabsTrigger`: `value: string` (requerido), `disabled?: boolean`, `className?: string`.
+  - `TabsContent`: `value: string` (requerido), `className?: string` — sin Portal, vive en el flujo normal del documento (a diferencia de `DropdownMenuContent`/`TooltipContent`).
+
+**Comportamiento no obvio:** el `activationMode` por defecto de Radix Tabs es `"automatic"` — `ArrowRight`/`ArrowLeft` mueven el foco **y** activan el tab en el mismo paso, sin necesitar `Enter`/`Space` adicional. Pensado para grupos chicos (2-5 opciones), no para una fila larga de tabs de dashboard.
+
+Uso (ejemplo, extraído de `Tabs.stories.tsx`):
+
+```tsx
+<Tabs defaultValue="prep" className="w-80">
+  <TabsList>
+    <TabsTrigger value="prep">Prep</TabsTrigger>
+    <TabsTrigger value="cook">Cook</TabsTrigger>
+    <TabsTrigger value="serve">Serve</TabsTrigger>
+  </TabsList>
+  <TabsContent value="prep">Corta los vegetales y marina la proteína.</TabsContent>
+  <TabsContent value="cook">Cocina a fuego medio durante 12 minutos.</TabsContent>
+  <TabsContent value="serve">Emplata y decora con hierbas frescas.</TabsContent>
+</Tabs>
+```
+
+### 🔲 Overlays
+
+Contenido flotante posicionado relativo a un trigger (Portal + `@radix-ui/react-popper`), con animaciones de entrada/salida y la misma superficie visual (`bg-base-100`, `rounded-box`, `border-base-300`, `shadow-md`) en los tres.
+
+| Componente        | Descripción                          | Props clave                                                                 |
+| :----------------- | :------------------------------------ | :---------------------------------------------------------------------------- |
+| `Popover`          | Contenido flotante disparado por click | `align`, `sideOffset`; **Subcomponentes:** `<PopoverTrigger>`, `<PopoverAnchor>`, `<PopoverContent>` |
+| `Tooltip`          | Texto flotante disparado por hover/foco | Requiere `<TooltipProvider>`; **Subcomponentes:** `<TooltipTrigger>`, `<TooltipContent>` |
+| `DropdownMenu`     | Menú de acciones/opciones             | **Subcomponentes:** `<DropdownMenuTrigger>`, `<DropdownMenuContent>`, `<DropdownMenuItem>`, `<DropdownMenuCheckboxItem>`, `<DropdownMenuRadioGroup>`/`<DropdownMenuRadioItem>`, `<DropdownMenuLabel>`, `<DropdownMenuSeparator>` |
+
+### Popover — Uso y Props
+
+- **Exports:** `Popover`, `PopoverTrigger`, `PopoverAnchor`, `PopoverContent`.
+- **Props principales:**
+  - `Popover` (root): no controlado por defecto; acepta los props de `PopoverPrimitive.Root` (`open`, `onOpenChange`, etc.).
+  - `PopoverTrigger`: `asChild?: boolean`.
+  - `PopoverAnchor`: ancla de posicionamiento alternativa (sin ser el trigger que abre/cierra).
+  - `PopoverContent`: `align?: 'start' | 'center' | 'end'` (default `'center'`), `sideOffset?: number` (default `4`), `className?: string`.
+
+El contenido se monta en un Portal (fuera del árbol donde se declara) con `role="dialog"`, y usa la misma superficie visual que `Select`/`DropdownMenu`. `Calendar`+`Popover` es exactamente cómo está armado `DatePicker` — no una API distinta.
+
+Uso (ejemplo, extraído de `Popover.stories.tsx`):
+
+```tsx
+<Popover>
+  <PopoverTrigger asChild>
+    <Button variant="outline">Open popover</Button>
+  </PopoverTrigger>
+  <PopoverContent aria-label="Popover example">
+    <p>This is the popover content.</p>
+  </PopoverContent>
+</Popover>
+```
+
+### Tooltip — Uso y Props
+
+- **Exports:** `TooltipProvider`, `Tooltip`, `TooltipTrigger`, `TooltipContent`.
+- **Props principales:**
+  - `TooltipProvider`: sin props propias — debe montarse **una sola vez** en un nivel alto del árbol (mismo rol que `<Toast />` en el root layout). Sin un `TooltipProvider` ancestro, `Tooltip` lanza un error (Radix no trae un contexto por defecto).
+  - `Tooltip` (root): no controlado por defecto.
+  - `TooltipTrigger`: `asChild?: boolean`.
+  - `TooltipContent`: `align?: 'start' | 'center' | 'end'`, `sideOffset?: number` (default `4`), `className?: string`.
+
+**Comportamiento no obvio:** el hover pasa por el delay por defecto de Radix (`delayDuration = 700ms`) antes de abrir. El foco por teclado, en cambio, abre **de inmediato**, sin ese delay (`TooltipTrigger.onFocus` llama a `context.onOpen()` directo, sin pasar por el timer que sí usa el hover). El contenido vive en un Portal con `role="tooltip"`.
+
+Uso (ejemplo, extraído de `Tooltip.stories.tsx`):
+
+```tsx
+<TooltipProvider>
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <Button variant="outline">Hover me</Button>
+    </TooltipTrigger>
+    <TooltipContent>
+      <p>Saved to your library</p>
+    </TooltipContent>
+  </Tooltip>
+</TooltipProvider>
+```
+
+### DropdownMenu — Uso y Props
+
+- **Exports:** `DropdownMenu`, `DropdownMenuTrigger`, `DropdownMenuGroup`, `DropdownMenuContent`, `DropdownMenuItem`, `DropdownMenuCheckboxItem`, `DropdownMenuRadioGroup`, `DropdownMenuRadioItem`, `DropdownMenuLabel`, `DropdownMenuSeparator`.
+- **Alcance recortado a propósito:** sin `Sub`/`SubTrigger`/`SubContent` (submenús anidados) ni `Shortcut`.
+- **Props y comportamiento clave:**
+  - `DropdownMenu` (root): controlado/no controlado, mismo patrón que `Popover`.
+  - `DropdownMenuContent`: `align?` (default `'start'`), `sideOffset?` (default `4`).
+  - `DropdownMenuCheckboxItem` / `DropdownMenuRadioItem`: **totalmente controlados** en Radix — a diferencia de `Checkbox`/`Switch`, no existe `defaultChecked`/`defaultValue`; `checked`/`onCheckedChange` (o `value`/`onValueChange` en el `RadioGroup`) quedan enteramente a cargo de quien consume.
+
+**Comportamiento no obvio:** seleccionar un `DropdownMenuItem`, `DropdownMenuCheckboxItem` o `DropdownMenuRadioItem` **cierra el menú** por default (Radix, sin `preventDefault` en `onSelect`); el foco vuelve al trigger al cerrar.
+
+Uso (ejemplo simplificado, extraído de `DropdownMenu.stories.tsx`):
+
+```tsx
+<DropdownMenu>
+  <DropdownMenuTrigger asChild>
+    <Button variant="outline">Open menu</Button>
+  </DropdownMenuTrigger>
+  <DropdownMenuContent>
+    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+    <DropdownMenuSeparator />
+    <DropdownMenuItem onSelect={() => console.log('profile')}>Profile</DropdownMenuItem>
+    <DropdownMenuItem>Billing</DropdownMenuItem>
+    <DropdownMenuSeparator />
+    <DropdownMenuCheckboxItem checked={notifications} onCheckedChange={setNotifications}>
+      Show notifications
+    </DropdownMenuCheckboxItem>
+    <DropdownMenuSeparator />
+    <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+      <DropdownMenuRadioItem value="light">Light</DropdownMenuRadioItem>
+      <DropdownMenuRadioItem value="dark">Dark</DropdownMenuRadioItem>
+    </DropdownMenuRadioGroup>
+  </DropdownMenuContent>
+</DropdownMenu>
+```
+
 ### 📝 Formularios (Forms)
 
-| Componente | Descripción          | Props clave                                                                                                         |
-| :--------- | :------------------- | :------------------------------------------------------------------------------------------------------------------ |
-| `Input`    | Campo de texto       | `type`, `label?`, `error?`, `helperText?`, `startIcon?`, `endIcon?`, `variant?`, `size?`, `disabled?`, `className?` |
-| `Textarea` | Texto multilinea     | Standard HTML props, `variant?`, `error?`, `className?`                                                             |
-| `Select`   | Dropdown avanzado    | `value?`, `defaultValue?`, `onValueChange?`, `placeholder?`, `className?`                                           |
-| `Switch`   | Toggle binario       | `checked?`, `defaultChecked?`, `onCheckedChange?`, `disabled?`, `className?`                                        |
-| `Checkbox` | Casilla de selección | `checked?`, `defaultChecked?`, `onCheckedChange?`, `disabled?`, `className?`                                        |
+| Componente   | Descripción          | Props clave                                                                                                         |
+| :----------- | :-------------------- | :------------------------------------------------------------------------------------------------------------------ |
+| `Input`      | Campo de texto       | `type`, `label?`, `error?`, `helperText?`, `startIcon?`, `endIcon?`, `variant?`, `size?`, `disabled?`, `className?` |
+| `Textarea`   | Texto multilinea     | Standard HTML props, `variant?`, `error?`, `className?`                                                             |
+| `Select`     | Dropdown avanzado    | `value?`, `defaultValue?`, `onValueChange?`, `placeholder?`, `className?`                                           |
+| `Switch`     | Toggle binario       | `checked?`, `defaultChecked?`, `onCheckedChange?`, `disabled?`, `className?`                                        |
+| `Checkbox`   | Casilla de selección | `checked?`, `defaultChecked?`, `onCheckedChange?`, `disabled?`, `className?`                                        |
+| `Calendar`   | Grilla de calendario | `mode`, `selected`, `onSelect`, `showOutsideDays?` (todos los props de `DayPicker`)                                 |
+| `DatePicker` | Selector de fecha (Popover + Calendar) | `date?`, `onDateChange?`, `placeholder?`, `disabled?`, `className?`                                |
 
 ### Checkbox — Uso y Props
 
@@ -737,7 +998,48 @@ const [on, setOn] = useState(false);
 
 Nota: para accesibilidad, envuelve el `Switch` en un `label` o provee `aria-label` cuando no haya texto visible. Usa `onCheckedChange` para integrar con formularios controlados.
 
+### Calendar — Uso y Props
+
+- **Exports:** `Calendar`.
+- **Props principales:** `CalendarProps = DayPickerProps` (tipo re-exportado de `@daypicker/react`) — soporta todos los props reales de `DayPicker`: `mode: 'single' | 'multiple' | 'range'`, `selected`, `onSelect`, `showOutsideDays?: boolean` (default `true`), etc.
+
+**Comportamiento no obvio:** `Calendar` es un wrapper de estilos sobre `@daypicker/react`, no una calendarización propia del DS. Reemplaza los componentes internos `Chevron`, `PreviousMonthButton`, `NextMonthButton` y `DayButton` de DayPicker por versiones que usan `buttonVariants` del DS (mismos estilos que `Button`). El estilo visual de cada día sale de los `modifiers` que provee DayPicker, no de una prop propia: `today` (borde + texto `primary` si no está seleccionado), `outside` (opacidad reducida), `disabled` (`pointer-events-none`), `range_middle` (fondo `primary/10`), `selected`/`range_start`/`range_end` (fondo `primary` sólido).
+
+Uso (ejemplo, extraído de `Calendar.stories.tsx`):
+
+```tsx
+<Calendar mode="single" selected={date} onSelect={setDate} />
+```
+
+### DatePicker — Uso y Props
+
+- **Exports:** `DatePicker`.
+- **Props principales:**
+  - `date?: Date` — fecha seleccionada.
+  - `onDateChange?: (date: Date | undefined) => void`.
+  - `placeholder?: string` (default `'Pick a date'`).
+  - `disabled?: boolean`.
+  - `className?: string` — se aplica al `Button` trigger.
+
+**Comportamiento no obvio:** `DatePicker` es **100% controlado, sin estado interno propio** — compone `Popover` + `Button` (trigger) + `Calendar` (`mode="single"`) tal cual ya existen en el DS, no una API monolítica aparte. El consumidor maneja `date`/`onDateChange` desde afuera, igual que lo haría en una app real. Formatea la fecha visible con `date-fns` (`format(date, 'PPP')`).
+
+Uso (ejemplo, extraído de `DatePicker.stories.tsx`):
+
+```tsx
+function ControlledDatePicker() {
+  const [date, setDate] = useState<Date | undefined>(undefined);
+  return <DatePicker date={date} onDateChange={setDate} />;
+}
+```
+
 ### 📢 Feedback (Notificaciones)
+
+| Componente     | Descripción                        | Props clave                                                                          |
+| :-------------- | :----------------------------------- | :--------------------------------------------------------------------------------------- |
+| `Toast`        | Notificaciones no-modales (Sonner)  | Ver props de `<Toaster />` más abajo                                                |
+| `Progress`     | Barra de progreso lineal            | `value`, `max?`, `variant?: 'primary'\|'success'\|'warning'\|'error'`, `className?`    |
+| `ProgressRing` | Progreso circular (anillo SVG)      | `value`, `max?`, `variant?`, `size?`, `strokeWidth?`, `showValueLabel?`               |
+| `Alert`        | Aviso inline persistente (no-modal) | `variant?: 'info'\|'success'\|'warning'\|'error'`, `icon?`; **Subcomponentes:** `<AlertTitle>`, `<AlertDescription>` |
 
 El sistema de Toast utiliza **Sonner**.
 
@@ -809,6 +1111,273 @@ Consejos:
 - Personaliza comportamiento visual/colores pasando las props del `Toaster` o ajustando las clases que el wrapper aplica.
 - Los toasts son no-modales; no bloquean el foco y no deben usarse para contenido crítico que requiera confirmación inmediata.
 
+### Progress — Uso y Props
+
+- **Exports:** `Progress`.
+- **Props principales:**
+  - `value?: number` — valor actual.
+  - `max?: number` (default `100`).
+  - `variant?: 'primary' | 'success' | 'warning' | 'error'` (default `'primary'`) — ver `progressVariants.ts`.
+  - `aria-label?: string` (default `'Progress'` si no se pasa — `role="progressbar"` exige nombre accesible).
+  - `className?: string` y `React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root>` (`@radix-ui/react-progress`).
+
+Descripción: barra horizontal sobre `@radix-ui/react-progress`. El ancho del indicador se calcula como `translateX(-${100 - percentage}%)` a partir de `value`/`max`.
+
+Uso (ejemplos, extraídos de `Progress.stories.tsx`):
+
+```tsx
+// 1. Default (variant primary)
+<Progress value={50} />
+
+// 2-4. Variantes de color
+<Progress value={80} variant="success" />
+<Progress value={60} variant="warning" />
+<Progress value={30} variant="error" />
+
+// 5. Vacío / 6. Completo
+<Progress value={0} />
+<Progress value={100} />
+```
+
+### ProgressRing — Uso y Props
+
+- **Exports:** `ProgressRing`.
+- **Props principales:**
+  - `value: number` (requerido) — valor actual.
+  - `max?: number` (default `100`).
+  - `variant?: 'primary' | 'success' | 'warning' | 'error'` (default `'primary'`) — ver `progressRingVariants.ts`.
+  - `size?: number` (default `64`) — diámetro del anillo en px.
+  - `strokeWidth?: number` (default `6`).
+  - `showValueLabel?: boolean` (default `false`) — opt-in: a tamaños chicos el porcentaje no cabe.
+  - `aria-label?: string` (default `'Progress'`).
+  - `className?: string` y `Omit<React.HTMLAttributes<HTMLDivElement>, 'children'>`.
+
+Descripción: SVG puro (dos `<circle>` — uno de fondo y otro de progreso animado vía `strokeDasharray`/`strokeDashoffset`), sin dependencia de Radix. `role="progressbar"` con `aria-valuenow`/`aria-valuemin`/`aria-valuemax`. El `value` se clampa entre `0` y `max` (un valor por encima de `max` no rompe el cálculo del arco).
+
+Uso (ejemplos, extraídos de `ProgressRing.stories.tsx`):
+
+```tsx
+// 1. Default (sin label)
+<ProgressRing value={50} />
+
+// 2. Con label centrado (opt-in)
+<ProgressRing value={72} showValueLabel />
+
+// 3. Tamaño y grosor personalizados
+<ProgressRing value={40} size={120} strokeWidth={10} showValueLabel />
+
+// 4. Valor por encima del máximo (clamping a 100%)
+<ProgressRing value={150} max={100} showValueLabel />
+```
+
+### Alert — Uso y Props
+
+- **Exports:** `Alert`, `AlertTitle`, `AlertDescription`.
+- **Props principales:**
+  - `variant?: 'info' | 'success' | 'warning' | 'error'` (default `'info'`) — ver `alertVariants.ts`.
+  - `icon?: React.ReactNode` — reemplaza el ícono default de la variante (patrón compositivo, igual que `fallback` en `Image`).
+  - `className?: string` y `React.HTMLAttributes<HTMLDivElement>`.
+
+**Comportamiento no obvio (accesibilidad):** el `role` del `Alert` se **deriva automáticamente de `variant`**, sin ninguna prop de override. `info`/`success` son "así está el estado" → `role="status"` (cortés: espera a que el lector de pantalla termine de leer lo que esté leyendo). `warning`/`error` son "algo salió mal" → `role="alert"` (asertivo: interrumpe al lector de pantalla). También el ícono se resuelve por variante — `InfoCircledIcon`/`CheckCircledIcon`/`ExclamationTriangleIcon`/`CrossCircledIcon` respectivamente — a menos que se pase `icon` explícitamente: si `icon` es `undefined` se usa el default; si se pasa **cualquier** valor, incluidos `null` o `false`, se usa tal cual, lo que permite ocultar el ícono explícitamente sin una prop separada. `AlertTitle` se renderiza como un `<div>`, no un `<h*>`, a propósito — un `Alert` puede aparecer en cualquier punto del árbol (inyectado por un formulario, un toast, etc.) sin que el componente pueda saber qué nivel de heading le corresponde ahí.
+
+Uso (ejemplos, extraídos de `Alert.stories.tsx`):
+
+```tsx
+// 1. Info (default) — role="status"
+<Alert>
+  <AlertTitle>Heads up</AlertTitle>
+  <AlertDescription>This is a general information message.</AlertDescription>
+</Alert>
+
+// 2. Success — role="status"
+<Alert variant="success">
+  <AlertTitle>Success</AlertTitle>
+  <AlertDescription>Your changes have been saved.</AlertDescription>
+</Alert>
+
+// 3. Warning / Error — role="alert"
+<Alert variant="warning">
+  <AlertTitle>Warning</AlertTitle>
+  <AlertDescription>This action may have unintended consequences.</AlertDescription>
+</Alert>
+
+// 4. Ícono personalizado (override)
+<Alert variant="success" icon={<span>🚀</span>}>
+  <AlertTitle>Deployed</AlertTitle>
+  <AlertDescription>Your app is live.</AlertDescription>
+</Alert>
+
+// 5. Sin ícono, explícito (distingue "no pasé icon" de "no quiero icon")
+<Alert icon={null}>
+  <AlertTitle>No icon</AlertTitle>
+  <AlertDescription>This alert explicitly opts out of any icon.</AlertDescription>
+</Alert>
+```
+
+### 📊 Datos
+
+| Componente  | Descripción                                       | API & Composición                                                                                             |
+| :----------- | :-------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------- |
+| `Table`     | 8 primitivos HTML de tabla, estilizados            | `<Table>`, `<TableHeader>`, `<TableBody>`, `<TableFooter>`, `<TableRow>`, `<TableHead>`, `<TableCell>`, `<TableCaption>` |
+| `DataTable` | Tabla con sorting, filtro global y paginación       | `columns: ColumnDef<typeof features, TData>[]`, `data`, `searchPlaceholder?`, `className?` (sobre `@tanstack/react-table` v9) |
+| `Chart`     | Charts de Bar/Line/Area/Pie/Ring sobre recharts     | `ChartContainer`, `ChartTooltipContent`, `ChartLegendContent` + re-exports de recharts (`BarChart`, `LineChart`, `AreaChart`, `PieChart`, etc.) |
+
+### Table — Uso y Props
+
+- **Exports:** `Table`, `TableHeader`, `TableBody`, `TableFooter`, `TableRow`, `TableHead`, `TableCell`, `TableCaption`.
+
+8 primitivos de bajo nivel, cada uno mapea 1:1 a su elemento HTML de tabla (`<table>`, `<thead>`, `<tbody>`, `<tfoot>`, `<tr>`, `<th>`, `<td>`, `<caption>` respectivamente) con estilos del DS. Todos aceptan `className?: string` y los atributos/eventos HTML estándar de su elemento — no traen ninguna lógica de datos (para eso está `DataTable`).
+
+**Comportamiento no obvio:** `Table` envuelve el `<table>` en un `<div className="relative w-full overflow-x-auto">` — el scroll horizontal para tablas con muchas columnas es responsabilidad del propio primitivo, no de quien lo consume. El `ref` se forwardea al `<table>`, no al `div` wrapper. `TableRow` aplica `hover:bg-base-200` (mismo token de highlight que `SelectItem`/`DropdownMenuItem`, pero en `hover` en vez de `focus`, porque una fila de tabla no es un ítem navegable por teclado por defecto).
+
+Uso (ejemplo simplificado, extraído de `Table.stories.tsx`):
+
+```tsx
+<Table>
+  <TableCaption>Listado de facturas recientes.</TableCaption>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Factura</TableHead>
+      <TableHead>Estado</TableHead>
+      <TableHead className="text-right">Monto</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    {invoices.map((row) => (
+      <TableRow key={row.invoice}>
+        <TableCell className="font-medium">{row.invoice}</TableCell>
+        <TableCell>{row.status}</TableCell>
+        <TableCell className="text-right">{row.amount}</TableCell>
+      </TableRow>
+    ))}
+  </TableBody>
+  <TableFooter>
+    <TableRow>
+      <TableCell colSpan={2}>Total</TableCell>
+      <TableCell className="text-right">$750.00</TableCell>
+    </TableRow>
+  </TableFooter>
+</Table>
+```
+
+Nota: `TableCaption` y `TableFooter` son opcionales — una tabla mínima (sin caption ni footer) es un uso válido y común.
+
+### DataTable — Uso y Props
+
+- **Exports:** `DataTable`, `features` (el objeto de features de `@tanstack/react-table` v9, re-exportado desde el mismo módulo).
+- **Props principales:**
+  - `columns: ColumnDef<typeof features, TData>[]` (requerido) — ver nota abajo, tienen que tiparse contra `typeof features`.
+  - `data: TData[]` (requerido).
+  - `searchPlaceholder?: string` (default `'Buscar...'`) — la caja de búsqueda global **siempre es visible**, no es opcional vía prop.
+  - `className?: string`.
+
+**Comportamiento no obvio:** construida sobre `@tanstack/react-table` v9. Las columnas deben tiparse contra `typeof features` (exportado por este mismo módulo, vía `createColumnHelper<typeof features, TData>()`) — es un requisito real de los generics de v9, no un detalle estilístico. `features` combina `rowSortingFeature` + `columnFilteringFeature` + `globalFilteringFeature` + `rowPaginationFeature`, pero **`columnFilteringFeature` está registrada únicamente porque el sistema de tipos de v9 la exige como prerequisito** de `globalFilteringFeature`/`filteredRowModel`/`filterFns` — `DataTable` no expone ningún filtro por columna, solo el filtro global (la caja de búsqueda). Alcance v1: sorting + filtro global + paginación; sin selección de filas, visibilidad de columnas, resize, agrupación/agregación ni pinning.
+
+Uso (ejemplo, extraído de `DataTable.stories.tsx`):
+
+```tsx
+import { createColumnHelper } from '@tanstack/react-table';
+import { DataTable, features } from '@abelardo-salazar/core-ui-design-system';
+
+interface Person {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
+const columnHelper = createColumnHelper<typeof features, Person>();
+const columns = [
+  columnHelper.accessor('name', { header: 'Nombre' }),
+  columnHelper.accessor('email', { header: 'Email' }),
+  columnHelper.accessor('role', { header: 'Rol' }),
+];
+
+<DataTable columns={columns} data={people} />;
+```
+
+Notas:
+
+- Hacer click en un `TableHead` ordenable alterna el sort de esa columna (ícono `CaretUpIcon`/`CaretDownIcon`/`CaretSortIcon`, con `text-primary` cuando la columna está efectivamente ordenada).
+- El filtro global resetea la paginación a la primera página.
+
+### Chart — Uso y Props
+
+- **Exports:** `ChartContainer`, `ChartTooltipContent`, `ChartLegendContent`, `ChartConfig` (tipo), `CHART_COLOR_TOKENS`, más re-exports directos de `recharts` (sin wrapper propio, mismo criterio que `Popover` re-exportando `PopoverAnchor`): `BarChart`/`Bar`, `LineChart`/`Line`, `AreaChart`/`Area`, `PieChart`/`Pie`/`Cell`/`Label`, `XAxis`, `YAxis`, `CartesianGrid`, `ResponsiveContainer`, `ChartTooltip` (el `Tooltip` de recharts, renombrado — choca en compilación con el `Tooltip` propio del DS vía `export *`), `ChartLegend` (el `Legend` de recharts, renombrado por consistencia con `ChartTooltip`).
+- **Props principales:**
+  - `ChartContainer`: `config: ChartConfig` (`Record<string, { label?: ReactNode; color: 'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'info' }>`, requerido), `children` (el chart de recharts), más `React.ComponentPropsWithoutRef<'div'>`.
+  - `ChartTooltipContent`: `config: ChartConfig` (requerido), `hideLabel?: boolean`, `indicator?: 'dot' | 'line'` (default `'dot'`) — el resto (`active`/`payload`/`label`) lo inyecta Recharts.
+  - `ChartLegendContent`: `config: ChartConfig` (requerido) — el resto (`payload`) lo inyecta Recharts.
+
+Alcance: **Bar, Line, Area, Pie — incluyendo Ring (donut)**. `recharts` **no** es peerDependency: viene bundleado dentro del paquete del DS.
+
+**Comportamiento no obvio:**
+
+- `ChartContainer` inyecta `--color-<key>` como variable CSS por cada entrada de `config`, apuntando al token real del DS (`var(--color-primary)`, etc). Las piezas de datos referencian esa variable vía `fill`/`stroke` (ej. `fill="var(--color-escritorio)"`), nunca un color fijo — así responden solas a claro/oscuro. Esto es más simple que el recipe original de `ChartContainer` de shadcn/ui (que además inyecta un bloque `<style>` duplicado por tema): acá no hace falta, los tokens del DS ya cambian de valor solos con `.dark`.
+- "**Ring**" (donut) no es un componente propio: se logra componiendo `Pie` con `innerRadius`/`outerRadius` (el hueco) y un texto central armado a mano.
+- **`<Label position="center">` no sirve para el texto central de un Ring** — probado contra un `Pie` real, no renderiza nada en `recharts@3.10.1`. Es un bug/quirk conocido de la propia librería ([issue #6030 de recharts](https://github.com/recharts/recharts/issues/6030)): para `position="center"` específicamente, `Label` resuelve el viewBox contra el contexto *cartesiano* en vez del *polar*, y un `PieChart` sin ejes nunca provee ese contexto cartesiano. Para el texto central de un Ring, usa un `<text x="50%" y="50%">` crudo como hijo de `Pie` (`Pie` renderiza sus `children` tal cual, sin filtrarlos) — los porcentajes se resuelven contra el viewport del propio `<svg>`, sin JS ni conocer el tamaño del contenedor. Ver `RingChartExample` en `Chart.stories.tsx` para el patrón completo.
+- Para `Pie`, el tooltip y la leyenda resuelven cada porción por `name`/`value`, no por `dataKey` — en un `Pie`, `dataKey` es el mismo string (el campo del valor numérico, ej. `"value"`) en **todas** las porciones; lo que distingue cada porción es `name` (tooltip) / `value` (leyenda), resuelto por Recharts vía `nameKey`.
+
+Uso (ejemplos, extraídos de `Chart.stories.tsx`):
+
+```tsx
+// 1. BarChart
+const chartConfig: ChartConfig = {
+  escritorio: { label: 'Escritorio', color: 'primary' },
+  movil: { label: 'Móvil', color: 'secondary' },
+};
+
+<ChartContainer config={chartConfig} className="aspect-video w-full">
+  <BarChart data={data}>
+    <CartesianGrid vertical={false} />
+    <XAxis dataKey="month" tickLine={false} axisLine={false} />
+    <YAxis tickLine={false} axisLine={false} />
+    <ChartTooltip content={<ChartTooltipContent config={chartConfig} />} />
+    <ChartLegend content={<ChartLegendContent config={chartConfig} />} />
+    <Bar dataKey="escritorio" fill="var(--color-escritorio)" radius={4} />
+    <Bar dataKey="movil" fill="var(--color-movil)" radius={4} />
+  </BarChart>
+</ChartContainer>;
+
+// 2. Pie
+const teamConfig: ChartConfig = {
+  design: { label: 'Design', color: 'primary' },
+  engineering: { label: 'Engineering', color: 'secondary' },
+};
+
+<ChartContainer config={teamConfig} className="aspect-video w-full">
+  <PieChart>
+    <ChartTooltip content={<ChartTooltipContent config={teamConfig} />} />
+    <ChartLegend content={<ChartLegendContent config={teamConfig} />} />
+    <Pie data={teamData} dataKey="headcount" nameKey="team">
+      {teamData.map((entry) => (
+        <Cell key={entry.team} fill={`var(--color-${entry.team})`} />
+      ))}
+    </Pie>
+  </PieChart>
+</ChartContainer>;
+
+// 3. Ring (donut) — Pie + innerRadius/outerRadius + <text> central compuesto a mano
+<ChartContainer config={teamConfig} className="aspect-video w-full">
+  <PieChart>
+    <ChartTooltip content={<ChartTooltipContent config={teamConfig} />} />
+    <Pie data={teamData} dataKey="headcount" nameKey="team" innerRadius={55} outerRadius={85}>
+      {teamData.map((entry) => (
+        <Cell key={entry.team} fill={`var(--color-${entry.team})`} />
+      ))}
+      <text x="50%" y="50%" textAnchor="middle">
+        <tspan x="50%" dy="-0.3em" className="fill-base-content text-2xl font-bold">
+          {total}
+        </tspan>
+        <tspan x="50%" dy="1.4em" className="fill-base-content/65 text-xs">
+          Personas
+        </tspan>
+      </text>
+    </Pie>
+  </PieChart>
+</ChartContainer>;
+```
+
 ## 💻 Desarrollo Local
 
 Si deseas contribuir o modificar la librería:
@@ -819,16 +1388,14 @@ Si deseas contribuir o modificar la librería:
 
 ```bash
 npm run storybook
-
 ```
 
 4. Compilar librería:
 
 ```bash
 npm run build
-
 ```
 
 ---
 
-**Core UI Design System** © Abelaro Salazar / @abelardo-salazar 2026. Internal Use Only.
+**Core UI Design System** © Abelardo Salazar / @abelardo-salazar 2026. Internal Use Only.
