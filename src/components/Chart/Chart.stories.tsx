@@ -9,10 +9,13 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
   ChartLegend,
+  ChartTooltip,
   Line,
   LineChart,
-  ChartTooltip,
+  Pie,
+  PieChart,
   XAxis,
   YAxis,
 } from './ChartPrimitives';
@@ -229,5 +232,157 @@ export const AreaChartExample: Story = {
     await waitFor(() =>
       expect(canvasElement.querySelector('svg.recharts-surface')).toBeInTheDocument(),
     );
+  },
+};
+
+// Config y data compartidos por PieChartExample y RingChartExample: 4 categorías, cada una
+// con su propio token — a diferencia de Bar/Line/Area (una entrada de config por *serie*),
+// acá es una entrada por *porción*.
+const teamConfig: ChartConfig = {
+  design: { label: 'Design', color: 'primary' },
+  engineering: { label: 'Engineering', color: 'secondary' },
+  product: { label: 'Product', color: 'accent' },
+  sales: { label: 'Sales', color: 'success' },
+};
+
+const teamData = [
+  { team: 'design', headcount: 28 },
+  { team: 'engineering', headcount: 42 },
+  { team: 'product', headcount: 19 },
+  { team: 'sales', headcount: 17 },
+];
+
+// Simula un mousemove sobre una porción de Pie. A diferencia de Bar/Line/Area (tooltip tipo
+// "axis", disparado por mousemove en cualquier punto del área de trazado — ver
+// hoverChartCenter), PieChart usa defaultTooltipEventType "item" (verificado en
+// PieChart.js): cada <path class="recharts-pie-sector"> tiene su propio onMouseEnter, y el
+// dispatch a Redux es síncrono (sin el throttle por rAF de mouseMoveAction), pero requiere
+// mouseover — mouseenter nativo no dispara el onMouseEnter sintético de React (que en
+// realidad escucha mouseover/mouseout y calcula el enter/leave él mismo).
+async function hoverFirstPieSector(canvasElement: HTMLElement) {
+  await waitFor(() =>
+    expect(canvasElement.querySelector('.recharts-pie-sector')).toBeInTheDocument(),
+  );
+  const sector = canvasElement.querySelector('.recharts-pie-sector') as SVGElement;
+  fireEvent.mouseOver(sector, { bubbles: true });
+  fireEvent.mouseMove(sector, { bubbles: true });
+  await new Promise((resolve) => requestAnimationFrame(resolve));
+}
+
+// 4. Pie: config por porción (no por serie). Confirma que ChartTooltipContent/
+// ChartLegendContent resuelven cada porción por `name`/`value`, no por `dataKey` (el mismo
+// string para todas las porciones de un Pie — ver comentario en ambos componentes).
+export const PieChartExample: Story = {
+  render: () => (
+    <ChartContainer config={teamConfig} className="max-w-md" style={testSize}>
+      <PieChart>
+        <ChartTooltip content={<ChartTooltipContent config={teamConfig} />} />
+        <ChartLegend content={<ChartLegendContent config={teamConfig} />} />
+        <Pie data={teamData} dataKey="headcount" nameKey="team" isAnimationActive={false}>
+          {teamData.map((entry) => (
+            <Cell key={entry.team} fill={`var(--color-${entry.team})`} />
+          ))}
+        </Pie>
+      </PieChart>
+    </ChartContainer>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    const container = canvasElement.querySelector('div') as HTMLElement;
+    await expect(container.style.getPropertyValue('--color-design')).toBe('var(--color-primary)');
+    await expect(container.style.getPropertyValue('--color-engineering')).toBe(
+      'var(--color-secondary)',
+    );
+    await expect(container.style.getPropertyValue('--color-product')).toBe('var(--color-accent)');
+    await expect(container.style.getPropertyValue('--color-sales')).toBe('var(--color-success)');
+
+    // La leyenda usa las labels de config ("Design"), no los ids crudos de la data ("design").
+    await expect(canvas.getByText('Design')).toBeInTheDocument();
+    await expect(canvas.getByText('Engineering')).toBeInTheDocument();
+
+    await hoverFirstPieSector(canvasElement);
+
+    // teamData[0] es "design" -> primer <Cell>/sector en el DOM.
+    await waitFor(() =>
+      expect(
+        canvasElement.querySelector('.recharts-tooltip-wrapper')?.getAttribute('style'),
+      ).toContain('visibility: visible'),
+    );
+    const tooltipWrapper = canvasElement.querySelector('.recharts-tooltip-wrapper') as HTMLElement;
+    const withinTooltip = within(tooltipWrapper);
+    await expect(withinTooltip.getByText('Design')).toBeInTheDocument();
+    await expect(withinTooltip.getByText('28')).toBeInTheDocument();
+    const swatch = tooltipWrapper.querySelector('span[style]') as HTMLElement;
+    await expect(swatch.style.backgroundColor).toBe('var(--color-design)');
+  },
+};
+
+// 5. Ring (donut): Pie con innerRadius/outerRadius + texto central con el total.
+// "Ring" no es un componente nuevo — es composición directa de piezas ya re-exportadas.
+//
+// El texto central NO usa <Label position="center">: probado contra un Pie real, no
+// renderiza nada. Causa (Label.js, comentario propio de Recharts citando su issue #6030):
+// para position="center" específicamente, Label resuelve el viewBox contra el contexto
+// *cartesiano* en vez del *polar* ("quick fix" documentado como tal en su propio código) —
+// un PieChart sin ejes nunca provee ese contexto cartesiano, así que queda undefined y el
+// componente no renderiza nada. Es un bug/quirk real de recharts@3.10.1, no un error de uso.
+// El fix es más simple que el original: un <text x="50%" y="50%"> crudo como hijo de <Pie>
+// (Pie renderiza sus children tal cual, sin filtrarlos — ver Pie.js). Los porcentajes se
+// resuelven contra el viewport del propio <svg>, sin JS ni conocer el tamaño del contenedor
+// — sigue siendo 100% SVG inline, ningún div posicionado por encima del chart.
+export const RingChartExample: Story = {
+  render: () => {
+    const total = teamData.reduce((sum, item) => sum + item.headcount, 0);
+
+    return (
+      <ChartContainer config={teamConfig} className="max-w-md" style={testSize}>
+        <PieChart>
+          <ChartTooltip content={<ChartTooltipContent config={teamConfig} />} />
+          <Pie
+            data={teamData}
+            dataKey="headcount"
+            nameKey="team"
+            innerRadius={55}
+            outerRadius={85}
+            isAnimationActive={false}
+          >
+            {teamData.map((entry) => (
+              <Cell key={entry.team} fill={`var(--color-${entry.team})`} />
+            ))}
+            <text x="50%" y="50%" textAnchor="middle">
+              <tspan x="50%" dy="-0.3em" className="fill-base-content text-2xl font-bold">
+                {total}
+              </tspan>
+              <tspan x="50%" dy="1.4em" className="fill-base-content/65 text-xs">
+                Personas
+              </tspan>
+            </text>
+          </Pie>
+        </PieChart>
+      </ChartContainer>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // El total (28+42+19+17=106) se ve como texto central sin overlay absoluto: es un <tspan>
+    // real dentro del <svg> del chart, no un <div> posicionado encima.
+    await waitFor(() => expect(canvas.getByText('106')).toBeInTheDocument());
+    const svg = canvasElement.querySelector('svg.recharts-surface');
+    await expect(svg).toContainElement(canvas.getByText('106'));
+
+    await hoverFirstPieSector(canvasElement);
+
+    await waitFor(() =>
+      expect(
+        canvasElement.querySelector('.recharts-tooltip-wrapper')?.getAttribute('style'),
+      ).toContain('visibility: visible'),
+    );
+    const tooltipWrapper = canvasElement.querySelector('.recharts-tooltip-wrapper') as HTMLElement;
+    const withinTooltip = within(tooltipWrapper);
+    await expect(withinTooltip.getByText('Design')).toBeInTheDocument();
+    const swatch = tooltipWrapper.querySelector('span[style]') as HTMLElement;
+    await expect(swatch.style.backgroundColor).toBe('var(--color-design)');
   },
 };

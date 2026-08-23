@@ -18,7 +18,14 @@ function ChartLegendContent({ payload, className, config }: ChartLegendContentPr
   return (
     <div className={cn('flex flex-wrap items-center justify-center gap-4', className)}>
       {payload.map((entry, index) => {
-        const key = String(entry.dataKey ?? entry.value ?? index);
+        // entry.value antes que entry.dataKey a propósito: mismo caso que
+        // ChartTooltipContent — para Pie, dataKey es el mismo string en todas las porciones
+        // (el campo que indica el valor numérico), y la única key que distingue cada porción
+        // es `value` (el nombre resuelto por nameKey). Verificado con un Pie real: el payload
+        // del legend trae dataKey:"value" repetido en cada entry y value:"design"/
+        // "engineering" distinto por entry — con dataKey primero, todas las porciones
+        // colapsaban a var(--color-value), que ChartContainer nunca inyecta.
+        const key = String(entry.value ?? entry.dataKey ?? index);
         const itemConfig = config[key];
         const itemLabel = itemConfig?.label ?? entry.value ?? key;
 
