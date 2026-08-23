@@ -92,14 +92,20 @@ export const SortByHeader: Story = {
     await expect(rows()[1]).toHaveTextContent('Marta');
 
     const nameHeader = canvas.getByRole('button', { name: /Nombre/i });
+
+    // Estado neutro (CaretSortIcon): el ícono no lleva text-primary.
+    await expect(nameHeader.querySelector('svg')).not.toHaveClass('text-primary');
+
     await userEvent.click(nameHeader);
 
     // sortFn_text (auto, registrado en features) compara en minúscula con < / > estándar:
     // 'Ana' es la primera alfabéticamente entre los 23 nombres.
     await expect(rows()[1]).toHaveTextContent('Ana');
 
-    // El ícono de sort cambia de CaretSortIcon (sin ordenar) a CaretUpIcon (ascendente).
+    // El ícono de sort cambia de CaretSortIcon (sin ordenar) a CaretUpIcon (ascendente) y
+    // pasa a usar text-primary para distinguir visualmente que la columna está ordenada.
     await expect(nameHeader.querySelector('svg')).toBeInTheDocument();
+    await expect(nameHeader.querySelector('svg')).toHaveClass('text-primary');
   },
 };
 
