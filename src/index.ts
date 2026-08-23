@@ -9,6 +9,7 @@ export * from './components/Button';
 export * from './components/Calendar';
 export * from './components/Card';
 export * from './components/Checkbox';
+export * from './components/Chart';
 export * from './components/Chip';
 export * from './components/DataTable';
 export * from './components/DatePicker';
