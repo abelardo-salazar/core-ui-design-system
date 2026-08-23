@@ -61,14 +61,14 @@ function DataTable<TData extends RowData>({
                     {header.isPlaceholder ? null : canSort ? (
                       <button
                         type="button"
-                        className="flex items-center gap-1.5 select-none"
+                        className="flex items-center gap-1.5 select-none rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                         onClick={header.column.getToggleSortingHandler()}
                       >
                         <table.FlexRender header={header} />
                         {sortDirection === 'asc' ? (
-                          <CaretUpIcon className="size-4" />
+                          <CaretUpIcon className="size-4 text-primary" />
                         ) : sortDirection === 'desc' ? (
-                          <CaretDownIcon className="size-4" />
+                          <CaretDownIcon className="size-4 text-primary" />
                         ) : (
                           <CaretSortIcon className="size-4" />
                         )}
