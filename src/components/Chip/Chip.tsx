@@ -75,6 +75,10 @@ const Chip = React.forwardRef<HTMLSpanElement, ChipProps>(
               'inline-flex shrink-0 items-center justify-center rounded-full opacity-70 transition-opacity hover:opacity-100',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
               'disabled:cursor-not-allowed disabled:opacity-50',
+              // p-1.5 (6px) lleva el hit box a 24x24: el touch target que la propia spec de
+              // Material Design define para el ícono de borrar de un Chip (no el mínimo
+              // genérico de 48dp de un botón, que infla visiblemente esta píldora compacta).
+              'p-1.5',
             )}
           >
             <Cross2Icon className="h-3 w-3" />
