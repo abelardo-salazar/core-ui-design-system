@@ -67,6 +67,14 @@ export const Removable: Story = {
     await expect(canvas.getAllByRole('button')).toHaveLength(1);
     const removeButton = canvas.getByRole('button', { name: 'Remove' });
 
+    // Touch target: 24x24 reales (spec de Material para el ícono de borrar de un Chip),
+    // sin que el ícono en sí (12x12) cambie de tamaño. El fixture de vitest-browser no
+    // aplica el CSS de utilidades de Tailwind (mismo issue documentado en el story
+    // Destructive de Button), así que la aserción va sobre la clase; el tamaño real en
+    // píxeles se verificó a mano en Storybook con devtools de un navegador real.
+    await expect(removeButton.className.split(' ')).toContain('p-1.5');
+    await expect(removeButton.querySelector('svg')).toHaveClass('h-3', 'w-3');
+
     await userEvent.click(removeButton);
     await expect(args.onRemove).toHaveBeenCalledTimes(1);
   },

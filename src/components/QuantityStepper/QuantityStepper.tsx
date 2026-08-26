@@ -112,6 +112,11 @@ const QuantityStepper = React.forwardRef<HTMLInputElement, QuantityStepperProps>
           aria-label={ariaLabel ?? 'Quantity'}
           className={cn(
             'w-full text-center',
+            // h-11: alinea la altura del input con los botones +/- (size="icon" de Button,
+            // 44px tras el fix de touch target) — Input no tiene un size md/lg que dé
+            // exactamente 44px, así que se pisa la altura puntualmente acá vía className
+            // (cn/twMerge) sin tocar Input.tsx ni sus variants.
+            'h-11',
             // El input number nativo trae sus propias flechas de +/-; las ocultamos para
             // que no convivan visualmente con los botones custom de este componente.
             '[&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [appearance:textfield]',

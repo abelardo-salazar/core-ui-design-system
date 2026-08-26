@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, fn, userEvent, within } from 'storybook/test';
+import { Cross2Icon } from '@radix-ui/react-icons';
 import { Button } from './Button';
 
 // Main story configuration
@@ -129,6 +130,32 @@ export const WithIcons: Story = {
   args: {
     children: 'Settings',
     startIcon: <span>⚙️</span>, // We use an emoji for simplicity; an Icon component would go here.
+  },
+};
+
+// 4b. Touch target: size="icon" debe medir 44x44 reales (Apple HIG), sin que el ícono en sí
+// (forzado a size-4 por la clase base [&_svg]:size-4, independiente del size del botón) cambie.
+// El fixture de vitest-browser no aplica el CSS de utilidades de Tailwind (mismo issue
+// documentado en el story Destructive: getComputedStyle no expone lo que generan las
+// clases), así que la aserción va sobre las clases, no sobre getBoundingClientRect(); el
+// tamaño real en píxeles (44x44 botón, 16x16 ícono) se verificó a mano en Storybook con
+// devtools de un navegador real.
+export const Icon: Story = {
+  args: {
+    size: 'icon',
+    'aria-label': 'Close',
+    children: <Cross2Icon />,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const button = canvas.getByRole('button', { name: 'Close' });
+
+    await expect(button.className.split(' ')).toContain('h-11');
+    await expect(button.className.split(' ')).toContain('w-11');
+    // El ícono no lleva h-4/w-4 propio: depende de [&_svg]:size-4 en la clase base del
+    // botón, que es justamente lo que garantiza que el ícono no crece con el hit area.
+    await expect(button.className.split(' ')).toContain('[&_svg]:size-4');
+    await expect(button.querySelector('svg')).toBeInTheDocument();
   },
 };
 
