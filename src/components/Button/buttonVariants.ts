@@ -20,7 +20,9 @@ export const buttonVariants = cva(
         sm: 'h-8 px-3 text-xs',
         md: 'h-10 px-4 py-2',
         lg: 'h-12 px-8 text-base',
-        icon: 'h-10 w-10',
+        // 44x44 (Apple HIG) en vez del h-10 w-10 (40x40) anterior — el ícono en sí no cambia de
+        // tamaño porque [&_svg]:size-4 en la clase base ya lo fija independientemente del size.
+        icon: 'h-11 w-11',
       },
       fullWidth: {
         true: 'w-full',

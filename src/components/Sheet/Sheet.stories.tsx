@@ -77,6 +77,21 @@ export const Right: Story = {
     await expect(dialog.className.split(' ')).toContain('right-0');
     await expect(dialog.contains(document.activeElement)).toBe(true);
 
+    // Touch target: p-3.5 (14px) lleva el hit box a 44x44 (Apple HIG) sin que el ícono
+    // (h-4 w-4, 16x16) cambie de tamaño; right-0.5/top-0.5 (16px - 14px de padding)
+    // compensa el offset para que el ícono quede en el mismo lugar visual que con
+    // right-4/top-4 sin padding. El fixture de vitest-browser no aplica el CSS de
+    // utilidades de Tailwind (mismo issue documentado en el story Destructive de Button),
+    // así que la aserción va sobre las clases; el tamaño y la posición reales en píxeles
+    // (44x44, ícono a 16px del borde superior/derecho) se verificaron a mano en Storybook
+    // con devtools de un navegador real, en ambos temas.
+    const closeButton = within(dialog).getByRole('button', { name: 'Close' });
+    const closeClasses = closeButton.className.split(' ');
+    await expect(closeClasses).toContain('p-3.5');
+    await expect(closeClasses).toContain('right-0.5');
+    await expect(closeClasses).toContain('top-0.5');
+    await expect(closeButton.querySelector('svg')).toHaveClass('h-4', 'w-4');
+
     await userEvent.keyboard('{Escape}');
     await waitFor(() => expect(body.queryByRole('dialog')).not.toBeInTheDocument());
     await expect(trigger).toHaveFocus();
