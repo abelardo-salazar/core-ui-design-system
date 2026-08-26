@@ -111,7 +111,7 @@ const QuantityStepper = React.forwardRef<HTMLInputElement, QuantityStepperProps>
           // visible propio, el a11y addon de Storybook lo marca "Critical" (Form label).
           aria-label={ariaLabel ?? 'Quantity'}
           className={cn(
-            'w-16 text-center',
+            'w-full text-center',
             // El input number nativo trae sus propias flechas de +/-; las ocultamos para
             // que no convivan visualmente con los botones custom de este componente.
             '[&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [appearance:textfield]',
