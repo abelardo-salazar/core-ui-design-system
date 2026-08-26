@@ -34,4 +34,5 @@ export const CLIENT_ENTRY_POINTS = [
   'src/components/Tabs/Tabs.tsx',
   'src/components/DataTable/DataTable.tsx',
   'src/components/Chart/ChartContainer.tsx',
+  'src/components/QuantityStepper/QuantityStepper.tsx',
 ];
