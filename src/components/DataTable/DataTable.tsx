@@ -48,7 +48,7 @@ function DataTable<TData extends RowData>({
         className="max-w-sm"
       />
 
-      <Table>
+      <Table responsive>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -86,11 +86,20 @@ function DataTable<TData extends RowData>({
           {rows.length ? (
             rows.map((row) => (
               <TableRow key={row.id}>
-                {row.getAllCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    <table.FlexRender cell={cell} />
-                  </TableCell>
-                ))}
+                {row.getAllCells().map((cell) => {
+                  // data-label para el modo tarjeta de Table (responsive): si el header de
+                  // la columna es un string lo usamos tal cual (caso real de uso del DS);
+                  // si es una función/JSX no se puede aplanar a un valor de attr(), así que
+                  // cae a column.id antes que dejar la celda sin etiqueta.
+                  const header = cell.column.columnDef.header;
+                  const dataLabel = typeof header === 'string' ? header : cell.column.id;
+
+                  return (
+                    <TableCell key={cell.id} data-label={dataLabel}>
+                      <table.FlexRender cell={cell} />
+                    </TableCell>
+                  );
+                })}
               </TableRow>
             ))
           ) : (
@@ -103,7 +112,13 @@ function DataTable<TData extends RowData>({
         </TableBody>
       </Table>
 
-      <div className="flex items-center justify-end gap-4">
+      {/*
+        Breakpoint `md` (no `lg`, a diferencia del colapso a tarjeta de la tabla arriba):
+        estos son solo un input + 2 botones + texto de página, entran en una fila en más
+        anchos que una tabla completa de columnas — usar `lg` acá forzaría un stack
+        innecesario en una tablet donde el toolbar entra perfecto en horizontal.
+      */}
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-end md:gap-4">
         <p className="text-sm text-base-content/65">
           Página {table.state.pagination.pageIndex + 1} de {Math.max(pageCount, 1)}
         </p>

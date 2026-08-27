@@ -132,3 +132,89 @@ export const WithoutFooterOrCaption: Story = {
     </Table>
   ),
 };
+
+// 3. responsive=false (default): no debe agregar ninguna clase del modo tarjeta. Los
+// roles explícitos (table/row/columnheader/cell) están siempre, sea responsive o no —
+// son el baseline defensivo de accesibilidad, no algo que dependa de la prop.
+export const NotResponsiveByDefault: Story = {
+  render: () => (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Nombre</TableHead>
+          <TableHead>Rol</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        <TableRow>
+          <TableCell data-label="Nombre">Ada Lovelace</TableCell>
+          <TableCell data-label="Rol">Engineer</TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const table = canvas.getByRole('table');
+
+    // Sin responsive, ninguna clase max-lg (modo tarjeta) debe estar presente.
+    await expect(table.className).not.toContain('max-lg:');
+
+    // Roles explícitos presentes de todas formas (baseline defensivo de accesibilidad).
+    await expect(table.getAttribute('role')).toBe('table');
+    const dataRow = canvas.getByText('Ada Lovelace').closest('tr');
+    await expect(dataRow?.getAttribute('role')).toBe('row');
+    const cell = canvas.getByText('Ada Lovelace');
+    await expect(cell.getAttribute('role')).toBe('cell');
+    const columnHeader = canvas.getAllByRole('columnheader')[0];
+    await expect(columnHeader.getAttribute('role')).toBe('columnheader');
+  },
+};
+
+// 4. responsive=true: agrega las clases del modo tarjeta (colapso por debajo de `lg`) y
+// respeta el data-label pasado a mano en TableCell para quien usa los primitivos directo
+// sin DataTable. Verificación de clases en headless — el colapso visual real por debajo
+// de 1024px y la accesibilidad del thead oculto se verifican en una ventana de Storybook
+// real (mismo criterio que el resto de tareas de este DS).
+export const Responsive: Story = {
+  render: () => (
+    <Table responsive>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Nombre</TableHead>
+          <TableHead>Rol</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        <TableRow>
+          <TableCell data-label="Nombre">Ada Lovelace</TableCell>
+          <TableCell data-label="Rol">Engineer</TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const table = canvas.getByRole('table');
+
+    // Clases clave del modo tarjeta: blockify de table/thead/tbody/tr/td, thead oculto
+    // vía sr-only (no display:none) y la etiqueta de columna vía ::before + attr().
+    await expect(table.className).toContain('max-lg:block');
+    await expect(table.className).toContain('max-lg:[&_thead]:sr-only');
+    await expect(table.className).toContain('max-lg:[&_tbody]:block');
+    await expect(table.className).toContain('max-lg:[&_tr]:block');
+    await expect(table.className).toContain('max-lg:[&_tr]:rounded-box');
+    await expect(table.className).toContain('max-lg:[&_td]:flex');
+    await expect(table.className).toContain(
+      'max-lg:[&_td[data-label]]:before:content-[attr(data-label)]',
+    );
+
+    // El thead sigue en el árbol de accesibilidad (sr-only, no display:none): sus
+    // columnheaders siguen siendo queryables por rol.
+    await expect(canvas.getAllByRole('columnheader')).toHaveLength(2);
+
+    // data-label pasado a mano por el consumidor queda en el DOM tal cual.
+    const cell = canvas.getByText('Ada Lovelace');
+    await expect(cell.getAttribute('data-label')).toBe('Nombre');
+  },
+};
