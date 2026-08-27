@@ -156,7 +156,31 @@ export const Pagination: Story = {
   },
 };
 
-// 5. Estado vacío: el filtro sin resultados muestra una única fila con colSpan = columnas.
+// 5. Modo responsive: DataTable activa Table `responsive` por su cuenta (el consumidor no
+// pasa nada) y autogenera el data-label de cada celda a partir del header de columna
+// (string) definido en `columns`. Verificación de clases en headless — el colapso visual
+// real por debajo de 1024px se verifica en una ventana de Storybook real.
+export const ResponsiveCollapse: Story = {
+  render: () => <DataTable columns={columns} data={people} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const table = canvas.getByRole('table');
+
+    // Table interno recibe responsive=true sin que el consumidor de DataTable pase nada.
+    await expect(table.className).toContain('max-lg:block');
+    await expect(table.className).toContain('max-lg:[&_thead]:sr-only');
+
+    // data-label autogenerado a partir del header ('Nombre', 'Email', 'Rol' — strings
+    // definidos en `columns` de esta story) para cada celda de la primera fila de datos.
+    const firstDataRow = canvas.getByText('Marta').closest('tr');
+    const cellsInRow = firstDataRow ? within(firstDataRow).getAllByRole('cell') : [];
+    await expect(cellsInRow[0].getAttribute('data-label')).toBe('Nombre');
+    await expect(cellsInRow[1].getAttribute('data-label')).toBe('Email');
+    await expect(cellsInRow[2].getAttribute('data-label')).toBe('Rol');
+  },
+};
+
+// 6. Estado vacío: el filtro sin resultados muestra una única fila con colSpan = columnas.
 export const EmptyState: Story = {
   render: () => <DataTable columns={columns} data={people} />,
   play: async ({ canvasElement }) => {
