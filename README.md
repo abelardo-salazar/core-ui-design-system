@@ -736,6 +736,8 @@ Uso (ejemplo, extraído de `Popover.stories.tsx`):
 
 **Comportamiento no obvio:** el hover pasa por el delay por defecto de Radix (`delayDuration = 700ms`) antes de abrir. El foco por teclado, en cambio, abre **de inmediato**, sin ese delay (`TooltipTrigger.onFocus` llama a `context.onOpen()` directo, sin pasar por el timer que sí usa el hover). El contenido vive en un Portal con `role="tooltip"`.
 
+**En dispositivos táctiles el contenido de `Tooltip` no está disponible — es una decisión de diseño aceptada, no un bug.** Radix nunca abre el tooltip ante un tap (ignora explícitamente `pointerType === 'touch'` en su handler de apertura), y `TooltipContent` añade `pointer-coarse:hidden` como capa defensiva de CSS: en un dispositivo cuyo input principal es de baja precisión (dedo) el panel queda oculto aunque algo intente mostrarlo. **`Tooltip` no es apto para información que el usuario necesite en touch.** Para esos casos usá [`Popover`](#popover--uso-y-props), que sí soporta tap de forma nativa.
+
 Uso (ejemplo, extraído de `Tooltip.stories.tsx`):
 
 ```tsx

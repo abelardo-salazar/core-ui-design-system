@@ -22,6 +22,10 @@ const TooltipContent = React.forwardRef<
       sideOffset={sideOffset}
       className={cn(
         'z-50 overflow-hidden rounded-btn bg-neutral px-3 py-1.5 text-xs text-neutral-content shadow-md outline-none',
+        // Defensive layer: Radix already ignores touch taps in its open handler, so the
+        // tooltip never opens on a coarse-pointer device. This also hides the content via
+        // CSS on those devices. Tooltip is not for touch-critical info — use Popover there.
+        'pointer-coarse:hidden',
         // El data-state de Tooltip no es "open"/"closed" como en Popover: Radix distingue
         // "delayed-open" (hover) de "instant-open" (foco por teclado), además de "closed".
         'data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95',

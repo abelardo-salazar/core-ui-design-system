@@ -44,6 +44,10 @@ export const Default: Story = {
     const tooltipPanel = await body.findByRole('tooltip', {}, { timeout: 2000 });
     await expect(tooltipPanel).toHaveTextContent('Saved to your library');
 
+    // Defensive CSS layer: the content is hidden on coarse-pointer (touch) devices via
+    // the `pointer: coarse` media feature, independent of whether anything tried to open it.
+    await expect(tooltipPanel.className.split(' ')).toContain('pointer-coarse:hidden');
+
     await userEvent.unhover(trigger);
     await waitFor(() => expect(body.queryByRole('tooltip')).not.toBeInTheDocument(), {
       timeout: 2000,
