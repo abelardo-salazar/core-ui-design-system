@@ -1400,4 +1400,25 @@ npm run build
 
 ---
 
+## 🤖 Integración Continua (CI)
+
+Cada Pull Request contra `main` (y cada push a `main`) dispara el workflow
+**`.github/workflows/ci.yml`** (GitHub Actions). Corre sobre **Node 22 LTS**, en
+este orden:
+
+1. `npm ci` — instalación determinística desde `package-lock.json` (con cache de npm).
+2. `npx playwright install chromium --with-deps` — el runner no trae el navegador
+   que usa la suite de tests.
+3. `npm run lint` — ESLint.
+4. `npx tsc -b` — typecheck.
+5. `npm run build` — incluye `verify-client-directives` + `tsc -b` + `vite build`.
+6. `npm run test` — Vitest en modo browser.
+7. `npm audit --audit-level=high` — falla solo ante vulnerabilidades `high` /
+   `critical`; `moderate` / `low` no bloquean.
+
+Cualquier paso que falle marca el PR en rojo. Es la misma batería de checks que
+antes se corría a mano.
+
+---
+
 **Core UI Design System** © Abelardo Salazar / @abelardo-salazar 2026. Internal Use Only.
