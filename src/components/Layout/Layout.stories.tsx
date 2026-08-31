@@ -27,10 +27,10 @@ export const PageExample: StoryObj = {
         <Container className="flex items-center justify-between">
           <Heading level="h4">My App</Heading>
           <nav className="flex gap-4 text-sm font-medium">
-            <a href="#" className="hover:text-primary">
+            <a href="/" className="hover:text-primary">
               Home
             </a>
-            <a href="#" className="hover:text-primary">
+            <a href="/about" className="hover:text-primary">
               About
             </a>
           </nav>
