@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.4.0] - 2026-08-31
+
+### Added
+
+- **`Alert`** — aviso inline persistente (no-modal), variantes `info`/`success`/`warning`/`error`, subcomponentes `<AlertTitle>` y `<AlertDescription>`.
+- **`DropdownMenu`** — menú de acciones sobre Radix: items normales, checkbox, radio group, label y separador.
+- **`Tabs`** — navegación por pestañas sobre Radix (`<Tabs>`, `<TabsList>`, `<TabsTrigger>`, `<TabsContent>`).
+- **`Table`** — 8 primitivos HTML de tabla estilizados (`<Table>`, `<TableHeader>`, `<TableBody>`, `<TableFooter>`, `<TableRow>`, `<TableHead>`, `<TableCell>`, `<TableCaption>`).
+- **`DataTable`** — tabla con sorting, filtro global y paginación sobre `@tanstack/react-table` v9.
+- **`Chart`** — charts Bar/Line/Area/Pie/Ring sobre `recharts` (bundleado, no peerDependency); `ChartContainer`, `ChartTooltipContent`, `ChartLegendContent` + re-exports de recharts.
+- **`QuantityStepper`** — control numérico +/- compuesto sobre `Button` e `Input`.
+
+### Fixed
+
+- **Áreas táctiles mínimas** en el cierre de `Dialog`/`Sheet`, el botón de quitar de `Chip` y los `Button` de solo icono.
+- **`Tooltip` en táctil** — `TooltipContent` ya no se muestra en punteros gruesos (coarse-pointer), donde no hay hover y se disparaba de forma inconsistente.
+- **`DataTable` — header de ordenamiento** ahora expone focus ring visible y color de icono `primary` al foco de teclado.
+- **`Table` / `DataTable` — modo responsive** que colapsa la tabla a tarjetas por fila en viewports angostos, integrado en `DataTable`.
+
+### Chore
+
+- Resueltas las 26 vulnerabilidades de `npm audit` (todas en `devDependencies`; árbol publicado sin cambios).
+- Agregado workflow de CI (GitHub Actions): lint, typecheck, build (con guardrail de `'use client'`), tests y `npm audit` en cada pull request y push a `main`.
+
+### Docs
+
+- Reescritura completa del `README.md`: contenido desactualizado corregido y componentes + `peerDependencies` faltantes documentados.
+
 ## [0.3.15] - Sin publicar
 
 ### Fixed
