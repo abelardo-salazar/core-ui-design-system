@@ -20,12 +20,12 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # Node 22 LTS: el repo no declara engines; es la intersección de los rangos
       # de las deps instaladas (vitest 4 excluye Node 23, vite 7 pide >=22.12).
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: 'npm'
