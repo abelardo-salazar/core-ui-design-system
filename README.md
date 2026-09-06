@@ -62,7 +62,7 @@ npm install react@^19.0.0 react-dom@^19.0.0 \
   sonner@^2.0.7
 ```
 
-> `recharts` (usado por `Chart`) **no** es peerDependency: viene bundleado dentro del propio paquete, no hace falta instalarlo aparte.
+> `recharts` (usado por `Chart`) **no** es peerDependency: viene bundleado dentro del propio paquete, no hace falta instalarlo aparte. Desde `0.4.1`, `Chart` **no** vive en el barrel principal — se importa desde el subpath `@abelardo-salazar/core-ui-design-system/charts` (ver [Chart — Uso y Props](#chart--uso-y-props)). Así el import principal queda libre de `recharts` y sigue siendo seguro para Server Components.
 
 ---
 
@@ -1222,7 +1222,7 @@ Uso (ejemplos, extraídos de `Alert.stories.tsx`):
 | :----------- | :-------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------- |
 | `Table`     | 8 primitivos HTML de tabla, estilizados            | `<Table>`, `<TableHeader>`, `<TableBody>`, `<TableFooter>`, `<TableRow>`, `<TableHead>`, `<TableCell>`, `<TableCaption>` |
 | `DataTable` | Tabla con sorting, filtro global y paginación       | `columns: ColumnDef<typeof features, TData>[]`, `data`, `searchPlaceholder?`, `className?` (sobre `@tanstack/react-table` v9) |
-| `Chart`     | Charts de Bar/Line/Area/Pie/Ring sobre recharts     | `ChartContainer`, `ChartTooltipContent`, `ChartLegendContent` + re-exports de recharts (`BarChart`, `LineChart`, `AreaChart`, `PieChart`, etc.) |
+| `Chart`     | Charts de Bar/Line/Area/Pie/Ring sobre recharts — **subpath `/charts`** | `ChartContainer`, `ChartTooltipContent`, `ChartLegendContent` + re-exports de recharts (`BarChart`, `LineChart`, `AreaChart`, `PieChart`, etc.), todo desde `@abelardo-salazar/core-ui-design-system/charts` |
 
 ### Table — Uso y Props
 
@@ -1305,6 +1305,36 @@ Notas:
 
 ### Chart — Uso y Props
 
+> **Import desde el subpath `/charts`, no desde el barrel principal.** `Chart` arrastra
+> `recharts`, que llama `createContext()` a nivel de módulo — incluirlo en el barrel raíz
+> rompía el paquete entero para cualquier consumidor de React Server Components (Next.js App
+> Router), aun sin usar `Chart`. Desde `0.4.1` `Chart` tiene su propio entry point,
+> `client-only` completo:
+>
+> ```tsx
+> // ✅ Chart va por su subpath propio
+> import {
+>   ChartContainer,
+>   ChartTooltipContent,
+>   ChartLegendContent,
+>   ChartTooltip,
+>   ChartLegend,
+>   BarChart,
+>   Bar,
+>   XAxis,
+>   YAxis,
+>   CartesianGrid,
+>   type ChartConfig,
+> } from '@abelardo-salazar/core-ui-design-system/charts';
+>
+> // ✅ El resto del DS sigue igual, desde el barrel principal
+> import { Card, Heading } from '@abelardo-salazar/core-ui-design-system';
+> ```
+>
+> El resto de la API de `Chart` no cambió — es exclusivamente una reestructuración de dónde
+> se importa. Versión publicada afectada por el bug: **`0.4.0`** (única versión donde `Chart`
+> existía).
+
 - **Exports:** `ChartContainer`, `ChartTooltipContent`, `ChartLegendContent`, `ChartConfig` (tipo), `CHART_COLOR_TOKENS`, más re-exports directos de `recharts` (sin wrapper propio, mismo criterio que `Popover` re-exportando `PopoverAnchor`): `BarChart`/`Bar`, `LineChart`/`Line`, `AreaChart`/`Area`, `PieChart`/`Pie`/`Cell`/`Label`, `XAxis`, `YAxis`, `CartesianGrid`, `ResponsiveContainer`, `ChartTooltip` (el `Tooltip` de recharts, renombrado — choca en compilación con el `Tooltip` propio del DS vía `export *`), `ChartLegend` (el `Legend` de recharts, renombrado por consistencia con `ChartTooltip`).
 - **Props principales:**
   - `ChartContainer`: `config: ChartConfig` (`Record<string, { label?: ReactNode; color: 'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'info' }>`, requerido), `children` (el chart de recharts), más `React.ComponentPropsWithoutRef<'div'>`.
@@ -1323,6 +1353,23 @@ Alcance: **Bar, Line, Area, Pie — incluyendo Ring (donut)**. `recharts` **no**
 Uso (ejemplos, extraídos de `Chart.stories.tsx`):
 
 ```tsx
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  type ChartConfig,
+} from '@abelardo-salazar/core-ui-design-system/charts';
+
 // 1. BarChart
 const chartConfig: ChartConfig = {
   escritorio: { label: 'Escritorio', color: 'primary' },
@@ -1411,7 +1458,8 @@ este orden:
    que usa la suite de tests.
 3. `npm run lint` — ESLint.
 4. `npx tsc -b` — typecheck.
-5. `npm run build` — incluye `verify-client-directives` + `tsc -b` + `vite build`.
+5. `npm run build` — incluye `verify-client-directives` (pre) + `tsc -b` + `vite build` +
+   `verify-client-directives --post-build` (post: falla si `dist/index.js` arrastra `recharts`).
 6. `npm run test` — Vitest en modo browser.
 7. `npm audit --audit-level=high` — falla solo ante vulnerabilidades `high` /
    `critical`; `moderate` / `low` no bloquean.

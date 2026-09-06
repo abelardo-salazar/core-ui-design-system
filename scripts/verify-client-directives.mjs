@@ -11,8 +11,16 @@
 //   - una entrada de CLIENT_ENTRY_POINTS ya no existe, o su archivo ya no tiene la
 //     directiva (lista desactualizada en el otro sentido — no rompe el build hoy, pero es
 //     la misma clase de desalineamiento silencioso).
+//
+// Modo `--post-build` (corre DESPUÉS de `vite build`, ver package.json): valida el artefacto
+// real. Falla si el barrel raíz publicado (dist/index.js) arrastra recharts — directa o
+// transitivamente por cualquier import relativo alcanzable. recharts (ResponsiveContainer.js)
+// llama createContext(...) a nivel de módulo, lo cual explota en el entorno react-server de
+// Next.js; dist/index.js es el único archivo que un consumidor real importa, así que debe
+// quedar 100% libre de recharts. Chart vive ahora en el subpath ./charts (dist/charts.js),
+// que es client-only completo y sí puede traer recharts. Ver CHANGELOG.md [0.4.1].
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CLIENT_ENTRY_POINTS } from './client-entry-points.mjs';
 
@@ -23,6 +31,74 @@ const USE_CLIENT_RE = /^['"]use client['"];?$/;
 function toPosix(p) {
   return p.replace(/\\/g, '/');
 }
+
+// --- Modo post-build: dist/index.js debe quedar libre de recharts ------------------------
+
+if (process.argv.includes('--post-build')) {
+  const BARREL = join(ROOT, 'dist/index.js');
+
+  if (!existsSync(BARREL)) {
+    console.error(`✗ ${toPosix(relative(ROOT, BARREL))} no existe — ¿corriste este check antes de \`vite build\`?`);
+    process.exit(1);
+  }
+
+  // Todo `import ... from '<spec>'` / `export ... from '<spec>'` (y `import '<spec>'`) del chunk.
+  const FROM_RE = /(?:import|export)\b[^'"]*?\bfrom\s*['"]([^'"]+)['"]|import\s*['"]([^'"]+)['"]/g;
+  const RECHARTS_RE = /(^|\/)recharts(\/|$)/;
+
+  const visited = new Set();
+  const queue = [BARREL];
+  const offenders = []; // { file, spec }
+
+  while (queue.length > 0) {
+    const abs = queue.shift();
+    if (visited.has(abs)) continue;
+    visited.add(abs);
+
+    let code;
+    try {
+      code = readFileSync(abs, 'utf8');
+    } catch {
+      continue;
+    }
+
+    for (const m of code.matchAll(FROM_RE)) {
+      const spec = m[1] ?? m[2];
+      if (!spec) continue;
+
+      if (RECHARTS_RE.test(spec)) {
+        offenders.push({ file: toPosix(relative(ROOT, abs)), spec });
+        continue;
+      }
+      // Seguir solo imports relativos que sigan dentro de dist/ (los bare specifiers
+      // externalizados —react, @radix-ui/*— no son recharts y no hace falta abrirlos).
+      if (spec.startsWith('.')) {
+        const target = resolve(dirname(abs), spec);
+        for (const cand of [target, `${target}.js`, join(target, 'index.js')]) {
+          if (existsSync(cand) && statSync(cand).isFile()) {
+            queue.push(cand);
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  if (offenders.length > 0) {
+    console.error('✗ El barrel raíz publicado (dist/index.js) arrastra recharts y NO es seguro para Server Components:\n');
+    for (const { file, spec } of offenders) {
+      console.error(`    ${file}  →  import '${spec}'`);
+    }
+    console.error('\n  recharts solo puede vivir bajo el subpath ./charts (src/charts.ts → dist/charts.js).');
+    console.error('  Revisá que src/index.ts no reexporte nada de src/components/Chart/ (ni transitivamente).');
+    process.exit(1);
+  }
+
+  console.log(`✓ dist/index.js está libre de recharts (${visited.size} módulos del barrel inspeccionados).`);
+  process.exit(0);
+}
+
+// --- Modo por defecto (pre-build): CLIENT_ENTRY_POINTS sincronizado con src/components/ --
 
 function firstLine(absPath) {
   const content = readFileSync(absPath, 'utf8');

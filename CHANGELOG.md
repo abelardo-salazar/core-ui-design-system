@@ -1,5 +1,67 @@
 # Changelog
 
+## [0.4.1] - 2026-09-06
+
+### Fixed
+
+- **El barrel raíz publicado (`dist/index.js`) arrastraba `recharts` y dejaba de ser seguro
+  para React Server Components.**
+  `recharts` (`ResponsiveContainer.js`) llama `createContext(...)` a nivel de módulo, y
+  `createContext` no existe en el entorno `react-server` de Next.js. Cualquier consumidor del
+  App Router que importara **cualquier cosa** del paquete desde un Server Component —
+  `Container`, `Badge`, `Card`, lo que sea, sin tocar `Chart` para nada — se topaba con
+  `TypeError: (0 , f.createContext) is not a function` al hacer `next build` ("Failed to
+  collect page data"). No era un problema de `Chart`: era el paquete entero roto para RSC.
+
+  **Mecanismo (nuevo, distinto al de `0.3.15`):** `src/components/Chart/ChartPrimitives.ts`
+  era el único archivo de todo `src/components/` que es 100 % re-export sin código propio
+  (`export { BarChart, ... } from 'recharts'`). Rollup, en vez de darle su propio chunk
+  preservado bajo `dist/components/Chart/`, lo **plegó dentro de `dist/index.js`** — metiendo
+  16 imports directos a submódulos de `recharts` (ninguno con `'use client'`) en el archivo
+  que todo consumidor importa. El guardrail de `'use client'` de `0.3.15` nunca lo detectó:
+  solo escanea `src/components/*.tsx` contra su `dist/` correspondiente, jamás miró
+  `dist/index.js`. Cada componente de `Chart` por separado (`ChartContainer.js`, etc.) tenía
+  su directiva correcta — el archivo inseguro era el barrel.
+
+  **Fix:** `Chart` sale del barrel raíz y pasa a un segundo entry point de build, expuesto
+  como el subpath `./charts`:
+
+  ```tsx
+  // antes (0.4.0) — rompía el paquete entero para RSC
+  import { ChartContainer, BarChart } from '@abelardo-salazar/core-ui-design-system';
+
+  // ahora (0.4.1+)
+  import { ChartContainer, BarChart } from '@abelardo-salazar/core-ui-design-system/charts';
+  ```
+
+  `dist/index.js` queda 100 % libre de `recharts` (verificado: `head -1` ya no es un import
+  de `recharts`, y `grep recharts dist/index.js` da 0). `dist/charts.js` lleva `'use client'`
+  en su cabecera — es client-only completo, no necesita el tratamiento granular por
+  componente del barrel. **No se tocó el comportamiento de ningún componente de `Chart`**: es
+  exclusivamente una reestructuración de build/exports.
+
+  **Versiones publicadas afectadas: `0.4.0` únicamente.** `Chart` no existía en ninguna
+  versión publicada anterior, así que `0.3.x` y previas no están afectadas por este bug.
+
+### Chore
+
+- El guardrail `scripts/verify-client-directives.mjs` gana un modo `--post-build` (corre
+  después de `vite build`, dentro de `npm run build`): recorre el grafo de imports relativos
+  alcanzables desde `dist/index.js` y falla si alguno importa `recharts`. El check de
+  `0.3.15` validaba `src/components/*.tsx` → su `dist/`; este valida el barrel raíz, que es
+  el archivo que un consumidor real importa y el que estaba roto.
+
+### Docs
+
+- `README.md`: documentado el nuevo patrón de import — `Chart` desde
+  `@abelardo-salazar/core-ui-design-system/charts`, separado del import principal.
+
+### Acción recomendada
+
+Si instalaste `@abelardo-salazar/core-ui-design-system@0.4.0` y lo consumís desde Next.js App
+Router (o cualquier entorno RSC), actualizá a `0.4.1`. Si usás `Chart`, además cambiá el
+import a `@abelardo-salazar/core-ui-design-system/charts`.
+
 ## [0.4.0] - 2026-08-31
 
 ### Added
