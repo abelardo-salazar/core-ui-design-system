@@ -1,6 +1,6 @@
 {
   "name": "@abelardo-salazar/core-ui-design-system",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -9,8 +9,9 @@
   "scripts": {
     "dev": "vite",
     "test": "vitest run",
-    "build": "node scripts/verify-client-directives.mjs && tsc -b && vite build",
+    "build": "node scripts/verify-client-directives.mjs && tsc -b && vite build && node scripts/verify-client-directives.mjs --post-build",
     "verify:client-directives": "node scripts/verify-client-directives.mjs",
+    "verify:barrel-rsc-safe": "node scripts/verify-client-directives.mjs --post-build",
     "lint": "eslint .",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
@@ -81,6 +82,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./charts": {
+      "types": "./dist/charts.d.ts",
+      "import": "./dist/charts.js"
     },
     "./style.css": "./dist/core-ui-design-system.css"
   },

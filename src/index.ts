@@ -9,7 +9,11 @@ export * from './components/Button';
 export * from './components/Calendar';
 export * from './components/Card';
 export * from './components/Checkbox';
-export * from './components/Chart';
+// `Chart` NO se exporta desde el barrel raíz: arrastra recharts, que llama createContext()
+// a nivel de módulo y rompe el barrel entero en Server Components (react-server). Vive en su
+// propio subpath, client-only completo:
+//   import { ChartContainer, BarChart, ... } from '@abelardo-salazar/core-ui-design-system/charts';
+// Ver src/charts.ts y CHANGELOG.md [0.4.1].
 export * from './components/Chip';
 export * from './components/DataTable';
 export * from './components/DatePicker';

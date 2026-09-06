@@ -18,12 +18,21 @@ const CLIENT_ENTRY_POINTS = CLIENT_ENTRY_POINTS_RELATIVE.map((p) =>
   resolve(__dirname, p).replace(/\\/g, '/'),
 );
 
+// El entry `./charts` (src/charts.ts → dist/charts.js) es client-only completo: no necesita
+// el tratamiento granular por componente de CLIENT_ENTRY_POINTS, lleva 'use client' en toda
+// su cabecera. Se maneja aparte de esa lista a propósito — CLIENT_ENTRY_POINTS es
+// específicamente "componentes .tsx bajo src/components/" y scripts/verify-client-directives.mjs
+// la valida con esa semántica.
+const CHARTS_ENTRY = resolve(__dirname, 'src/charts.ts').replace(/\\/g, '/');
+
 function preserveUseClientDirective(): Plugin {
   return {
     name: 'preserve-use-client-directive',
     renderChunk(code, chunk) {
       const facadeModuleId = chunk.facadeModuleId?.replace(/\\/g, '/');
-      const isClientModule = !!facadeModuleId && CLIENT_ENTRY_POINTS.includes(facadeModuleId);
+      const isClientModule =
+        !!facadeModuleId &&
+        (facadeModuleId === CHARTS_ENTRY || CLIENT_ENTRY_POINTS.includes(facadeModuleId));
       const alreadyHasDirective = /^['"]use client['"];?/.test(code);
 
       if (isClientModule && !alreadyHasDirective) {
@@ -45,7 +54,13 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
+      // Dos entry points: el barrel raíz (`.`) y `./charts` (Chart aislado para no
+      // arrastrar recharts al barrel — ver src/charts.ts). Con preserveModules cada uno
+      // sale como dist/<name>.js (name = ruta relativa a preserveModulesRoot: 'src').
+      entry: {
+        index: resolve(__dirname, 'src/index.ts'),
+        charts: resolve(__dirname, 'src/charts.ts'),
+      },
       name: 'CoreUI',
       formats: ['es'], // Solo ESM: preserveModules requiere un archivo por módulo,
       // incompatible con un bundle único UMD. Ver decisión registrada en la migración.
