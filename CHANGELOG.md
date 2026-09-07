@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.4.2] - 2026-09-06
+
+### Fixed
+
+- **`@tanstack/react-table` estaba pineado a la versión exacta `9.1.2` en
+  `peerDependencies`**, así que cualquier consumidor con una versión más nueva instalada
+  (el registro ya publicó `9.2.4`) fallaba el `npm install` con `ERESOLVE`. Ahora es `^9.1.2`
+  — mismo estilo caret que el resto de los peers. El pin exacto había sido cautela por lo
+  nueva que era la v9 al integrarla; verificado que `9.2.4` pasa la suite completa (test,
+  build, tsc, lint) sin cambios en `DataTable`, la API que usa (`useTable`, `tableFeatures`,
+  `table.state`, `row.getAllCells`, `columnFilteringFeature`/`globalFilteringFeature`) no
+  cambió entre `9.1.2` y `9.2.4`.
+
+### Chore
+
+- `package-lock.json`: sincronizada la versión raíz (había quedado en `0.3.15`; los releases
+  `0.4.0`/`0.4.1` no la actualizaron).
+
 ## [0.4.1] - 2026-09-06
 
 ### Fixed

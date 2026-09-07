@@ -58,7 +58,7 @@ npm install react@^19.0.0 react-dom@^19.0.0 \
   @radix-ui/react-tabs@^1.1.21 \
   @radix-ui/react-toggle@^1.1.18 \
   @radix-ui/react-tooltip@^1.2.16 \
-  @tanstack/react-table@9.1.2 \
+  @tanstack/react-table@^9.1.2 \
   sonner@^2.0.7
 ```
 
