@@ -180,6 +180,35 @@ export const AsLink: Story = {
   },
 };
 
+// 5b. Polymorphism mínimo: asChild + <a href> SIN onClick/disabled/isLoading — el uso más
+// inocente posible. Es exactamente el shape que rompía `next build` en 0.4.2 y anteriores
+// ("Error: Event handlers cannot be passed to Client Component props", apuntando a
+// onClick: function onClick) porque handleClick se armaba igual dentro del branch asChild
+// y se colgaba de onClick={handleClick} sobre Slot sin que ninguna prop lo evitara. Este
+// story no puede reproducir la frontera RSC en sí (corre client-side vía vitest-browser) —
+// esa parte se verifica en un `next build` real (ver CHANGELOG.md [0.4.3]) — pero cubre que
+// agregar 'use client' no rompió el comportamiento normal de este caso.
+export const AsChildMinimal: Story = {
+  args: {
+    asChild: true,
+    children: <a href="/">Ir</a>,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const link = canvas.getByRole('link', { name: 'Ir' });
+
+    await expect(link).toHaveAttribute('href', '/');
+    await expect(link).not.toHaveAttribute('aria-disabled', 'true');
+
+    // Sin handler propio, un click normal no debe tirar ni bloquear nada. Interceptamos la
+    // navegación real a nivel de test (no del Button — sus props siguen siendo exactamente
+    // asChild + children) porque en vitest-browser un href real navega la página del runner
+    // y tumba la conexión.
+    link.addEventListener('click', (event) => event.preventDefault());
+    await userEvent.click(link);
+  },
+};
+
 // 6. Polymorphism + isLoading: cubre los 3 fixes de la auditoría sobre asChild.
 // Usamos el mismo href real que AsLink: como el fix es justamente el preventDefault
 // antes de que el navegador navegue, el test nunca llega a abrir la URL.
