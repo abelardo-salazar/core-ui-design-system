@@ -1,5 +1,62 @@
 # Changelog
 
+## [0.4.3] - 2026-09-12
+
+### Fixed
+
+- **`Button` sin `'use client'` rompía `next build` en el uso más inocente posible de `asChild`.**
+  El hallazgo vino de un consumidor externo real: reprodujo `<Button asChild><a href="/">Ir</a></Button>`
+  — **sin** `onClick`, **sin** `disabled`, **sin** `isLoading` — contra un Server Component real y
+  `next build` falló con `Error: Event handlers cannot be passed to Client Component props`,
+  apuntando puntualmente a `onClick: function onClick`.
+
+  **Mecanismo (nuevo, distinto al de `0.3.15`/`0.4.1`):** dentro del branch `asChild` de
+  `Button.tsx`, `handleClick` se construye **incondicionalmente** y se cuelga siempre de
+  `onClick={handleClick}` sobre `Comp` (`Slot`) — ninguna combinación de props lo evita. Es la
+  misma función que bloquea la interacción cuando el botón está `disabled`/`isLoading` (fix de
+  una auditoría anterior sobre `asChild`); esa lógica es inherentemente de cliente, así que
+  `Button` no podía seguir siendo server-safe tal como estaba diseñado. La rama nativa (sin
+  `asChild`) es segura hoy sin `onClick` propio — `onClick={onClick}` reenvía `undefined` si el
+  consumidor no pasa nada, y `undefined` sí es serializable —, pero al vivir en el mismo
+  archivo hereda la directiva igual.
+
+  **Fix:** `'use client'` en `src/components/Button/Button.tsx`, registrado en
+  `scripts/client-entry-points.mjs`. No se tocó la lógica interna de `Button` (el guard de
+  `disabled`/`isLoading`, `Slottable`, etc.) — es exclusivamente la directiva.
+
+  **`Badge` quedó evaluado y descartado de este fix**, con el mismo método (reproducido sin
+  `onClick` contra un Server Component real: compila limpio). Es pura passthrough de props —
+  nunca construye una función propia —, mismo perfil de riesgo que `Card`/`Alert`/`Typography`
+  (solo romperían si el consumidor les pasa un handler propio desde un Server Component, lo
+  cual es un error del consumidor, no del componente). Queda para una tarea futura junto con
+  esos otros, no agrupado con este fix.
+
+  **Versiones publicadas afectadas: todas las que incluyen `Button` con `asChild`** (desde su
+  introducción). Si consumís `Button` con `asChild` desde un Server Component de Next.js App
+  Router, actualizá a `0.4.3`.
+
+### Chore
+
+- El guardrail `scripts/verify-client-directives.mjs` gana un nuevo chequeo en su modo por
+  defecto (mismo criterio de severidad: falla el build, no es solo un warning): detecta un
+  archivo `.tsx` de `src/components/` sin `'use client'` que (a) declara una función
+  localmente (`const nombre = (...) => {...}` o `function nombre(...) {...}`) y (b) usa ese
+  mismo identificador como valor de un prop con forma de handler (`/^on[A-Z]/`) en algún punto
+  del archivo — el patrón exacto que tenía `Button` (`handleClick` definido y después usado en
+  `onClick={handleClick}`), a diferencia de un passthrough seguro como `onClick={onClick}`
+  (ahí el identificador es un prop desestructurado, no una función declarada en el archivo).
+  Heurística estática, no perfecta (no cubre `useCallback`/wrappers, y puede requerir juicio
+  humano en falsos positivos) — corrida como regresión contra los componentes existentes: no
+  generó falsos positivos y, restaurada al estado pre-fix, sí detectó `Button`. El check de
+  `0.3.15` solo validaba que `CLIENT_ENTRY_POINTS` estuviera sincronizado con quién *ya*
+  declara `'use client'`; este cubre el caso de un componente que *debería* declararlo pero no
+  lo hace.
+
+### Acción recomendada
+
+Si usás `Button` con `asChild` desde un Server Component (Next.js App Router u otro entorno
+RSC), actualizá a `0.4.3`.
+
 ## [0.4.2] - 2026-09-06
 
 ### Fixed

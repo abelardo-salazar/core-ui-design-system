@@ -19,6 +19,12 @@
 // Next.js; dist/index.js es el único archivo que un consumidor real importa, así que debe
 // quedar 100% libre de recharts. Chart vive ahora en el subpath ./charts (dist/charts.js),
 // que es client-only completo y sí puede traer recharts. Ver CHANGELOG.md [0.4.1].
+//
+// Chequeo adicional del modo por defecto (heurística estática, ver más abajo): detecta un
+// componente sin 'use client' que declara una función localmente y la usa como handler JSX
+// (onClick={handleX}) — el patrón que rompió Button (handleClick se arma siempre dentro del
+// branch asChild y se cuelga de onClick={handleClick} sobre Slot; ninguna combinación de
+// props lo evita). Ver CHANGELOG.md [0.4.3].
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -119,9 +125,51 @@ function findTsxFiles(dir) {
   return results;
 }
 
+// Detecta `const NOMBRE = (...) => {...}` / `const NOMBRE = function(...) {...}` y
+// `function NOMBRE(...) {...}` declarados a nivel de archivo (no importa si están dentro del
+// cuerpo del componente, solo que el identificador se declare con `const`/`function`, no que
+// venga desdestructurado de props). Deliberadamente NO cubre wrappers como
+// `useCallback(...)`/`useMemo(...)` — la heurística es la que pide la tarea, no más: ver
+// comentario de cabecera. Falsos negativos ahí quedan para juicio humano.
+const LOCAL_FN_DECL_RE =
+  /\bconst\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s+)?\(|\bfunction\s+([A-Za-z_$][\w$]*)\s*\(/g;
+
+// `onClick={handleClick}`, `onKeyDown={onKeyDown}`, etc. Solo identificadores simples entre
+// llaves — `onClick={() => ...}` o `onClick={props.onClick}` no matchean, a propósito: el
+// caso que nos interesa es un identificador que además aparece en LOCAL_FN_DECL_RE.
+const HANDLER_PROP_USE_RE = /\b(on[A-Z]\w*)\s*=\s*\{\s*([A-Za-z_$][\w$]*)\s*\}/g;
+
+// Los .stories.tsx nunca se publican en dist/ (son fixtures de Storybook/vitest-browser) y
+// usan libremente `const x = () => {...}` dentro de sus play(), sin relación con RSC — se
+// excluyen para no generar ruido ajeno al propósito del check.
+const STORY_FILE_RE = /\.stories\.tsx$/;
+
+function findImplicitClientHandlers(absPath, relPath) {
+  if (STORY_FILE_RE.test(relPath)) return null;
+  if (USE_CLIENT_RE.test(firstLine(absPath))) return null; // ya declarado, no aplica
+
+  const content = readFileSync(absPath, 'utf8');
+
+  const localFns = new Set();
+  for (const m of content.matchAll(LOCAL_FN_DECL_RE)) {
+    localFns.add(m[1] ?? m[2]);
+  }
+  if (localFns.size === 0) return null;
+
+  const offenses = [];
+  for (const m of content.matchAll(HANDLER_PROP_USE_RE)) {
+    const [, propName, ident] = m;
+    if (localFns.has(ident)) {
+      offenses.push(`${propName}={${ident}}`);
+    }
+  }
+  return offenses.length > 0 ? { relPath, offenses: [...new Set(offenses)] } : null;
+}
+
 const declared = new Set(CLIENT_ENTRY_POINTS.map(toPosix));
 const missing = []; // tiene 'use client' pero no está declarado
 const stale = []; // declarado pero no existe, o ya no tiene 'use client'
+const implicitClient = []; // sin 'use client', pero arma un handler localmente y lo usa en JSX
 
 for (const absPath of findTsxFiles(COMPONENTS_DIR)) {
   const relPath = toPosix(relative(ROOT, absPath));
@@ -130,6 +178,9 @@ for (const absPath of findTsxFiles(COMPONENTS_DIR)) {
   if (hasDirective && !declared.has(relPath)) {
     missing.push(relPath);
   }
+
+  const implicit = findImplicitClientHandlers(absPath, relPath);
+  if (implicit) implicitClient.push(implicit);
 }
 
 for (const relPath of declared) {
@@ -164,4 +215,23 @@ if (missing.length > 0 || stale.length > 0) {
   process.exit(1);
 }
 
+if (implicitClient.length > 0) {
+  console.error(
+    "✗ Componente(s) sin 'use client' que arman un handler localmente y lo usan como prop JSX (patrón que rompió Button — ver CHANGELOG.md [0.4.3]):\n",
+  );
+  for (const { relPath, offenses } of implicitClient) {
+    console.error(`    - ${relPath}  →  ${offenses.join(', ')}`);
+  }
+  console.error(
+    "\n  Heurística estática, no perfecta: puede ser un falso positivo legítimo (revisar a mano) o un\n" +
+      "  componente que de verdad necesita 'use client'. Si es lo segundo, agregá la directiva y\n" +
+      "  registralo en scripts/client-entry-points.mjs; si es un falso positivo, dejá constancia de\n" +
+      '  por qué en el PR en vez de silenciarlo acá.',
+  );
+  process.exit(1);
+}
+
 console.log(`✓ CLIENT_ENTRY_POINTS está sincronizado con src/components/ (${declared.size} componentes).`);
+console.log(
+  `✓ Ningún componente server-safe arma un handler local y lo usa como prop JSX (heurística de handlers implícitos).`,
+);
