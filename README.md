@@ -87,6 +87,88 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 
 ---
 
+## 🎨 4. Theming (Custom Properties)
+
+El sistema de colores y radios se define en tokens semánticos (CSS Custom Properties) que viven dentro de Tailwind v4 en `@layer base { :root {...} }` (tema claro) y `:root:has(.dark), .dark {...}` (tema oscuro). Cualquier componente de color (`bg-primary`, `text-primary-content`, etc.) apunta a estos tokens indirectamente vía `var(...)`, así que **sobreescribir el token cambia el color en todos los componentes que lo usan**, sin tocar el paquete.
+
+### Tokens overrideables
+
+Estos son los tokens semánticos soportados como superficie pública de theming, con su valor default:
+
+| Token | Claro (default) | Oscuro (default) |
+| --- | --- | --- |
+| `--primary` | `#302b6e` | `#b7b1ff` |
+| `--primary-focus` | `#28245b` | `#cfcbff` |
+| `--primary-content` | `#ffffff` | `#000000` |
+| `--secondary` | `#235e43` | `#2dd287` |
+| `--secondary-focus` | `#1c4b36` | `#40d692` |
+| `--secondary-content` | `#ffffff` | `#000000` |
+| `--accent` | `#426020` | `#9ed261` |
+| `--accent-focus` | `#354c19` | `#aad875` |
+| `--accent-content` | `#ffffff` | `#000000` |
+| `--neutral` | `#282524` | `#ffffff` |
+| `--neutral-focus` | `#0d0c0c` | `#e5e5e5` |
+| `--neutral-content` | `#ffffff` | `#000000` |
+| `--base-100` | `#ffffff` | `#141414` |
+| `--base-200` | `#fcfcfc` | `#1f1f1f` |
+| `--base-300` | `#f3f4f6` | `#292929` |
+| `--base-content` | `#282524` | `#ffffff` |
+| `--info` | `#3b82f6` | (igual, no cambia en oscuro) |
+| `--success` | `#22c55e` | (igual, no cambia en oscuro) |
+| `--warning` | `#eab308` | (igual, no cambia en oscuro) |
+| `--error` | `#ef4444` | (igual, no cambia en oscuro) |
+| `--error-content` | `#000000` | (igual, no cambia en oscuro) |
+| `--error-focus` | `#b91c1c` | `#f87171` |
+| `--error-focus-content` | `#ffffff` | `#000000` |
+
+> `--info`, `--success` y `--warning` **no** tienen variantes `-focus`/`-content` en el sistema actual — solo `--error` las tiene completas (por el contraste de texto que necesita, ver comentarios en `src/index.css`). No agregues `--info-focus`, `--success-content`, etc. asumiendo simetría: no existen y no tienen efecto salvo que también los definas vos.
+
+### Patrón sancionado: override sin capa (`@layer`)
+
+La única forma de override que garantiza ganar sobre los tokens del design system **sin importar el orden de import** entre tu hoja de estilos y la del paquete es CSS declarado **fuera de cualquier `@layer`**, apuntando a `:root` (claro) y `.dark` (oscuro):
+
+```css
+/* tu-tema.css — importado en cualquier orden respecto al style.css del design system */
+:root {
+  --primary: #1d4ed8;
+  --primary-focus: #1e40af;
+  --primary-content: #ffffff;
+
+  --base-100: #f8fafc;
+  --base-content: #0f172a;
+}
+
+.dark {
+  --primary: #93c5fd;
+  --primary-focus: #bfdbfe;
+  --primary-content: #0f172a;
+
+  --base-100: #0f172a;
+  --base-content: #f8fafc;
+}
+```
+
+Esto funciona porque, por especificación de CSS Cascade Layers, **cualquier regla sin capa tiene prioridad sobre cualquier regla dentro de una `@layer`**, sin importar en qué orden se importen las hojas de estilo. Verificado en navegador real (Chromium vía Playwright, contra Storybook sirviendo el CSS compilado real del paquete): un override sin capa insertado incluso *antes* del CSS del design system en el `<head>` sigue ganando.
+
+### ⚠️ Qué NO hacer: override dentro de tu propio `@layer base`
+
+Si tu proyecto también usa Tailwind y seguís su convención de customización de tema poniendo tus overrides dentro de tu propio `@layer base { :root {...} }`, **la prioridad deja de estar garantizada** y pasa a depender del orden de import entre tu hoja de estilos y la del design system:
+
+- Si tu `@layer base` se importa **después** del CSS del design system → tu override gana.
+- Si tu `@layer base` se importa **antes** del CSS del design system → tu override **NO gana**: el valor del design system prevalece.
+
+Esto es así porque ambas hojas declaran la misma capa con nombre `base`, y dentro de una capa con nombre compartido el desempate para igual especificidad es el orden normal de cascada (la declaración que aparece más tarde en el documento gana) — ya no aplica la prioridad especial de "sin capa". Es un mecanismo frágil: un reorden de imports, un bump de una dependencia que cambia cuándo se inyecta su CSS, o un bundler que reordena hojas de estilo puede invertir silenciosamente cuál de las dos gana.
+
+Verificado en navegador real (misma configuración de prueba): un override en `@layer base` importado *antes* del CSS del design system efectivamente **no** tuvo efecto — el token quedó en su valor default del paquete.
+
+**Por eso el patrón sancionado es siempre el override sin capa** (sección anterior), incluso en proyectos que ya usan `@layer base` para otras cosas.
+
+### `--palette-*` es interno, no es la API de theming
+
+`src/index.css` también define tokens `--palette-*` (`--palette-navy`, `--palette-red-dark`, etc.) que son la implementación interna de los tokens semánticos (`--primary: var(--palette-navy)`, por ejemplo). **No están pensados para ser overrideados directamente** y no forman parte de la superficie pública de theming — pueden renombrarse o reestructurarse en cualquier momento sin que eso cuente como breaking change. Overrideá siempre el token semántico (`--primary`, `--base-100`, etc.), nunca `--palette-*`.
+
+---
+
 ## 📚 Contenido
 
 - [Core UI Design System](#core-ui-design-system)
@@ -96,8 +178,13 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   - [📦 2. Instalación](#-2-instalación)
     - [Peer Dependencies](#peer-dependencies)
   - [⚙️ 3. Setup Inicial](#️-3-setup-inicial)
+  - [🎨 4. Theming (Custom Properties)](#-4-theming-custom-properties)
+    - [Tokens overrideables](#tokens-overrideables)
+    - [Patrón sancionado: override sin capa (`@layer`)](#patrón-sancionado-override-sin-capa-layer)
+    - [⚠️ Qué NO hacer: override dentro de tu propio `@layer base`](#️-qué-no-hacer-override-dentro-de-tu-propio-layer-base)
+    - [`--palette-*` es interno, no es la API de theming](#--palette--es-interno-no-es-la-api-de-theming)
   - [📚 Contenido](#-contenido)
-  - [🧩 4. Documentación de API](#-4-documentación-de-api)
+  - [🧩 5. Documentación de API](#-5-documentación-de-api)
     - [🧱 Átomos (Fundamentos)](#-átomos-fundamentos)
     - [Button — Uso y Props](#button--uso-y-props)
     - [Avatar — Uso y Props](#avatar--uso-y-props)
@@ -138,7 +225,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 
 ---
 
-## 🧩 4. Documentación de API
+## 🧩 5. Documentación de API
 
 ### 🧱 Átomos (Fundamentos)
 
