@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.5.0] - 2026-10-04
+
+### Added
+
+- **`Chip` gana una escala de tamaños propia: `size?: 'sm' | 'md' | 'lg'`** (default `'sm'`,
+  compatible hacia atrás). `md` = 32px de alto; `lg` = 44px de alto, el tamaño táctil.
+
+### Fixed
+
+- **El área táctil real del `Chip` era solo el texto**, sin importar el tamaño: el padding que
+  da forma a la píldora vivía en el `<span>` raíz, que nunca es interactivo (evita anidar
+  `<button>` dentro de `<button>`), mientras que el `Toggle`/botón de cierre de adentro no tenía
+  padding propio. Tocar la píldora, fuera del texto mismo, no hacía nada. El padding ahora vive
+  en el cuerpo (`Toggle`/`span`) y el botón de cierre pasa a tamaño explícito en `md`/`lg`
+  (antes derivado del padding) — ambos cubren ahora el alto completo de la píldora y llegan a
+  su borde exterior, en los tres tamaños. Efecto secundario esperado en `sm` cuando hay botón
+  de cierre (`Removable`/`ToggleableAndRemovable`): la píldora se angosta y achica unos
+  px — esa "zona muerta" alrededor del botón nunca respondía al toque, así que eliminarla era
+  el propio fix. `sm` sin botón de cierre (`Static`/`Toggleable`) queda pixel-idéntico a antes
+  (verificado con bounding boxes A/B contra `main` en navegador real).
+
 ## [0.4.4] - 2026-10-04
 
 ### Fixed

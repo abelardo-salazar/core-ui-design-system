@@ -111,3 +111,77 @@ export const ToggleableAndRemovable: Story = {
     await expect(args.onPressedChange).toHaveBeenCalledTimes(1);
   },
 };
+
+// 5. size="md": el padding del cuerpo y el tamaño del botón de cierre pasan a vivir en los
+// hijos (no en la raíz) para que su hit box real llene la píldora de 32px. El fixture de
+// vitest-browser no aplica el CSS de utilidades de Tailwind (mismo issue documentado en
+// Removable), así que esto verifica las clases; el tamaño real en píxeles se verificó a mano
+// en Storybook con un navegador real.
+export const Medium: Story = {
+  args: {
+    children: 'Design',
+    size: 'md',
+    defaultPressed: false,
+    onPressedChange: fn(),
+    onRemove: fn(),
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const toggle = canvas.getByRole('button', { name: 'Design' });
+    const removeButton = canvas.getByRole('button', { name: 'Remove' });
+
+    const root = toggle.parentElement as HTMLElement;
+    await expect(root.className.split(' ')).toContain('h-8');
+    await expect(root.className.split(' ')).toContain('text-sm');
+
+    // pl-3 siempre; pr-3 NO (hay botón de cierre al lado: la separación la da gap-1 de la
+    // raíz, no un padding propio del cuerpo — ver comentario en Chip.tsx).
+    await expect(toggle.className.split(' ')).toContain('pl-3');
+    await expect(toggle.className.split(' ')).not.toContain('pr-3');
+    // py-0.5 es exclusivo de sm (md/lg fijan el alto en la raíz y se estiran hasta llenarlo).
+    await expect(toggle.className.split(' ')).not.toContain('py-0.5');
+
+    // Botón de cierre: tamaño explícito 32x32 (no el p-1.5 basado en padding que usa sm).
+    await expect(removeButton.className.split(' ')).toContain('h-8');
+    await expect(removeButton.className.split(' ')).toContain('w-8');
+    await expect(removeButton.className.split(' ')).not.toContain('p-1.5');
+    await expect(removeButton.querySelector('svg')).toHaveClass('h-3.5', 'w-3.5');
+
+    await userEvent.click(toggle);
+    await expect(args.onPressedChange).toHaveBeenLastCalledWith(true);
+  },
+};
+
+// 6. size="lg": tamaño táctil (44px). Mismo criterio que Medium.
+export const Large: Story = {
+  args: {
+    children: 'Design',
+    size: 'lg',
+    defaultPressed: false,
+    onPressedChange: fn(),
+    onRemove: fn(),
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const toggle = canvas.getByRole('button', { name: 'Design' });
+    const removeButton = canvas.getByRole('button', { name: 'Remove' });
+
+    const root = toggle.parentElement as HTMLElement;
+    await expect(root.className.split(' ')).toContain('h-11');
+    await expect(root.className.split(' ')).toContain('text-base');
+
+    await expect(toggle.className.split(' ')).toContain('pl-4');
+    await expect(toggle.className.split(' ')).not.toContain('pr-4');
+    await expect(toggle.className.split(' ')).not.toContain('py-0.5');
+
+    // Botón de cierre: 44x44 — el alto completo del chip, el tamaño táctil objetivo de esta
+    // escala (ver README).
+    await expect(removeButton.className.split(' ')).toContain('h-11');
+    await expect(removeButton.className.split(' ')).toContain('w-11');
+    await expect(removeButton.className.split(' ')).not.toContain('p-1.5');
+    await expect(removeButton.querySelector('svg')).toHaveClass('h-4', 'w-4');
+
+    await userEvent.click(toggle);
+    await expect(args.onPressedChange).toHaveBeenLastCalledWith(true);
+  },
+};
