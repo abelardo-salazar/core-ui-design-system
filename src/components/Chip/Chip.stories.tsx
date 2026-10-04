@@ -41,6 +41,11 @@ export const Toggleable: Story = {
     await expect(toggle).toHaveAttribute('aria-pressed', 'false');
     await expect(toggle).toHaveAttribute('data-state', 'off');
 
+    // Sin botón de cierre, el Toggle ya llega exactamente al borde de la píldora por su propio
+    // padding (pl-2.5/py-0.5) — no hay franja muerta que corregir, así que no genera ::after.
+    await expect(toggle.className.split(' ')).not.toContain('relative');
+    await expect(toggle.className).not.toContain("after:content-['']");
+
     await userEvent.click(toggle);
 
     await expect(toggle).toHaveAttribute('aria-pressed', 'true');
@@ -71,14 +76,18 @@ export const Removable: Story = {
     // el ícono de borrar de un Chip), sin que el ícono en sí (12x12) cambie de tamaño — el
     // anillo de foco sigue siendo ese mismo círculo de 24x24. El área que SÍ responde al toque
     // es más grande: el ::after (relative + after:...) extiende el hit area hacia el padding
-    // que la raíz reintroduce (pr-2.5/py-0.5 en root, ver abajo) sin agrandar la caja del botón.
-    // El fixture de vitest-browser no aplica el CSS de utilidades de Tailwind (mismo issue
-    // documentado en el story Destructive de Button), así que la aserción va sobre la clase; el
-    // tamaño y la posición reales en píxeles se verificaron a mano en Storybook con un navegador
-    // real, con A/B contra el commit previo a la regresión del PR #30.
+    // que la raíz reintroduce (pr-2.5/py-0.5 en root, ver abajo) sin agrandar la caja del botón,
+    // y rounded-r-full hace que esa zona siga la curva de la píldora en vez de un rectángulo
+    // (sin esto, un toque justo fuera de la curva, cerca de la esquina, también disparaba
+    // onRemove). El fixture de vitest-browser no aplica el CSS de utilidades de Tailwind (mismo
+    // issue documentado en el story Destructive de Button), así que la aserción va sobre la
+    // clase; el tamaño, la posición y la forma reales se verificaron a mano en Storybook con un
+    // navegador real (bounding boxes + elementFromPoint), con A/B contra el commit previo a la
+    // regresión del PR #30.
     await expect(removeButton.className.split(' ')).toContain('p-1.5');
     await expect(removeButton.className.split(' ')).toContain('relative');
     await expect(removeButton.className).toContain("after:content-['']");
+    await expect(removeButton.className).toContain('after:rounded-r-full');
     await expect(removeButton.querySelector('svg')).toHaveClass('h-3', 'w-3');
 
     // La raíz reintroduce el padding que el PR #30 le había sacado: es la única forma de
@@ -110,11 +119,20 @@ export const ToggleableAndRemovable: Story = {
 
     // Mismo fix que en Removable: la raíz reintroduce py-0.5/pr-2.5 (sm con botón de cierre)
     // para reconstruir el alto/ancho histórico; el botón de cierre reclama esa zona como área
-    // de respuesta vía ::after, sin agrandar su caja visual de 24x24 (ver Chip.tsx).
+    // de respuesta vía ::after (rounded-r-full), sin agrandar su caja visual de 24x24.
     const root = toggle.parentElement as HTMLElement;
     await expect(root.className.split(' ')).toContain('py-0.5');
     await expect(root.className.split(' ')).toContain('pr-2.5');
     await expect(removeButton.className.split(' ')).toContain('relative');
+    await expect(removeButton.className).toContain('after:rounded-r-full');
+
+    // El Toggle, a diferencia del botón de cierre, solo se estira al alto de la fila (24px) —
+    // sin su propio ::after quedarían ~2px sin respuesta arriba/abajo que el ✕ sí reclama.
+    // rounded-l-full porque el Toggle vive en el borde IZQUIERDO de la píldora (curva opuesta
+    // a la del botón de cierre).
+    await expect(toggle.className.split(' ')).toContain('relative');
+    await expect(toggle.className).toContain("after:content-['']");
+    await expect(toggle.className).toContain('after:rounded-l-full');
 
     // Foco independiente: clic en el cuerpo enfoca solo el Toggle, Tab mueve al botón de cierre
     // sin activarlo, y cada uno dispara su propio callback sin interferir con el otro.
@@ -161,11 +179,23 @@ export const Medium: Story = {
     await expect(toggle.className.split(' ')).not.toContain('pr-3');
     // py-0.5 es exclusivo de sm (md/lg fijan el alto en la raíz y se estiran hasta llenarlo).
     await expect(toggle.className.split(' ')).not.toContain('py-0.5');
+    // El Toggle extiende su hit area hasta el borde EXTERIOR de la raíz (cubre el propio borde
+    // de 1px, a diferencia de sm) — con o sin botón de cierre al lado, ver Chip.tsx.
+    await expect(toggle.className.split(' ')).toContain('relative');
+    await expect(toggle.className).toContain("after:content-['']");
+    await expect(toggle.className).toContain('after:rounded-l-full');
+    await expect(toggle.className).toContain('after:-top-px');
 
-    // Botón de cierre: tamaño explícito 32x32 (no el p-1.5 basado en padding que usa sm).
-    await expect(removeButton.className.split(' ')).toContain('h-8');
+    // Botón de cierre: ancho explícito 32px, pero SIN alto explícito (a diferencia de una
+    // versión anterior de este archivo) — así se estira igual que el Toggle/body y queda
+    // centrado, en vez de desbordar el borde inferior de la raíz por no responder a
+    // items-stretch (h-8 fijo no se estira). Su ::after (rounded-r-full) llega hasta el borde
+    // exterior igual que el del Toggle, pero del lado derecho.
+    await expect(removeButton.className.split(' ')).not.toContain('h-8');
     await expect(removeButton.className.split(' ')).toContain('w-8');
     await expect(removeButton.className.split(' ')).not.toContain('p-1.5');
+    await expect(removeButton.className.split(' ')).toContain('relative');
+    await expect(removeButton.className).toContain('after:rounded-r-full');
     await expect(removeButton.querySelector('svg')).toHaveClass('h-3.5', 'w-3.5');
 
     await userEvent.click(toggle);
@@ -194,12 +224,22 @@ export const Large: Story = {
     await expect(toggle.className.split(' ')).toContain('pl-4');
     await expect(toggle.className.split(' ')).not.toContain('pr-4');
     await expect(toggle.className.split(' ')).not.toContain('py-0.5');
+    // Igual que en Medium: el Toggle alcanza el borde exterior de la raíz, incluyendo el propio
+    // borde de 1px — en lg esto es lo que garantiza el objetivo táctil real de 44px (no solo
+    // la caja visual del Toggle, que por construcción mide 1px menos que la raíz).
+    await expect(toggle.className.split(' ')).toContain('relative');
+    await expect(toggle.className).toContain('after:rounded-l-full');
 
-    // Botón de cierre: 44x44 — el alto completo del chip, el tamaño táctil objetivo de esta
-    // escala (ver README).
-    await expect(removeButton.className.split(' ')).toContain('h-11');
+    // Botón de cierre: SIN alto explícito (igual que en Medium) — se estira al interior de la
+    // raíz y queda centrado; su ancho (w-11, 44px) sí se mantiene fijo. Su propia caja visual
+    // mide ~1px menos de alto que la raíz (el borde-box del borde se lo "come"), pero su área de
+    // respuesta real (caja + ::after) sí llega a los 44px completos, el tamaño táctil objetivo
+    // de esta escala (ver README) — verificado en navegador real escaneando el área de clic.
+    await expect(removeButton.className.split(' ')).not.toContain('h-11');
     await expect(removeButton.className.split(' ')).toContain('w-11');
     await expect(removeButton.className.split(' ')).not.toContain('p-1.5');
+    await expect(removeButton.className.split(' ')).toContain('relative');
+    await expect(removeButton.className).toContain('after:rounded-r-full');
     await expect(removeButton.querySelector('svg')).toHaveClass('h-4', 'w-4');
 
     await userEvent.click(toggle);

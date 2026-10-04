@@ -35,13 +35,31 @@ const BODY_PADDING: Record<ChipSize, { left: string; right: string; vertical?: s
 };
 
 // sm: sin cambios respecto al botón de cierre actual (p-1.5 ya da el 24x24 de la spec de
-// Material para el ícono de borrar de un Chip). md/lg: tamaño explícito en vez de derivado del
-// padding, porque ahora se estiran (items-stretch en la raíz) hasta el alto completo de la
-// píldora — lg es el tamaño táctil (44px).
+// Material para el ícono de borrar de un Chip). md/lg: solo ancho explícito — el alto NO se
+// fija (a diferencia de versiones anteriores de este archivo): una altura explícita (h-8/h-11)
+// no responde a items-stretch, así que el botón no se centraba con el Toggle y desbordaba el
+// borde inferior de la raíz por ~1px. Sin altura propia, se estira igual que el Toggle/body y
+// queda centrado — mismo mecanismo ya probado, no uno nuevo.
 const CLOSE_BUTTON_SIZE: Record<ChipSize, string> = {
   sm: 'p-1.5',
-  md: 'h-8 w-8',
-  lg: 'h-11 w-11',
+  md: 'w-8',
+  lg: 'w-11',
+};
+
+// Extiende el área de respuesta del botón de cierre hasta el borde EXTERIOR de la raíz (nunca
+// más allá de su propia caja visual, así que el anillo de foco no cambia) siguiendo la curva de
+// la píldora: rounded-r-full redondea solo las dos esquinas derechas con el mismo radio que la
+// raíz (en vez de un rectángulo cuyas esquinas quedan fuera de la silueta visible — un toque ahí,
+// antes de este fix, sí disparaba onRemove). Sin extensión a la izquierda: el gap-1 con el
+// cuerpo sigue sin responder a propósito.
+// sm reconstruye el padding histórico que la raíz reintroduce (rootDeadZoneRestore) — ese caso
+// deliberadamente NO llega al borde en sí (ver comentario ahí: "el borde de 1px es inevitable y
+// está bien" era la regla acordada para sm). md/lg sí llegan al borde — son tamaños nuevos, sin
+// compromiso histórico, y la tarea pide explícitamente que el borde de 1px responda ahí.
+const CLOSE_BUTTON_HIT_AREA: Record<ChipSize, string> = {
+  sm: "relative after:content-[''] after:absolute after:rounded-r-full after:-top-0.5 after:-right-2.5 after:-bottom-0.5 after:left-0",
+  md: "relative after:content-[''] after:absolute after:rounded-r-full after:-top-px after:-right-px after:-bottom-px after:left-0",
+  lg: "relative after:content-[''] after:absolute after:rounded-r-full after:-top-px after:-right-px after:-bottom-px after:left-0",
 };
 
 // El ícono crece junto con el botón (no hay spec explícita para esto; es una decisión propia,
@@ -88,20 +106,26 @@ const Chip = React.forwardRef<HTMLSpanElement, ChipProps>(
     // sin volver a inflar el cuerpo (que ya tiene su propio padding, correcto, para el caso sin
     // botón). pr-2.5 reintroduce los 10px a la derecha del botón; py-0.5 reintroduce los 2px
     // arriba/abajo — ambos eran espacio "muerto" en el PR #30 (la raíz dejó de tenerlo, y nadie
-    // lo heredó). El botón de cierre reclama esa zona como área de respuesta vía ::after (ver
-    // closeButtonHitArea), sin cambiar su caja visual.
+    // lo heredó). El borde de 1px en sí queda deliberadamente fuera del área de respuesta en sm
+    // (es inevitable y está bien, acordado al restaurar este aspecto) — ver CLOSE_BUTTON_HIT_AREA.
     const rootDeadZoneRestore = size === 'sm' && onRemove && 'py-0.5 pr-2.5';
 
-    // Extiende el área de clic del botón de cierre (sm) hacia la zona que rootDeadZoneRestore
-    // reintrodujo como padding de la raíz, SIN agrandar la caja real del botón — así el anillo
-    // de foco sigue siendo el círculo de 24x24 de siempre, en la misma posición que tenía antes
-    // del PR #30 (restaurar el padding de la raíz también restaura la posición del botón).
-    // Sin extensión a la izquierda: el gap-1 entre el cuerpo y el botón se mantiene muerto a
-    // propósito (es parte del aspecto histórico). Un ::after es parte del hit-testing de su
-    // propio elemento, así que un clic ahí dispara el onClick del botón real.
-    const closeButtonHitArea =
-      size === 'sm' &&
-      "relative after:content-[''] after:absolute after:-top-0.5 after:-right-2.5 after:-bottom-0.5 after:left-0";
+    // Extiende el área de respuesta del Toggle hasta el borde EXTERIOR de la raíz, solo
+    // verticalmente (inset-x-0: nunca invade el gap-1 ni la zona del botón de cierre) y con
+    // rounded-l-full — mismo criterio que CLOSE_BUTTON_HIT_AREA pero en el borde IZQUIERDO de la
+    // píldora, donde vive el Toggle (sin el radio, las esquinas del rectángulo quedarían fuera
+    // de la silueta visible, el mismo problema que tenía el botón de cierre sin rounded-r-full).
+    // sm con botón de cierre: cubre la franja que rootDeadZoneRestore agranda (py-0.5) y que el
+    // Toggle, al estirarse solo al alto de la fila (24px), no alcanzaba por sí solo — sin botón
+    // de cierre, el Toggle ya llega exactamente al borde interior (nada que corregir), y el
+    // borde en sí queda fuera a propósito, igual que en el ✕ de sm.
+    // md/lg: cubre el borde en sí (1px) — con o sin botón de cierre al lado, el Toggle es un
+    // control real que debe alcanzar el tamaño táctil completo por su cuenta.
+    const toggleHitArea =
+      size === 'sm'
+        ? onRemove &&
+          "relative after:content-[''] after:absolute after:rounded-l-full after:inset-x-0 after:-top-0.5 after:-bottom-0.5"
+        : "relative after:content-[''] after:absolute after:rounded-l-full after:inset-x-0 after:-top-px after:-bottom-px";
 
     const body = isToggle ? (
       <TogglePrimitive.Root
@@ -114,6 +138,7 @@ const Chip = React.forwardRef<HTMLSpanElement, ChipProps>(
           'disabled:cursor-not-allowed disabled:opacity-50',
           !disabled && 'cursor-pointer',
           bodyPadding,
+          toggleHitArea,
         )}
       >
         {children}
@@ -142,7 +167,7 @@ const Chip = React.forwardRef<HTMLSpanElement, ChipProps>(
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
               'disabled:cursor-not-allowed disabled:opacity-50',
               CLOSE_BUTTON_SIZE[size],
-              closeButtonHitArea,
+              CLOSE_BUTTON_HIT_AREA[size],
             )}
           >
             <Cross2Icon className={CLOSE_ICON_SIZE[size]} />
