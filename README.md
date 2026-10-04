@@ -238,7 +238,7 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
 | `Avatar`    | Imagen de perfil con fallback | `src`, `alt`, `fallback`, `className`                                                       |
 | `Separator` | Divisor visual                | `orientation`, `className`                                                                  |
 | `Skeleton`  | Placeholder de carga          | `className`                                                                                 |
-| `Chip`      | Etiqueta toggleable/removible | `variant`, `pressed`, `defaultPressed`, `onPressedChange`, `onRemove`, `removeLabel`         |
+| `Chip`      | Etiqueta toggleable/removible | `variant`, `size`, `pressed`, `defaultPressed`, `onPressedChange`, `onRemove`, `removeLabel` |
 | `Image`     | Imagen con estado de carga/error | `src`, `alt`, `fallback`, `containerClassName`                                            |
 
 ### Button — Uso y Props
@@ -428,6 +428,7 @@ Nota: usa `className` para ajustar dimensiones y `rounded-*` según el patrón (
 - **Exports:** `Chip`.
 - **Props principales:**
   - `variant?: 'default' | 'secondary' | 'outline' | 'ghost'` — estilo visual base (ver `chipVariants.ts`).
+  - `size?: 'sm' | 'md' | 'lg'` (default `'sm'`) — `sm` = alto derivado del contenido (comportamiento histórico); `md` = 32px de alto; `lg` = 44px de alto, el tamaño que cumple el objetivo táctil de 44px (WCAG 2.5.5 / Apple HIG). El cuerpo interactivo (`Toggle`) y el botón de cierre cubren siempre el alto completo de la píldora y llegan hasta su borde exterior, en los tres tamaños — no solo el texto responde al toque.
   - `pressed?: boolean` / `defaultPressed?: boolean` — toggle controlado / no controlado.
   - `onPressedChange?: (pressed: boolean) => void`.
   - `onRemove?: () => void` — si se pasa, agrega un botón de cierre (✕) independiente del cuerpo del chip.
@@ -461,6 +462,11 @@ Uso (ejemplos, extraídos de `Chip.stories.tsx`):
   onPressedChange={(pressed) => console.log(pressed)}
   onRemove={() => console.log('removed')}
 >
+  Design
+</Chip>
+
+// 5. size="lg" — tamaño táctil (44px), botón de cierre a 44x44
+<Chip size="lg" onRemove={() => console.log('removed')}>
   Design
 </Chip>
 ```
