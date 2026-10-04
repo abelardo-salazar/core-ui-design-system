@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.4.4] - 2026-10-04
+
+### Fixed
+
+- **`Checkbox`, `Switch` y `Badge` usaban `ring-ring`, una clase que no resuelve a ningún
+  color** — `--ring`/`--color-ring` no están definidos en el sistema de tokens de este DS (es
+  un resabio de la plantilla original de shadcn/ui, nunca traducido). En la práctica, `Checkbox`
+  y `Switch` no mostraban ningún anillo de foco visible al navegar por teclado (falla de WCAG
+  2.4.7 en dos controles de formulario centrales). Ahora usan `ring-primary`, la convención ya
+  dominante en el resto del DS (`Button`, `Input`, `Select`, `Tabs`, `Dialog`, `DataTable`, etc.).
+
 ## [0.4.3] - 2026-09-12
 
 ### Fixed

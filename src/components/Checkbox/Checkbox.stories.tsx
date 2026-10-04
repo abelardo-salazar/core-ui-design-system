@@ -31,6 +31,11 @@ export const Default: Story = {
     // para Space, la hereda del elemento nativo.
     const checkbox = canvas.getByRole('checkbox');
 
+    // --ring/--color-ring no existen en el sistema de tokens: ring-ring no resolvía a
+    // ningún color y el anillo de foco quedaba invisible al navegar por teclado.
+    await expect(checkbox.className.split(' ')).toContain('focus-visible:ring-primary');
+    await expect(checkbox.className.split(' ')).not.toContain('focus-visible:ring-ring');
+
     await expect(checkbox).toHaveAttribute('aria-checked', 'false');
 
     // Click: toggle a checked.
