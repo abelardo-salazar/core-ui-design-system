@@ -83,6 +83,26 @@ const Chip = React.forwardRef<HTMLSpanElement, ChipProps>(
     // 0 — tocar el "aire" alrededor del texto no hacía nada.
     const bodyPadding = cn(left, !onRemove && right, vertical);
 
+    // sm con botón de cierre es el único caso donde la raíz SÍ necesita padding propio: es la
+    // única forma de reconstruir el alto/ancho histórico (30px / borde+10+texto+gap-1+24+10+borde)
+    // sin volver a inflar el cuerpo (que ya tiene su propio padding, correcto, para el caso sin
+    // botón). pr-2.5 reintroduce los 10px a la derecha del botón; py-0.5 reintroduce los 2px
+    // arriba/abajo — ambos eran espacio "muerto" en el PR #30 (la raíz dejó de tenerlo, y nadie
+    // lo heredó). El botón de cierre reclama esa zona como área de respuesta vía ::after (ver
+    // closeButtonHitArea), sin cambiar su caja visual.
+    const rootDeadZoneRestore = size === 'sm' && onRemove && 'py-0.5 pr-2.5';
+
+    // Extiende el área de clic del botón de cierre (sm) hacia la zona que rootDeadZoneRestore
+    // reintrodujo como padding de la raíz, SIN agrandar la caja real del botón — así el anillo
+    // de foco sigue siendo el círculo de 24x24 de siempre, en la misma posición que tenía antes
+    // del PR #30 (restaurar el padding de la raíz también restaura la posición del botón).
+    // Sin extensión a la izquierda: el gap-1 entre el cuerpo y el botón se mantiene muerto a
+    // propósito (es parte del aspecto histórico). Un ::after es parte del hit-testing de su
+    // propio elemento, así que un clic ahí dispara el onClick del botón real.
+    const closeButtonHitArea =
+      size === 'sm' &&
+      "relative after:content-[''] after:absolute after:-top-0.5 after:-right-2.5 after:-bottom-0.5 after:left-0";
+
     const body = isToggle ? (
       <TogglePrimitive.Root
         pressed={pressed}
@@ -106,7 +126,11 @@ const Chip = React.forwardRef<HTMLSpanElement, ChipProps>(
       // El contenedor raíz NUNCA es interactivo por sí mismo: si fuera un <button> o el propio
       // Toggle, y además tuviera el botón de cierre adentro, resultaría en <button><button/></button>,
       // HTML inválido. Por eso compone dos elementos interactivos independientes como hermanos.
-      <span ref={ref} className={cn(chipVariants({ variant, size }), className)} {...props}>
+      <span
+        ref={ref}
+        className={cn(chipVariants({ variant, size }), rootDeadZoneRestore, className)}
+        {...props}
+      >
         {body}
         {onRemove && (
           <button
@@ -118,6 +142,7 @@ const Chip = React.forwardRef<HTMLSpanElement, ChipProps>(
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
               'disabled:cursor-not-allowed disabled:opacity-50',
               CLOSE_BUTTON_SIZE[size],
+              closeButtonHitArea,
             )}
           >
             <Cross2Icon className={CLOSE_ICON_SIZE[size]} />
