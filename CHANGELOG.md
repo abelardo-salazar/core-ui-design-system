@@ -24,6 +24,32 @@
   escala (`1be50ab`) en navegador real, con tres largos de texto distintos, y con
   `elementFromPoint` sobre la zona antes muerta.
 
+- **El área de respuesta extendida no seguía la silueta de la píldora.** El `::after` del botón
+  de cierre era un rectángulo: sus esquinas exteriores quedaban fuera de la curva redondeada de
+  la píldora, así que un toque justo afuera del contorno visible, cerca de la esquina, disparaba
+  `onRemove` igual (confirmado con `elementFromPoint` + geometría: un punto a distancia 18.8px
+  del centro de la curva, con radio 14.6px, devolvía el botón). Ahora ese `::after` lleva
+  `rounded-r-full`, que redondea solo sus dos esquinas derechas con el mismo radio que la raíz.
+
+- **`sm` con Toggle y botón de cierre a la vez dejaba ~2px sin respuesta arriba/abajo del
+  Toggle**, mientras que el botón de cierre sí los reclamaba: el Toggle solo se estira al alto
+  de la fila (24px), no al interior completo de la raíz (que la raíz agranda con su `py-0.5`
+  reintroducido). El Toggle gana ahora su propio `::after` (solo vertical, con `rounded-l-full`
+  por el mismo motivo de silueta, del lado opuesto) para alcanzar la misma franja que el botón
+  de cierre ya cubría.
+
+- **`md`/`lg` con botón de cierre: el botón desbordaba el borde inferior de la raíz por ~1px y
+  su ícono quedaba ~1px descentrado** — medido con `getBoundingClientRect` antes de corregir,
+  no asumido: su altura explícita (`h-8`/`h-11`) no respondía a `items-stretch`, así que no se
+  centraba con el Toggle (que sí se estira correctamente). Fix: se le quita la altura explícita
+  (queda solo `w-8`/`w-11`), así se estira igual que el Toggle/body y queda centrado. Además,
+  tanto el Toggle como el botón de cierre ganan en `md`/`lg` un `::after` que cubre el propio
+  borde de 1px de la raíz (a diferencia de `sm`, donde ese borde queda deliberadamente fuera):
+  en `lg`, el área de respuesta real de ambos alcanza así los 44px completos, el objetivo táctil
+  de esta escala — no solo su caja visual, que por construcción mide ~1px menos que la raíz.
+  `md`/`lg` no están publicados: este ajuste de ±1px en su reposo es una corrección, documentada
+  acá, no un cambio de API.
+
 ## [0.4.4] - 2026-10-04
 
 ### Fixed

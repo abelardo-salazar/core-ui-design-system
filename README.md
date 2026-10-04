@@ -428,7 +428,7 @@ Nota: usa `className` para ajustar dimensiones y `rounded-*` según el patrón (
 - **Exports:** `Chip`.
 - **Props principales:**
   - `variant?: 'default' | 'secondary' | 'outline' | 'ghost'` — estilo visual base (ver `chipVariants.ts`).
-  - `size?: 'sm' | 'md' | 'lg'` (default `'sm'`) — `sm` = alto derivado del contenido (comportamiento histórico); `md` = 32px de alto; `lg` = 44px de alto, el tamaño que cumple el objetivo táctil de 44px (WCAG 2.5.5 / Apple HIG). El cuerpo interactivo (`Toggle`) y el botón de cierre cubren siempre el alto completo de la píldora y llegan hasta su borde exterior, en los tres tamaños — no solo el texto responde al toque.
+  - `size?: 'sm' | 'md' | 'lg'` (default `'sm'`) — `sm` = alto derivado del contenido (comportamiento histórico); `md` = 32px de alto; `lg` = 44px de alto, el tamaño que cumple el objetivo táctil de 44px (WCAG 2.5.5 / Apple HIG). El cuerpo interactivo (`Toggle`) y el botón de cierre cubren siempre el alto completo de la píldora y siguen su silueta redondeada — no solo el texto responde al toque, y un toque justo afuera de la curva visible no activa nada. En `md`/`lg` el área de respuesta llega hasta el borde exterior de la raíz (el propio borde de 1px también responde); en `sm` llega hasta el borde interior, preservando el aspecto histórico pixel a pixel.
   - `pressed?: boolean` / `defaultPressed?: boolean` — toggle controlado / no controlado.
   - `onPressedChange?: (pressed: boolean) => void`.
   - `onRemove?: () => void` — si se pasa, agrega un botón de cierre (✕) independiente del cuerpo del chip.
