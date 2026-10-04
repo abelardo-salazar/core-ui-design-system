@@ -24,6 +24,11 @@ export const Default: Story = {
     const badge = canvas.getByText('Default');
     await expect(badge.className.split(' ')).toContain('bg-primary');
     await expect(badge.className.split(' ')).toContain('text-primary-content');
+
+    // --ring/--color-ring no existen en el sistema de tokens: ring-ring no resolvía a
+    // ningún color y el anillo de foco quedaba invisible al navegar por teclado.
+    await expect(badge.className.split(' ')).toContain('focus:ring-primary');
+    await expect(badge.className.split(' ')).not.toContain('focus:ring-ring');
   },
 };
 
