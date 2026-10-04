@@ -67,13 +67,26 @@ export const Removable: Story = {
     await expect(canvas.getAllByRole('button')).toHaveLength(1);
     const removeButton = canvas.getByRole('button', { name: 'Remove' });
 
-    // Touch target: 24x24 reales (spec de Material para el ícono de borrar de un Chip),
-    // sin que el ícono en sí (12x12) cambie de tamaño. El fixture de vitest-browser no
-    // aplica el CSS de utilidades de Tailwind (mismo issue documentado en el story
-    // Destructive de Button), así que la aserción va sobre la clase; el tamaño real en
-    // píxeles se verificó a mano en Storybook con devtools de un navegador real.
+    // Touch target: la caja VISUAL del botón sigue siendo 24x24 reales (spec de Material para
+    // el ícono de borrar de un Chip), sin que el ícono en sí (12x12) cambie de tamaño — el
+    // anillo de foco sigue siendo ese mismo círculo de 24x24. El área que SÍ responde al toque
+    // es más grande: el ::after (relative + after:...) extiende el hit area hacia el padding
+    // que la raíz reintroduce (pr-2.5/py-0.5 en root, ver abajo) sin agrandar la caja del botón.
+    // El fixture de vitest-browser no aplica el CSS de utilidades de Tailwind (mismo issue
+    // documentado en el story Destructive de Button), así que la aserción va sobre la clase; el
+    // tamaño y la posición reales en píxeles se verificaron a mano en Storybook con un navegador
+    // real, con A/B contra el commit previo a la regresión del PR #30.
     await expect(removeButton.className.split(' ')).toContain('p-1.5');
+    await expect(removeButton.className.split(' ')).toContain('relative');
+    await expect(removeButton.className).toContain("after:content-['']");
     await expect(removeButton.querySelector('svg')).toHaveClass('h-3', 'w-3');
+
+    // La raíz reintroduce el padding que el PR #30 le había sacado: es la única forma de
+    // reconstruir el alto/ancho histórico (30px de alto) sin volver a inflar el cuerpo, que ya
+    // tiene su propio padding correcto para el caso sin botón de cierre.
+    const root = removeButton.parentElement as HTMLElement;
+    await expect(root.className.split(' ')).toContain('py-0.5');
+    await expect(root.className.split(' ')).toContain('pr-2.5');
 
     await userEvent.click(removeButton);
     await expect(args.onRemove).toHaveBeenCalledTimes(1);
@@ -94,6 +107,14 @@ export const ToggleableAndRemovable: Story = {
     const removeButton = canvas.getByRole('button', { name: 'Remove' });
 
     await expect(canvas.getAllByRole('button')).toHaveLength(2);
+
+    // Mismo fix que en Removable: la raíz reintroduce py-0.5/pr-2.5 (sm con botón de cierre)
+    // para reconstruir el alto/ancho histórico; el botón de cierre reclama esa zona como área
+    // de respuesta vía ::after, sin agrandar su caja visual de 24x24 (ver Chip.tsx).
+    const root = toggle.parentElement as HTMLElement;
+    await expect(root.className.split(' ')).toContain('py-0.5');
+    await expect(root.className.split(' ')).toContain('pr-2.5');
+    await expect(removeButton.className.split(' ')).toContain('relative');
 
     // Foco independiente: clic en el cuerpo enfoca solo el Toggle, Tab mueve al botón de cierre
     // sin activarlo, y cada uno dispara su propio callback sin interferir con el otro.

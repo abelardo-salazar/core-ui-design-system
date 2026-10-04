@@ -15,11 +15,14 @@
   padding propio. Tocar la píldora, fuera del texto mismo, no hacía nada. El padding ahora vive
   en el cuerpo (`Toggle`/`span`) y el botón de cierre pasa a tamaño explícito en `md`/`lg`
   (antes derivado del padding) — ambos cubren ahora el alto completo de la píldora y llegan a
-  su borde exterior, en los tres tamaños. Efecto secundario esperado en `sm` cuando hay botón
-  de cierre (`Removable`/`ToggleableAndRemovable`): la píldora se angosta y achica unos
-  px — esa "zona muerta" alrededor del botón nunca respondía al toque, así que eliminarla era
-  el propio fix. `sm` sin botón de cierre (`Static`/`Toggleable`) queda pixel-idéntico a antes
-  (verificado con bounding boxes A/B contra `main` en navegador real).
+  su borde exterior, en los tres tamaños. **`sm` es pixel-idéntico al aspecto histórico en todos
+  los casos**, también con botón de cierre (`Removable`/`ToggleableAndRemovable`): la raíz
+  reintroduce ahí, y solo ahí, el padding que necesitaba para no perder su tamaño, y el botón de
+  cierre reclama esa zona como área de respuesta vía un `::after` invisible — sin agrandar su
+  caja visual, así que el anillo de foco del botón de cierre también queda idéntico (círculo de
+  24x24 en la misma posición). Verificado con bounding boxes A/B contra el commit previo a esta
+  escala (`1be50ab`) en navegador real, con tres largos de texto distintos, y con
+  `elementFromPoint` sobre la zona antes muerta.
 
 ## [0.4.4] - 2026-10-04
 
