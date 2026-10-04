@@ -31,6 +31,11 @@ export const Default: Story = {
     // solo cambia la primitiva por debajo.
     const switchControl = canvas.getByRole('switch');
 
+    // --ring/--color-ring no existen en el sistema de tokens: ring-ring no resolvía a
+    // ningún color y el anillo de foco quedaba invisible al navegar por teclado.
+    await expect(switchControl.className.split(' ')).toContain('focus-visible:ring-primary');
+    await expect(switchControl.className.split(' ')).not.toContain('focus-visible:ring-ring');
+
     await expect(switchControl).toHaveAttribute('aria-checked', 'false');
 
     // Click: toggle a checked.
