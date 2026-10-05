@@ -203,7 +203,31 @@ export const Medium: Story = {
   },
 };
 
-// 6. size="lg": tamaño táctil (44px). Mismo criterio que Medium.
+// 6. size="md", Toggle SIN botón de cierre: caso no cubierto por Medium (que siempre tiene
+// onRemove). Acá el extremo DERECHO del Toggle es también el extremo derecho de la píldora
+// (a diferencia de Medium, donde linda con el gap-1 interior) — necesita rounded-full completo,
+// no rounded-l-full, o esas dos esquinas quedan cuadradas y responden fuera de la curva visible
+// de la píldora (bug corregido acá; confirmado con un barrido sistemático de elementFromPoint
+// en Storybook con un navegador real — ver PR).
+export const MediumToggleable: Story = {
+  args: {
+    children: 'Design',
+    size: 'md',
+    defaultPressed: false,
+    onPressedChange: fn(),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const toggle = canvas.getByRole('button', { name: 'Design' });
+
+    await expect(toggle.className.split(' ')).toContain('relative');
+    await expect(toggle.className).toContain("after:content-['']");
+    await expect(toggle.className).toContain('after:rounded-full');
+    await expect(toggle.className).not.toContain('after:rounded-l-full');
+  },
+};
+
+// 7. size="lg": tamaño táctil (44px). Mismo criterio que Medium.
 export const Large: Story = {
   args: {
     children: 'Design',
@@ -244,5 +268,26 @@ export const Large: Story = {
 
     await userEvent.click(toggle);
     await expect(args.onPressedChange).toHaveBeenLastCalledWith(true);
+  },
+};
+
+// 8. size="lg", Toggle SIN botón de cierre: mismo caso que MediumToggleable, en el tamaño
+// táctil (44px) — acá la esquina cuadrada sin corregir dejaba hasta ~9px de hueco en diagonal
+// fuera de la curva visible que igual activaban el Toggle.
+export const LargeToggleable: Story = {
+  args: {
+    children: 'Design',
+    size: 'lg',
+    defaultPressed: false,
+    onPressedChange: fn(),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const toggle = canvas.getByRole('button', { name: 'Design' });
+
+    await expect(toggle.className.split(' ')).toContain('relative');
+    await expect(toggle.className).toContain("after:content-['']");
+    await expect(toggle.className).toContain('after:rounded-full');
+    await expect(toggle.className).not.toContain('after:rounded-l-full');
   },
 };
