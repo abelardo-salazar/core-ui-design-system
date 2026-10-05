@@ -112,20 +112,27 @@ const Chip = React.forwardRef<HTMLSpanElement, ChipProps>(
 
     // Extiende el área de respuesta del Toggle hasta el borde EXTERIOR de la raíz, solo
     // verticalmente (inset-x-0: nunca invade el gap-1 ni la zona del botón de cierre) y con
-    // rounded-l-full — mismo criterio que CLOSE_BUTTON_HIT_AREA pero en el borde IZQUIERDO de la
-    // píldora, donde vive el Toggle (sin el radio, las esquinas del rectángulo quedarían fuera
-    // de la silueta visible, el mismo problema que tenía el botón de cierre sin rounded-r-full).
+    // radio — mismo criterio que CLOSE_BUTTON_HIT_AREA pero en el borde IZQUIERDO de la píldora,
+    // donde vive el Toggle (sin el radio, las esquinas del rectángulo quedarían fuera de la
+    // silueta visible, el mismo problema que tenía el botón de cierre sin rounded-r-full).
     // sm con botón de cierre: cubre la franja que rootDeadZoneRestore agranda (py-0.5) y que el
     // Toggle, al estirarse solo al alto de la fila (24px), no alcanzaba por sí solo — sin botón
     // de cierre, el Toggle ya llega exactamente al borde interior (nada que corregir), y el
     // borde en sí queda fuera a propósito, igual que en el ✕ de sm.
     // md/lg: cubre el borde en sí (1px) — con o sin botón de cierre al lado, el Toggle es un
-    // control real que debe alcanzar el tamaño táctil completo por su cuenta.
+    // control real que debe alcanzar el tamaño táctil completo por su cuenta. CON botón de
+    // cierre, el extremo derecho del Toggle linda con el gap-1 (interior de la píldora): ahí
+    // rounded-l-full es correcto, solo la esquina izquierda es exterior. SIN botón de cierre, el
+    // extremo derecho del Toggle ES el extremo derecho de la píldora — las dos esquinas son
+    // exteriores, así que necesita rounded-full completo (si no, esas esquinas quedan cuadradas
+    // y responden en el hueco entre la curva y la esquina, fuera de la silueta visible).
     const toggleHitArea =
       size === 'sm'
         ? onRemove &&
           "relative after:content-[''] after:absolute after:rounded-l-full after:inset-x-0 after:-top-0.5 after:-bottom-0.5"
-        : "relative after:content-[''] after:absolute after:rounded-l-full after:inset-x-0 after:-top-px after:-bottom-px";
+        : onRemove
+          ? "relative after:content-[''] after:absolute after:rounded-l-full after:inset-x-0 after:-top-px after:-bottom-px"
+          : "relative after:content-[''] after:absolute after:rounded-full after:inset-x-0 after:-top-px after:-bottom-px";
 
     const body = isToggle ? (
       <TogglePrimitive.Root
