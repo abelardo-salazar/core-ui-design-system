@@ -3,11 +3,53 @@ import { type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import { badgeVariants } from './badgeVariants';
 
-export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeVariants> {}
+type BadgeVariantProps = Omit<VariantProps<typeof badgeVariants>, 'interactive'>;
 
-function Badge({ className, variant, ...props }: BadgeProps) {
-  return <div className={cn(badgeVariants({ variant }), className)} {...props} />;
+export interface InteractiveBadgeProps
+  extends BadgeVariantProps, React.ButtonHTMLAttributes<HTMLButtonElement> {
+  /** Renderiza un <button> real: foco, Enter/Space y disabled nativos, sin handlers propios. */
+  interactive: true;
+}
+
+export interface StaticBadgeProps
+  extends BadgeVariantProps, Omit<React.HTMLAttributes<HTMLDivElement>, 'onClick'> {
+  interactive?: false;
+}
+
+// Unión discriminada por `interactive`, no un solo tipo con todo opcional: así
+// `<Badge onClick={fn}>` sin `interactive` es un error de compilación (antes compilaba y
+// renderizaba un <div> con el click funcionando pero sin foco por teclado ni semántica de
+// botón) en vez de perder el hover/foco en silencio. `onClick` se omite explícitamente del
+// lado <div> en vez de dejarlo heredar de HTMLAttributes para que el error sea sobre esa
+// prop puntual, no sobre toda la forma del objeto.
+export type BadgeProps = InteractiveBadgeProps | StaticBadgeProps;
+
+function Badge(props: BadgeProps) {
+  const { className, variant, size, interactive = false, ...rest } = props;
+
+  if (interactive) {
+    // El cast hace falta porque TS no sigue el discriminante `interactive` a través de un
+    // rest-spread sobre una unión (el chequeo en runtime ya garantiza que `rest` es la rama
+    // de botón acá; TS no puede inferirlo solo).
+    const { type = 'button', ...buttonProps } = rest as Omit<
+      InteractiveBadgeProps,
+      'className' | 'variant' | 'size' | 'interactive'
+    >;
+    return (
+      <button
+        type={type}
+        className={cn(badgeVariants({ variant, size, interactive: true }), className)}
+        {...buttonProps}
+      />
+    );
+  }
+
+  return (
+    <div
+      className={cn(badgeVariants({ variant, size, interactive: false }), className)}
+      {...(rest as Omit<StaticBadgeProps, 'className' | 'variant' | 'size' | 'interactive'>)}
+    />
+  );
 }
 
 export { Badge };
