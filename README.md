@@ -234,7 +234,7 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
 | `Button`    | Botón interactivo polimórfico | `variant`, `size`, `isLoading`, `asChild`, `fullWidth`, `startIcon`, `endIcon`, `className` |
 | `Heading`   | Títulos semánticos            | `level`, `as`, `className`                                                                  |
 | `Text`      | Párrafos y texto cuerpo       | `size`, `weight`, `as`, `className`                                                         |
-| `Badge`     | Etiquetas de estado           | `variant`, `size`, `className`                                                              |
+| `Badge`     | Etiquetas de estado           | `variant`, `size`, `interactive`, `className`                                               |
 | `Avatar`    | Imagen de perfil con fallback | `src`, `alt`, `fallback`, `className`                                                       |
 | `Separator` | Divisor visual                | `orientation`, `className`                                                                  |
 | `Skeleton`  | Placeholder de carga          | `className`                                                                                 |
@@ -348,20 +348,22 @@ Nota: usa `className` para ajuste fino (color, margen, tracking). Para mantener 
 
 ### Badge — Uso y Props
 
-- **Exports:** `Badge`.
+- **Exports:** `Badge`, `badgeVariants`.
 - **Props principales:**
   - `variant?: 'default' | 'secondary' | 'destructive' | 'outline' | 'ghost'` — define el estilo visual.
-  - `size?: 'sm' | 'md' | 'lg' | 'icon'` — define la altura y el padding (mismos nombres de tamaño que `Button`; default `'sm'`).
-  - `className?: string` — clases adicionales (p. ej. para tamaño, espaciado o tipografía).
-  - Acepta `React.HTMLAttributes<HTMLDivElement>` (eventos y atributos HTML estándar).
+  - `size?: 'sm' | 'md' | 'lg' | 'icon'` (default `'sm'`) — escala **propia de `Badge`** (no la de `Button`), compacta, pensada para una etiqueta de estado, no un control. Alturas reales (borde + padding vertical + line-height del propio `text-*`, sin `h-*` fijas salvo `icon`, medidas en navegador): `sm` ≈ 22px, `md` ≈ 26px, `lg` ≈ 30px, `icon` = 24px exactos (cuadrado, sin padding horizontal — para un ícono o un número corto).
+  - `interactive?: boolean` (default `false`) — con `interactive`, `Badge` renderiza un `<button type="button">` real: foco por teclado, `Enter`/`Space` y `disabled` nativos del navegador, sin que `Badge` sintetice ningún handler propio. Sin `interactive`, sigue siendo un `<div>`. `cursor-pointer`, el anillo de foco (`focus-visible:ring-2 ring-primary ring-offset-2`) y el hover por color **solo existen cuando `interactive` es `true`** — en un `<div>` no-interactivo serían CSS muerto (nunca se dispara `:focus-visible` sin `tabIndex`).
+  - `className?: string` — clases adicionales.
+  - **Con `interactive: true`:** acepta `React.ButtonHTMLAttributes<HTMLButtonElement>` (`onClick`, `disabled`, `type`, etc). **Sin `interactive`** (o `interactive: false`): acepta `React.HTMLAttributes<HTMLDivElement>`, **sin `onClick`** — `BadgeProps` es una unión discriminada por `interactive`, así que `<Badge onClick={fn}>` sin `interactive` es un error de compilación (ver nota de migración abajo), no un `<div>` con el click funcionando pero sin foco por teclado.
 
-La implementación usa `class-variance-authority` con variantes definidas en `badgeVariants.ts`. Las variantes por defecto son `variant: 'default'`, `size: 'sm'`.
+La implementación usa `class-variance-authority` con variantes definidas en `badgeVariants.ts`. Las variantes por defecto son `variant: 'default'`, `size: 'sm'`, `interactive: false`.
 
-> **Nota sobre `variant="destructive"` y el token `--error-focus-content`:** mismo caso que `Button` (`variant="destructive"`) — `error` es el único color del sistema donde el base es claro y su `-focus` (hover) es oscuro, así que el texto necesita un `-focus-content` propio (`hover:text-error-focus-content`) distinto del `-content` del estado base. Ver la nota en la sección de `Button` y `src/index.css` para el detalle completo.
+> **Nota sobre `variant="destructive"` y el token `--error-focus-content`:** mismo caso que `Button` (`variant="destructive"`) — `error` es el único color del sistema donde el base es claro y su `-focus` (hover) es oscuro, así que el texto necesita un `-focus-content` propio (`hover:text-error-focus-content`) distinto del `-content` del estado base. Esta clase, como el resto del hover, solo se aplica con `interactive: true`. Ver la nota en la sección de `Button` y `src/index.css` para el detalle completo.
 
 Uso (ejemplos):
 
 ```tsx
+// Estático (default) — <div>, sin hover ni foco, para una etiqueta de estado.
 <div className="flex gap-2">
   <Badge>Default</Badge>
   <Badge variant="secondary">Secondary</Badge>
@@ -370,11 +372,31 @@ Uso (ejemplos):
   <Badge variant="ghost">Ghost</Badge>
 </div>
 
-// Personalizar tamaño/alto
+// Las cuatro escalas
+<Badge size="sm">sm</Badge>
+<Badge size="md">md</Badge>
+<Badge size="lg">lg</Badge>
+<Badge size="icon">9</Badge>
+
+// Interactivo — <button> real, con onClick
+<Badge interactive onClick={() => console.log('clicked')}>
+  Interactive
+</Badge>
+
+// Enlace con el look de Badge: badgeVariants es la variante estilística, sin asChild/href —
+// el consumidor arma su propio <a>/<Link> y le aplica las clases.
+import Link from 'next/link';
+<Link href="/billing" className={badgeVariants({ variant: 'secondary', interactive: true })}>
+  Ver facturación
+</Link>
+
+// Personalizar tamaño/alto puntual (className sigue ganando sobre la variante vía twMerge)
 <Badge className="text-[10px] px-1 py-0 h-5">Small</Badge>
 ```
 
-Nota: usa `className` para ajustar padding/alto/texto; `badgeVariants` ya aplica `inline-flex`, `rounded-full`, `px-2.5 py-0.5` y utilidades de enfoque.
+**Migración desde `<Badge onClick={fn}>` (sin `interactive`):** antes compilaba y el click funcionaba, pero sobre un `<div>` sin foco por teclado ni semántica de botón — un bug de accesibilidad real y silencioso. Ahora es un error de compilación; cambiar a `<Badge interactive onClick={fn}>`.
+
+**`Badge` vs `Chip`:** un `Badge` interactivo compacto mide ~22px y **no cumple el objetivo táctil de 44px** (WCAG 2.5.5 / Apple HIG) — es para usos incidentales, una etiqueta que además abre algo al tocarla (p. ej. un estado que lleva al detalle). Para un control pensado para tocarse a propósito (filtros, chips seleccionables), usar `Chip`, que en `size="lg"` ya mide 44px de alto real, incluyendo el área de respuesta.
 
 ### Skeleton — Uso y Props
 

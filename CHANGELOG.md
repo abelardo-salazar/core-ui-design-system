@@ -7,6 +7,42 @@
 - **`Chip` gana una escala de tamaños propia: `size?: 'sm' | 'md' | 'lg'`** (default `'sm'`,
   compatible hacia atrás). `md` = 32px de alto; `lg` = 44px de alto, el tamaño táctil.
 
+- **`Badge` gana una escala de tamaños propia** (`size?: 'sm' | 'md' | 'lg' | 'icon'`, default
+  `'sm'`): `sm` ≈ 22px de alto, `md` ≈ 26px, `lg` ≈ 30px, `icon` = 24px exactos (cuadrado, sin
+  padding horizontal — para un ícono o un número corto). Alturas = borde + padding vertical +
+  line-height del propio `text-*` de cada escalón, sin `h-*` fijas (salvo `icon`), medidas a
+  mano en Storybook con un navegador real.
+
+- **`Badge` gana `interactive?: boolean`** (default `false`). Con `interactive`, `Badge`
+  renderiza un `<button type="button">` real (foco, Enter/Space y `disabled` nativos del
+  navegador, sin que `Badge` sintetice ningún handler) en vez de un `<div>`; `cursor-pointer`,
+  el anillo de foco (`focus-visible:ring-2 ring-primary ring-offset-2`) y el hover por color
+  solo existen en ese caso — antes vivían siempre en la base, eran CSS muerto en un `<div>` sin
+  `tabIndex` (nunca dispara `:focus-visible`). `badgeVariants` (ya exportado) acepta
+  `interactive: true` para que un consumidor estilice su propio `<a>`/`Link` con el mismo look;
+  `Badge` no agrega `asChild` ni `href`. Un `Badge` interactivo compacto (~22px) no cumple el
+  objetivo táctil de 44px — es para usos incidentales (una etiqueta que abre algo), no para
+  controles táctiles (filtros): para eso está `Chip`, que ya mide 44px en `lg`.
+
+### Changed
+
+- **Rompe: el alto por defecto de `Badge` pasa de 32px a ~22px.** Era un efecto colateral del
+  fix de abajo (`size` no hacía nada, así que el único resultado posible era 32px) — ahora que
+  `size` es funcional, el default (`sm`) usa la escala propia y compacta de `Badge`, pensada
+  para una etiqueta de estado, no copiada de `Button`. Para recuperar el aspecto anterior en un
+  `Badge` puntual: `<Badge className="h-8 px-3">`.
+
+- **Rompe: `<Badge onClick={fn}>` sin `interactive` ya no compila.** Antes compilaba y el click
+  funcionaba, pero sobre un `<div>` sin foco por teclado ni semántica de botón (un bug de
+  accesibilidad real, silencioso). Ahora `onClick` (y el resto de `ButtonHTMLAttributes`) solo
+  existen en el tipo cuando se pasa `interactive` — migrar a `<Badge interactive onClick={fn}>`,
+  que renderiza un `<button>` real con foco/teclado/`disabled` correctos de fábrica.
+
+- **Rompe: el hover y el anillo de foco de `Badge` ya no están presentes sin `interactive`.**
+  Si algún consumidor dependía de esas clases en un `<div>` no-interactivo (poco probable, eran
+  CSS muerto: nunca se veían al navegar por teclado), hay que agregar `interactive` o
+  replicarlas a mano vía `className`.
+
 ### Fixed
 
 - **El área táctil real del `Chip` era solo el texto**, sin importar el tamaño: el padding que
@@ -49,6 +85,15 @@
   de esta escala — no solo su caja visual, que por construcción mide ~1px menos que la raíz.
   `md`/`lg` no están publicados: este ajuste de ±1px en su reposo es una corrección, documentada
   acá, no un cambio de API.
+
+- **La prop `size` de `Badge` era un no-op.** `Badge.tsx` desestructuraba `size` de las props
+  pero nunca lo pasaba a `badgeVariants()` — `<Badge>`, `<Badge size="lg">` y
+  `<Badge size="icon">` producían exactamente las mismas clases (el default de `cva`, una
+  escala copiada 1:1 de `Button`, con la que además convivía sin resolver el padding propio de
+  la base de `badgeVariants`). Confirmado renderizando el `Badge` real del `dist` publicado, no
+  solo leyendo el código. `size` ahora llega a `cva` y usa la escala propia de `Badge` (ver
+  Added) — el padding/alto/texto de cada tamaño ahora vive SOLO en la variante `size`, nunca
+  también en la base, para no depender de que algo resuelva un conflicto entre ambos.
 
 ## [0.4.4] - 2026-10-04
 

@@ -75,7 +75,11 @@ export const Badges: Story = {
     <div className="flex gap-2">
       <Badge>Default</Badge>
       <Badge variant="secondary">Secondary</Badge>
-      <Badge variant="destructive">Removed</Badge>
+      {/* interactive: true — el hover (compoundVariants) solo existe cuando el badge es
+          interactivo; sin esto no habría ninguna clase hover: que verificar acá abajo. */}
+      <Badge variant="destructive" interactive>
+        Removed
+      </Badge>
       <Badge variant="outline">Outline</Badge>
     </div>
   ),
