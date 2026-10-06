@@ -59,7 +59,7 @@ export const LoadingCard: Story = {
 
       <CardFooter>
         {/* Simulamos un botón */}
-        <Skeleton className="h-10 w-28" />
+        <Skeleton className="h-11 w-28" />
       </CardFooter>
     </Card>
   ),

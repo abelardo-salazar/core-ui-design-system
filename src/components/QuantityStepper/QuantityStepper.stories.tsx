@@ -43,12 +43,13 @@ export const Uncontrolled: Story = {
     const input = canvas.getByRole('spinbutton');
     await expect(input).toHaveValue(3);
 
-    // Touch target: hereda el size="icon" de Button, ahora 44x44 (antes 40x40) — regresión
-    // para el único consumidor real de size="icon" en el repo. El input se sube a h-11 acá
-    // puntualmente para quedar alineado en altura con los botones. El fixture de
-    // vitest-browser no aplica el CSS de utilidades de Tailwind (mismo issue documentado en
-    // el story Destructive de Button), así que la aserción va sobre las clases; el tamaño
-    // real en píxeles y la alineación visual se verificaron a mano en Storybook.
+    // Touch target: los botones heredan el size="icon" de Button (44x44). El input queda
+    // alineado en altura porque Input md ya mide 44px por su cuenta (misma familia de
+    // controles de formulario que Button/Select) — ya no hace falta pisarlo con un className
+    // puntual como antes de esa escala compartida. El fixture de vitest-browser no aplica el
+    // CSS de utilidades de Tailwind (mismo issue documentado en el story Destructive de
+    // Button), así que la aserción va sobre las clases; el tamaño real en píxeles y la
+    // alineación visual se verificaron a mano en Storybook, A/B contra main.
     const incrementButton = canvas.getByRole('button', { name: 'Increase quantity' });
     await expect(incrementButton.className.split(' ')).toEqual(
       expect.arrayContaining(['h-11', 'w-11']),

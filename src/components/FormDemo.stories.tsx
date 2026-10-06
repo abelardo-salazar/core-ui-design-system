@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { expect, within } from 'storybook/test';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from './Card';
 import { Button } from './Button';
+import { Input } from './Input';
 import { Textarea } from './Textarea';
 import { Checkbox } from './Checkbox';
 import { Switch } from './Switch';
@@ -99,5 +100,44 @@ export const SettingsForm: StoryObj = {
       'role',
       'checkbox',
     );
+  },
+};
+
+// Button, Input y el trigger de Select comparten la misma familia de alturas (sm=32px,
+// md=44px, lg=48px) — en una misma fila, usarlos con el mismo size los deja alineados por
+// arriba y por abajo. Acá los tres quedan en su size md (el default de los tres, sin pasarlo
+// explícito): es justo el caso que antes NO alineaba (Button md medía 40px, Input/Select
+// también 40px — alineaban por coincidencia, no por diseño — y un size="icon" de 44px, como
+// los botones de QuantityStepper, rompía esa alineación en 4px).
+export const AlignedFormRow: StoryObj = {
+  render: () => (
+    <div className="flex items-center gap-2">
+      <Input aria-label="Nombre" placeholder="Nombre" />
+      <Select defaultValue="md">
+        <SelectTrigger className="w-32" aria-label="Tamaño">
+          <SelectValue placeholder="Tamaño" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="sm">Chico</SelectItem>
+          <SelectItem value="md">Mediano</SelectItem>
+          <SelectItem value="lg">Grande</SelectItem>
+        </SelectContent>
+      </Select>
+      <Button>Buscar</Button>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const input = canvas.getByPlaceholderText('Nombre');
+    const trigger = canvas.getByRole('combobox');
+    const button = canvas.getByRole('button', { name: 'Buscar' });
+
+    // El fixture headless de vitest-browser no aplica las utilidades de Tailwind ni hace
+    // layout real, así que esto solo puede verificar la clase, no el alto/alineación real en
+    // píxeles (eso se verificó a mano en Storybook con un navegador real, A/B contra main:
+    // los tres con el mismo top/bottom).
+    await expect(input.className.split(' ')).toContain('h-11');
+    await expect(trigger.className.split(' ')).toContain('h-11');
+    await expect(button.className.split(' ')).toContain('h-11');
   },
 };
