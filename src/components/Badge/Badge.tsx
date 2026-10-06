@@ -24,6 +24,18 @@ export interface StaticBadgeProps
 // prop puntual, no sobre toda la forma del objeto.
 export type BadgeProps = InteractiveBadgeProps | StaticBadgeProps;
 
+// La unión sola NO alcanza: en `StaticBadgeProps`, `interactive` es opcional
+// (`interactive?: false`), así que al omitirlo TS no puede usarlo para discriminar y el
+// chequeo de propiedades sobrantes de JSX cae a "¿existe esta prop en ALGÚN miembro de la
+// unión?" — onClick/disabled/type existen en InteractiveBadgeProps, así que `<Badge onClick>`
+// sin `interactive` compilaba igual (bug real de #34, reproducido contra main antes de este
+// fix). Dos firmas sobrecargadas, una por rama, arreglan esto: TS chequea las props sobrantes
+// contra la firma CONCRETA que intenta primero, no contra la unión — ninguna de las dos admite
+// onClick/disabled/type sin `interactive: true` literal. (`disabled`/`type` ni siquiera son
+// parte de HTMLAttributes<HTMLDivElement> — por eso esto también los cubre a ellos, no solo a
+// onClick, sin necesitar ningún Omit/never adicional.)
+function Badge(props: InteractiveBadgeProps): React.ReactElement;
+function Badge(props: StaticBadgeProps): React.ReactElement;
 function Badge(props: BadgeProps) {
   const { className, variant, size, interactive = false, ...rest } = props;
 
