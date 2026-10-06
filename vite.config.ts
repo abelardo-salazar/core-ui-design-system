@@ -50,6 +50,13 @@ export default defineConfig({
     dts({
       insertTypesEntry: true,
       tsconfigPath: './tsconfig.app.json', // Asegúrate que este sea tu tsconfig correcto
+      // Por defecto, dts() toma include/exclude de tsconfig.app.json — que excluye
+      // *.stories.tsx/*.test.tsx, así que ninguno termina en dist/. *.test-d.tsx (test de
+      // tipos puro, ver Badge.types.test-d.tsx) usa ese nombre justamente para que tsc -b SÍ
+      // lo compile — por eso necesita su propia exclusión acá, explícita: pasar `exclude` lo
+      // reemplaza entero en vez de sumarlo al de tsconfig, así que hay que repetir los otros
+      // dos patrones para no perderlos.
+      exclude: ['src/**/*.stories.tsx', 'src/**/*.test.tsx', 'src/**/*.test-d.tsx'],
     }),
   ],
   build: {

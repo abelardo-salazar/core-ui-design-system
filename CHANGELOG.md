@@ -34,8 +34,13 @@
 
 - **Rompe: `<Badge onClick={fn}>` sin `interactive` ya no compila.** Antes compilaba y el click
   funcionaba, pero sobre un `<div>` sin foco por teclado ni semántica de botón (un bug de
-  accesibilidad real, silencioso). Ahora `onClick` (y el resto de `ButtonHTMLAttributes`) solo
-  existen en el tipo cuando se pasa `interactive` — migrar a `<Badge interactive onClick={fn}>`,
+  accesibilidad real, silencioso). `BadgeProps` es una unión discriminada por `interactive`,
+  pero `Badge` también necesita dos firmas sobrecargadas (una por rama) para que esto se
+  cumpla de verdad: con un único parámetro de tipo unión, el chequeo de propiedades sobrantes
+  de JSX se relaja a "¿existe esta prop en ALGÚN miembro de la unión?", así que `onClick`/
+  `disabled`/`type` (presentes en la rama de botón) igual colaban sin `interactive` — regresión
+  real dentro de esta misma versión sin publicar, cubierta ahora con un test de tipos
+  (`Badge.types.test-d.tsx`, compilado por `tsc -b`). Migrar a `<Badge interactive onClick={fn}>`,
   que renderiza un `<button>` real con foco/teclado/`disabled` correctos de fábrica.
 
 - **Rompe: el hover y el anillo de foco de `Badge` ya no están presentes sin `interactive`.**
