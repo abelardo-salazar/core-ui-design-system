@@ -5,20 +5,13 @@
 ### Added
 
 - **`Input` gana un botón de limpiar: `clearable`, `onClear?: () => void` y `clearLabel?: string`**
-  (`aria-label`, default `"Clear"`). Vacía el campo con el setter nativo de `value` más un evento
-  `input` burbujeante, así que el `onChange` del consumidor corre en modo controlado, no
-  controlado y con `register` de react-hook-form; después llama a `onClear` y devuelve el foco al
-  input. La visibilidad sale solo de CSS (`:placeholder-shown`, sin estado interno), así que
-  `reset()`/`setValue()` de RHF no la desincronizan. Sin placeholder se pone `placeholder=" "`.
-  Es un botón cuadrado del alto del input (32/44/48px), pegado a la derecha, y el padding derecho
-  del input se deriva del tamaño (nueva variante `clearable` de `inputVariants`). No se renderiza
-  con `disabled` ni `readOnly`. No maneja Escape: Radix lo escucha en `document` y dentro de un
-  `Dialog`/`Sheet` cerraría el modal. Con `type="search"` se oculta la ✕ nativa.
-  `InputProps` pasa a ser una unión discriminada: `endIcon` no se admite con `clearable`, y
-  `onClear`/`clearLabel` no se admiten sin `clearable`. El uso existente de `endIcon` sin
-  `clearable` no cambia. Una `interface` no puede extender una unión: quien tenga
-  `interface X extends InputProps` debe pasar a extender `InputBaseProps` (exportada).
-  Los contenedores de `startIcon`/`endIcon` ganan `aria-hidden="true"`.
+  (`aria-label` del botón, default `"Clear"`). Vaciar el campo dispara el `onChange` del
+  consumidor (modo controlado, no controlado y `register` de react-hook-form); después se llama a
+  `onClear` y el foco vuelve al input. El botón solo se ve mientras el campo tiene valor, también
+  tras `reset()`/`setValue()` de RHF, y no aparece con `disabled` ni `readOnly`. No limpia con
+  Escape, para no interferir con el cierre de un `Dialog`/`Sheet`. `endIcon` no se admite junto
+  con `clearable`, y `onClear`/`clearLabel` no se admiten sin él (ver Changed). Los contenedores
+  de `startIcon`/`endIcon` ganan `aria-hidden="true"`.
 
 - **`Chip` gana una escala de tamaños propia: `size?: 'sm' | 'md' | 'lg'`** (default `'sm'`,
   compatible hacia atrás). `md` = 32px de alto; `lg` = 44px de alto, el tamaño táctil.
@@ -50,6 +43,15 @@
   siguen resolviendo a `rounded-btn` vía `defaultVariants`, sin cambios.
 
 ### Changed
+
+- **Rompe: `InputProps` pasa de `interface` a unión discriminada por `clearable`.** El uso de
+  `<Input>` no cambia (`endIcon` sin `clearable` compila igual), pero hay dos casos que sí:
+  - `interface X extends InputProps` deja de compilar (una interface no puede extender una
+    unión). Migrar a `interface X extends InputBaseProps` (exportada).
+  - `Omit<InputProps, K>` sigue compilando, pero en silencio pierde la exclusión
+    `clearable`/`endIcon`: `Omit` no reparte sobre uniones. Migrar a un Omit por rama,
+    `type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never`,
+    o a `Omit<InputBaseProps, K>` si no hacen falta `clearable`/`endIcon`.
 
 - **Rompe: el alto por defecto de `Badge` pasa de 32px a ~22px.** Era un efecto colateral del
   fix de abajo (`size` no hacía nada, así que el único resultado posible era 32px) — ahora que
