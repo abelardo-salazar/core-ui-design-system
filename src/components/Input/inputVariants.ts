@@ -17,10 +17,22 @@ export const inputVariants = cva(
         md: 'h-11 px-3',
         lg: 'h-12 px-4 text-base',
       },
+      // Reserva a la derecha el ancho del botón de limpiar (cuadrado del alto del input), así
+      // que se deriva del tamaño en compoundVariants en vez de un pr fijo.
+      clearable: {
+        true: '',
+        false: '',
+      },
     },
+    compoundVariants: [
+      { clearable: true, size: 'sm', class: 'pr-8' },
+      { clearable: true, size: 'md', class: 'pr-11' },
+      { clearable: true, size: 'lg', class: 'pr-12' },
+    ],
     defaultVariants: {
       variant: 'default',
       size: 'md',
+      clearable: false,
     },
   },
 );

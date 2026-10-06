@@ -4,6 +4,22 @@
 
 ### Added
 
+- **`Input` gana un botón de limpiar: `clearable`, `onClear?: () => void` y `clearLabel?: string`**
+  (`aria-label`, default `"Clear"`). Vacía el campo con el setter nativo de `value` más un evento
+  `input` burbujeante, así que el `onChange` del consumidor corre en modo controlado, no
+  controlado y con `register` de react-hook-form; después llama a `onClear` y devuelve el foco al
+  input. La visibilidad sale solo de CSS (`:placeholder-shown`, sin estado interno), así que
+  `reset()`/`setValue()` de RHF no la desincronizan. Sin placeholder se pone `placeholder=" "`.
+  Es un botón cuadrado del alto del input (32/44/48px), pegado a la derecha, y el padding derecho
+  del input se deriva del tamaño (nueva variante `clearable` de `inputVariants`). No se renderiza
+  con `disabled` ni `readOnly`. No maneja Escape: Radix lo escucha en `document` y dentro de un
+  `Dialog`/`Sheet` cerraría el modal. Con `type="search"` se oculta la ✕ nativa.
+  `InputProps` pasa a ser una unión discriminada: `endIcon` no se admite con `clearable`, y
+  `onClear`/`clearLabel` no se admiten sin `clearable`. El uso existente de `endIcon` sin
+  `clearable` no cambia. Una `interface` no puede extender una unión: quien tenga
+  `interface X extends InputProps` debe pasar a extender `InputBaseProps` (exportada).
+  Los contenedores de `startIcon`/`endIcon` ganan `aria-hidden="true"`.
+
 - **`Chip` gana una escala de tamaños propia: `size?: 'sm' | 'md' | 'lg'`** (default `'sm'`,
   compatible hacia atrás). `md` = 32px de alto; `lg` = 44px de alto, el tamaño táctil.
 
