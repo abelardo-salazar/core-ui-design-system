@@ -243,17 +243,20 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
 
 ### Button — Uso y Props
 
-- **Exports:** `Button`.
+- **Exports:** `Button`, `buttonVariants`.
 - **Props principales:**
   - `variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'link' | 'destructive'` — define el estilo visual (ver `buttonVariants.ts`).
-  - `size?: 'sm' | 'md' | 'lg' | 'icon'` — define la altura y el padding.
+  - `size?: 'sm' | 'md' | 'lg' | 'icon'` (default `'md'`) — define la altura y el padding. Alturas: `sm` = 32px, `md` = 44px, `lg` = 48px, `icon` = 44x44 (cuadrado). `sm` es un tamaño compacto, por debajo del objetivo táctil de 44px (WCAG 2.5.5 / Apple HIG) — para una acción secundaria de baja frecuencia, no para el control principal de una fila táctil.
+  - `shape?: 'default' | 'pill'` (default `'default'`) — `default` = `rounded-btn` (el radio estándar del DS); `pill` = `rounded-full`. Con `shape="pill"` y `size="icon"`, el resultado es un círculo de 44x44; el anillo de foco sigue la forma sin configuración adicional.
   - `isLoading?: boolean` — muestra un spinner (`ReloadIcon`) y deshabilita la interacción.
   - `asChild?: boolean` — usa `@radix-ui/react-slot` para renderizar un elemento distinto (p. ej. `<a>`) preservando estilos.
   - `startIcon?: React.ReactNode`, `endIcon?: React.ReactNode` — iconos antes/después del texto.
   - `fullWidth?: boolean` — si es `true` aplica `w-full`.
   - `className?: string` y todos los `React.ButtonHTMLAttributes<HTMLButtonElement>` estándar.
 
-La implementación usa `class-variance-authority` (`buttonVariants`) para combinar variantes y tamaños. Variantes por defecto: `variant: 'primary'`, `size: 'md'`.
+La implementación usa `class-variance-authority` (`buttonVariants`, exportado para que un consumidor arme su propio elemento con el mismo look) para combinar variantes y tamaños. Variantes por defecto: `variant: 'primary'`, `size: 'md'`, `shape: 'default'`.
+
+> **Regla de alineación: `Button`, `Input` y el trigger de `Select` comparten la misma escala de alturas** (`sm` = 32px, `md` = 44px, `lg` = 48px — `Input`/`Select` no tienen `size="icon"`). En una misma fila (p. ej. un campo con un botón de búsqueda al lado, o un `Select` junto a un `Button`), usá el mismo `size` en los tres para que queden alineados por arriba y por abajo — ver el story `AlignedFormRow` en `FormDemo.stories.tsx`.
 
 > **Nota sobre `variant="destructive"` y el token `--error-focus-content`:** en primary/secondary/accent/neutral, tanto el color base como su `-focus` (hover) son oscuros en modo claro, así que un solo `-content` (blanco) sirve como color de texto para los dos estados. `error` es el único color del sistema donde eso no es cierto: el base (`--error`, `#ef4444`) es claro pero el `-focus` (`--error-focus`, `#b91c1c` en claro / `#f87171` en oscuro) es oscuro — la relación se invierte. Por eso `destructive` es la única variante que necesita `hover:text-error-focus-content` además de `hover:bg-error-focus`; sin ese token, el texto (`text-error-content`, negro) cae a 3.25:1 sobre el fondo de hover. No es un descuido de copiar/pegar de las otras variantes — no lo agregues a primary/secondary/accent/neutral, ahí un solo `-content` ya cubre ambos estados. Ver `src/index.css` para el detalle y el cálculo de contraste en ambos temas.
 
@@ -276,9 +279,13 @@ Uso (ejemplos):
 
 // 5. Full width
 <Button fullWidth>Enviar</Button>
+
+// 6. Forma píldora — con size="icon" da un círculo de 44x44
+<Button shape="pill">Aplicar filtro</Button>
+<Button shape="pill" size="icon" aria-label="Agregar"><PlusIcon /></Button>
 ```
 
-Nota: controla apariencia y tamaño via `variant`, `size` y `className`. Si `asChild` es `true`, `Button` no renderiza un `button` nativo sino el elemento hijo con los estilos aplicados.
+Nota: controla apariencia y tamaño via `variant`, `size`, `shape` y `className`. Si `asChild` es `true`, `Button` no renderiza un `button` nativo sino el elemento hijo con los estilos aplicados.
 
 ### Avatar — Uso y Props
 
@@ -425,7 +432,7 @@ Uso (ejemplos):
   </CardContent>
 
   <CardFooter>
-    <Skeleton className="h-10 w-28" />
+    <Skeleton className="h-11 w-28" />
   </CardFooter>
 </Card>
 
@@ -964,7 +971,7 @@ Nota: para accesibilidad, envuelve el `Checkbox` con un `label` o usa `aria-labe
   - `helperText?: string` — texto de ayuda descriptivo (vinculado mediante `aria-describedby`).
   - `startIcon?: React.ReactNode`, `endIcon?: React.ReactNode` — iconos dentro del campo.
   - `variant?: 'default' | 'error'` — variantes visuales (definidas en `inputVariants.ts`).
-  - `size?: 'sm' | 'md' | 'lg'` — tamaños disponibles.
+  - `size?: 'sm' | 'md' | 'lg'` (default `'md'`) — alturas: `sm` = 32px, `md` = 44px, `lg` = 48px. Comparte escala con `Button` y el trigger de `Select` — ver la nota de alineación en la sección de `Button`.
   - `disabled?: boolean`, `className?: string` y el resto de `React.InputHTMLAttributes<HTMLInputElement>`.
 
 La implementación genera un `id` accesible si no se pasa uno y enlaza `aria-invalid` y `aria-describedby` según `error`/`helperText`. Usa `inputVariants` (class-variance-authority) para combinar `variant` y `size`.
@@ -1031,7 +1038,7 @@ const [value, setValue] = useState('');
 - **Exports:** `Select`, `SelectGroup`, `SelectValue`, `SelectTrigger`, `SelectContent`, `SelectLabel`, `SelectItem`, `SelectSeparator`, `SelectScrollUpButton`, `SelectScrollDownButton`.
 - **Props y comportamiento clave:**
   - `Select` (root): `value?: string`, `defaultValue?: string`, `onValueChange?: (value: string) => void` — API para controlado/no-controlado.
-  - `SelectTrigger`: `className?: string`, `asChild?: boolean` — dispara el panel y puede renderizar elementos existentes como trigger.
+  - `SelectTrigger`: `className?: string`, `asChild?: boolean` — dispara el panel y puede renderizar elementos existentes como trigger. Alto fijo de 44px (sin prop `size`: `SelectTrigger` no tiene escala propia) — comparte altura con `Button` `md` e `Input` `md`, ver la nota de alineación en la sección de `Button`.
   - `SelectContent`: `position?: 'popper'` (usa `popper` por defecto en la implementación), `className?: string` — controla el panel desplegable (animaciones, tamaño mínimo).
   - `SelectItem`: `value: string`, `disabled?: boolean`, `className?: string` — representa una opción; usa `ItemIndicator` (check) cuando está seleccionada.
   - `SelectGroup` y `SelectLabel`: para agrupar opciones y mostrar labels de grupo.

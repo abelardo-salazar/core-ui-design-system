@@ -111,12 +111,11 @@ const QuantityStepper = React.forwardRef<HTMLInputElement, QuantityStepperProps>
           // visible propio, el a11y addon de Storybook lo marca "Critical" (Form label).
           aria-label={ariaLabel ?? 'Quantity'}
           className={cn(
+            // Sin override de altura acá: Input md ya da 44px por su cuenta (misma familia de
+            // controles de formulario que Button), alineado de fábrica con los botones +/-
+            // (size="icon" de Button, también 44px) — antes hacía falta pisarlo a mano con
+            // className="h-11" porque Input md medía 40px; ya no.
             'w-full text-center',
-            // h-11: alinea la altura del input con los botones +/- (size="icon" de Button,
-            // 44px tras el fix de touch target) — Input no tiene un size md/lg que dé
-            // exactamente 44px, así que se pisa la altura puntualmente acá vía className
-            // (cn/twMerge) sin tocar Input.tsx ni sus variants.
-            'h-11',
             // El input number nativo trae sus propias flechas de +/-; las ocultamos para
             // que no convivan visualmente con los botones custom de este componente.
             '[&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [appearance:textfield]',

@@ -20,6 +20,10 @@ const meta: Meta<typeof Button> = {
       control: 'radio',
       options: ['sm', 'md', 'lg', 'icon'],
     },
+    shape: {
+      control: 'radio',
+      options: ['default', 'pill'],
+    },
     isLoading: { control: 'boolean' },
     fullWidth: { control: 'boolean' },
     asChild: { control: 'boolean', description: 'Enables polymorphism (render as a, Link, etc)' },
@@ -40,6 +44,14 @@ export const Default: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     const button = canvas.getByRole('button', { name: 'Button UI' });
+
+    // md = 44px, alineado con Input md y el trigger de Select (misma familia de controles de
+    // formulario). Sin shape explícito: debe seguir resolviendo a rounded-btn (defaultVariants),
+    // no a rounded-full — los consumidores que llaman buttonVariants({...}) sin pasar shape
+    // (Calendar, SkipToContent, DatePicker) dependen de este default.
+    await expect(button.className.split(' ')).toContain('h-11');
+    await expect(button.className.split(' ')).toContain('rounded-btn');
+    await expect(button.className.split(' ')).not.toContain('rounded-full');
 
     // Caso nativo habilitado: el click debe disparar el onClick del consumidor
     // tal cual se lo pasamos (la composición de handlers no debe romperse).
@@ -156,6 +168,67 @@ export const Icon: Story = {
     // botón, que es justamente lo que garantiza que el ícono no crece con el hit area.
     await expect(button.className.split(' ')).toContain('[&_svg]:size-4');
     await expect(button.querySelector('svg')).toBeInTheDocument();
+  },
+};
+
+// 4c. shape="pill" — nativo. Riesgo conocido (ya pasó con Badge.size): si Button.tsx no
+// desestructurara `shape` y lo pasara a buttonVariants(), el valor se esparciría a ...props y
+// terminaría como un atributo HTML inválido `shape="pill"` en el DOM en vez de aplicar
+// rounded-full — por eso la aserción explícita de que NO existe ese atributo, no solo de que
+// la clase correcta está presente.
+export const PillShape: Story = {
+  args: {
+    shape: 'pill',
+    children: 'Pill button',
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const button = canvas.getByRole('button', { name: 'Pill button' });
+
+    await expect(button.className.split(' ')).toContain('rounded-full');
+    await expect(button.className.split(' ')).not.toContain('rounded-btn');
+    await expect(button).not.toHaveAttribute('shape');
+  },
+};
+
+// 4d. shape="pill" + asChild — mismo chequeo que PillShape, pero por la rama de Slot: `classes`
+// se computa una sola vez en Button.tsx y alimenta las dos ramas, pero esta story lo confirma
+// en vez de asumirlo a partir de leer el código.
+export const PillShapeAsChild: Story = {
+  args: {
+    shape: 'pill',
+    asChild: true,
+    children: <a href="/">Pill link</a>,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const link = canvas.getByRole('link', { name: 'Pill link' });
+
+    await expect(link.className.split(' ')).toContain('rounded-full');
+    await expect(link.className.split(' ')).not.toContain('rounded-btn');
+    await expect(link).not.toHaveAttribute('shape');
+  },
+};
+
+// 4e. shape="pill" + size="icon": un círculo de 44x44 (rounded-full sobre una caja cuadrada).
+// El anillo de foco sigue la forma sin ningún cambio de código (ver buttonVariants.ts) — eso
+// se confirma visualmente en Storybook con un navegador real, no acá.
+export const PillIcon: Story = {
+  args: {
+    shape: 'pill',
+    size: 'icon',
+    'aria-label': 'Add',
+    children: <Cross2Icon />,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const button = canvas.getByRole('button', { name: 'Add' });
+
+    await expect(button.className.split(' ')).toContain('rounded-full');
+    await expect(button.className.split(' ')).not.toContain('rounded-btn');
+    await expect(button.className.split(' ')).toContain('h-11');
+    await expect(button.className.split(' ')).toContain('w-11');
+    await expect(button).not.toHaveAttribute('shape');
   },
 };
 

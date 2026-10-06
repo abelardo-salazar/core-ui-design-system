@@ -24,6 +24,15 @@
   objetivo táctil de 44px — es para usos incidentales (una etiqueta que abre algo), no para
   controles táctiles (filtros): para eso está `Chip`, que ya mide 44px en `lg`.
 
+- **`Button` gana `shape?: 'default' | 'pill'`** (default `'default'`). Con `shape="pill"`,
+  `rounded-full` en vez de `rounded-btn` — combinado con `size="icon"` da un círculo de 44x44;
+  el anillo de foco sigue la forma sin ningún cambio de código, porque usa el mismo
+  border-radius del elemento. `rounded-btn` deja de vivir en la base de `buttonVariants` y pasa
+  a ser solo el valor de `shape: 'default'` (mismo motivo que el fix de `Badge.size`: la base y
+  una variante no deben aplicar el mismo grupo de utilidades a la vez) — los consumidores que
+  llaman `buttonVariants({...})` sin pasar `shape` (`Calendar`, `SkipToContent`, `DatePicker`)
+  siguen resolviendo a `rounded-btn` vía `defaultVariants`, sin cambios.
+
 ### Changed
 
 - **Rompe: el alto por defecto de `Badge` pasa de 32px a ~22px.** Era un efecto colateral del
@@ -47,6 +56,15 @@
   Si algún consumidor dependía de esas clases en un `<div>` no-interactivo (poco probable, eran
   CSS muerto: nunca se veían al navegar por teclado), hay que agregar `interactive` o
   replicarlas a mano vía `className`.
+
+- **Rompe: `Button` `size="md"`, `Input` `size="md"` y el trigger de `Select` pasan de 40px a
+  44px de alto.** Los tres comparten la misma escala de alturas (son la misma familia de
+  controles de formulario) y antes medían 40px — una fila con un botón `size="icon"` (ya 44px
+  desde el fix de touch target) quedaba desalineada 4px contra su propio `Button` `md` al lado.
+  Mover los tres a la vez mantiene la fila alineada en vez de romperla de un lado. `sm` (32px)
+  y `lg` (48px) no cambian en `Button` ni en `Input`. Para recuperar el aspecto anterior en un
+  uso puntual: `className="h-10"` (gana sobre la variante vía `twMerge`, igual que cualquier
+  otro ajuste de tamaño por `className`).
 
 ### Fixed
 

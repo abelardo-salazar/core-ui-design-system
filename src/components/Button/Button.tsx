@@ -22,6 +22,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       className,
       variant,
       size,
+      shape,
       fullWidth,
       asChild = false,
       isLoading = false,
@@ -35,7 +36,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref,
   ) => {
     const Comp = asChild ? Slot : 'button';
-    const classes = cn(buttonVariants({ variant, size, fullWidth, className }));
+    // `classes` se computa UNA sola vez y alimenta las dos ramas de abajo (nativa y asChild) —
+    // por eso basta con desestructurar `shape` acá arriba y pasarlo acá: si no se desestructura,
+    // se esparce a `...props` y termina como atributo HTML `shape="pill"` en el DOM en vez de
+    // aplicar la clase (mismo riesgo que ya pasó con `size` en Badge).
+    const classes = cn(buttonVariants({ variant, size, shape, fullWidth, className }));
     const isDisabled = isLoading || disabled;
 
     if (asChild) {

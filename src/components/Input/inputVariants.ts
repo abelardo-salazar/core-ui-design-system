@@ -10,10 +10,11 @@ export const inputVariants = cva(
         default: 'border-base-300 focus-visible:ring-primary focus-visible:border-primary',
         error: 'border-error focus-visible:ring-error text-error-focus placeholder:text-error/50',
       },
-      // Sizes (height and padding)
+      // Sizes (height and padding). md = 44px: alinea con Button md y el trigger de Select
+      // (misma familia de controles de formulario) — sm (32px) y lg (48px) no cambian.
       size: {
         sm: 'h-8 px-2 text-xs',
-        md: 'h-10 px-3',
+        md: 'h-11 px-3',
         lg: 'h-12 px-4 text-base',
       },
     },
