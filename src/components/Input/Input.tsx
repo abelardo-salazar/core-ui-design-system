@@ -40,6 +40,21 @@ export interface ClearableInputProps extends InputBaseProps {
 // error salga de la asignabilidad y no del chequeo de props sobrantes, que contra una unión se
 // relaja a "¿existe en ALGÚN miembro?" (el bug que obligó a Badge a usar sobrecargas).
 // `clearable: boolean` (no `true`) para que `clearable={dinámico}` compile sin endIcon.
+/**
+ * Props de `Input`: unión discriminada por `clearable`.
+ *
+ * `Omit<InputProps, K>` NO preserva la exclusión `clearable`/`endIcon`: `Omit` no reparte sobre
+ * uniones, colapsa las dos ramas en un solo objeto y `{ clearable: true, endIcon }` vuelve a
+ * compilar. Para derivar props, repartir el Omit por rama:
+ *
+ * ```ts
+ * type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+ * type MyProps = DistributiveOmit<InputProps, 'size'>;
+ * ```
+ *
+ * o partir de `InputBaseProps`, que además sirve para `interface X extends ...` (una interface
+ * no puede extender esta unión).
+ */
 export type InputProps = InputWithEndIconProps | ClearableInputProps;
 
 // Setter nativo de `value`: React instala un tracker sobre la instancia, así que `input.value = ''`
