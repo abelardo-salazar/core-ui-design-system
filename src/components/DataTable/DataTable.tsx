@@ -1,9 +1,11 @@
 'use client';
 
+import type * as React from 'react';
 import { useTable, type ColumnDef, type RowData } from '@tanstack/react-table';
 import { CaretDownIcon, CaretSortIcon, CaretUpIcon, MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { cn } from '../../utils/cn';
 import { Button } from '../Button';
+import { EmptyState, EmptyStateTitle } from '../EmptyState';
 import { Input } from '../Input';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../Table';
 import { features } from './dataTableFeatures';
@@ -22,13 +24,25 @@ export interface DataTableProps<TData extends RowData> {
   data: TData[];
   /** Placeholder de la caja de búsqueda global. Siempre visible: no es opcional vía prop. */
   searchPlaceholder?: string;
+  /**
+   * Contenido de la fila vacía (sin datos o filtro sin resultados). Por defecto, un
+   * `EmptyState` `sm` con el título "Sin resultados.".
+   */
+  emptyState?: React.ReactNode;
   className?: string;
 }
+
+const defaultEmptyState = (
+  <EmptyState size="sm">
+    <EmptyStateTitle>Sin resultados.</EmptyStateTitle>
+  </EmptyState>
+);
 
 function DataTable<TData extends RowData>({
   columns,
   data,
   searchPlaceholder = 'Buscar...',
+  emptyState = defaultEmptyState,
   className,
 }: DataTableProps<TData>) {
   const table = useTable({ features, columns, data });
@@ -104,8 +118,11 @@ function DataTable<TData extends RowData>({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columnCount} className="h-24 text-center text-base-content/65">
-                Sin resultados.
+              {/* Sin data-label: en modo tarjeta no cuelga ninguna etiqueta de columna. El
+                  div w-full es necesario porque bajo `lg` Table pone el td en flex
+                  justify-between, que dejaría un hijo único pegado a la izquierda. */}
+              <TableCell colSpan={columnCount} className="text-center">
+                <div className="w-full">{emptyState}</div>
               </TableCell>
             </TableRow>
           )}
