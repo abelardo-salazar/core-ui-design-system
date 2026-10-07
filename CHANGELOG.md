@@ -4,15 +4,13 @@
 
 ### Added
 
-- **`SheetBody`: zona con scroll del `Sheet`, con header y footer fijos en los cuatro lados.**
-  Va entre `SheetHeader` y `SheetFooter`; el footer queda fijo por estar fuera del body, sin
-  `sticky`. Compensa el padding del panel con márgenes negativos, así que la barra de scroll
-  queda pegada al borde y el overflow no recorta los anillos de foco. `SheetContent` pasa a
-  `flex flex-col`, `top`/`bottom` tienen `max-h-[85dvh]` y el panel entero hace scroll como
-  respaldo si no se usa `SheetBody` (la ✕ se desplaza con el contenido en ese caso). Los bordes
-  que tocan el viewport respetan el safe area (`max(1.5rem, env(safe-area-inset-*))`), lo que
-  solo surte efecto si la app declara `viewportFit: 'cover'`. `SheetHeader` reserva el espacio
-  de la ✕ para que el título no quede debajo.
+- **`SheetBody`: zona con scroll del `Sheet`.** Se coloca entre `SheetHeader` y `SheetFooter`:
+  el contenido largo hace scroll dentro del body y header y footer quedan siempre visibles, en
+  los cuatro lados. `top` y `bottom` ocupan como máximo el 85% del alto. Sin `SheetBody` el
+  panel entero hace scroll y la ✕ se desplaza con el contenido; para migrar, envolver el bloque
+  central en `<SheetBody>`. El panel y la ✕ respetan el safe area de los bordes que tocan el
+  viewport si la app declara `viewportFit: 'cover'`. La ✕ muestra el anillo de foco solo con
+  teclado.
 
 - **`Input` gana un botón de limpiar: `clearable`, `onClear?: () => void` y `clearLabel?: string`**
   (`aria-label` del botón, default `"Clear"`). Vaciar el campo dispara el `onChange` del
