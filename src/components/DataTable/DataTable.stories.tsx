@@ -3,6 +3,16 @@ import { createColumnHelper } from '@tanstack/react-table';
 import { expect, userEvent, within } from 'storybook/test';
 import { DataTable } from './DataTable';
 import { features } from './dataTableFeatures';
+import { PersonIcon } from '@radix-ui/react-icons';
+import { Button } from '../Button';
+import {
+  // Alias: la story "EmptyState" de este archivo ya usa ese nombre.
+  EmptyState as EmptyStateRoot,
+  EmptyStateActions,
+  EmptyStateDescription,
+  EmptyStateIcon,
+  EmptyStateTitle,
+} from '../EmptyState';
 
 interface Person {
   id: string;
@@ -189,13 +199,51 @@ export const EmptyState: Story = {
 
     await userEvent.type(searchBox, 'zzzzz');
 
-    await expect(canvas.getByText('Sin resultados.')).toBeInTheDocument();
+    // Por defecto: EmptyState sm con el título de siempre.
+    const title = canvas.getByText('Sin resultados.');
+    await expect(title.tagName).toBe('P');
+    const root = title.closest('[data-size]');
+    await expect(root).toHaveAttribute('data-size', 'sm');
 
-    const emptyCell = canvas.getByText('Sin resultados.');
-    await expect(emptyCell.tagName).toBe('TD');
+    const emptyCell = title.closest('td')!;
     await expect(emptyCell.getAttribute('colspan')).toBe('3');
+    // Sin data-label: en modo tarjeta (bajo lg) no cuelga ninguna etiqueta de columna.
+    await expect(emptyCell).not.toHaveAttribute('data-label');
 
     // Una sola fila de datos (la del estado vacío) además de la fila de header.
+    await expect(canvas.getAllByRole('row')).toHaveLength(2);
+  },
+};
+
+// 7. Estado vacío propio: emptyState reemplaza al default dentro de la misma celda.
+export const CustomEmptyState: Story = {
+  render: () => (
+    <DataTable
+      columns={columns}
+      data={[]}
+      emptyState={
+        <EmptyStateRoot size="sm">
+          <EmptyStateIcon>
+            <PersonIcon />
+          </EmptyStateIcon>
+          <EmptyStateTitle>Todavía no hay personas</EmptyStateTitle>
+          <EmptyStateDescription>Invitá a alguien para empezar.</EmptyStateDescription>
+          <EmptyStateActions>
+            <Button size="sm">Invitar</Button>
+          </EmptyStateActions>
+        </EmptyStateRoot>
+      }
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.queryByText('Sin resultados.')).not.toBeInTheDocument();
+
+    const title = canvas.getByText('Todavía no hay personas');
+    const emptyCell = title.closest('td')!;
+    await expect(emptyCell.getAttribute('colspan')).toBe('3');
+    await expect(emptyCell).not.toHaveAttribute('data-label');
+    await expect(within(emptyCell).getByRole('button', { name: 'Invitar' })).toBeInTheDocument();
     await expect(canvas.getAllByRole('row')).toHaveLength(2);
   },
 };
