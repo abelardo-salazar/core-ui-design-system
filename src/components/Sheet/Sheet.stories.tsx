@@ -26,6 +26,16 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+const CLOSE_SAFE_TOP = 'top-[calc(0.125rem_+_env(safe-area-inset-top))]';
+const CLOSE_SAFE_RIGHT = 'right-[calc(0.125rem_+_env(safe-area-inset-right))]';
+
+// Anillo dentro del área táctil y sin separación, para que el overflow del panel no lo
+// recorte; solo con teclado (focus-visible).
+const expectInsetFocusRing = async (closeButton: HTMLElement) => {
+  await expect(closeButton).toHaveClass('focus-visible:ring-2', 'focus-visible:ring-inset');
+  await expect(closeButton.className).not.toMatch(/ring-offset/);
+};
+
 const SheetDemo = ({ side }: { side: 'top' | 'right' | 'bottom' | 'left' }) => (
   <Sheet>
     <SheetTrigger asChild>
@@ -79,18 +89,14 @@ export const Right: Story = {
     await expect(dialog.contains(document.activeElement)).toBe(true);
 
     // Touch target: p-3.5 (14px) lleva el hit box a 44x44 (Apple HIG) sin que el ícono
-    // (h-4 w-4, 16x16) cambie de tamaño; right-0.5/top-0.5 (16px - 14px de padding)
-    // compensa el offset para que el ícono quede en el mismo lugar visual que con
-    // right-4/top-4 sin padding. El fixture de vitest-browser no aplica el CSS de
-    // utilidades de Tailwind (mismo issue documentado en el story Destructive de Button),
-    // así que la aserción va sobre las clases; el tamaño y la posición reales en píxeles
-    // (44x44, ícono a 16px del borde superior/derecho) se verificaron a mano en Storybook
-    // con devtools de un navegador real, en ambos temas.
+    // (h-4 w-4, 16x16) cambie de tamaño; el offset de 2px + safe area deja el ícono a 16px
+    // del borde. El fixture de vitest-browser no aplica el CSS de utilidades de Tailwind
+    // (mismo issue documentado en el story Destructive de Button), así que la aserción va
+    // sobre las clases; el tamaño y la posición reales en píxeles se verificaron a mano en
+    // Storybook con un navegador real.
     const closeButton = within(dialog).getByRole('button', { name: 'Close' });
-    const closeClasses = closeButton.className.split(' ');
-    await expect(closeClasses).toContain('p-3.5');
-    await expect(closeClasses).toContain('right-0.5');
-    await expect(closeClasses).toContain('top-0.5');
+    await expect(closeButton).toHaveClass('p-3.5', CLOSE_SAFE_TOP, CLOSE_SAFE_RIGHT);
+    await expectInsetFocusRing(closeButton);
     await expect(closeButton.querySelector('svg')).toHaveClass('h-4', 'w-4');
 
     await userEvent.keyboard('{Escape}');
@@ -108,6 +114,11 @@ export const Left: Story = {
 
     const dialog = await within(document.body).findByRole('dialog');
     await expect(dialog.className.split(' ')).toContain('left-0');
+
+    // El lado derecho del panel es el borde interior: la ✕ no suma safe area ahí.
+    const closeButton = within(dialog).getByRole('button', { name: 'Close' });
+    await expect(closeButton).toHaveClass(CLOSE_SAFE_TOP, 'right-0.5');
+    await expectInsetFocusRing(closeButton);
   },
 };
 
@@ -132,6 +143,11 @@ export const Bottom: Story = {
 
     const dialog = await within(document.body).findByRole('dialog');
     await expect(dialog.className.split(' ')).toContain('bottom-0');
+
+    // El borde superior del panel es el interior: la ✕ no suma safe area ahí.
+    const closeButton = within(dialog).getByRole('button', { name: 'Close' });
+    await expect(closeButton).toHaveClass('top-0.5', CLOSE_SAFE_RIGHT);
+    await expectInsetFocusRing(closeButton);
   },
 };
 

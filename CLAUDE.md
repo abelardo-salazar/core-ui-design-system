@@ -15,6 +15,7 @@
 - Comparaciones A/B: en un clon o worktree con su propio npm ci. Nunca junctions ni symlinks al node_modules principal.
 - Un componente es server-safe salvo que use hooks o construya handlers propios; los componentes cliente se registran en scripts/client-entry-points.mjs.
 - Una variante nueva de cva debe desestructurarse y pasarse a la función de variantes en todas las ramas del componente; verificar que no llegue al DOM como atributo.
+- CHANGELOG: describir API, comportamiento y migración para el consumidor. Los detalles de implementación van en los comentarios del código.
 
 ## Estilo de respuesta (ahorro de créditos)
 
