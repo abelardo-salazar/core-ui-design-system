@@ -24,8 +24,20 @@ const getRegion = (politeness: 'polite' | 'assertive') => {
   // abrir un Dialog/Sheet) solo deja sin ocultar los [aria-live].
   region.setAttribute('aria-live', politeness);
   region.setAttribute('aria-atomic', 'true');
-  // sr-only, nunca display:none ni hidden: una región oculta así no se anuncia.
-  region.className = 'sr-only';
+  // Equivalente en línea de sr-only (copiado de la regla compilada), para no depender de que
+  // el consumidor haya importado el CSS. Nunca display:none ni hidden: una región oculta así
+  // no se anuncia.
+  Object.assign(region.style, {
+    position: 'absolute',
+    width: '1px',
+    height: '1px',
+    padding: '0',
+    margin: '-1px',
+    overflow: 'hidden',
+    clipPath: 'inset(50%)',
+    whiteSpace: 'nowrap',
+    borderWidth: '0',
+  });
   document.body.appendChild(region);
   return region;
 };

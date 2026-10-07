@@ -43,7 +43,7 @@ const SheetDemo = () => (
     <SheetContent>
       <SheetHeader>
         <SheetTitle>Carrito</SheetTitle>
-        <SheetDescription>Revisá los productos antes de pagar.</SheetDescription>
+        <SheetDescription>Revisa los productos antes de pagar.</SheetDescription>
       </SheetHeader>
     </SheetContent>
   </Sheet>
@@ -66,8 +66,13 @@ export const Regions: Story = {
     await expect(polite.parentElement).toBe(document.body);
     await expect(polite).toHaveAttribute('aria-live', 'polite');
     await expect(assertive).toHaveAttribute('aria-live', 'assertive');
-    // sr-only, no display:none ni hidden: una región oculta así no se anuncia.
-    await expect(polite).toHaveClass('sr-only');
+    // Oculta con el equivalente en línea de sr-only (sin depender del CSS del paquete), no
+    // con display:none ni hidden: una región oculta así no se anuncia.
+    await expect(polite.style.position).toBe('absolute');
+    await expect(polite.style.width).toBe('1px');
+    await expect(polite.style.height).toBe('1px');
+    await expect(polite.style.overflow).toBe('hidden');
+    await expect(polite.style.clipPath).toBe('inset(50%)');
     await expect(polite).not.toHaveAttribute('hidden');
     await expect(polite.style.display).not.toBe('none');
 
