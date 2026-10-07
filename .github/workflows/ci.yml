@@ -33,9 +33,27 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # El runner no trae navegador; la suite corre Vitest en modo browser (Playwright).
+      # La suite corre Vitest en modo browser (Playwright, headless). Sin --with-deps: las
+      # dependencias del sistema salen de apt, que llegó a tardar 12 minutos en bajar 32 MB
+      # (#43, #44), y el runner ya las trae por tener Google Chrome preinstalado. Si alguna
+      # falta, Playwright falla al lanzar el navegador y la nombra. --only-shell: headless
+      # usa Chrome Headless Shell, así que Chrome for Testing no hace falta en CI.
+      - name: Get Playwright version
+        id: playwright
+        run: echo "version=$(node -p "require('playwright/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      # La clave sigue la versión instalada desde el lockfile: cambia sola al actualizar
+      # Playwright.
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-chromium-shell
+
       - name: Install Playwright Chromium
-        run: npx playwright install chromium --with-deps
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install chromium --only-shell
 
       - name: Lint
         run: npm run lint
