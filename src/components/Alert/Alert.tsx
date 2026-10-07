@@ -44,6 +44,13 @@ export interface AlertProps
 // -----------------------------------------------------------------------------
 // Alert Root
 // -----------------------------------------------------------------------------
+/**
+ * Mensaje en línea. `error`/`warning` usan `role="alert"`; `info`/`success`, `role="status"`.
+ *
+ * Limitación: un `info`/`success` que se monta dinámicamente no se anuncia, porque los
+ * lectores solo leen los cambios de una región `status` que ya estaba en el DOM. Para
+ * anunciarlo, usar `announce()` o dejar el `Alert` montado y cambiar su contenido.
+ */
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
   ({ className, variant, icon, children, ...props }, ref) => {
     const resolvedVariant = variant ?? 'info';
