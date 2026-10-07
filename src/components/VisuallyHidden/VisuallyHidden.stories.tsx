@@ -48,7 +48,7 @@ export const HiddenSheetTitle: Story = {
           <VisuallyHidden as="div">
             <SheetTitle>Menú principal</SheetTitle>
           </VisuallyHidden>
-          <SheetDescription>Navegá por las secciones del sitio.</SheetDescription>
+          <SheetDescription>Navega por las secciones del sitio.</SheetDescription>
         </SheetHeader>
       </SheetContent>
     </Sheet>

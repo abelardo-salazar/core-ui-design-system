@@ -60,12 +60,17 @@ const SheetContent = React.forwardRef<
 ));
 SheetContent.displayName = SheetPrimitive.Content.displayName;
 
-// px-6 reserva el espacio de la ✕ (44px a 2px del borde, menos los 24px de padding del
-// panel). En móvil el texto va centrado, así que se reserva en ambos lados para no descentrarlo.
+// El padding reserva el espacio de la ✕: 1.5rem (44px a 2px del borde, menos los 24px de
+// padding del panel) más env(safe-area-inset-right), porque la ✕ se corre ese inset y el
+// panel no siempre lo absorbe (con muesca en horizontal el título quedaba debajo). Se aplica
+// en los cuatro lados en vez de leer un data-side del Content: en `left` el borde derecho es
+// interior y sobra el inset, pero el header no queda acoplado al Content. Sin inset resuelve
+// a los mismos 24px. En móvil el texto va centrado, así que se reserva en ambos lados para no
+// descentrarlo.
 const SheetHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      'flex shrink-0 flex-col space-y-2 px-6 text-center sm:pl-0 sm:text-left',
+      'flex shrink-0 flex-col space-y-2 px-[calc(1.5rem_+_env(safe-area-inset-right))] text-center sm:pl-0 sm:text-left',
       className,
     )}
     {...props}

@@ -9,19 +9,21 @@
   tablas y tarjetas, `md` para una página. `EmptyStateTitle` renderiza un `p` y acepta
   `as="h2"`…`"h6"` cuando el estado vacío encabeza una sección. El ícono es decorativo
   (`aria-hidden`). La raíz no tiene `role`: si el estado vacío aparece tras una acción (un
-  filtro sin resultados), anunciarlo con `announce()`.
+  filtro sin resultados), anunciarlo con `announce()`. El `className` de la raíz gana sobre el
+  padding de `size`; en las partes, en cambio, los ajustes de `sm` ganan sobre el `className`
+  (para cambiarlos, usar la misma variante: `group-data-[size=sm]/empty-state:…`).
 
 - **`DataTable` gana `emptyState?: React.ReactNode`** para reemplazar el contenido de la fila
-  vacía. Por defecto pasa a ser un `EmptyState` `sm` con el mismo texto, "Sin resultados.",
-  que ahora se ve como título (semibold, color de texto base) en vez de texto gris.
+  vacía. Por defecto es un `EmptyState` `sm` con el título "Sin resultados." (ver Changed).
 
 - **`announce(message, { politeness?: 'polite' | 'assertive' })`**: anuncia un mensaje a los
-  lectores de pantalla sin montar nada (default `'polite'`). Funciona también con un `Dialog`
-  o `Sheet` abierto. Repetir el mismo mensaje lo vuelve a anunciar, el texto se borra solo a
-  los pocos segundos y en el servidor no hace nada. Pensado para confirmaciones ("Producto
-  agregado") y resultados de acciones que no mueven el foco. Un `Alert` `info`/`success` que
-  se monta dinámicamente no se anuncia: para eso, `announce()` o dejar el `Alert` montado y
-  cambiar su contenido.
+  lectores de pantalla sin montar nada (default `'polite'`). La región no queda oculta con un
+  `Dialog` o `Sheet` abierto; no se ha probado con un lector de pantalla real. No depende de
+  que se haya importado el CSS del paquete. Repetir el mismo mensaje lo vuelve a anunciar, el
+  texto se borra solo a los pocos segundos y en el servidor no hace nada. Pensado para
+  confirmaciones ("Producto agregado") y resultados de acciones que no mueven el foco. Un
+  `Alert` `info`/`success` que se monta dinámicamente no se anuncia: para eso, `announce()` o
+  dejar el `Alert` montado y cambiar su contenido.
 
 - **`VisuallyHidden`**: oculta contenido a la vista y lo deja disponible para los lectores de
   pantalla. Renderiza un `span`; `as` cambia el elemento (por ejemplo, `as="div"` para envolver
@@ -32,8 +34,8 @@
   los cuatro lados. `top` y `bottom` ocupan como máximo el 85% del alto. Sin `SheetBody` el
   panel entero hace scroll y la ✕ se desplaza con el contenido; para migrar, envolver el bloque
   central en `<SheetBody>`. El panel y la ✕ respetan el safe area de los bordes que tocan el
-  viewport si la app declara `viewportFit: 'cover'`. La ✕ muestra el anillo de foco solo con
-  teclado.
+  viewport si la app declara `viewportFit: 'cover'`, y el título de `SheetHeader` no queda
+  debajo de la ✕ aunque haya muesca. La ✕ muestra el anillo de foco solo con teclado.
 
 - **`Input` gana un botón de limpiar: `clearable`, `onClear?: () => void` y `clearLabel?: string`**
   (`aria-label` del botón, default `"Clear"`). Vaciar el campo dispara el `onChange` del
@@ -74,6 +76,11 @@
   siguen resolviendo a `rounded-btn` vía `defaultVariants`, sin cambios.
 
 ### Changed
+
+- **El estado vacío por defecto de `DataTable` cambia de aspecto.** "Sin resultados." ahora se
+  ve como título (semibold, color de texto base) en vez de texto gris, y la fila es algo más
+  alta. Para conservar el aspecto anterior, pasar un `emptyState` propio, por ejemplo
+  `<span className="text-base-content/65">Sin resultados.</span>`.
 
 - **`SheetContent` ahora separa sus hijos con 16px.** El `gap-4` de la base estaba desde antes,
   pero no hacía nada porque el panel no era flex; al pasar a `flex flex-col` se activa y afecta a
