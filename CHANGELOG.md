@@ -4,6 +4,17 @@
 
 ### Added
 
+- **`EmptyState`**, compuesto por `EmptyStateIcon`, `EmptyStateTitle`, `EmptyStateDescription` y
+  `EmptyStateActions`, todos server-safe. `size?: 'sm' | 'md'` (default `'md'`): `sm` para
+  tablas y tarjetas, `md` para una página. `EmptyStateTitle` renderiza un `p` y acepta
+  `as="h2"`…`"h6"` cuando el estado vacío encabeza una sección. El ícono es decorativo
+  (`aria-hidden`). La raíz no tiene `role`: si el estado vacío aparece tras una acción (un
+  filtro sin resultados), anunciarlo con `announce()`.
+
+- **`DataTable` gana `emptyState?: React.ReactNode`** para reemplazar el contenido de la fila
+  vacía. Por defecto pasa a ser un `EmptyState` `sm` con el mismo texto, "Sin resultados.",
+  que ahora se ve como título (semibold, color de texto base) en vez de texto gris.
+
 - **`announce(message, { politeness?: 'polite' | 'assertive' })`**: anuncia un mensaje a los
   lectores de pantalla sin montar nada (default `'polite'`). Funciona también con un `Dialog`
   o `Sheet` abierto. Repetir el mismo mensaje lo vuelve a anunciar, el texto se borra solo a
