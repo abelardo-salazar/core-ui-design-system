@@ -4,6 +4,16 @@
 
 ### Added
 
+- **`SheetBody`: zona con scroll del `Sheet`, con header y footer fijos en los cuatro lados.**
+  Va entre `SheetHeader` y `SheetFooter`; el footer queda fijo por estar fuera del body, sin
+  `sticky`. Compensa el padding del panel con márgenes negativos, así que la barra de scroll
+  queda pegada al borde y el overflow no recorta los anillos de foco. `SheetContent` pasa a
+  `flex flex-col`, `top`/`bottom` tienen `max-h-[85dvh]` y el panel entero hace scroll como
+  respaldo si no se usa `SheetBody` (la ✕ se desplaza con el contenido en ese caso). Los bordes
+  que tocan el viewport respetan el safe area (`max(1.5rem, env(safe-area-inset-*))`), lo que
+  solo surte efecto si la app declara `viewportFit: 'cover'`. `SheetHeader` reserva el espacio
+  de la ✕ para que el título no quede debajo.
+
 - **`Input` gana un botón de limpiar: `clearable`, `onClear?: () => void` y `clearLabel?: string`**
   (`aria-label` del botón, default `"Clear"`). Vaciar el campo dispara el `onChange` del
   consumidor (modo controlado, no controlado y `register` de react-hook-form); después se llama a
@@ -43,6 +53,11 @@
   siguen resolviendo a `rounded-btn` vía `defaultVariants`, sin cambios.
 
 ### Changed
+
+- **`SheetContent` ahora separa sus hijos con 16px.** El `gap-4` de la base estaba desde antes,
+  pero no hacía nada porque el panel no era flex; al pasar a `flex flex-col` se activa y afecta a
+  los Sheets existentes. Quien compensaba la separación a mano (por ejemplo, con `py-4` en el
+  bloque central) verá el espacio duplicado y debería quitar ese padding.
 
 - **Rompe: `InputProps` pasa de `interface` a unión discriminada por `clearable`.** El uso de
   `<Input>` no cambia (`endIcon` sin `clearable` compila igual), pero hay dos casos que sí:

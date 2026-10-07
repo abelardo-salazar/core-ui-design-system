@@ -5,6 +5,7 @@ import {
   SheetTrigger,
   SheetContent,
   SheetHeader,
+  SheetBody,
   SheetTitle,
   SheetDescription,
   SheetFooter,
@@ -37,7 +38,7 @@ const SheetDemo = ({ side }: { side: 'top' | 'right' | 'bottom' | 'left' }) => (
           Make changes to your profile here. Click save when you're done.
         </SheetDescription>
       </SheetHeader>
-      <div className="grid gap-4 py-4">
+      <div className="grid gap-4">
         <div className="grid grid-cols-4 items-center gap-4">
           <label htmlFor="name" className="text-right text-sm font-medium">
             Name
@@ -132,4 +133,82 @@ export const Bottom: Story = {
     const dialog = await within(document.body).findByRole('dialog');
     await expect(dialog.className.split(' ')).toContain('bottom-0');
   },
+};
+
+type Side = 'top' | 'right' | 'bottom' | 'left';
+
+// Contenido largo dentro de SheetBody: el body hace scroll y header/footer quedan fijos.
+// Los inputs ocupan todo el ancho del body (y el primero y el último tocan su borde superior
+// e inferior) para comprobar en un navegador real que el overflow no recorta el anillo de foco.
+const LongSheetDemo = ({ side }: { side: Side }) => (
+  <Sheet>
+    <SheetTrigger asChild>
+      <Button variant="outline">{side} long sheet</Button>
+    </SheetTrigger>
+    <SheetContent side={side}>
+      <SheetHeader>
+        <SheetTitle>Edit profile</SheetTitle>
+        <SheetDescription>
+          Make changes to your profile here. Click save when you're done.
+        </SheetDescription>
+      </SheetHeader>
+      <SheetBody data-testid="sheet-body">
+        <div className="grid gap-4">
+          {Array.from({ length: 20 }, (_, i) => (
+            <Input key={i} aria-label={`Field ${i + 1}`} placeholder={`Field ${i + 1}`} />
+          ))}
+        </div>
+      </SheetBody>
+      <SheetFooter>
+        <SheetClose asChild>
+          <Button type="submit">Save changes</Button>
+        </SheetClose>
+      </SheetFooter>
+    </SheetContent>
+  </Sheet>
+);
+
+// Estructura, no medidas: el fixture headless no aplica Tailwind ni hace layout. Que el
+// footer quede visible, el alto máximo de top/bottom y los anillos sin recorte se verificaron
+// a mano en Storybook con un navegador real.
+const assertLongSheetStructure =
+  (side: Side): Story['play'] =>
+  async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: `${side} long sheet` }));
+
+    const dialog = await within(document.body).findByRole('dialog');
+    const sheetBody = within(dialog).getByTestId('sheet-body');
+    await expect(sheetBody).toHaveClass('flex-1', 'min-h-0', 'overflow-y-auto');
+    await expect(sheetBody.parentElement).toBe(dialog);
+
+    const header = within(dialog).getByText('Edit profile').parentElement!;
+    const footer = within(dialog).getByRole('button', { name: 'Save changes' }).parentElement!;
+    await expect(header.parentElement).toBe(dialog);
+    await expect(footer.parentElement).toBe(dialog);
+    await expect(sheetBody.contains(header)).toBe(false);
+    await expect(sheetBody.contains(footer)).toBe(false);
+
+    const closeButton = within(dialog).getByRole('button', { name: 'Close' });
+    await expect(dialog.lastElementChild).toBe(closeButton);
+  };
+
+export const LongContentRight: Story = {
+  render: () => <LongSheetDemo side="right" />,
+  play: assertLongSheetStructure('right'),
+};
+
+export const LongContentLeft: Story = {
+  render: () => <LongSheetDemo side="left" />,
+  play: assertLongSheetStructure('left'),
+};
+
+export const LongContentTop: Story = {
+  render: () => <LongSheetDemo side="top" />,
+  play: assertLongSheetStructure('top'),
+};
+
+export const LongContentBottom: Story = {
+  render: () => <LongSheetDemo side="bottom" />,
+  play: assertLongSheetStructure('bottom'),
 };
