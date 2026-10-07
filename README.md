@@ -121,7 +121,7 @@ Estos son los tokens semánticos soportados como superficie pública de theming,
 | `--error-focus` | `#b91c1c` | `#f87171` |
 | `--error-focus-content` | `#ffffff` | `#000000` |
 
-> `--info`, `--success` y `--warning` **no** tienen variantes `-focus`/`-content` en el sistema actual — solo `--error` las tiene completas (por el contraste de texto que necesita, ver comentarios en `src/index.css`). No agregues `--info-focus`, `--success-content`, etc. asumiendo simetría: no existen y no tienen efecto salvo que también los definas vos.
+> `--info`, `--success` y `--warning` **no** tienen variantes `-focus`/`-content` en el sistema actual — solo `--error` las tiene completas (por el contraste de texto que necesita, ver comentarios en `src/index.css`). No agregues `--info-focus`, `--success-content`, etc. asumiendo simetría: no existen y no tienen efecto salvo que también se definan.
 
 ### Patrón sancionado: override sin capa (`@layer`)
 

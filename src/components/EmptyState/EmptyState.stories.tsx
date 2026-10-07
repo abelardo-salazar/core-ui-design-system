@@ -36,7 +36,7 @@ export const Page: Story = {
       </EmptyStateIcon>
       <EmptyStateTitle>Todavía no hay documentos</EmptyStateTitle>
       <EmptyStateDescription>
-        Creá tu primer documento para empezar a trabajar con tu equipo.
+        Crea tu primer documento para empezar a trabajar con tu equipo.
       </EmptyStateDescription>
       <EmptyStateActions>
         <Button>Crear documento</Button>
@@ -80,7 +80,7 @@ export const Small: Story = {
           <MagnifyingGlassIcon />
         </EmptyStateIcon>
         <EmptyStateTitle>Sin resultados</EmptyStateTitle>
-        <EmptyStateDescription>Probá con otros términos de búsqueda.</EmptyStateDescription>
+        <EmptyStateDescription>Prueba con otros términos de búsqueda.</EmptyStateDescription>
         <EmptyStateActions>
           <Button size="sm" variant="outline">
             Limpiar filtros
@@ -134,5 +134,23 @@ export const HeadingTitle: Story = {
       name: 'Tu bandeja está vacía',
     });
     await expectRoot(heading, 'md');
+  },
+};
+
+// El className del consumidor gana sobre el padding de size: cva + twMerge resuelven el
+// conflicto. Con una variante por atributo (data-[size=sm]:py-6) el selector tendría más
+// especificidad y py-2 perdería.
+export const SmallCustomPadding: Story = {
+  render: () => (
+    <EmptyState size="sm" className="py-2">
+      <EmptyStateTitle>Sin elementos</EmptyStateTitle>
+    </EmptyState>
+  ),
+  play: async ({ canvasElement }) => {
+    const root = within(canvasElement).getByText('Sin elementos').closest('[data-size]')!;
+    await expect(root).toHaveAttribute('data-size', 'sm');
+    await expect(root).toHaveClass('py-2', 'px-4');
+    await expect(root).not.toHaveClass('py-6');
+    await expect(root.className).not.toMatch(/data-\[size=/);
   },
 };

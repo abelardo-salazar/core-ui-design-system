@@ -227,7 +227,7 @@ export const CustomEmptyState: Story = {
             <PersonIcon />
           </EmptyStateIcon>
           <EmptyStateTitle>Todavía no hay personas</EmptyStateTitle>
-          <EmptyStateDescription>Invitá a alguien para empezar.</EmptyStateDescription>
+          <EmptyStateDescription>Invita a alguien para empezar.</EmptyStateDescription>
           <EmptyStateActions>
             <Button size="sm">Invitar</Button>
           </EmptyStateActions>
