@@ -30,6 +30,18 @@ SheetOverlay.displayName = SheetPrimitive.Overlay.displayName;
 export type SheetContentProps = React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content> &
   VariantProps<typeof sheetVariants>;
 
+/**
+ * Panel del Sheet: columna flex con `gap-4` entre hijos. Estructura recomendada:
+ * `SheetHeader`, `SheetBody` y `SheetFooter`. El body hace scroll y header/footer quedan
+ * fijos. Sin `SheetBody`, el panel entero hace scroll como respaldo, pero la ✕ se desplaza
+ * con el contenido; lo correcto es usar `SheetBody`.
+ *
+ * `top` y `bottom` tienen un alto máximo de 85dvh; `left` y `right`, el alto completo.
+ *
+ * Los bordes que tocan el viewport respetan el safe area (`env(safe-area-inset-*)`). Solo
+ * surte efecto si la app declara `viewport-fit=cover` (en Next.js:
+ * `export const viewport = { viewportFit: 'cover' }`).
+ */
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
@@ -50,14 +62,36 @@ const SheetContent = React.forwardRef<
 ));
 SheetContent.displayName = SheetPrimitive.Content.displayName;
 
+// px-6 reserva el espacio de la ✕ (44px a 2px del borde, menos los 24px de padding del
+// panel). En móvil el texto va centrado, así que se reserva en ambos lados para no descentrarlo.
 const SheetHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn('flex flex-col space-y-2 text-center sm:text-left', className)} {...props} />
+  <div
+    className={cn(
+      'flex shrink-0 flex-col space-y-2 px-6 text-center sm:pl-0 sm:text-left',
+      className,
+    )}
+    {...props}
+  />
 );
 SheetHeader.displayName = 'SheetHeader';
 
+/**
+ * Zona con scroll del Sheet; header y footer quedan fijos por estar fuera de ella. Los
+ * márgenes negativos compensan el padding del panel para que el overflow no recorte los
+ * anillos de foco de los controles en el borde (ring-2 + offset-2 = 4px en vertical) y la
+ * barra de scroll quede pegada al borde del panel.
+ */
+const SheetBody = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn('-mx-6 -my-1 min-h-0 flex-1 overflow-y-auto px-6 py-1', className)}
+    {...props}
+  />
+);
+SheetBody.displayName = 'SheetBody';
+
 const SheetFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn('flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2', className)}
+    className={cn('flex shrink-0 flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2', className)}
     {...props}
   />
 );
@@ -95,6 +129,7 @@ export {
   SheetClose,
   SheetContent,
   SheetHeader,
+  SheetBody,
   SheetFooter,
   SheetTitle,
   SheetDescription,
