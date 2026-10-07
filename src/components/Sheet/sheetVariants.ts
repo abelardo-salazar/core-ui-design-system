@@ -22,3 +22,28 @@ export const sheetVariants = cva(
     },
   },
 );
+
+// Posición de la ✕. right-0.5/top-0.5 (2px) + el p-3.5 del botón dejan el ícono a 16px del
+// borde con un área táctil de 44x44. En los bordes que tocan el viewport se suma el safe area
+// completo, para que toda el área táctil quede fuera de la zona insegura.
+const closeTop = 'top-[calc(0.125rem_+_env(safe-area-inset-top))]';
+const closeRight = 'right-[calc(0.125rem_+_env(safe-area-inset-right))]';
+
+export const sheetCloseVariants = cva(
+  // ring-inset sin separación: el anillo se dibuja dentro del área táctil, así que el
+  // overflow-y-auto del panel no lo recorta.
+  'absolute rounded-sm p-3.5 opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary disabled:pointer-events-none data-[state=open]:bg-base-200 data-[state=open]:text-base-content/50',
+  {
+    variants: {
+      side: {
+        top: `${closeTop} ${closeRight}`,
+        bottom: `top-0.5 ${closeRight}`,
+        left: `${closeTop} right-0.5`,
+        right: `${closeTop} ${closeRight}`,
+      },
+    },
+    defaultVariants: {
+      side: 'right',
+    },
+  },
+);
