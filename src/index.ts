@@ -36,6 +36,8 @@ export * from './components/Textarea';
 export * from './components/Toast';
 export * from './components/Tooltip';
 export * from './components/Typography'; // Heading, Text
+export * from './components/VisuallyHidden';
 
 // Exportar utilidades si son necesarias externamente
 export { cn } from './utils/cn';
+export { announce, type AnnounceOptions } from './utils/announce';

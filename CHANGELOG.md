@@ -4,6 +4,18 @@
 
 ### Added
 
+- **`announce(message, { politeness?: 'polite' | 'assertive' })`**: anuncia un mensaje a los
+  lectores de pantalla sin montar nada (default `'polite'`). Funciona también con un `Dialog`
+  o `Sheet` abierto. Repetir el mismo mensaje lo vuelve a anunciar, el texto se borra solo a
+  los pocos segundos y en el servidor no hace nada. Pensado para confirmaciones ("Producto
+  agregado") y resultados de acciones que no mueven el foco. Un `Alert` `info`/`success` que
+  se monta dinámicamente no se anuncia: para eso, `announce()` o dejar el `Alert` montado y
+  cambiar su contenido.
+
+- **`VisuallyHidden`**: oculta contenido a la vista y lo deja disponible para los lectores de
+  pantalla. Renderiza un `span`; `as` cambia el elemento (por ejemplo, `as="div"` para envolver
+  un `SheetTitle` o `DialogTitle` que el diseño no muestra). Server-safe.
+
 - **`SheetBody`: zona con scroll del `Sheet`.** Se coloca entre `SheetHeader` y `SheetFooter`:
   el contenido largo hace scroll dentro del body y header y footer quedan siempre visibles, en
   los cuatro lados. `top` y `bottom` ocupan como máximo el 85% del alto. Sin `SheetBody` el
