@@ -2,7 +2,29 @@
 
 ## [0.5.0] - 2026-10-04
 
+### Instalación
+
+Nuevo peer: `@radix-ui/react-toggle-group@^1.1.20` (lo usa `ToggleGroup`). Instalarlo junto con
+los demás peers de Radix: `npm install @radix-ui/react-toggle-group@^1.1.20`.
+
 ### Added
+
+- **`ToggleGroup` y `ToggleGroupItem`**: un grupo de opciones que cambian un valor (una vista,
+  un filtro); para cambiar qué panel se ve, `Tabs`. Client component.
+  - `type="single"`: `radiogroup` con ítems `radio`. Una vez elegido un valor, siempre hay uno:
+    el clic sobre el ítem activo no lo desactiva y `onValueChange` nunca recibe `''`, en modo
+    controlado y no controlado. `type="multiple"`: `toolbar` con `aria-pressed`; puede quedar
+    vacío. Acepta `value`/`defaultValue`/`onValueChange` con los tipos de Radix según `type`.
+  - Teclado: un solo punto de tabulación; las flechas mueven el foco sin seleccionar y Space o
+    Enter seleccionan. En modo único esto se aparta a propósito del patrón de radio de ARIA (donde
+    la flecha también selecciona): cambiar el valor suele disparar una consulta, y recorrer las
+    opciones no debe disparar una por cada una.
+  - `size?: 'sm' | 'md' | 'lg'` (32 / 44 / 48px, la escala de `Button`; default `'md'`) en el
+    grupo, que lo pasa a sus ítems; un ítem puede sobrescribirlo. El grupo mide lo mismo que sus
+    ítems, así que queda alineado con un `Button` del mismo `size`.
+  - Estilo del segmento de `Tabs`: fondo `bg-base-200` e ítem activo `bg-primary`.
+  - Los ítems de solo ícono necesitan `aria-label`. `orientation`, `disabled` y `loop` pasan
+    directo a Radix.
 
 - **`EmptyState`**, compuesto por `EmptyStateIcon`, `EmptyStateTitle`, `EmptyStateDescription` y
   `EmptyStateActions`, todos server-safe. `size?: 'sm' | 'md'` (default `'md'`): `sm` para

@@ -4,6 +4,14 @@ import * as React from 'react';
 import * as TabsPrimitive from '@radix-ui/react-tabs';
 import { cn } from '../../utils/cn';
 
+/**
+ * Cambia qué panel de contenido se ve. Para cambiar un valor (una vista, un filtro), usar
+ * `ToggleGroup`.
+ *
+ * Por defecto (`activationMode="automatic"`), mover el foco con las flechas también muestra el
+ * panel. `activationMode="manual"` conviene cuando mostrar un panel es costoso (carga datos o
+ * renderiza mucho): las flechas solo mueven el foco y Space o Enter muestran el panel.
+ */
 const Tabs = TabsPrimitive.Root;
 
 // -----------------------------------------------------------------------------
