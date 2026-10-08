@@ -7,13 +7,12 @@ import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
 import { cn } from '../../utils/cn';
 
-export interface QuantityStepperProps
-  extends Omit<
-    React.InputHTMLAttributes<HTMLInputElement>,
-    // 'size' choca con la variante de tamaño de Input (string), no con el atributo nativo
-    // (number) — mismo Omit que ya usa InputProps.
-    'value' | 'defaultValue' | 'onChange' | 'type' | 'min' | 'max' | 'step' | 'size'
-  > {
+export interface QuantityStepperProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  // 'size' choca con la variante de tamaño de Input (string), no con el atributo nativo
+  // (number) — mismo Omit que ya usa InputProps.
+  'value' | 'defaultValue' | 'onChange' | 'type' | 'min' | 'max' | 'step' | 'size'
+> {
   value?: number;
   defaultValue?: number;
   onChange?: (value: number) => void;

@@ -238,8 +238,8 @@
   Heurística estática, no perfecta (no cubre `useCallback`/wrappers, y puede requerir juicio
   humano en falsos positivos) — corrida como regresión contra los componentes existentes: no
   generó falsos positivos y, restaurada al estado pre-fix, sí detectó `Button`. El check de
-  `0.3.15` solo validaba que `CLIENT_ENTRY_POINTS` estuviera sincronizado con quién *ya*
-  declara `'use client'`; este cubre el caso de un componente que *debería* declararlo pero no
+  `0.3.15` solo validaba que `CLIENT_ENTRY_POINTS` estuviera sincronizado con quién _ya_
+  declara `'use client'`; este cubre el caso de un componente que _debería_ declararlo pero no
   lo hace.
 
 ### Acción recomendada

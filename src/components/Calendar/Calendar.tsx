@@ -8,7 +8,12 @@ import {
   type NextMonthButtonProps,
   type PreviousMonthButtonProps,
 } from '@daypicker/react';
-import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon } from '@radix-ui/react-icons';
+import {
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ChevronUpIcon,
+} from '@radix-ui/react-icons';
 import { cn } from '../../utils/cn';
 import { buttonVariants } from '../Button/buttonVariants';
 
@@ -88,7 +93,8 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
       classNames={{
         months: 'flex flex-col sm:flex-row gap-4',
         month: 'grid grid-cols-[auto_1fr_auto] items-center gap-y-4',
-        month_caption: 'col-start-2 flex items-center justify-center text-sm font-medium text-base-content',
+        month_caption:
+          'col-start-2 flex items-center justify-center text-sm font-medium text-base-content',
         month_grid: 'col-span-3 w-full border-collapse',
         weekday: 'w-9 pb-2 text-[0.8rem] font-normal text-base-content/70',
         day: 'relative p-0 text-center text-sm focus-within:relative focus-within:z-20',

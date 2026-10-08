@@ -13,6 +13,8 @@
     "verify:client-directives": "node scripts/verify-client-directives.mjs",
     "verify:barrel-rsc-safe": "node scripts/verify-client-directives.mjs --post-build",
     "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"

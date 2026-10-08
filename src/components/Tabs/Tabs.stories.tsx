@@ -37,14 +37,18 @@ export const Default: Story = {
 
     await expect(prepTrigger).toHaveAttribute('data-state', 'active');
     await expect(canvas.getByText('Corta los vegetales y marina la proteína.')).toBeVisible();
-    await expect(canvas.queryByText('Cocina a fuego medio durante 12 minutos.')).not.toBeInTheDocument();
+    await expect(
+      canvas.queryByText('Cocina a fuego medio durante 12 minutos.'),
+    ).not.toBeInTheDocument();
 
     await userEvent.click(cookTrigger);
 
     await waitFor(() => expect(cookTrigger).toHaveAttribute('data-state', 'active'));
     await expect(prepTrigger).toHaveAttribute('data-state', 'inactive');
     await expect(canvas.getByText('Cocina a fuego medio durante 12 minutos.')).toBeVisible();
-    await expect(canvas.queryByText('Corta los vegetales y marina la proteína.')).not.toBeInTheDocument();
+    await expect(
+      canvas.queryByText('Corta los vegetales y marina la proteína.'),
+    ).not.toBeInTheDocument();
   },
 };
 

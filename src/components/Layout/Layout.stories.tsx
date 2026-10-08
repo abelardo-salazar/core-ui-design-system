@@ -90,7 +90,9 @@ export const PageExample: StoryObj = {
     const canvas = within(canvasElement);
 
     // axe: heading-order — "Main Area"/"Sidebar" saltaban de h1 a h3 sin pasar por h2.
-    await expect(canvas.getByRole('heading', { level: 1, name: 'Dashboard Layout' })).toBeInTheDocument();
+    await expect(
+      canvas.getByRole('heading', { level: 1, name: 'Dashboard Layout' }),
+    ).toBeInTheDocument();
     const h2s = canvas.getAllByRole('heading', { level: 2 });
     await expect(h2s.map((h) => h.textContent)).toEqual(['Main Area', 'Sidebar']);
     // level sigue siendo h3 visualmente (mismo tamaño de fuente que antes).
