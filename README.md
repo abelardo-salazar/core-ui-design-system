@@ -58,6 +58,7 @@ npm install react@^19.0.0 react-dom@^19.0.0 \
   @radix-ui/react-switch@^1.2.6 \
   @radix-ui/react-tabs@^1.1.21 \
   @radix-ui/react-toggle@^1.1.18 \
+  @radix-ui/react-toggle-group@^1.1.20 \
   @radix-ui/react-tooltip@^1.2.16 \
   @tanstack/react-table@^9.1.2 \
   sonner@^2.0.7
@@ -201,6 +202,7 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
     - [Sheet — Uso y Props](#sheet--uso-y-props)
     - [AspectRatio — Uso y Props](#aspectratio--uso-y-props)
     - [Tabs — Uso y Props](#tabs--uso-y-props)
+    - [ToggleGroup — Uso y Props](#togglegroup--uso-y-props)
     - [🔲 Overlays](#-overlays)
     - [Popover — Uso y Props](#popover--uso-y-props)
     - [Tooltip — Uso y Props](#tooltip--uso-y-props)
@@ -546,6 +548,7 @@ Uso (ejemplos, extraídos de `Image.stories.tsx`):
 | **`Container`**   | Wrapper de layout.              | `size`: 'sm' \| 'md' \| 'lg' \| 'xl' \| 'full' — controla `max-width` (ver sección `Layout` para el detalle).         |
 | **`AspectRatio`** | Fuerza una relación de aspecto. | `ratio`: number (ej. `16 / 9`). Se compone con otro contenido (`Image`, etc.), no es una API todo-en-uno.             |
 | **`Tabs`**        | Navegación por pestañas.        | `defaultValue`/`value`/`onValueChange` en el root; **Subcomponentes:** `<TabsList>`, `<TabsTrigger>`, `<TabsContent>` |
+| **`ToggleGroup`** | Opciones que cambian un valor.  | `type`: 'single'                                                                                                      | 'multiple'; `size`: 'sm' | 'md' | 'lg'; **Subcomponentes:** `<ToggleGroupItem>` |
 
 ### Layout — Uso y Props
 
@@ -797,7 +800,7 @@ Uso (ejemplos, extraídos de `AspectRatio.stories.tsx`):
   - `TabsTrigger`: `value: string` (requerido), `disabled?: boolean`, `className?: string`.
   - `TabsContent`: `value: string` (requerido), `className?: string` — sin Portal, vive en el flujo normal del documento (a diferencia de `DropdownMenuContent`/`TooltipContent`).
 
-**Comportamiento no obvio:** el `activationMode` por defecto de Radix Tabs es `"automatic"` — `ArrowRight`/`ArrowLeft` mueven el foco **y** activan el tab en el mismo paso, sin necesitar `Enter`/`Space` adicional. Pensado para grupos chicos (2-5 opciones), no para una fila larga de tabs de dashboard.
+**Comportamiento no obvio:** el `activationMode` por defecto de Radix Tabs es `"automatic"` — `ArrowRight`/`ArrowLeft` mueven el foco **y** activan el tab en el mismo paso, sin necesitar `Enter`/`Space` adicional. Pensado para grupos chicos (2-5 opciones), no para una fila larga de tabs de dashboard. `activationMode="manual"` conviene cuando mostrar un panel es costoso: las flechas solo mueven el foco y Space o Enter muestran el panel.
 
 Uso (ejemplo, extraído de `Tabs.stories.tsx`):
 
@@ -812,6 +815,26 @@ Uso (ejemplo, extraído de `Tabs.stories.tsx`):
   <TabsContent value="cook">Cocina a fuego medio durante 12 minutos.</TabsContent>
   <TabsContent value="serve">Emplata y decora con hierbas frescas.</TabsContent>
 </Tabs>
+```
+
+### ToggleGroup — Uso y Props
+
+- **Exports:** `ToggleGroup`, `ToggleGroupItem`. Client component; requiere el peer `@radix-ui/react-toggle-group`.
+- **Props principales:**
+  - `ToggleGroup`: `type: 'single' | 'multiple'` (requerido); `value`/`defaultValue`/`onValueChange` (`string` en modo único, `string[]` en múltiple); `size?: 'sm' | 'md' | 'lg'` (32 / 44 / 48px, default `'md'`); `orientation`, `disabled` y `loop` pasan directo a Radix.
+  - `ToggleGroupItem`: `value: string` (requerido), `size?` (sobrescribe el del grupo), `disabled?`. Si solo muestra un ícono, necesita `aria-label`.
+
+**Comportamiento no obvio:** `ToggleGroup` cambia un valor; `Tabs` cambia qué panel se ve. En modo único (`radiogroup`), una vez elegido un valor siempre hay uno: el clic sobre el ítem activo no lo desactiva y `onValueChange` nunca recibe `''`. En modo múltiple (`toolbar`, `aria-pressed`) puede quedar vacío. Las flechas mueven el foco **sin seleccionar** y Space o Enter seleccionan; en modo único esto se aparta a propósito del patrón de radio de ARIA, para que recorrer las opciones no dispare una consulta por cada una. El grupo mide lo mismo que sus ítems, así que queda alineado con un `Button` del mismo `size`.
+
+```tsx
+<ToggleGroup type="single" defaultValue="list" aria-label="Vista">
+  <ToggleGroupItem value="list" aria-label="Lista">
+    <ListBulletIcon />
+  </ToggleGroupItem>
+  <ToggleGroupItem value="grid" aria-label="Cuadrícula">
+    <GridIcon />
+  </ToggleGroupItem>
+</ToggleGroup>
 ```
 
 ### 🔲 Overlays

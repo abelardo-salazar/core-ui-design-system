@@ -91,6 +91,7 @@ export default defineConfig({
         '@radix-ui/react-popover',
         '@radix-ui/react-progress',
         '@radix-ui/react-tabs',
+        '@radix-ui/react-toggle-group',
         '@radix-ui/react-toggle',
         'sonner',
         '@tanstack/react-table',
