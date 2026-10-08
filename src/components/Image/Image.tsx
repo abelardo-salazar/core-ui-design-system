@@ -25,12 +25,17 @@ type ImageStatus = 'loading' | 'loaded' | 'error';
 const Image = React.forwardRef<HTMLImageElement, ImageProps>(
   ({ className, containerClassName, fallback, onLoad, onError, src, alt, ...props }, ref) => {
     const [status, setStatus] = React.useState<ImageStatus>('loading');
+    const [prevSrc, setPrevSrc] = React.useState(src);
 
     // Si cambia el src, vuelve a pasar por el ciclo de carga en vez de conservar el estado
-    // de la imagen anterior.
-    React.useEffect(() => {
+    // de la imagen anterior. Se ajusta durante el render y no en un useEffect: un efecto de
+    // montaje que pone 'loading' puede correr después de un onError temprano (src en caché,
+    // máquina cargada) y pisarlo; el <img> ya no vuelve a emitir error y queda invisible para
+    // siempre.
+    if (src !== prevSrc) {
+      setPrevSrc(src);
       setStatus('loading');
-    }, [src]);
+    }
 
     return (
       <div className={cn('relative h-full w-full overflow-hidden', containerClassName)}>
@@ -38,7 +43,7 @@ const Image = React.forwardRef<HTMLImageElement, ImageProps>(
         {status === 'error' && fallback}
         {/* Se desmonta al fallar: sin esto, un <img> roto queda invisible pero sigue en el DOM,
             lo cual no cumple "no renderiza nada" cuando no hay fallback. Vuelve a montarse solo
-            si el src cambia (el useEffect de arriba resetea status a 'loading'). */}
+            si el src cambia (el ajuste de prevSrc de arriba resetea status a 'loading'). */}
         {status !== 'error' && (
           <img
             ref={ref}

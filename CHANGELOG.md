@@ -154,6 +154,11 @@
 
 ### Fixed
 
+- **`Image` podía quedarse invisible para siempre si la imagen fallaba o cargaba muy rápido.**
+  Con la imagen en caché y el navegador ocupado, el resultado de la carga podía perderse: la
+  imagen no se mostraba, el `fallback` tampoco y quedaba el `Skeleton`. Ahora el resultado se
+  conserva siempre. Cambiar `src` sigue reiniciando el ciclo de carga.
+
 - **`DatePicker` abre el calendario en el mes de la fecha elegida.** Antes abría siempre en el mes
   actual, aunque `date` estuviera en otro mes. Sin `date`, sigue abriendo en el mes actual.
 
