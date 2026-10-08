@@ -231,3 +231,24 @@ export const LongContentBottom: Story = {
   render: () => <LongSheetDemo side="bottom" />,
   play: assertLongSheetStructure('bottom'),
 };
+
+// closeLabel cambia el nombre accesible de la ✕ (por defecto "Close") y no llega al DOM.
+export const CustomCloseLabel: Story = {
+  render: () => (
+    <Sheet defaultOpen>
+      <SheetContent closeLabel="Cerrar">
+        <SheetHeader>
+          <SheetTitle>Filtros</SheetTitle>
+          <SheetDescription>Ajusta los resultados.</SheetDescription>
+        </SheetHeader>
+      </SheetContent>
+    </Sheet>
+  ),
+  play: async () => {
+    const dialog = await within(document.body).findByRole('dialog');
+    await expect(within(dialog).getByRole('button', { name: 'Cerrar' })).toBeInTheDocument();
+    await expect(within(dialog).queryByRole('button', { name: 'Close' })).not.toBeInTheDocument();
+    await expect(dialog).not.toHaveAttribute('closelabel');
+    await expect(dialog).not.toHaveAttribute('closeLabel');
+  },
+};

@@ -32,8 +32,11 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 // 3. Content
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
+    /** Nombre accesible del botón ✕. @default 'Close' */
+    closeLabel?: string;
+  }
+>(({ className, children, closeLabel = 'Close', ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
     <DialogPrimitive.Content
@@ -57,7 +60,7 @@ const DialogContent = React.forwardRef<
           mismo lugar visual que con right-4/top-4 sin padding. */}
       <DialogPrimitive.Close className="absolute right-0.5 top-0.5 rounded-sm p-3.5 opacity-70 ring-offset-base-100 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-base-200 data-[state=open]:text-base-content/50">
         <Cross2Icon className="h-4 w-4" />
-        <span className="sr-only">Close</span>
+        <span className="sr-only">{closeLabel}</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
   </DialogPortal>

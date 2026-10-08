@@ -28,7 +28,10 @@ const SheetOverlay = React.forwardRef<
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName;
 
 export type SheetContentProps = React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content> &
-  VariantProps<typeof sheetVariants>;
+  VariantProps<typeof sheetVariants> & {
+    /** Nombre accesible del botón ✕. @default 'Close' */
+    closeLabel?: string;
+  };
 
 /**
  * Panel del Sheet: columna flex con `gap-4` entre hijos. Estructura recomendada:
@@ -45,7 +48,7 @@ export type SheetContentProps = React.ComponentPropsWithoutRef<typeof SheetPrimi
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
->(({ side = 'right', className, children, ...props }, ref) => (
+>(({ side = 'right', className, children, closeLabel = 'Close', ...props }, ref) => (
   <SheetPortal>
     <SheetOverlay />
     <SheetPrimitive.Content ref={ref} className={cn(sheetVariants({ side }), className)} {...props}>
@@ -53,7 +56,7 @@ const SheetContent = React.forwardRef<
       {/* Área táctil 44x44 (Apple HIG); posición y anillo en sheetCloseVariants. */}
       <SheetPrimitive.Close className={sheetCloseVariants({ side })}>
         <Cross2Icon className="h-4 w-4" />
-        <span className="sr-only">Close</span>
+        <span className="sr-only">{closeLabel}</span>
       </SheetPrimitive.Close>
     </SheetPrimitive.Content>
   </SheetPortal>
