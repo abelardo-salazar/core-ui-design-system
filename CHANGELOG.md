@@ -14,7 +14,24 @@
   (para cambiarlos, usar la misma variante: `group-data-[size=sm]/empty-state:…`).
 
 - **`DataTable` gana `emptyState?: React.ReactNode`** para reemplazar el contenido de la fila
-  vacía. Por defecto es un `EmptyState` `sm` con el título "Sin resultados." (ver Changed).
+  vacía. Por defecto es un `EmptyState` `sm` con el título "No results." (ver Changed).
+
+- **Textos por defecto configurables por prop**, todos opcionales y con el valor por defecto en
+  inglés. Sin proveedor global: cada componente recibe sus textos, así los server-safe lo siguen
+  siendo.
+  - `SheetContent` y `DialogContent`: `closeLabel` (nombre accesible de la ✕, default `"Close"`).
+  - `QuantityStepper`: `decrementLabel` / `incrementLabel` (default `"Decrease quantity"` /
+    `"Increase quantity"`).
+  - `DatePicker`: `dialogLabel` (nombre accesible del popover, default `"Choose date"`) y
+    `locale` (`Locale` de `date-fns`), que se aplica a la fecha del disparador y al calendario
+    (meses y días). Antes la fecha siempre salía en inglés. Con un locale de `date-fns`, las
+    etiquetas de navegación del calendario ("Go to the Next Month") quedan en inglés; el locale
+    de DayPicker (`import { es } from '@daypicker/react/locale/es'`) también las traduce y se
+    acepta igual.
+  - `DataTable`: `previousLabel` (default `"Previous"`), `nextLabel` (default `"Next"`) y
+    `pageLabel: (page, total) => string` (default `Page X of Y`; `page` empieza en 1).
+  - `SkipToContent`: usa `children` como texto si lo recibe (default `"Skip to content"`). Antes
+    un `children` del consumidor se ignoraba.
 
 - **`announce(message, { politeness?: 'polite' | 'assertive' })`**: anuncia un mensaje a los
   lectores de pantalla sin montar nada (default `'polite'`). La región no queda oculta con un
@@ -77,10 +94,18 @@
 
 ### Changed
 
-- **El estado vacío por defecto de `DataTable` cambia de aspecto.** "Sin resultados." ahora se
+- **Los textos por defecto de `DataTable` pasan a inglés.** `searchPlaceholder` (también nombre
+  accesible de la búsqueda) pasa de `"Buscar..."` a `"Search..."`; el estado vacío, de
+  "Sin resultados." a "No results."; la paginación, de "Anterior" / "Siguiente" /
+  "Página X de Y" a "Previous" / "Next" / "Page X of Y". Para conservar los textos en
+  español: `searchPlaceholder="Buscar..."`, `previousLabel="Anterior"`, `nextLabel="Siguiente"`,
+  ``pageLabel={(page, total) => `Página ${page} de ${total}`}`` y un `emptyState` propio. Los
+  tests que buscaban esos textos deben actualizarse.
+
+- **El estado vacío por defecto de `DataTable` cambia de aspecto.** El texto ahora se
   ve como título (semibold, color de texto base) en vez de texto gris, y la fila es algo más
   alta. Para conservar el aspecto anterior, pasar un `emptyState` propio, por ejemplo
-  `<span className="text-base-content/65">Sin resultados.</span>`.
+  `<span className="text-base-content/65">No results.</span>`.
 
 - **`SheetContent` ahora separa sus hijos con 16px.** El `gap-4` de la base estaba desde antes,
   pero no hacía nada porque el panel no era flex; al pasar a `flex flex-col` se activa y afecta a
@@ -128,6 +153,9 @@
   otro ajuste de tamaño por `className`).
 
 ### Fixed
+
+- **`DatePicker` abre el calendario en el mes de la fecha elegida.** Antes abría siempre en el mes
+  actual, aunque `date` estuviera en otro mes. Sin `date`, sigue abriendo en el mes actual.
 
 - **El área táctil real del `Chip` era solo el texto**, sin importar el tamaño: el padding que
   da forma a la píldora vivía en el `<span>` raíz, que nunca es interactivo (evita anidar

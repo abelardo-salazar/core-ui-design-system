@@ -21,6 +21,10 @@ export interface QuantityStepperProps extends Omit<
   /** Incremento/decremento por click. @default 1 */
   step?: number;
   disabled?: boolean;
+  /** Nombre accesible del botón −. @default 'Decrease quantity' */
+  decrementLabel?: string;
+  /** Nombre accesible del botón +. @default 'Increase quantity' */
+  incrementLabel?: string;
 }
 
 function clamp(rawValue: number, min: number, max: number) {
@@ -37,6 +41,8 @@ const QuantityStepper = React.forwardRef<HTMLInputElement, QuantityStepperProps>
       max = Infinity,
       step = 1,
       disabled = false,
+      decrementLabel = 'Decrease quantity',
+      incrementLabel = 'Increase quantity',
       className,
       id,
       'aria-label': ariaLabel,
@@ -89,7 +95,7 @@ const QuantityStepper = React.forwardRef<HTMLInputElement, QuantityStepperProps>
           size="icon"
           disabled={!canDecrement}
           onClick={handleDecrement}
-          aria-label="Decrease quantity"
+          aria-label={decrementLabel}
         >
           <MinusIcon />
         </Button>
@@ -127,7 +133,7 @@ const QuantityStepper = React.forwardRef<HTMLInputElement, QuantityStepperProps>
           size="icon"
           disabled={!canIncrement}
           onClick={handleIncrement}
-          aria-label="Increase quantity"
+          aria-label={incrementLabel}
         >
           <PlusIcon />
         </Button>

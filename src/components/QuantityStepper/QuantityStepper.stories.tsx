@@ -178,3 +178,28 @@ export const Disabled: Story = {
     await expect(canvas.getByRole('spinbutton')).toBeDisabled();
   },
 };
+
+// 7. Etiquetas propias: decrementLabel/incrementLabel reemplazan el nombre accesible de los
+// botones y no llegan al input como atributos.
+export const CustomLabels: Story = {
+  args: {
+    defaultValue: 2,
+    min: 0,
+    max: 10,
+    decrementLabel: 'Disminuir cantidad',
+    incrementLabel: 'Aumentar cantidad',
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Aumentar cantidad' }));
+    await expect(canvas.getByRole('spinbutton')).toHaveValue(3);
+    await userEvent.click(canvas.getByRole('button', { name: 'Disminuir cantidad' }));
+    await expect(canvas.getByRole('spinbutton')).toHaveValue(2);
+
+    const defaultIncrement = canvas.queryByRole('button', { name: 'Increase quantity' });
+    await expect(defaultIncrement).not.toBeInTheDocument();
+    const input = canvas.getByRole('spinbutton');
+    await expect(input).not.toHaveAttribute('decrementlabel');
+    await expect(input).not.toHaveAttribute('incrementlabel');
+  },
+};

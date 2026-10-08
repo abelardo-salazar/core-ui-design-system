@@ -104,3 +104,20 @@ export const PageExample: StoryObj = {
     await expect(within(banner).getByRole('link', { name: 'Skip to content' })).toBeInTheDocument();
   },
 };
+
+// SkipToContent usa children si lo recibe; si no, "Skip to content". Sigue siendo
+// server-safe: no usa hooks ni handlers propios.
+export const SkipToContentCustomText: StoryObj = {
+  render: () => (
+    <div className="relative h-24">
+      <SkipToContent href="#contenido">Saltar al contenido</SkipToContent>
+      <main id="contenido">Contenido</main>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const link = canvas.getByRole('link', { name: 'Saltar al contenido' });
+    await expect(link).toHaveAttribute('href', '#contenido');
+    await expect(canvas.queryByText('Skip to content')).not.toBeInTheDocument();
+  },
+};

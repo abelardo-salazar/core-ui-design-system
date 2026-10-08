@@ -5,7 +5,7 @@ import { buttonVariants } from '../Button/buttonVariants';
 export type SkipToContentProps = React.AnchorHTMLAttributes<HTMLAnchorElement>;
 
 const SkipToContent = React.forwardRef<HTMLAnchorElement, SkipToContentProps>(
-  ({ className, href = '#main-content', ...props }, ref) => {
+  ({ className, href = '#main-content', children, ...props }, ref) => {
     return (
       <a
         ref={ref}
@@ -17,7 +17,7 @@ const SkipToContent = React.forwardRef<HTMLAnchorElement, SkipToContentProps>(
         )}
         {...props}
       >
-        Skip to content
+        {children ?? 'Skip to content'}
       </a>
     );
   },
