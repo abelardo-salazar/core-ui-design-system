@@ -914,15 +914,15 @@ Uso (ejemplo simplificado, extraído de `DropdownMenu.stories.tsx`):
 
 ### 📝 Formularios (Forms)
 
-| Componente   | Descripción          | Props clave                                                                                                         |
-| :----------- | :-------------------- | :------------------------------------------------------------------------------------------------------------------ |
-| `Input`      | Campo de texto       | `type`, `label?`, `error?`, `helperText?`, `startIcon?`, `endIcon?`, `variant?`, `size?`, `disabled?`, `className?` |
-| `Textarea`   | Texto multilinea     | Standard HTML props, `variant?`, `error?`, `className?`                                                             |
-| `Select`     | Dropdown avanzado    | `value?`, `defaultValue?`, `onValueChange?`, `placeholder?`, `className?`                                           |
-| `Switch`     | Toggle binario       | `checked?`, `defaultChecked?`, `onCheckedChange?`, `disabled?`, `className?`                                        |
-| `Checkbox`   | Casilla de selección | `checked?`, `defaultChecked?`, `onCheckedChange?`, `disabled?`, `className?`                                        |
-| `Calendar`   | Grilla de calendario | `mode`, `selected`, `onSelect`, `showOutsideDays?` (todos los props de `DayPicker`)                                 |
-| `DatePicker` | Selector de fecha (Popover + Calendar) | `date?`, `onDateChange?`, `placeholder?`, `disabled?`, `className?`, `dialogLabel?`, `locale?` |
+| Componente   | Descripción                            | Props clave                                                                                                         |
+| :----------- | :------------------------------------- | :------------------------------------------------------------------------------------------------------------------ |
+| `Input`      | Campo de texto                         | `type`, `label?`, `error?`, `helperText?`, `startIcon?`, `endIcon?`, `variant?`, `size?`, `disabled?`, `className?` |
+| `Textarea`   | Texto multilinea                       | Standard HTML props, `variant?`, `error?`, `className?`                                                             |
+| `Select`     | Dropdown avanzado                      | `value?`, `defaultValue?`, `onValueChange?`, `placeholder?`, `className?`                                           |
+| `Switch`     | Toggle binario                         | `checked?`, `defaultChecked?`, `onCheckedChange?`, `disabled?`, `className?`                                        |
+| `Checkbox`   | Casilla de selección                   | `checked?`, `defaultChecked?`, `onCheckedChange?`, `disabled?`, `className?`                                        |
+| `Calendar`   | Grilla de calendario                   | `mode`, `selected`, `onSelect`, `showOutsideDays?` (todos los props de `DayPicker`)                                 |
+| `DatePicker` | Selector de fecha (Popover + Calendar) | `date?`, `onDateChange?`, `placeholder?`, `disabled?`, `className?`, `dialogLabel?`, `locale?`                      |
 
 ### Checkbox — Uso y Props
 

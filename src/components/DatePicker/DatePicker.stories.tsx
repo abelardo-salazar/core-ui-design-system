@@ -76,8 +76,12 @@ export const SpanishLocale: Story = {
     const weekdays = Array.from(content.querySelectorAll('th'), (th) => th.textContent);
     await expect(weekdays).toEqual(['lu', 'ma', 'mi', 'ju', 'vi', 'sá', 'do']);
 
-    await expect(within(content).getByRole('button', { name: 'Go to the Next Month' })).toBeInTheDocument();
-    await expect(within(content).getByRole('button', { name: 'Go to the Previous Month' })).toBeInTheDocument();
+    await expect(
+      within(content).getByRole('button', { name: 'Go to the Next Month' }),
+    ).toBeInTheDocument();
+    await expect(
+      within(content).getByRole('button', { name: 'Go to the Previous Month' }),
+    ).toBeInTheDocument();
   },
 };
 
@@ -90,7 +94,11 @@ export const SpanishLocaleWithDayPickerLabels: Story = {
     await userEvent.click(canvas.getByRole('button', { name: '15 de enero de 2026' }));
 
     const content = await within(document.body).findByRole('dialog', { name: 'Choose date' });
-    await expect(within(content).getByRole('button', { name: 'Ir al mes siguiente' })).toBeInTheDocument();
-    await expect(within(content).getByRole('button', { name: 'Ir al mes anterior' })).toBeInTheDocument();
+    await expect(
+      within(content).getByRole('button', { name: 'Ir al mes siguiente' }),
+    ).toBeInTheDocument();
+    await expect(
+      within(content).getByRole('button', { name: 'Ir al mes anterior' }),
+    ).toBeInTheDocument();
   },
 };
