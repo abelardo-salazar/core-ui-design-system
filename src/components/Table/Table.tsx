@@ -118,7 +118,10 @@ const TableFooter = React.forwardRef<
   <tfoot
     ref={ref}
     role="rowgroup"
-    className={cn('border-t border-base-300 bg-base-200/50 font-medium [&_tr]:last:border-b-0', className)}
+    className={cn(
+      'border-t border-base-300 bg-base-200/50 font-medium [&_tr]:last:border-b-0',
+      className,
+    )}
     {...props}
   />
 ));

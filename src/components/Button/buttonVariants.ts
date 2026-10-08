@@ -20,7 +20,8 @@ export const buttonVariants = cva(
         // hover:text-error-focus-content es necesario: --error es claro y --error-focus es
         // oscuro (al revés que en las demás variantes), así que text-error-content (negro)
         // solo da contraste suficiente en el estado base, no en hover. Ver index.css.
-        destructive: 'bg-error text-error-content hover:bg-error-focus hover:text-error-focus-content shadow-sm',
+        destructive:
+          'bg-error text-error-content hover:bg-error-focus hover:text-error-focus-content shadow-sm',
       },
       // md = 44px: alinea con Input md y el trigger de Select (misma familia de controles de
       // formulario, ver inputVariants.ts/Select.tsx) — antes los tres medían 40px, pero una

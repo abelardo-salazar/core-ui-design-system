@@ -106,9 +106,9 @@ export const Destructive: Story = {
     // --color-primary-content), así que la aserción de contraste va sobre el token crudo
     // que sí se define directamente en :root, más la clase que lo consume.
     await expect(button.className.split(' ')).toContain('text-error-content');
-    await expect(getComputedStyle(document.documentElement).getPropertyValue('--error-content')).toBe(
-      '#000000',
-    );
+    await expect(
+      getComputedStyle(document.documentElement).getPropertyValue('--error-content'),
+    ).toBe('#000000');
 
     // Hover: --error-focus (fondo) es oscuro mientras --error (fondo base) es claro — al
     // revés que en las demás variantes — así que el texto necesita SU PROPIO -focus-content,

@@ -2,7 +2,12 @@
 
 import type * as React from 'react';
 import { useTable, type ColumnDef, type RowData } from '@tanstack/react-table';
-import { CaretDownIcon, CaretSortIcon, CaretUpIcon, MagnifyingGlassIcon } from '@radix-ui/react-icons';
+import {
+  CaretDownIcon,
+  CaretSortIcon,
+  CaretUpIcon,
+  MagnifyingGlassIcon,
+} from '@radix-ui/react-icons';
 import { cn } from '../../utils/cn';
 import { Button } from '../Button';
 import { EmptyState, EmptyStateTitle } from '../EmptyState';
