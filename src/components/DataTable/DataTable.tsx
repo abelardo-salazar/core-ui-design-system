@@ -27,27 +27,44 @@ export interface DataTableProps<TData extends RowData> {
    */
   columns: ColumnDef<typeof features, TData>[];
   data: TData[];
-  /** Placeholder de la caja de búsqueda global. Siempre visible: no es opcional vía prop. */
+  /**
+   * Placeholder (y nombre accesible) de la caja de búsqueda global. Siempre visible: no es
+   * opcional vía prop. @default 'Search...'
+   */
   searchPlaceholder?: string;
   /**
    * Contenido de la fila vacía (sin datos o filtro sin resultados). Por defecto, un
-   * `EmptyState` `sm` con el título "Sin resultados.".
+   * `EmptyState` `sm` con el título "No results.".
    */
   emptyState?: React.ReactNode;
+  /** Texto del botón de página anterior. @default 'Previous' */
+  previousLabel?: string;
+  /** Texto del botón de página siguiente. @default 'Next' */
+  nextLabel?: string;
+  /**
+   * Texto del indicador de página. Recibe la página actual (desde 1) y el total (mínimo 1).
+   * @default (page, total) => `Page ${page} of ${total}`
+   */
+  pageLabel?: (page: number, total: number) => string;
   className?: string;
 }
 
 const defaultEmptyState = (
   <EmptyState size="sm">
-    <EmptyStateTitle>Sin resultados.</EmptyStateTitle>
+    <EmptyStateTitle>No results.</EmptyStateTitle>
   </EmptyState>
 );
+
+const defaultPageLabel = (page: number, total: number) => `Page ${page} of ${total}`;
 
 function DataTable<TData extends RowData>({
   columns,
   data,
-  searchPlaceholder = 'Buscar...',
+  searchPlaceholder = 'Search...',
   emptyState = defaultEmptyState,
+  previousLabel = 'Previous',
+  nextLabel = 'Next',
+  pageLabel = defaultPageLabel,
   className,
 }: DataTableProps<TData>) {
   const table = useTable({ features, columns, data });
@@ -142,7 +159,7 @@ function DataTable<TData extends RowData>({
       */}
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-end md:gap-4">
         <p className="text-sm text-base-content/65">
-          Página {table.state.pagination.pageIndex + 1} de {Math.max(pageCount, 1)}
+          {pageLabel(table.state.pagination.pageIndex + 1, Math.max(pageCount, 1))}
         </p>
         <div className="flex gap-2">
           <Button
@@ -151,7 +168,7 @@ function DataTable<TData extends RowData>({
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
-            Anterior
+            {previousLabel}
           </Button>
           <Button
             variant="outline"
@@ -159,7 +176,7 @@ function DataTable<TData extends RowData>({
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
-            Siguiente
+            {nextLabel}
           </Button>
         </div>
       </div>

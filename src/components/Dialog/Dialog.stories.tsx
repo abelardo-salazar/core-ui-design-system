@@ -107,3 +107,24 @@ export const EditProfileExample: Story = {
     await expect(trigger).toHaveFocus();
   },
 };
+
+// closeLabel cambia el nombre accesible de la ✕ (por defecto "Close") y no llega al DOM.
+export const CustomCloseLabel: Story = {
+  render: () => (
+    <Dialog defaultOpen>
+      <DialogContent closeLabel="Cerrar">
+        <DialogHeader>
+          <DialogTitle>Editar perfil</DialogTitle>
+          <DialogDescription>Cambia tus datos.</DialogDescription>
+        </DialogHeader>
+      </DialogContent>
+    </Dialog>
+  ),
+  play: async () => {
+    const dialog = await within(document.body).findByRole('dialog');
+    await expect(within(dialog).getByRole('button', { name: 'Cerrar' })).toBeInTheDocument();
+    await expect(within(dialog).queryByRole('button', { name: 'Close' })).not.toBeInTheDocument();
+    await expect(dialog).not.toHaveAttribute('closelabel');
+    await expect(dialog).not.toHaveAttribute('closeLabel');
+  },
+};

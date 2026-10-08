@@ -579,7 +579,7 @@ Uso (ejemplos, extraídos de `Image.stories.tsx`):
 
 - **`SkipToContent`**
   - **Exports:** `SkipToContent`.
-  - **Props principales:** `href?: string` (por defecto `#main-content`); `className?: string`; acepta `React.AnchorHTMLAttributes<HTMLAnchorElement>`.
+  - **Props principales:** `href?: string` (por defecto `#main-content`); `children?: React.ReactNode` (por defecto `'Skip to content'`); `className?: string`; acepta `React.AnchorHTMLAttributes<HTMLAnchorElement>`.
   - **Descripción:** enlace accesible para saltar al contenido principal; está estilizado con `buttonVariants` y posicionamiento oculto hasta recibir foco (ideal para accesibilidad keyboard users / screen readers).
   - **Uso:**
 
@@ -587,8 +587,8 @@ Uso (ejemplos, extraídos de `Image.stories.tsx`):
 // Insertar al principio del layout
 <SkipToContent />
 
-// Personalizar destino
-<SkipToContent href="#content" />
+// Personalizar destino y texto
+<SkipToContent href="#content">Saltar al contenido</SkipToContent>
 ```
 
 Notas:
@@ -922,7 +922,7 @@ Uso (ejemplo simplificado, extraído de `DropdownMenu.stories.tsx`):
 | `Switch`     | Toggle binario                         | `checked?`, `defaultChecked?`, `onCheckedChange?`, `disabled?`, `className?`                                        |
 | `Checkbox`   | Casilla de selección                   | `checked?`, `defaultChecked?`, `onCheckedChange?`, `disabled?`, `className?`                                        |
 | `Calendar`   | Grilla de calendario                   | `mode`, `selected`, `onSelect`, `showOutsideDays?` (todos los props de `DayPicker`)                                 |
-| `DatePicker` | Selector de fecha (Popover + Calendar) | `date?`, `onDateChange?`, `placeholder?`, `disabled?`, `className?`                                                 |
+| `DatePicker` | Selector de fecha (Popover + Calendar) | `date?`, `onDateChange?`, `placeholder?`, `disabled?`, `className?`, `dialogLabel?`, `locale?`                      |
 
 ### Checkbox — Uso y Props
 
@@ -1143,10 +1143,12 @@ Uso (ejemplo, extraído de `Calendar.stories.tsx`):
   - `date?: Date` — fecha seleccionada.
   - `onDateChange?: (date: Date | undefined) => void`.
   - `placeholder?: string` (default `'Pick a date'`).
+  - `dialogLabel?: string` (default `'Choose date'`) — nombre accesible del popover.
+  - `locale?: Locale` (de `date-fns`) — se aplica a la fecha del disparador y al calendario. Con un locale de `date-fns` las etiquetas de navegación del calendario quedan en inglés; con el de DayPicker (`import { es } from '@daypicker/react/locale/es'`) también se traducen.
   - `disabled?: boolean`.
   - `className?: string` — se aplica al `Button` trigger.
 
-**Comportamiento no obvio:** `DatePicker` es **100% controlado, sin estado interno propio** — compone `Popover` + `Button` (trigger) + `Calendar` (`mode="single"`) tal cual ya existen en el DS, no una API monolítica aparte. El consumidor maneja `date`/`onDateChange` desde afuera, igual que lo haría en una app real. Formatea la fecha visible con `date-fns` (`format(date, 'PPP')`).
+**Comportamiento no obvio:** `DatePicker` es **100% controlado, sin estado interno propio** — compone `Popover` + `Button` (trigger) + `Calendar` (`mode="single"`) tal cual ya existen en el DS, no una API monolítica aparte. El consumidor maneja `date`/`onDateChange` desde afuera, igual que lo haría en una app real. Formatea la fecha visible con `date-fns` (`format(date, 'PPP', { locale })`).
 
 Uso (ejemplo, extraído de `DatePicker.stories.tsx`):
 
@@ -1393,7 +1395,10 @@ Nota: `TableCaption` y `TableFooter` son opcionales — una tabla mínima (sin c
 - **Props principales:**
   - `columns: ColumnDef<typeof features, TData>[]` (requerido) — ver nota abajo, tienen que tiparse contra `typeof features`.
   - `data: TData[]` (requerido).
-  - `searchPlaceholder?: string` (default `'Buscar...'`) — la caja de búsqueda global **siempre es visible**, no es opcional vía prop.
+  - `searchPlaceholder?: string` (default `'Search...'`) — la caja de búsqueda global **siempre es visible**, no es opcional vía prop. También es su nombre accesible.
+  - `emptyState?: React.ReactNode` (default: `EmptyState` `sm` con el título `'No results.'`).
+  - `previousLabel?: string` (default `'Previous'`), `nextLabel?: string` (default `'Next'`).
+  - `pageLabel?: (page: number, total: number) => string` (default `` (page, total) => `Page ${page} of ${total}` ``) — `page` empieza en 1.
   - `className?: string`.
 
 **Comportamiento no obvio:** construida sobre `@tanstack/react-table` v9. Las columnas deben tiparse contra `typeof features` (exportado por este mismo módulo, vía `createColumnHelper<typeof features, TData>()`) — es un requisito real de los generics de v9, no un detalle estilístico. `features` combina `rowSortingFeature` + `columnFilteringFeature` + `globalFilteringFeature` + `rowPaginationFeature`, pero **`columnFilteringFeature` está registrada únicamente porque el sistema de tipos de v9 la exige como prerequisito** de `globalFilteringFeature`/`filteredRowModel`/`filterFns` — `DataTable` no expone ningún filtro por columna, solo el filtro global (la caja de búsqueda). Alcance v1: sorting + filtro global + paginación; sin selección de filas, visibilidad de columnas, resize, agrupación/agregación ni pinning.

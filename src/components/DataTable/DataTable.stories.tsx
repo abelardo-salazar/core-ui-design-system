@@ -84,10 +84,10 @@ export const Default: Story = {
     const canvas = within(canvasElement);
 
     await expect(canvas.getByRole('table')).toBeInTheDocument();
-    await expect(canvas.getByPlaceholderText('Buscar...')).toBeInTheDocument();
+    await expect(canvas.getByPlaceholderText('Search...')).toBeInTheDocument();
     await expect(canvas.getAllByRole('columnheader')).toHaveLength(3);
     // pageSize default de rowPaginationFeature es 10 -> 23 registros = 3 páginas.
-    await expect(canvas.getByText('Página 1 de 3')).toBeInTheDocument();
+    await expect(canvas.getByText('Page 1 of 3')).toBeInTheDocument();
   },
 };
 
@@ -124,7 +124,7 @@ export const GlobalFilter: Story = {
   render: () => <DataTable columns={columns} data={people} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const searchBox = canvas.getByPlaceholderText('Buscar...');
+    const searchBox = canvas.getByPlaceholderText('Search...');
 
     await userEvent.type(searchBox, 'Walter');
 
@@ -134,19 +134,19 @@ export const GlobalFilter: Story = {
     await expect(canvas.queryByText('Ana')).not.toBeInTheDocument();
 
     // La búsqueda también resetea a la primera página (23 -> 1 resultado = 1 página).
-    await expect(canvas.getByText('Página 1 de 1')).toBeInTheDocument();
+    await expect(canvas.getByText('Page 1 of 1')).toBeInTheDocument();
   },
 };
 
-// 4. Paginación: "Siguiente"/"Anterior" cambian las filas mostradas.
+// 4. Paginación: "Next"/"Previous" cambian las filas mostradas.
 export const Pagination: Story = {
   render: () => <DataTable columns={columns} data={people} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const previousButton = canvas.getByRole('button', { name: 'Anterior' });
-    const nextButton = canvas.getByRole('button', { name: 'Siguiente' });
+    const previousButton = canvas.getByRole('button', { name: 'Previous' });
+    const nextButton = canvas.getByRole('button', { name: 'Next' });
 
-    // Página 1: "Anterior" deshabilitado, primera fila es "Marta" (orden original).
+    // Página 1: "Previous" deshabilitado, primera fila es "Marta" (orden original).
     await expect(previousButton).toBeDisabled();
     await expect(canvas.getAllByRole('row')[1]).toHaveTextContent('Marta');
 
@@ -154,14 +154,14 @@ export const Pagination: Story = {
 
     // Página 2: el registro #11 sin ordenar es "Rosa" (índice 10 del array `names`,
     // pageSize 10 -> la página 2 arranca en el índice 10).
-    await expect(canvas.getByText('Página 2 de 3')).toBeInTheDocument();
+    await expect(canvas.getByText('Page 2 of 3')).toBeInTheDocument();
     await expect(canvas.getAllByRole('row')[1]).toHaveTextContent('Rosa');
     await expect(previousButton).not.toBeDisabled();
 
     await userEvent.click(previousButton);
 
     // Vuelve a la página 1 con las mismas filas que al inicio.
-    await expect(canvas.getByText('Página 1 de 3')).toBeInTheDocument();
+    await expect(canvas.getByText('Page 1 of 3')).toBeInTheDocument();
     await expect(canvas.getAllByRole('row')[1]).toHaveTextContent('Marta');
   },
 };
@@ -195,12 +195,12 @@ export const EmptyState: Story = {
   render: () => <DataTable columns={columns} data={people} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const searchBox = canvas.getByPlaceholderText('Buscar...');
+    const searchBox = canvas.getByPlaceholderText('Search...');
 
     await userEvent.type(searchBox, 'zzzzz');
 
     // Por defecto: EmptyState sm con el título de siempre.
-    const title = canvas.getByText('Sin resultados.');
+    const title = canvas.getByText('No results.');
     await expect(title.tagName).toBe('P');
     const root = title.closest('[data-size]');
     await expect(root).toHaveAttribute('data-size', 'sm');
@@ -237,7 +237,7 @@ export const CustomEmptyState: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.queryByText('Sin resultados.')).not.toBeInTheDocument();
+    await expect(canvas.queryByText('No results.')).not.toBeInTheDocument();
 
     const title = canvas.getByText('Todavía no hay personas');
     const emptyCell = title.closest('td')!;
@@ -245,5 +245,34 @@ export const CustomEmptyState: Story = {
     await expect(emptyCell).not.toHaveAttribute('data-label');
     await expect(within(emptyCell).getByRole('button', { name: 'Invitar' })).toBeInTheDocument();
     await expect(canvas.getAllByRole('row')).toHaveLength(2);
+  },
+};
+
+// 8. Textos propios: searchPlaceholder, previousLabel, nextLabel y pageLabel reemplazan a los
+// valores por defecto en inglés. pageLabel recibe la página actual (desde 1) y el total.
+export const CustomLabels: Story = {
+  render: () => (
+    <DataTable
+      columns={columns}
+      data={people}
+      searchPlaceholder="Buscar..."
+      previousLabel="Anterior"
+      nextLabel="Siguiente"
+      pageLabel={(page, total) => `Página ${page} de ${total}`}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    const searchBox = canvas.getByRole('textbox', { name: 'Buscar...' });
+    await expect(searchBox).toHaveAttribute('placeholder', 'Buscar...');
+    await expect(canvas.getByText('Página 1 de 3')).toBeInTheDocument();
+    await expect(canvas.queryByText(/^Page /)).not.toBeInTheDocument();
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Siguiente' }));
+    await expect(canvas.getByText('Página 2 de 3')).toBeInTheDocument();
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Anterior' }));
+    await expect(canvas.getByText('Página 1 de 3')).toBeInTheDocument();
   },
 };
