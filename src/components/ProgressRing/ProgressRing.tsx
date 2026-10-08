@@ -4,7 +4,8 @@ import { cn } from '../../utils/cn';
 import { progressRingVariants } from './progressRingVariants';
 
 export interface ProgressRingProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children'>,
+  extends
+    Omit<React.HTMLAttributes<HTMLDivElement>, 'children'>,
     VariantProps<typeof progressRingVariants> {
   value: number;
   max?: number;

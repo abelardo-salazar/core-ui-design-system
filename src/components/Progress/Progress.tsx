@@ -7,7 +7,8 @@ import { cn } from '../../utils/cn';
 import { progressIndicatorVariants } from './progressVariants';
 
 export interface ProgressProps
-  extends React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root>,
+  extends
+    React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root>,
     VariantProps<typeof progressIndicatorVariants> {}
 
 const Progress = React.forwardRef<React.ElementRef<typeof ProgressPrimitive.Root>, ProgressProps>(
@@ -20,10 +21,7 @@ const Progress = React.forwardRef<React.ElementRef<typeof ProgressPrimitive.Root
         value={value}
         max={max}
         aria-label={ariaLabel ?? 'Progress'}
-        className={cn(
-          'relative h-2 w-full overflow-hidden rounded-full bg-base-300',
-          className,
-        )}
+        className={cn('relative h-2 w-full overflow-hidden rounded-full bg-base-300', className)}
         {...props}
       >
         <ProgressPrimitive.Indicator

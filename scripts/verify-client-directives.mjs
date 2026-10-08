@@ -44,7 +44,9 @@ if (process.argv.includes('--post-build')) {
   const BARREL = join(ROOT, 'dist/index.js');
 
   if (!existsSync(BARREL)) {
-    console.error(`✗ ${toPosix(relative(ROOT, BARREL))} no existe — ¿corriste este check antes de \`vite build\`?`);
+    console.error(
+      `✗ ${toPosix(relative(ROOT, BARREL))} no existe — ¿corriste este check antes de \`vite build\`?`,
+    );
     process.exit(1);
   }
 
@@ -91,16 +93,24 @@ if (process.argv.includes('--post-build')) {
   }
 
   if (offenders.length > 0) {
-    console.error('✗ El barrel raíz publicado (dist/index.js) arrastra recharts y NO es seguro para Server Components:\n');
+    console.error(
+      '✗ El barrel raíz publicado (dist/index.js) arrastra recharts y NO es seguro para Server Components:\n',
+    );
     for (const { file, spec } of offenders) {
       console.error(`    ${file}  →  import '${spec}'`);
     }
-    console.error('\n  recharts solo puede vivir bajo el subpath ./charts (src/charts.ts → dist/charts.js).');
-    console.error('  Revisá que src/index.ts no reexporte nada de src/components/Chart/ (ni transitivamente).');
+    console.error(
+      '\n  recharts solo puede vivir bajo el subpath ./charts (src/charts.ts → dist/charts.js).',
+    );
+    console.error(
+      '  Revisá que src/index.ts no reexporte nada de src/components/Chart/ (ni transitivamente).',
+    );
     process.exit(1);
   }
 
-  console.log(`✓ dist/index.js está libre de recharts (${visited.size} módulos del barrel inspeccionados).`);
+  console.log(
+    `✓ dist/index.js está libre de recharts (${visited.size} módulos del barrel inspeccionados).`,
+  );
   process.exit(0);
 }
 
@@ -108,7 +118,9 @@ if (process.argv.includes('--post-build')) {
 
 function firstLine(absPath) {
   const content = readFileSync(absPath, 'utf8');
-  return content.slice(0, content.indexOf('\n') === -1 ? content.length : content.indexOf('\n')).trim();
+  return content
+    .slice(0, content.indexOf('\n') === -1 ? content.length : content.indexOf('\n'))
+    .trim();
 }
 
 function findTsxFiles(dir) {
@@ -195,7 +207,9 @@ for (const relPath of declared) {
 }
 
 if (missing.length > 0 || stale.length > 0) {
-  console.error('✗ CLIENT_ENTRY_POINTS (scripts/client-entry-points.mjs) está desalineado con src/components/:\n');
+  console.error(
+    '✗ CLIENT_ENTRY_POINTS (scripts/client-entry-points.mjs) está desalineado con src/components/:\n',
+  );
 
   if (missing.length > 0) {
     console.error(
@@ -223,15 +237,17 @@ if (implicitClient.length > 0) {
     console.error(`    - ${relPath}  →  ${offenses.join(', ')}`);
   }
   console.error(
-    "\n  Heurística estática, no perfecta: puede ser un falso positivo legítimo (revisar a mano) o un\n" +
+    '\n  Heurística estática, no perfecta: puede ser un falso positivo legítimo (revisar a mano) o un\n' +
       "  componente que de verdad necesita 'use client'. Si es lo segundo, agregá la directiva y\n" +
-      "  registralo en scripts/client-entry-points.mjs; si es un falso positivo, dejá constancia de\n" +
+      '  registralo en scripts/client-entry-points.mjs; si es un falso positivo, dejá constancia de\n' +
       '  por qué en el PR en vez de silenciarlo acá.',
   );
   process.exit(1);
 }
 
-console.log(`✓ CLIENT_ENTRY_POINTS está sincronizado con src/components/ (${declared.size} componentes).`);
+console.log(
+  `✓ CLIENT_ENTRY_POINTS está sincronizado con src/components/ (${declared.size} componentes).`,
+);
 console.log(
   `✓ Ningún componente server-safe arma un handler local y lo usa como prop JSX (heurística de handlers implícitos).`,
 );

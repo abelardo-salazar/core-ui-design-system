@@ -40,7 +40,8 @@ export const Default: Story = {
     const dayButtons = within(content)
       .getAllByRole('button')
       .filter(
-        (el) => /^\d{1,2}$/.test(el.textContent ?? '') && el.closest('td')?.dataset.outside !== 'true',
+        (el) =>
+          /^\d{1,2}$/.test(el.textContent ?? '') && el.closest('td')?.dataset.outside !== 'true',
       );
     const targetDay = dayButtons[Math.min(10, dayButtons.length - 1)];
     await userEvent.click(targetDay);

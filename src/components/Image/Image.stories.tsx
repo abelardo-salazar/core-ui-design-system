@@ -52,7 +52,11 @@ export const ErrorWithFallback: Story = {
       <Image
         src="/broken-image.jpg"
         alt="Broken"
-        fallback={<span className="flex h-full w-full items-center justify-center bg-base-200 text-xs">No image</span>}
+        fallback={
+          <span className="flex h-full w-full items-center justify-center bg-base-200 text-xs">
+            No image
+          </span>
+        }
       />
     </div>
   ),

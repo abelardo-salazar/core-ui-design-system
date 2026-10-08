@@ -10,7 +10,8 @@ import { chipVariants } from './chipVariants';
 type ChipSize = NonNullable<VariantProps<typeof chipVariants>['size']>;
 
 export interface ChipProps
-  extends Omit<React.HTMLAttributes<HTMLSpanElement>, 'onSelect'>,
+  extends
+    Omit<React.HTMLAttributes<HTMLSpanElement>, 'onSelect'>,
     VariantProps<typeof chipVariants> {
   /** Toggle controlado. Junto con onPressedChange, activa el modo interactivo del cuerpo (Radix Toggle real). */
   pressed?: boolean;
@@ -93,7 +94,8 @@ const Chip = React.forwardRef<HTMLSpanElement, ChipProps>(
 
     // El cuerpo solo se vuelve interactivo (Toggle real) si el consumidor participa del
     // protocolo de pressed/defaultPressed/onPressedChange. Sin eso, es texto plano.
-    const isToggle = pressed !== undefined || defaultPressed !== undefined || onPressedChange !== undefined;
+    const isToggle =
+      pressed !== undefined || defaultPressed !== undefined || onPressedChange !== undefined;
 
     const { left, right, vertical } = BODY_PADDING[size];
     // El padding vive acá (no en la raíz) para que el hit box real del Toggle/span llene la

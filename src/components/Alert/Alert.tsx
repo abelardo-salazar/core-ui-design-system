@@ -22,7 +22,10 @@ const ROLE_BY_VARIANT: Record<AlertVariant, 'alert' | 'status'> = {
   error: 'alert',
 };
 
-const DEFAULT_ICON_BY_VARIANT: Record<AlertVariant, React.ComponentType<React.ComponentProps<typeof InfoCircledIcon>>> = {
+const DEFAULT_ICON_BY_VARIANT: Record<
+  AlertVariant,
+  React.ComponentType<React.ComponentProps<typeof InfoCircledIcon>>
+> = {
   info: InfoCircledIcon,
   success: CheckCircledIcon,
   warning: ExclamationTriangleIcon,
@@ -30,8 +33,7 @@ const DEFAULT_ICON_BY_VARIANT: Record<AlertVariant, React.ComponentType<React.Co
 };
 
 export interface AlertProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof alertVariants> {
+  extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof alertVariants> {
   /**
    * Reemplaza el ícono default de la variante (patrón compositivo, igual que `fallback` en
    * Image). Si no se pasa (`undefined`), se usa el ícono default de `variant`. Si se pasa
@@ -58,15 +60,14 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
     const DefaultIcon = DEFAULT_ICON_BY_VARIANT[resolvedVariant];
 
     const resolvedIcon =
-      icon !== undefined ? icon : <DefaultIcon className={cn(alertIconVariants({ variant }))} aria-hidden />;
+      icon !== undefined ? (
+        icon
+      ) : (
+        <DefaultIcon className={cn(alertIconVariants({ variant }))} aria-hidden />
+      );
 
     return (
-      <div
-        ref={ref}
-        role={role}
-        className={cn(alertVariants({ variant }), className)}
-        {...props}
-      >
+      <div ref={ref} role={role} className={cn(alertVariants({ variant }), className)} {...props}>
         {resolvedIcon}
         <div className="flex-1 space-y-1">{children}</div>
       </div>
@@ -84,7 +85,11 @@ Alert.displayName = 'Alert';
 // podría romper el orden de headings de la página consumidora.
 const AlertTitle = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('font-medium leading-none tracking-tight', className)} {...props} />
+    <div
+      ref={ref}
+      className={cn('font-medium leading-none tracking-tight', className)}
+      {...props}
+    />
   ),
 );
 AlertTitle.displayName = 'AlertTitle';
@@ -94,7 +99,11 @@ AlertTitle.displayName = 'AlertTitle';
 // -----------------------------------------------------------------------------
 const AlertDescription = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div className={cn('text-sm text-base-content [&_p]:leading-relaxed', className)} ref={ref} {...props} />
+    <div
+      className={cn('text-sm text-base-content [&_p]:leading-relaxed', className)}
+      ref={ref}
+      {...props}
+    />
   ),
 );
 AlertDescription.displayName = 'AlertDescription';

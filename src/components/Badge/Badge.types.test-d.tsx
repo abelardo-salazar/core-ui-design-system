@@ -14,7 +14,11 @@ const staticSized = (
     Secondary md
   </Badge>
 );
-const interactiveClick = <Badge interactive onClick={() => {}}>Click</Badge>;
+const interactiveClick = (
+  <Badge interactive onClick={() => {}}>
+    Click
+  </Badge>
+);
 const interactiveButtonProps = (
   <Badge interactive disabled type="submit">
     Submit

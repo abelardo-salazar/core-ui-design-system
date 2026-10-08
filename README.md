@@ -3,6 +3,7 @@
 <!-- El badge de versión se actualiza a mano en cada bump (ver "version" en package.json) —
      no hay automatización que lo sincronice. Si tocás package.json#version, actualizá esta
      línea en el mismo commit. -->
+
 ![Version](https://img.shields.io/badge/version-0.3.15-blue.svg)
 ![React](https://img.shields.io/badge/react-19.0.0+-61DAFB.svg)
 ![TypeScript](https://img.shields.io/badge/typescript-5.9+-3178C6.svg)
@@ -95,31 +96,31 @@ El sistema de colores y radios se define en tokens semánticos (CSS Custom Prope
 
 Estos son los tokens semánticos soportados como superficie pública de theming, con su valor default:
 
-| Token | Claro (default) | Oscuro (default) |
-| --- | --- | --- |
-| `--primary` | `#302b6e` | `#b7b1ff` |
-| `--primary-focus` | `#28245b` | `#cfcbff` |
-| `--primary-content` | `#ffffff` | `#000000` |
-| `--secondary` | `#235e43` | `#2dd287` |
-| `--secondary-focus` | `#1c4b36` | `#40d692` |
-| `--secondary-content` | `#ffffff` | `#000000` |
-| `--accent` | `#426020` | `#9ed261` |
-| `--accent-focus` | `#354c19` | `#aad875` |
-| `--accent-content` | `#ffffff` | `#000000` |
-| `--neutral` | `#282524` | `#ffffff` |
-| `--neutral-focus` | `#0d0c0c` | `#e5e5e5` |
-| `--neutral-content` | `#ffffff` | `#000000` |
-| `--base-100` | `#ffffff` | `#141414` |
-| `--base-200` | `#fcfcfc` | `#1f1f1f` |
-| `--base-300` | `#f3f4f6` | `#292929` |
-| `--base-content` | `#282524` | `#ffffff` |
-| `--info` | `#3b82f6` | (igual, no cambia en oscuro) |
-| `--success` | `#22c55e` | (igual, no cambia en oscuro) |
-| `--warning` | `#eab308` | (igual, no cambia en oscuro) |
-| `--error` | `#ef4444` | (igual, no cambia en oscuro) |
-| `--error-content` | `#000000` | (igual, no cambia en oscuro) |
-| `--error-focus` | `#b91c1c` | `#f87171` |
-| `--error-focus-content` | `#ffffff` | `#000000` |
+| Token                   | Claro (default) | Oscuro (default)             |
+| ----------------------- | --------------- | ---------------------------- |
+| `--primary`             | `#302b6e`       | `#b7b1ff`                    |
+| `--primary-focus`       | `#28245b`       | `#cfcbff`                    |
+| `--primary-content`     | `#ffffff`       | `#000000`                    |
+| `--secondary`           | `#235e43`       | `#2dd287`                    |
+| `--secondary-focus`     | `#1c4b36`       | `#40d692`                    |
+| `--secondary-content`   | `#ffffff`       | `#000000`                    |
+| `--accent`              | `#426020`       | `#9ed261`                    |
+| `--accent-focus`        | `#354c19`       | `#aad875`                    |
+| `--accent-content`      | `#ffffff`       | `#000000`                    |
+| `--neutral`             | `#282524`       | `#ffffff`                    |
+| `--neutral-focus`       | `#0d0c0c`       | `#e5e5e5`                    |
+| `--neutral-content`     | `#ffffff`       | `#000000`                    |
+| `--base-100`            | `#ffffff`       | `#141414`                    |
+| `--base-200`            | `#fcfcfc`       | `#1f1f1f`                    |
+| `--base-300`            | `#f3f4f6`       | `#292929`                    |
+| `--base-content`        | `#282524`       | `#ffffff`                    |
+| `--info`                | `#3b82f6`       | (igual, no cambia en oscuro) |
+| `--success`             | `#22c55e`       | (igual, no cambia en oscuro) |
+| `--warning`             | `#eab308`       | (igual, no cambia en oscuro) |
+| `--error`               | `#ef4444`       | (igual, no cambia en oscuro) |
+| `--error-content`       | `#000000`       | (igual, no cambia en oscuro) |
+| `--error-focus`         | `#b91c1c`       | `#f87171`                    |
+| `--error-focus-content` | `#ffffff`       | `#000000`                    |
 
 > `--info`, `--success` y `--warning` **no** tienen variantes `-focus`/`-content` en el sistema actual — solo `--error` las tiene completas (por el contraste de texto que necesita, ver comentarios en `src/index.css`). No agregues `--info-focus`, `--success-content`, etc. asumiendo simetría: no existen y no tienen efecto salvo que también se definan.
 
@@ -148,7 +149,7 @@ La única forma de override que garantiza ganar sobre los tokens del design syst
 }
 ```
 
-Esto funciona porque, por especificación de CSS Cascade Layers, **cualquier regla sin capa tiene prioridad sobre cualquier regla dentro de una `@layer`**, sin importar en qué orden se importen las hojas de estilo. Verificado en navegador real (Chromium vía Playwright, contra Storybook sirviendo el CSS compilado real del paquete): un override sin capa insertado incluso *antes* del CSS del design system en el `<head>` sigue ganando.
+Esto funciona porque, por especificación de CSS Cascade Layers, **cualquier regla sin capa tiene prioridad sobre cualquier regla dentro de una `@layer`**, sin importar en qué orden se importen las hojas de estilo. Verificado en navegador real (Chromium vía Playwright, contra Storybook sirviendo el CSS compilado real del paquete): un override sin capa insertado incluso _antes_ del CSS del design system en el `<head>` sigue ganando.
 
 ### ⚠️ Qué NO hacer: override dentro de tu propio `@layer base`
 
@@ -159,7 +160,7 @@ Si tu proyecto también usa Tailwind y seguís su convención de customización 
 
 Esto es así porque ambas hojas declaran la misma capa con nombre `base`, y dentro de una capa con nombre compartido el desempate para igual especificidad es el orden normal de cascada (la declaración que aparece más tarde en el documento gana) — ya no aplica la prioridad especial de "sin capa". Es un mecanismo frágil: un reorden de imports, un bump de una dependencia que cambia cuándo se inyecta su CSS, o un bundler que reordena hojas de estilo puede invertir silenciosamente cuál de las dos gana.
 
-Verificado en navegador real (misma configuración de prueba): un override en `@layer base` importado *antes* del CSS del design system efectivamente **no** tuvo efecto — el token quedó en su valor default del paquete.
+Verificado en navegador real (misma configuración de prueba): un override en `@layer base` importado _antes_ del CSS del design system efectivamente **no** tuvo efecto — el token quedó en su valor default del paquete.
 
 **Por eso el patrón sancionado es siempre el override sin capa** (sección anterior), incluso en proyectos que ya usan `@layer base` para otras cosas.
 
@@ -229,17 +230,17 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
 
 ### 🧱 Átomos (Fundamentos)
 
-| Componente  | Descripción                   | Props clave                                                                                 |
-| :---------- | :----------------------------- | :------------------------------------------------------------------------------------------ |
-| `Button`    | Botón interactivo polimórfico | `variant`, `size`, `isLoading`, `asChild`, `fullWidth`, `startIcon`, `endIcon`, `className` |
-| `Heading`   | Títulos semánticos            | `level`, `as`, `className`                                                                  |
-| `Text`      | Párrafos y texto cuerpo       | `size`, `weight`, `as`, `className`                                                         |
-| `Badge`     | Etiquetas de estado           | `variant`, `size`, `interactive`, `className`                                               |
-| `Avatar`    | Imagen de perfil con fallback | `src`, `alt`, `fallback`, `className`                                                       |
-| `Separator` | Divisor visual                | `orientation`, `className`                                                                  |
-| `Skeleton`  | Placeholder de carga          | `className`                                                                                 |
-| `Chip`      | Etiqueta toggleable/removible | `variant`, `size`, `pressed`, `defaultPressed`, `onPressedChange`, `onRemove`, `removeLabel` |
-| `Image`     | Imagen con estado de carga/error | `src`, `alt`, `fallback`, `containerClassName`                                            |
+| Componente  | Descripción                      | Props clave                                                                                  |
+| :---------- | :------------------------------- | :------------------------------------------------------------------------------------------- |
+| `Button`    | Botón interactivo polimórfico    | `variant`, `size`, `isLoading`, `asChild`, `fullWidth`, `startIcon`, `endIcon`, `className`  |
+| `Heading`   | Títulos semánticos               | `level`, `as`, `className`                                                                   |
+| `Text`      | Párrafos y texto cuerpo          | `size`, `weight`, `as`, `className`                                                          |
+| `Badge`     | Etiquetas de estado              | `variant`, `size`, `interactive`, `className`                                                |
+| `Avatar`    | Imagen de perfil con fallback    | `src`, `alt`, `fallback`, `className`                                                        |
+| `Separator` | Divisor visual                   | `orientation`, `className`                                                                   |
+| `Skeleton`  | Placeholder de carga             | `className`                                                                                  |
+| `Chip`      | Etiqueta toggleable/removible    | `variant`, `size`, `pressed`, `defaultPressed`, `onPressedChange`, `onRemove`, `removeLabel` |
+| `Image`     | Imagen con estado de carga/error | `src`, `alt`, `fallback`, `containerClassName`                                               |
 
 ### Button — Uso y Props
 
@@ -537,14 +538,14 @@ Uso (ejemplos, extraídos de `Image.stories.tsx`):
 
 ### 🧬 Moléculas (Estructura)
 
-| Componente      | Descripción                | API & Composición                                                                                                  |
-| ---------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **`Card`**      | Contenedor de información. | **Subcomponentes:** `<CardHeader>`, `<CardTitle>`, `<CardDescription>`, `<CardContent>`, `<CardFooter>`            |
-| **`Dialog`**    | Modal accesible.           | `open`: boolean; `onOpenChange`: (open: boolean) => void; **Subcomponentes:** `<DialogTrigger>`, `<DialogContent>` |
-| **`Sheet`**     | Panel lateral (Drawer).    | `side`: "top" \| "right" \| "bottom" \| "left"                                                                     |
-| **`Container`** | Wrapper de layout.         | `size`: 'sm' \| 'md' \| 'lg' \| 'xl' \| 'full' — controla `max-width` (ver sección `Layout` para el detalle).       |
-| **`AspectRatio`** | Fuerza una relación de aspecto. | `ratio`: number (ej. `16 / 9`). Se compone con otro contenido (`Image`, etc.), no es una API todo-en-uno.      |
-| **`Tabs`**      | Navegación por pestañas.   | `defaultValue`/`value`/`onValueChange` en el root; **Subcomponentes:** `<TabsList>`, `<TabsTrigger>`, `<TabsContent>` |
+| Componente        | Descripción                     | API & Composición                                                                                                     |
+| ----------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| **`Card`**        | Contenedor de información.      | **Subcomponentes:** `<CardHeader>`, `<CardTitle>`, `<CardDescription>`, `<CardContent>`, `<CardFooter>`               |
+| **`Dialog`**      | Modal accesible.                | `open`: boolean; `onOpenChange`: (open: boolean) => void; **Subcomponentes:** `<DialogTrigger>`, `<DialogContent>`    |
+| **`Sheet`**       | Panel lateral (Drawer).         | `side`: "top" \| "right" \| "bottom" \| "left"                                                                        |
+| **`Container`**   | Wrapper de layout.              | `size`: 'sm' \| 'md' \| 'lg' \| 'xl' \| 'full' — controla `max-width` (ver sección `Layout` para el detalle).         |
+| **`AspectRatio`** | Fuerza una relación de aspecto. | `ratio`: number (ej. `16 / 9`). Se compone con otro contenido (`Image`, etc.), no es una API todo-en-uno.             |
+| **`Tabs`**        | Navegación por pestañas.        | `defaultValue`/`value`/`onValueChange` en el root; **Subcomponentes:** `<TabsList>`, `<TabsTrigger>`, `<TabsContent>` |
 
 ### Layout — Uso y Props
 
@@ -817,11 +818,11 @@ Uso (ejemplo, extraído de `Tabs.stories.tsx`):
 
 Contenido flotante posicionado relativo a un trigger (Portal + `@radix-ui/react-popper`), con animaciones de entrada/salida y la misma superficie visual (`bg-base-100`, `rounded-box`, `border-base-300`, `shadow-md`) en los tres.
 
-| Componente        | Descripción                          | Props clave                                                                 |
-| :----------------- | :------------------------------------ | :---------------------------------------------------------------------------- |
-| `Popover`          | Contenido flotante disparado por click | `align`, `sideOffset`; **Subcomponentes:** `<PopoverTrigger>`, `<PopoverAnchor>`, `<PopoverContent>` |
-| `Tooltip`          | Texto flotante disparado por hover/foco | Requiere `<TooltipProvider>`; **Subcomponentes:** `<TooltipTrigger>`, `<TooltipContent>` |
-| `DropdownMenu`     | Menú de acciones/opciones             | **Subcomponentes:** `<DropdownMenuTrigger>`, `<DropdownMenuContent>`, `<DropdownMenuItem>`, `<DropdownMenuCheckboxItem>`, `<DropdownMenuRadioGroup>`/`<DropdownMenuRadioItem>`, `<DropdownMenuLabel>`, `<DropdownMenuSeparator>` |
+| Componente     | Descripción                             | Props clave                                                                                                                                                                                                                      |
+| :------------- | :-------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Popover`      | Contenido flotante disparado por click  | `align`, `sideOffset`; **Subcomponentes:** `<PopoverTrigger>`, `<PopoverAnchor>`, `<PopoverContent>`                                                                                                                             |
+| `Tooltip`      | Texto flotante disparado por hover/foco | Requiere `<TooltipProvider>`; **Subcomponentes:** `<TooltipTrigger>`, `<TooltipContent>`                                                                                                                                         |
+| `DropdownMenu` | Menú de acciones/opciones               | **Subcomponentes:** `<DropdownMenuTrigger>`, `<DropdownMenuContent>`, `<DropdownMenuItem>`, `<DropdownMenuCheckboxItem>`, `<DropdownMenuRadioGroup>`/`<DropdownMenuRadioItem>`, `<DropdownMenuLabel>`, `<DropdownMenuSeparator>` |
 
 ### Popover — Uso y Props
 
@@ -913,15 +914,15 @@ Uso (ejemplo simplificado, extraído de `DropdownMenu.stories.tsx`):
 
 ### 📝 Formularios (Forms)
 
-| Componente   | Descripción          | Props clave                                                                                                         |
-| :----------- | :-------------------- | :------------------------------------------------------------------------------------------------------------------ |
-| `Input`      | Campo de texto       | `type`, `label?`, `error?`, `helperText?`, `startIcon?`, `endIcon?`, `variant?`, `size?`, `disabled?`, `className?` |
-| `Textarea`   | Texto multilinea     | Standard HTML props, `variant?`, `error?`, `className?`                                                             |
-| `Select`     | Dropdown avanzado    | `value?`, `defaultValue?`, `onValueChange?`, `placeholder?`, `className?`                                           |
-| `Switch`     | Toggle binario       | `checked?`, `defaultChecked?`, `onCheckedChange?`, `disabled?`, `className?`                                        |
-| `Checkbox`   | Casilla de selección | `checked?`, `defaultChecked?`, `onCheckedChange?`, `disabled?`, `className?`                                        |
-| `Calendar`   | Grilla de calendario | `mode`, `selected`, `onSelect`, `showOutsideDays?` (todos los props de `DayPicker`)                                 |
-| `DatePicker` | Selector de fecha (Popover + Calendar) | `date?`, `onDateChange?`, `placeholder?`, `disabled?`, `className?`                                |
+| Componente   | Descripción                            | Props clave                                                                                                         |
+| :----------- | :------------------------------------- | :------------------------------------------------------------------------------------------------------------------ |
+| `Input`      | Campo de texto                         | `type`, `label?`, `error?`, `helperText?`, `startIcon?`, `endIcon?`, `variant?`, `size?`, `disabled?`, `className?` |
+| `Textarea`   | Texto multilinea                       | Standard HTML props, `variant?`, `error?`, `className?`                                                             |
+| `Select`     | Dropdown avanzado                      | `value?`, `defaultValue?`, `onValueChange?`, `placeholder?`, `className?`                                           |
+| `Switch`     | Toggle binario                         | `checked?`, `defaultChecked?`, `onCheckedChange?`, `disabled?`, `className?`                                        |
+| `Checkbox`   | Casilla de selección                   | `checked?`, `defaultChecked?`, `onCheckedChange?`, `disabled?`, `className?`                                        |
+| `Calendar`   | Grilla de calendario                   | `mode`, `selected`, `onSelect`, `showOutsideDays?` (todos los props de `DayPicker`)                                 |
+| `DatePicker` | Selector de fecha (Popover + Calendar) | `date?`, `onDateChange?`, `placeholder?`, `disabled?`, `className?`                                                 |
 
 ### Checkbox — Uso y Props
 
@@ -1158,11 +1159,11 @@ function ControlledDatePicker() {
 
 ### 📢 Feedback (Notificaciones)
 
-| Componente     | Descripción                        | Props clave                                                                          |
-| :-------------- | :----------------------------------- | :--------------------------------------------------------------------------------------- |
-| `Toast`        | Notificaciones no-modales (Sonner)  | Ver props de `<Toaster />` más abajo                                                |
-| `Progress`     | Barra de progreso lineal            | `value`, `max?`, `variant?: 'primary'\|'success'\|'warning'\|'error'`, `className?`    |
-| `ProgressRing` | Progreso circular (anillo SVG)      | `value`, `max?`, `variant?`, `size?`, `strokeWidth?`, `showValueLabel?`               |
+| Componente     | Descripción                         | Props clave                                                                                                          |
+| :------------- | :---------------------------------- | :------------------------------------------------------------------------------------------------------------------- |
+| `Toast`        | Notificaciones no-modales (Sonner)  | Ver props de `<Toaster />` más abajo                                                                                 |
+| `Progress`     | Barra de progreso lineal            | `value`, `max?`, `variant?: 'primary'\|'success'\|'warning'\|'error'`, `className?`                                  |
+| `ProgressRing` | Progreso circular (anillo SVG)      | `value`, `max?`, `variant?`, `size?`, `strokeWidth?`, `showValueLabel?`                                              |
 | `Alert`        | Aviso inline persistente (no-modal) | `variant?: 'info'\|'success'\|'warning'\|'error'`, `icon?`; **Subcomponentes:** `<AlertTitle>`, `<AlertDescription>` |
 
 El sistema de Toast utiliza **Sonner**.
@@ -1340,10 +1341,10 @@ Uso (ejemplos, extraídos de `Alert.stories.tsx`):
 
 ### 📊 Datos
 
-| Componente  | Descripción                                       | API & Composición                                                                                             |
-| :----------- | :-------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------- |
-| `Table`     | 8 primitivos HTML de tabla, estilizados            | `<Table>`, `<TableHeader>`, `<TableBody>`, `<TableFooter>`, `<TableRow>`, `<TableHead>`, `<TableCell>`, `<TableCaption>` |
-| `DataTable` | Tabla con sorting, filtro global y paginación       | `columns: ColumnDef<typeof features, TData>[]`, `data`, `searchPlaceholder?`, `className?` (sobre `@tanstack/react-table` v9) |
+| Componente  | Descripción                                                             | API & Composición                                                                                                                                                                                            |
+| :---------- | :---------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Table`     | 8 primitivos HTML de tabla, estilizados                                 | `<Table>`, `<TableHeader>`, `<TableBody>`, `<TableFooter>`, `<TableRow>`, `<TableHead>`, `<TableCell>`, `<TableCaption>`                                                                                     |
+| `DataTable` | Tabla con sorting, filtro global y paginación                           | `columns: ColumnDef<typeof features, TData>[]`, `data`, `searchPlaceholder?`, `className?` (sobre `@tanstack/react-table` v9)                                                                                |
 | `Chart`     | Charts de Bar/Line/Area/Pie/Ring sobre recharts — **subpath `/charts`** | `ChartContainer`, `ChartTooltipContent`, `ChartLegendContent` + re-exports de recharts (`BarChart`, `LineChart`, `AreaChart`, `PieChart`, etc.), todo desde `@abelardo-salazar/core-ui-design-system/charts` |
 
 ### Table — Uso y Props
@@ -1469,7 +1470,7 @@ Alcance: **Bar, Line, Area, Pie — incluyendo Ring (donut)**. `recharts` **no**
 
 - `ChartContainer` inyecta `--color-<key>` como variable CSS por cada entrada de `config`, apuntando al token real del DS (`var(--color-primary)`, etc). Las piezas de datos referencian esa variable vía `fill`/`stroke` (ej. `fill="var(--color-escritorio)"`), nunca un color fijo — así responden solas a claro/oscuro. Esto es más simple que el recipe original de `ChartContainer` de shadcn/ui (que además inyecta un bloque `<style>` duplicado por tema): acá no hace falta, los tokens del DS ya cambian de valor solos con `.dark`.
 - "**Ring**" (donut) no es un componente propio: se logra componiendo `Pie` con `innerRadius`/`outerRadius` (el hueco) y un texto central armado a mano.
-- **`<Label position="center">` no sirve para el texto central de un Ring** — probado contra un `Pie` real, no renderiza nada en `recharts@3.10.1`. Es un bug/quirk conocido de la propia librería ([issue #6030 de recharts](https://github.com/recharts/recharts/issues/6030)): para `position="center"` específicamente, `Label` resuelve el viewBox contra el contexto *cartesiano* en vez del *polar*, y un `PieChart` sin ejes nunca provee ese contexto cartesiano. Para el texto central de un Ring, usa un `<text x="50%" y="50%">` crudo como hijo de `Pie` (`Pie` renderiza sus `children` tal cual, sin filtrarlos) — los porcentajes se resuelven contra el viewport del propio `<svg>`, sin JS ni conocer el tamaño del contenedor. Ver `RingChartExample` en `Chart.stories.tsx` para el patrón completo.
+- **`<Label position="center">` no sirve para el texto central de un Ring** — probado contra un `Pie` real, no renderiza nada en `recharts@3.10.1`. Es un bug/quirk conocido de la propia librería ([issue #6030 de recharts](https://github.com/recharts/recharts/issues/6030)): para `position="center"` específicamente, `Label` resuelve el viewBox contra el contexto _cartesiano_ en vez del _polar_, y un `PieChart` sin ejes nunca provee ese contexto cartesiano. Para el texto central de un Ring, usa un `<text x="50%" y="50%">` crudo como hijo de `Pie` (`Pie` renderiza sus `children` tal cual, sin filtrarlos) — los porcentajes se resuelven contra el viewport del propio `<svg>`, sin JS ni conocer el tamaño del contenedor. Ver `RingChartExample` en `Chart.stories.tsx` para el patrón completo.
 - Para `Pie`, el tooltip y la leyenda resuelven cada porción por `name`/`value`, no por `dataKey` — en un `Pie`, `dataKey` es el mismo string (el campo del valor numérico, ej. `"value"`) en **todas** las porciones; lo que distingue cada porción es `name` (tooltip) / `value` (leyenda), resuelto por Recharts vía `nameKey`.
 
 Uso (ejemplos, extraídos de `Chart.stories.tsx`):

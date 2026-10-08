@@ -40,7 +40,9 @@ export const Simple: Story = {
     const canvas = within(canvasElement);
 
     // CardTitle usa <h3> semánticamente.
-    await expect(canvas.getByRole('heading', { level: 3, name: 'Create project' })).toBeInTheDocument();
+    await expect(
+      canvas.getByRole('heading', { level: 3, name: 'Create project' }),
+    ).toBeInTheDocument();
     await expect(canvas.getByText('Deploy your new project in one-click.')).toBeInTheDocument();
     await expect(
       canvas.getByText('Your project will be deployed to the edge network instantly.'),

@@ -203,10 +203,7 @@ const assertLongSheetStructure =
     await expect(header.parentElement).toBe(dialog);
     // Reserva de la ✕ con el safe area derecho (sin inset resuelve a 24px; medido en
     // navegador real), simétrica en móvil para conservar el centrado.
-    await expect(header).toHaveClass(
-      'px-[calc(1.5rem_+_env(safe-area-inset-right))]',
-      'sm:pl-0',
-    );
+    await expect(header).toHaveClass('px-[calc(1.5rem_+_env(safe-area-inset-right))]', 'sm:pl-0');
     await expect(footer.parentElement).toBe(dialog);
     await expect(sheetBody.contains(header)).toBe(false);
     await expect(sheetBody.contains(footer)).toBe(false);
