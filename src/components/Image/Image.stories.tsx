@@ -1,5 +1,6 @@
+import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, waitFor, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { Image } from './Image';
 
 const meta: Meta<typeof Image> = {
@@ -88,5 +89,63 @@ export const ErrorWithoutFallback: Story = {
     await expect(canvas.queryByAltText('Broken')).not.toBeInTheDocument();
     await expect(container.querySelector('img')).not.toBeInTheDocument();
     await expect(container).toHaveTextContent('');
+  },
+};
+
+// 4. Carrera error-antes-del-efecto: si el <img> falla antes de que React ejecute los efectos
+// pasivos del montaje (src en caché con la máquina cargada), el error no debe perderse. El
+// wrapper dispara el `error` desde un useLayoutEffect, que corre antes de esos efectos. El
+// <img> es lazy dentro de un contenedor display:none (inline: el fixture headless no aplica
+// Tailwind), así que el navegador nunca lo carga y ningún evento real tapa el resultado.
+function ErrorBeforeEffects() {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  React.useLayoutEffect(() => {
+    containerRef.current?.querySelector('img')?.dispatchEvent(new Event('error'));
+  }, []);
+  return (
+    <div ref={containerRef} data-testid="image-container" style={{ display: 'none' }}>
+      <Image src="/never-loaded.jpg" alt="Early error" loading="lazy" />
+    </div>
+  );
+}
+
+export const ErrorBeforeMountEffects: Story = {
+  render: () => <ErrorBeforeEffects />,
+  play: async ({ canvasElement }) => {
+    const container = within(canvasElement).getByTestId('image-container');
+    // Sin espera: el error ya ocurrió de forma síncrona durante el montaje.
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    await expect(container.querySelector('img')).not.toBeInTheDocument();
+  },
+};
+
+// 5. Cambio de src tras un error: el <img> vuelve a montarse y recorre de nuevo el ciclo de
+// carga, en vez de quedarse en el estado de error de la imagen anterior.
+function SwitchSrcAfterError() {
+  const [src, setSrc] = React.useState('/broken-image.jpg');
+  return (
+    <div className="space-y-2">
+      <div className="h-32 w-32">
+        <Image src={src} alt="Switchable" fallback={<span>No image</span>} />
+      </div>
+      <button type="button" onClick={() => setSrc(TINY_PNG)}>
+        Cambiar imagen
+      </button>
+    </div>
+  );
+}
+
+export const RecoversWhenSrcChanges: Story = {
+  render: () => <SwitchSrcAfterError />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(await canvas.findByText('No image')).toBeInTheDocument();
+    await expect(canvas.queryByAltText('Switchable')).not.toBeInTheDocument();
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Cambiar imagen' }));
+
+    const img = await canvas.findByAltText('Switchable');
+    await waitFor(() => expect(img.className).not.toContain('invisible'));
+    await expect(canvas.queryByText('No image')).not.toBeInTheDocument();
   },
 };
