@@ -1,0 +1,5 @@
+# Commits de solo formato, ignorados por git blame. GitHub lo lee automáticamente; en local:
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# fix: formatear el repo con Prettier y fijar fin de línea LF (#46)
+91d40835fcf2196b4967a46d71f4aa1042b4b1b3
