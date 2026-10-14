@@ -154,6 +154,18 @@
 }
 
 @layer base {
+  /* Color de la separación entre un control y su anillo de foco (ring-offset-*), para todo el
+     DS. Tailwind v4 registra --tw-ring-offset-color con initial-value #fff e inherits: false:
+     sin esto, ring-offset-2 dibuja 2px blancos, un halo en modo oscuro. Por no heredarse se
+     aplica con * (en :root no surte efecto); var(--base-100) se resuelve en cada elemento y
+     sigue al tema de su contexto. En @layer base para que un ring-offset-<color> explícito
+     (capa utilities) siga ganando, por ejemplo sobre un fondo base-200. */
+  *,
+  ::before,
+  ::after {
+    --tw-ring-offset-color: var(--base-100);
+  }
+
   html {
     font-family: var(--font-sans);
   }

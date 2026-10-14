@@ -319,3 +319,38 @@ export const AsLinkLoading: Story = {
     await expect(args.onClick).not.toHaveBeenCalled();
   },
 };
+
+// Separación del anillo de foco: por defecto toma el color de fondo del tema (base-100, regla
+// base de index.css). Sobre otra superficie, un ring-offset-<color> explícito gana sobre esa
+// regla. El color real con foco de teclado en ambos temas se verificó en Storybook con un
+// navegador real.
+export const FocusRingOnSurface: Story = {
+  render: () => (
+    <div className="flex items-center gap-4">
+      <Button>Sobre la página</Button>
+      <div className="rounded-box bg-base-200 p-4">
+        <Button className="focus-visible:ring-offset-base-200">Sobre base-200</Button>
+      </div>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const button = canvas.getByRole('button', { name: 'Sobre la página' });
+    const offsetColor = () =>
+      getComputedStyle(button).getPropertyValue('--tw-ring-offset-color').trim();
+
+    // Modo oscuro (sin un contenedor .dark en el render: :root:has(.dark) oscurecería toda la
+    // story). Sin la regla base, el valor sería el initial-value de Tailwind (#fff).
+    document.documentElement.classList.add('dark');
+    try {
+      await expect(offsetColor()).toBe('#141414');
+    } finally {
+      document.documentElement.classList.remove('dark');
+    }
+    await expect(offsetColor()).toBe('#ffffff');
+
+    await expect(canvas.getByRole('button', { name: 'Sobre base-200' })).toHaveClass(
+      'focus-visible:ring-offset-base-200',
+    );
+  },
+};
