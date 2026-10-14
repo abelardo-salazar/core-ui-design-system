@@ -61,12 +61,14 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      // Dos entry points: el barrel raíz (`.`) y `./charts` (Chart aislado para no
-      // arrastrar recharts al barrel — ver src/charts.ts). Con preserveModules cada uno
-      // sale como dist/<name>.js (name = ruta relativa a preserveModulesRoot: 'src').
+      // Tres entry points: el barrel raíz (`.`), `./charts` (Chart aislado para no
+      // arrastrar recharts al barrel — ver src/charts.ts) y `./locale` (locales de DayPicker,
+      // datos puros, server-safe — ver src/locale.ts). Con preserveModules cada uno sale como
+      // dist/<name>.js (name = ruta relativa a preserveModulesRoot: 'src').
       entry: {
         index: resolve(__dirname, 'src/index.ts'),
         charts: resolve(__dirname, 'src/charts.ts'),
+        locale: resolve(__dirname, 'src/locale.ts'),
       },
       name: 'CoreUI',
       formats: ['es'], // Solo ESM: preserveModules requiere un archivo por módulo,

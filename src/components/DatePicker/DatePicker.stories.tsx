@@ -2,7 +2,8 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, userEvent, within } from 'storybook/test';
 import { es } from 'date-fns/locale';
-import { es as dayPickerEs } from '@daypicker/react/locale/es';
+// Desde el subpath ./locale del DS (src/locale.ts), como lo importa el consumidor.
+import { es as dayPickerEs } from '../../locale';
 import { DatePicker } from './DatePicker';
 
 const meta: Meta<typeof DatePicker> = {

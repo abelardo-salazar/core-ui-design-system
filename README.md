@@ -1167,7 +1167,7 @@ Uso (ejemplo, extraído de `Calendar.stories.tsx`):
   - `onDateChange?: (date: Date | undefined) => void`.
   - `placeholder?: string` (default `'Pick a date'`).
   - `dialogLabel?: string` (default `'Choose date'`) — nombre accesible del popover.
-  - `locale?: Locale` (de `date-fns`) — se aplica a la fecha del disparador y al calendario. Con un locale de `date-fns` las etiquetas de navegación del calendario quedan en inglés; con el de DayPicker (`import { es } from '@daypicker/react/locale/es'`) también se traducen.
+  - `locale?: Locale` (de `date-fns`) — se aplica a la fecha del disparador y al calendario. Con un locale de `date-fns` las etiquetas de navegación del calendario quedan en inglés; con los locales que exporta el DS desde el subpath `/locale` (`import { es } from '@abelardo-salazar/core-ui-design-system/locale'`) también se traducen. Ese subpath reexporta los locales de DayPicker (los de `date-fns` con las etiquetas traducidas), es server-safe y solo empaqueta los locales que se importan. No importar desde `@daypicker/react`: es dependencia del DS, no de la app (con pnpm no se resuelve).
   - `disabled?: boolean`.
   - `className?: string` — se aplica al `Button` trigger.
 
