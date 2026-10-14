@@ -47,13 +47,20 @@ los demás peers de Radix: `npm install @radix-ui/react-toggle-group@^1.1.20`.
   - `DatePicker`: `dialogLabel` (nombre accesible del popover, default `"Choose date"`) y
     `locale` (`Locale` de `date-fns`), que se aplica a la fecha del disparador y al calendario
     (meses y días). Antes la fecha siempre salía en inglés. Con un locale de `date-fns`, las
-    etiquetas de navegación del calendario ("Go to the Next Month") quedan en inglés; el locale
-    de DayPicker (`import { es } from '@daypicker/react/locale/es'`) también las traduce y se
-    acepta igual.
+    etiquetas de navegación del calendario ("Go to the Next Month") quedan en inglés; los
+    locales del subpath `/locale` (ver abajo) también las traducen y se aceptan igual.
   - `DataTable`: `previousLabel` (default `"Previous"`), `nextLabel` (default `"Next"`) y
     `pageLabel: (page, total) => string` (default `Page X of Y`; `page` empieza en 1).
   - `SkipToContent`: usa `children` como texto si lo recibe (default `"Skip to content"`). Antes
     un `children` del consumidor se ignoraba.
+
+- **Subpath `@abelardo-salazar/core-ui-design-system/locale`**: reexporta los locales de
+  DayPicker, que son los de `date-fns` con meses y etiquetas de navegación traducidos
+  (`import { es } from '@abelardo-salazar/core-ui-design-system/locale'`). Se pasan al `locale`
+  de `DatePicker` o `Calendar`. Son datos, sin `'use client'`: se pueden importar desde un
+  Server Component. Solo se empaquetan los locales que se importan. **Migración:** si la app
+  importaba desde `@daypicker/react/locale/...`, cambiar el import por este subpath y quitar esa
+  dependencia (con pnpm no se resolvía, y su versión podía no coincidir con la del DS).
 
 - **`announce(message, { politeness?: 'polite' | 'assertive' })`**: anuncia un mensaje a los
   lectores de pantalla sin montar nada (default `'polite'`). La región no queda oculta con un
@@ -175,6 +182,14 @@ los demás peers de Radix: `npm install @radix-ui/react-toggle-group@^1.1.20`.
   otro ajuste de tamaño por `className`).
 
 ### Fixed
+
+- **Importar un componente ya no incluye el DS entero en el bundle del cliente.** Hasta 0.4.4,
+  el paquete no declaraba `sideEffects`, así que el bundler no podía descartar los módulos sin
+  usar: en una app Next (webpack), `import { Button }` sumaba unos 270 kB de JS con el resto de
+  los componentes. Ahora el paquete declara `"sideEffects": ["**/*.css"]` y ese import suma solo
+  `Button` y lo que necesita (unos 33 kB). No hay que cambiar nada en la app. El CSS sigue
+  marcado con efectos: `import '@abelardo-salazar/core-ui-design-system/style.css'` no se
+  descarta.
 
 - **Halo blanco alrededor del anillo de foco en modo oscuro.** Al enfocar con el teclado
   `Button`, `Input`, `Textarea`, `Select`, `Tabs`, `Chip`, `Badge` interactivo, `ToggleGroup` o
