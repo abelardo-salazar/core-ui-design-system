@@ -1,5 +1,7 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
+import { hydrateRoot } from 'react-dom/client';
+import { renderToString } from 'react-dom/server';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { Image } from './Image';
 
@@ -119,7 +121,66 @@ export const ErrorBeforeMountEffects: Story = {
   },
 };
 
-// 5. Cambio de src tras un error: el <img> vuelve a montarse y recorre de nuevo el ciclo de
+// 5. Renderizado en servidor: el HTML del servidor trae el <img>, que puede terminar de cargar
+// antes de que React se hidrate y conecte onLoad. La imagen no debe quedarse en 'loading'
+// (invisible, con el Skeleton encima). El play hace lo que haría Next: renderToString, inyecta
+// el HTML, espera a que la imagen cargue (img.complete) y recién entonces hidrata.
+const ssrImage = <Image src={TINY_PNG} alt="Server image" />;
+
+export const LoadedBeforeHydration: Story = {
+  render: () => <div className="h-32 w-32" data-testid="ssr-container" />,
+  play: async ({ canvasElement }) => {
+    const container = within(canvasElement).getByTestId('ssr-container');
+    container.innerHTML = renderToString(ssrImage);
+
+    const img = container.querySelector('img')!;
+    await waitFor(() => expect(img.complete && img.naturalWidth > 0).toBe(true));
+    // Un frame más: el evento load ya se despachó (sin listener de React) antes de hidratar.
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+
+    const root = hydrateRoot(container, ssrImage);
+    try {
+      await waitFor(() =>
+        expect(container.querySelector('img')?.className).not.toContain('invisible'),
+      );
+      await expect(container.querySelector('.animate-pulse')).not.toBeInTheDocument();
+    } finally {
+      root.unmount();
+    }
+  },
+};
+
+// 6. Lo mismo con una imagen que falla antes de hidratar: debe mostrarse el fallback.
+const ssrBrokenImage = (
+  <Image
+    src="data:image/png;base64,AAAA"
+    alt="Broken server image"
+    fallback={<span>No image</span>}
+  />
+);
+
+export const ErrorBeforeHydration: Story = {
+  render: () => <div className="h-32 w-32" data-testid="ssr-container" />,
+  play: async ({ canvasElement }) => {
+    const container = within(canvasElement).getByTestId('ssr-container');
+    container.innerHTML = renderToString(ssrBrokenImage);
+
+    const img = container.querySelector('img')!;
+    await waitFor(() => expect(img.complete).toBe(true));
+    await expect(img.naturalWidth).toBe(0);
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+
+    const root = hydrateRoot(container, ssrBrokenImage);
+    try {
+      await waitFor(() => expect(container).toHaveTextContent('No image'));
+      await expect(container.querySelector('img')).not.toBeInTheDocument();
+    } finally {
+      root.unmount();
+    }
+  },
+};
+
+// 7. Cambio de src tras un error: el <img> vuelve a montarse y recorre de nuevo el ciclo de
 // carga, en vez de quedarse en el estado de error de la imagen anterior.
 function SwitchSrcAfterError() {
   const [src, setSrc] = React.useState('/broken-image.jpg');

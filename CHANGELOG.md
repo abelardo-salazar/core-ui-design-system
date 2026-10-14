@@ -200,8 +200,13 @@ los demás peers de Radix: `npm install @radix-ui/react-toggle-group@^1.1.20`.
 
 - **`Image` podía quedarse invisible para siempre si la imagen fallaba o cargaba muy rápido.**
   Con la imagen en caché y el navegador ocupado, el resultado de la carga podía perderse: la
-  imagen no se mostraba, el `fallback` tampoco y quedaba el `Skeleton`. Ahora el resultado se
-  conserva siempre. Cambiar `src` sigue reiniciando el ciclo de carga.
+  imagen no se mostraba, el `fallback` tampoco y quedaba el `Skeleton`. Lo mismo pasaba con
+  renderizado en servidor (Next.js) cuando la imagen terminaba de cargar o fallaba antes de que
+  la página se hidratara. Ahora el resultado se conserva siempre. Cambiar `src` sigue
+  reiniciando el ciclo de carga.
+
+- **La ✕ de `Dialog` mostraba el anillo de foco también al hacer clic.** Ahora aparece solo al
+  enfocarla con el teclado y se dibuja dentro del área táctil, igual que la ✕ de `Sheet`.
 
 - **`DatePicker` abre el calendario en el mes de la fecha elegida.** Antes abría siempre en el mes
   actual, aunque `date` estuviera en otro mes. Sin `date`, sigue abriendo en el mes actual.

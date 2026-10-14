@@ -37,6 +37,29 @@ const Image = React.forwardRef<HTMLImageElement, ImageProps>(
       setStatus('loading');
     }
 
+    // Con renderizado en servidor, el <img> del HTML puede terminar de cargar (o fallar) antes
+    // de que React se hidrate y conecte onLoad/onError: el evento se pierde y status quedaría
+    // en 'loading' para siempre (reproducido en Image.stories, LoadedBeforeHydration). Al
+    // montar y al cambiar src se lee el resultado directo del elemento: complete con
+    // naturalWidth > 0 es una carga, con 0 es un error. Solo se resuelve desde 'loading', así
+    // que un onLoad/onError que ya llegó no se pisa.
+    const imgRef = React.useRef<HTMLImageElement | null>(null);
+    const setImgRef = React.useCallback(
+      (node: HTMLImageElement | null) => {
+        imgRef.current = node;
+        if (typeof ref === 'function') ref(node);
+        else if (ref) ref.current = node;
+      },
+      [ref],
+    );
+
+    React.useLayoutEffect(() => {
+      const img = imgRef.current;
+      if (!img?.complete) return;
+      const result = img.naturalWidth > 0 ? 'loaded' : 'error';
+      setStatus((current) => (current === 'loading' ? result : current));
+    }, [src]);
+
     return (
       <div className={cn('relative h-full w-full overflow-hidden', containerClassName)}>
         {status === 'loading' && <Skeleton className="absolute inset-0 h-full w-full" />}
@@ -46,7 +69,7 @@ const Image = React.forwardRef<HTMLImageElement, ImageProps>(
             si el src cambia (el ajuste de prevSrc de arriba resetea status a 'loading'). */}
         {status !== 'error' && (
           <img
-            ref={ref}
+            ref={setImgRef}
             src={src}
             alt={alt}
             className={cn(
