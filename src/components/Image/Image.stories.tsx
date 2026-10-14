@@ -180,7 +180,23 @@ export const ErrorBeforeHydration: Story = {
   },
 };
 
-// 7. Cambio de src tras un error: el <img> vuelve a montarse y recorre de nuevo el ciclo de
+// 7. Sin src: un <img> sin src queda complete con naturalWidth 0, así que cuenta como error y
+// se muestra el fallback (antes quedaba el Skeleton para siempre: nunca llega load ni error).
+export const WithoutSrc: Story = {
+  render: () => (
+    <div className="h-32 w-32">
+      <Image alt="Sin imagen" fallback={<span>No image</span>} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(await canvas.findByText('No image')).toBeInTheDocument();
+    await expect(canvas.queryByAltText('Sin imagen')).not.toBeInTheDocument();
+    await expect(canvasElement.querySelector('.animate-pulse')).not.toBeInTheDocument();
+  },
+};
+
+// 8. Cambio de src tras un error: el <img> vuelve a montarse y recorre de nuevo el ciclo de
 // carga, en vez de quedarse en el estado de error de la imagen anterior.
 function SwitchSrcAfterError() {
   const [src, setSrc] = React.useState('/broken-image.jpg');

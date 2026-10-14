@@ -6,7 +6,9 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "sideEffects": [
-    "**/*.css"
+    "**/*.css",
+    "./dist/node_modules/d3-format/src/defaultLocale.js",
+    "./dist/node_modules/d3-time-format/src/defaultLocale.js"
   ],
   "description": "Sistema de diseño privado",
   "scripts": {
