@@ -186,10 +186,11 @@ los demás peers de Radix: `npm install @radix-ui/react-toggle-group@^1.1.20`.
 - **Importar un componente ya no incluye el DS entero en el bundle del cliente.** Hasta 0.4.4,
   el paquete no declaraba `sideEffects`, así que el bundler no podía descartar los módulos sin
   usar: en una app Next (webpack), `import { Button }` sumaba unos 270 kB de JS con el resto de
-  los componentes. Ahora el paquete declara `"sideEffects": ["**/*.css"]` y ese import suma solo
-  `Button` y lo que necesita (unos 33 kB). No hay que cambiar nada en la app. El CSS sigue
-  marcado con efectos: `import '@abelardo-salazar/core-ui-design-system/style.css'` no se
-  descarta.
+  los componentes. Ahora el paquete declara `sideEffects` y ese import suma solo `Button` y lo
+  que necesita (unos 33 kB). No hay que cambiar nada en la app. Siguen marcados con efectos el
+  CSS (`import '@abelardo-salazar/core-ui-design-system/style.css'` no se descarta) y los
+  módulos de las dependencias internas que los declaran (el locale por defecto de los formatos
+  de número y fecha de `Chart`).
 
 - **Halo blanco alrededor del anillo de foco en modo oscuro.** Al enfocar con el teclado
   `Button`, `Input`, `Textarea`, `Select`, `Tabs`, `Chip`, `Badge` interactivo, `ToggleGroup` o
@@ -203,7 +204,8 @@ los demás peers de Radix: `npm install @radix-ui/react-toggle-group@^1.1.20`.
   imagen no se mostraba, el `fallback` tampoco y quedaba el `Skeleton`. Lo mismo pasaba con
   renderizado en servidor (Next.js) cuando la imagen terminaba de cargar o fallaba antes de que
   la página se hidratara. Ahora el resultado se conserva siempre. Cambiar `src` sigue
-  reiniciando el ciclo de carga.
+  reiniciando el ciclo de carga. `Image` sin `src` ahora muestra el `fallback` (o nada, si no
+  hay `fallback`) en lugar del `Skeleton`.
 
 - **La ✕ de `Dialog` mostraba el anillo de foco también al hacer clic.** Ahora aparece solo al
   enfocarla con el teclado y se dibuja dentro del área táctil, igual que la ✕ de `Sheet`.

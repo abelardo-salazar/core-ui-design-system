@@ -137,6 +137,69 @@ if (process.argv.includes('--post-build')) {
     }
     console.log(`✓ ${entry} ${ok} (${visited.size} módulos inspeccionados).`);
   }
+
+  // `sideEffects` del DS vs. las dependencias empaquetadas en dist/node_modules/. Para el
+  // bundler del consumidor, esas copias son archivos del DS: el campo del DS reemplaza al de
+  // cada dependencia. Si una dependencia declara un módulo JS con efectos (d3-format,
+  // d3-time-format: src/defaultLocale.js) y está en el dist, su ruta tiene que figurar en el
+  // `sideEffects` del DS; y cada ruta JS declarada tiene que existir (preserveModules puede
+  // mover el layout de dist/node_modules/).
+  const declared = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).sideEffects ?? [];
+  const isCss = (pattern) => /\.css$/.test(pattern);
+
+  // dist/node_modules/<pkg> refleja node_modules/<pkg> del repo (también anidados).
+  function bundledPackages(rel = 'node_modules') {
+    const distDir = join(ROOT, 'dist', rel);
+    if (!existsSync(distDir)) return [];
+    const result = [];
+    for (const name of readdirSync(distDir)) {
+      const names = name.startsWith('@')
+        ? readdirSync(join(distDir, name)).map((s) => `${name}/${s}`)
+        : [name];
+      for (const pkg of names) {
+        const pkgRel = `${rel}/${pkg}`;
+        const manifest = join(ROOT, pkgRel, 'package.json');
+        if (existsSync(manifest)) {
+          result.push({
+            pkgRel,
+            sideEffects: JSON.parse(readFileSync(manifest, 'utf8')).sideEffects,
+          });
+        }
+        result.push(...bundledPackages(`${pkgRel}/node_modules`));
+      }
+    }
+    return result;
+  }
+
+  const missingDecl = [];
+  const unmappable = [];
+  for (const { pkgRel, sideEffects } of bundledPackages()) {
+    if (!Array.isArray(sideEffects)) continue;
+    for (const pattern of sideEffects.filter((p) => !isCss(p))) {
+      if (/[*?{[]/.test(pattern)) {
+        unmappable.push(`${pkgRel}: '${pattern}'`);
+        continue;
+      }
+      const distPath = `./dist/${pkgRel}/${pattern.replace(/^\.\//, '')}`;
+      if (existsSync(join(ROOT, distPath)) && !declared.includes(distPath)) {
+        missingDecl.push(distPath);
+      }
+    }
+  }
+  const staleDecl = declared.filter((p) => !isCss(p) && !existsSync(join(ROOT, p)));
+
+  if (missingDecl.length > 0 || unmappable.length > 0 || staleDecl.length > 0) {
+    console.error('✗ `sideEffects` de package.json no refleja las dependencias empaquetadas:\n');
+    for (const p of missingDecl) console.error(`    falta declarar: "${p}"`);
+    for (const p of unmappable) console.error(`    glob JS sin traducir (revisar a mano): ${p}`);
+    for (const p of staleDecl) console.error(`    declarado pero no existe en dist/: "${p}"`);
+    failed = true;
+  } else {
+    console.log(
+      '✓ `sideEffects` incluye los módulos con efectos de las dependencias empaquetadas.',
+    );
+  }
+
   process.exit(failed ? 1 : 0);
 }
 
