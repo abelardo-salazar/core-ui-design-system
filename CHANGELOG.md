@@ -176,6 +176,13 @@ los demás peers de Radix: `npm install @radix-ui/react-toggle-group@^1.1.20`.
 
 ### Fixed
 
+- **Halo blanco alrededor del anillo de foco en modo oscuro.** Al enfocar con el teclado
+  `Button`, `Input`, `Textarea`, `Select`, `Tabs`, `Chip`, `Badge` interactivo, `ToggleGroup` o
+  el botón de orden de `DataTable`, aparecía una franja blanca de 2px entre el control y el
+  anillo. Ahora la separación toma el color de fondo del tema (`base-100`) en todo el DS. Sobre
+  otra superficie, un `ring-offset-<color>` en el `className` sigue ganando (por ejemplo,
+  `focus-visible:ring-offset-base-200` para un control sobre `bg-base-200`).
+
 - **`Image` podía quedarse invisible para siempre si la imagen fallaba o cargaba muy rápido.**
   Con la imagen en caché y el navegador ocupado, el resultado de la carga podía perderse: la
   imagen no se mostraba, el `fallback` tampoco y quedaba el `Skeleton`. Ahora el resultado se
