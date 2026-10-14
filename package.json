@@ -5,6 +5,9 @@
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "sideEffects": [
+    "**/*.css"
+  ],
   "description": "Sistema de diseño privado",
   "scripts": {
     "dev": "vite",
@@ -89,6 +92,10 @@
     "./charts": {
       "types": "./dist/charts.d.ts",
       "import": "./dist/charts.js"
+    },
+    "./locale": {
+      "types": "./dist/locale.d.ts",
+      "import": "./dist/locale.js"
     },
     "./style.css": "./dist/core-ui-design-system.css"
   },

@@ -18,7 +18,8 @@
 // llama createContext(...) a nivel de módulo, lo cual explota en el entorno react-server de
 // Next.js; dist/index.js es el único archivo que un consumidor real importa, así que debe
 // quedar 100% libre de recharts. Chart vive ahora en el subpath ./charts (dist/charts.js),
-// que es client-only completo y sí puede traer recharts. Ver CHANGELOG.md [0.4.1].
+// que es client-only completo y sí puede traer recharts. Ver CHANGELOG.md [0.4.1]. También
+// valida dist/locale.js (subpath ./locale): no puede alcanzar ni el barrel ni recharts.
 //
 // Chequeo adicional del modo por defecto (heurística estática, ver más abajo): detecta un
 // componente sin 'use client' que declara una función localmente y la usa como handler JSX
@@ -38,80 +39,105 @@ function toPosix(p) {
   return p.replace(/\\/g, '/');
 }
 
-// --- Modo post-build: dist/index.js debe quedar libre de recharts ------------------------
+// --- Modo post-build: lo que cada entry publicado puede alcanzar --------------------------
+//
+// dist/index.js no puede alcanzar recharts (ver cabecera). dist/locale.js (subpath ./locale,
+// src/locale.ts) es datos puros y server-safe: no puede alcanzar recharts ni el barrel raíz —
+// si lo hiciera, importar un locale arrastraría el DS entero y su frontera 'use client'.
 
 if (process.argv.includes('--post-build')) {
-  const BARREL = join(ROOT, 'dist/index.js');
-
-  if (!existsSync(BARREL)) {
-    console.error(
-      `✗ ${toPosix(relative(ROOT, BARREL))} no existe — ¿corriste este check antes de \`vite build\`?`,
-    );
-    process.exit(1);
-  }
-
   // Todo `import ... from '<spec>'` / `export ... from '<spec>'` (y `import '<spec>'`) del chunk.
   const FROM_RE = /(?:import|export)\b[^'"]*?\bfrom\s*['"]([^'"]+)['"]|import\s*['"]([^'"]+)['"]/g;
   const RECHARTS_RE = /(^|\/)recharts(\/|$)/;
+  const BARREL = join(ROOT, 'dist/index.js');
 
-  const visited = new Set();
-  const queue = [BARREL];
-  const offenders = []; // { file, spec }
+  // Recorre el grafo de imports relativos desde `entry` (los bare specifiers externalizados
+  // —react, @radix-ui/*— no se abren). Devuelve los archivos visitados y los imports que
+  // violan alguna regla: `{ file, spec, reason }`.
+  function inspect(entry, { forbidBarrel }) {
+    const visited = new Set();
+    const queue = [entry];
+    const offenders = [];
 
-  while (queue.length > 0) {
-    const abs = queue.shift();
-    if (visited.has(abs)) continue;
-    visited.add(abs);
+    while (queue.length > 0) {
+      const abs = queue.shift();
+      if (visited.has(abs)) continue;
+      visited.add(abs);
 
-    let code;
-    try {
-      code = readFileSync(abs, 'utf8');
-    } catch {
-      continue;
-    }
-
-    for (const m of code.matchAll(FROM_RE)) {
-      const spec = m[1] ?? m[2];
-      if (!spec) continue;
-
-      if (RECHARTS_RE.test(spec)) {
-        offenders.push({ file: toPosix(relative(ROOT, abs)), spec });
+      let code;
+      try {
+        code = readFileSync(abs, 'utf8');
+      } catch {
         continue;
       }
-      // Seguir solo imports relativos que sigan dentro de dist/ (los bare specifiers
-      // externalizados —react, @radix-ui/*— no son recharts y no hace falta abrirlos).
-      if (spec.startsWith('.')) {
-        const target = resolve(dirname(abs), spec);
-        for (const cand of [target, `${target}.js`, join(target, 'index.js')]) {
-          if (existsSync(cand) && statSync(cand).isFile()) {
-            queue.push(cand);
-            break;
+
+      for (const m of code.matchAll(FROM_RE)) {
+        const spec = m[1] ?? m[2];
+        if (!spec) continue;
+        const file = toPosix(relative(ROOT, abs));
+
+        if (RECHARTS_RE.test(spec)) {
+          offenders.push({ file, spec, reason: 'recharts' });
+          continue;
+        }
+        if (spec.startsWith('.')) {
+          const target = resolve(dirname(abs), spec);
+          for (const cand of [target, `${target}.js`, join(target, 'index.js')]) {
+            if (existsSync(cand) && statSync(cand).isFile()) {
+              if (forbidBarrel && cand === BARREL) {
+                offenders.push({ file, spec, reason: 'barrel raíz (dist/index.js)' });
+              } else {
+                queue.push(cand);
+              }
+              break;
+            }
           }
         }
       }
     }
+    return { visited, offenders };
   }
 
-  if (offenders.length > 0) {
-    console.error(
-      '✗ El barrel raíz publicado (dist/index.js) arrastra recharts y NO es seguro para Server Components:\n',
-    );
-    for (const { file, spec } of offenders) {
-      console.error(`    ${file}  →  import '${spec}'`);
+  const CHECKS = [
+    {
+      entry: 'dist/index.js',
+      forbidBarrel: false,
+      ok: 'está libre de recharts',
+      fail: 'El barrel raíz publicado (dist/index.js) arrastra recharts y NO es seguro para Server Components',
+      hint:
+        '  recharts solo puede vivir bajo el subpath ./charts (src/charts.ts → dist/charts.js).\n' +
+        '  Revisa que src/index.ts no reexporte nada de src/components/Chart/ (ni transitivamente).',
+    },
+    {
+      entry: 'dist/locale.js',
+      forbidBarrel: true,
+      ok: 'no alcanza ni el barrel raíz ni recharts',
+      fail: 'El subpath ./locale (dist/locale.js) alcanza módulos que no le corresponden',
+      hint: '  src/locale.ts solo puede reexportar locales de DayPicker: nada del barrel ni de components/.',
+    },
+  ];
+
+  let failed = false;
+  for (const { entry, forbidBarrel, ok, fail, hint } of CHECKS) {
+    const abs = join(ROOT, entry);
+    if (!existsSync(abs)) {
+      console.error(`✗ ${entry} no existe — ¿corriste este check antes de \`vite build\`?`);
+      failed = true;
+      continue;
     }
-    console.error(
-      '\n  recharts solo puede vivir bajo el subpath ./charts (src/charts.ts → dist/charts.js).',
-    );
-    console.error(
-      '  Revisá que src/index.ts no reexporte nada de src/components/Chart/ (ni transitivamente).',
-    );
-    process.exit(1);
+    const { visited, offenders } = inspect(abs, { forbidBarrel });
+    if (offenders.length > 0) {
+      console.error(`✗ ${fail}:\n`);
+      for (const { file, spec, reason } of offenders) {
+        console.error(`    ${file}  →  import '${spec}'  (${reason})`);
+      }
+      console.error(`\n${hint}`);
+      failed = true;
+      continue;
+    }
+    console.log(`✓ ${entry} ${ok} (${visited.size} módulos inspeccionados).`);
   }
-
-  console.log(
-    `✓ dist/index.js está libre de recharts (${visited.size} módulos del barrel inspeccionados).`,
-  );
-  process.exit(0);
+  process.exit(failed ? 1 : 0);
 }
 
 // --- Modo por defecto (pre-build): CLIENT_ENTRY_POINTS sincronizado con src/components/ --
