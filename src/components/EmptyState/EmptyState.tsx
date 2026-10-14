@@ -37,10 +37,12 @@ EmptyState.displayName = 'EmptyState';
  * Ícono decorativo: `aria-hidden` va después del spread para que no se pueda deshacer. Fija
  * el tamaño del SVG desde el contenedor.
  *
- * En `size="sm"` los ajustes de tamaño ganan sobre el `className`: Tailwind emite las
- * variantes después de las utilidades base y twMerge no los ve como conflicto. Es el costo de
- * seguir siendo server-safe. Para cambiarlos en sm, usar la misma variante en `className`
- * (por ejemplo, `group-data-[size=sm]/empty-state:size-8`).
+ * En `size="sm"` los ajustes de tamaño ganan sobre el `className` por especificidad, no por
+ * orden: el selector de la variante (`.clase:is(:where(.group/empty-state)[data-size=sm] *)`)
+ * pesa (0,2,0) y una clase sola (0,1,0). Es el costo de seguir siendo server-safe. Para
+ * cambiarlos en sm, usar la misma variante en `className` (por ejemplo,
+ * `group-data-[size=sm]/empty-state:size-8`): twMerge la reconoce como conflicto y descarta el
+ * ajuste del DS.
  */
 const EmptyStateIcon = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
@@ -71,10 +73,12 @@ export interface EmptyStateTitleProps extends React.HTMLAttributes<
 /**
  * Título del estado vacío. Renderiza un `p` salvo que `as` indique un encabezado.
  *
- * En `size="sm"` los ajustes de tamaño ganan sobre el `className`: Tailwind emite las
- * variantes después de las utilidades base y twMerge no los ve como conflicto. Es el costo de
- * seguir siendo server-safe. Para cambiarlos en sm, usar la misma variante en `className`
- * (por ejemplo, `group-data-[size=sm]/empty-state:text-base`).
+ * En `size="sm"` los ajustes de tamaño ganan sobre el `className` por especificidad, no por
+ * orden: el selector de la variante (`.clase:is(:where(.group/empty-state)[data-size=sm] *)`)
+ * pesa (0,2,0) y una clase sola (0,1,0). Es el costo de seguir siendo server-safe. Para
+ * cambiarlos en sm, usar la misma variante en `className` (por ejemplo,
+ * `group-data-[size=sm]/empty-state:text-base`): twMerge la reconoce como conflicto y descarta el
+ * ajuste del DS.
  */
 const EmptyStateTitle = React.forwardRef<
   HTMLParagraphElement | HTMLHeadingElement,
@@ -95,10 +99,12 @@ EmptyStateTitle.displayName = 'EmptyStateTitle';
 /**
  * Texto secundario del estado vacío.
  *
- * En `size="sm"` los ajustes de tamaño ganan sobre el `className`: Tailwind emite las
- * variantes después de las utilidades base y twMerge no los ve como conflicto. Es el costo de
- * seguir siendo server-safe. Para cambiarlos en sm, usar la misma variante en `className`
- * (por ejemplo, `group-data-[size=sm]/empty-state:text-base`).
+ * En `size="sm"` los ajustes de tamaño ganan sobre el `className` por especificidad, no por
+ * orden: el selector de la variante (`.clase:is(:where(.group/empty-state)[data-size=sm] *)`)
+ * pesa (0,2,0) y una clase sola (0,1,0). Es el costo de seguir siendo server-safe. Para
+ * cambiarlos en sm, usar la misma variante en `className` (por ejemplo,
+ * `group-data-[size=sm]/empty-state:max-w-sm`): twMerge la reconoce como conflicto y descarta el
+ * ajuste del DS.
  */
 const EmptyStateDescription = React.forwardRef<
   HTMLParagraphElement,
@@ -118,10 +124,12 @@ EmptyStateDescription.displayName = 'EmptyStateDescription';
 /**
  * Botones o enlaces del estado vacío, centrados.
  *
- * En `size="sm"` los ajustes de tamaño ganan sobre el `className`: Tailwind emite las
- * variantes después de las utilidades base y twMerge no los ve como conflicto. Es el costo de
- * seguir siendo server-safe. Para cambiarlos en sm, usar la misma variante en `className`
- * (por ejemplo, `group-data-[size=sm]/empty-state:text-base`).
+ * En `size="sm"` los ajustes de tamaño ganan sobre el `className` por especificidad, no por
+ * orden: el selector de la variante (`.clase:is(:where(.group/empty-state)[data-size=sm] *)`)
+ * pesa (0,2,0) y una clase sola (0,1,0). Es el costo de seguir siendo server-safe. Para
+ * cambiarlos en sm, usar la misma variante en `className` (por ejemplo,
+ * `group-data-[size=sm]/empty-state:mt-3`): twMerge la reconoce como conflicto y descarta el
+ * ajuste del DS.
  */
 const EmptyStateActions = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (

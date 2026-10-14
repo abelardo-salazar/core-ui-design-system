@@ -91,6 +91,14 @@ export const EditProfileExample: Story = {
     await expect(closeClasses).toContain('right-0.5');
     await expect(closeClasses).toContain('top-0.5');
     await expect(closeButton.querySelector('svg')).toHaveClass('h-4', 'w-4');
+    // Anillo igual al de la ✕ de Sheet: solo con teclado (focus-visible), dentro del área
+    // táctil y sin separación. Con el mouse no aparece.
+    await expect(closeButton).toHaveClass(
+      'focus-visible:ring-2',
+      'focus-visible:ring-inset',
+      'focus-visible:ring-primary',
+    );
+    await expect(closeButton.className).not.toMatch(/(^|\s)focus:|ring-offset/);
 
     // axe: label — los inputs no tenían label real, solo texto suelto sin htmlFor.
     await expect(dialogScope.getByLabelText('Name')).toHaveValue('Pedro Duarte');
