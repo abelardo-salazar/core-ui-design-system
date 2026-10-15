@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, within } from 'storybook/test';
+import { expect, fn, waitFor, within } from 'storybook/test';
 import { Avatar, AvatarImage, AvatarFallback } from './Avatar';
 import { Badge } from '../Badge';
 
@@ -41,29 +41,30 @@ export const UserProfile: Story = {
   },
 };
 
-// 2. Fallback
-export const FallbackState: Story = {
-  render: () => (
+// 2. Fallback tras un error de carga. El src es un data URI que no se puede decodificar: falla
+// en el navegador, sin pedir nada al servidor (en vitest, una ruta inexistente no da 404 sino
+// el HTML de fallback del servidor, con un tiempo que depende de lo ocupado que esté).
+export const FallbackState: StoryObj<typeof AvatarImage> = {
+  args: { onLoadingStatusChange: fn() },
+  render: (args) => (
     <div className="flex items-center gap-4">
       <Avatar>
-        <AvatarImage src="/broken-image.jpg" alt="@user" />
+        <AvatarImage
+          src="data:image/png;base64,AAAA"
+          alt="@user"
+          onLoadingStatusChange={args.onLoadingStatusChange}
+        />
         <AvatarFallback>JD</AvatarFallback>
       </Avatar>
       <span className="text-sm">John Doe (No image)</span>
     </div>
   ),
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
 
-    // AvatarFallback se muestra mientras el status de carga no sea "loaded" (idle/loading/error
-    // por igual, verificado en el código de @radix-ui/react-avatar). Con un src que 404 dentro
-    // del propio origin (sin dependencia de red externa), el status nunca llega a "loaded".
-    await expect(canvas.getByText('JD')).toBeInTheDocument();
-
-    // Le damos tiempo al intento de carga (404) a resolver antes de confirmar la ausencia:
-    // AvatarImage (Radix) no renderiza el <img> en el DOM hasta que el status sea "loaded".
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
+    // AvatarFallback también se ve mientras la imagen carga, así que verlo no prueba nada por
+    // sí solo: primero se espera a que Radix informe el error.
+    await waitFor(() => expect(args.onLoadingStatusChange).toHaveBeenLastCalledWith('error'));
     await expect(canvas.queryByAltText('@user')).not.toBeInTheDocument();
     await expect(canvas.getByText('JD')).toBeInTheDocument();
   },
