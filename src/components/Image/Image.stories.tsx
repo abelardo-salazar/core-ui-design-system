@@ -31,6 +31,22 @@ const TINY_PNG =
 // anterior), y las stories fallaban a veces con la máquina cargada.
 const BROKEN_SRC = 'data:image/png;base64,AAAA';
 
+// Cuenta los eventos load/error que dispara el navegador (isTrusted) dentro de un contenedor.
+// load y error no burbujean, pero sí pasan por la fase de captura. Sirve para comprobar que un
+// callback se llamó "exactamente una vez" sin esperar un tiempo fijo: una vez llegado el evento
+// real del navegador, ya no puede llegar otro para ese src.
+function countBrowserEvents(container: HTMLElement) {
+  const counts = { load: 0, error: 0 };
+  const listener = (event: Event) => {
+    if (event.isTrusted && (event.type === 'load' || event.type === 'error')) {
+      counts[event.type] += 1;
+    }
+  };
+  container.addEventListener('load', listener, true);
+  container.addEventListener('error', listener, true);
+  return counts;
+}
+
 // 1. Ciclo completo: Skeleton visible mientras carga -> imagen visible al cargar.
 export const LoadsSuccessfully: Story = {
   render: () => (
@@ -131,19 +147,20 @@ export const ErrorBeforeMountEffects: Story = {
 // 5. Renderizado en servidor: el HTML del servidor trae el <img>, que puede terminar de cargar
 // antes de que React se hidrate y conecte onLoad. La imagen no debe quedarse en 'loading'
 // (invisible, con el Skeleton encima). El play hace lo que haría Next: renderToString, inyecta
-// el HTML, espera a que la imagen cargue (img.complete) y recién entonces hidrata.
-const ssrImage = <Image src={TINY_PNG} alt="Server image" />;
-
+// el HTML, espera el evento load del navegador (sin listener de React) y recién entonces
+// hidrata. El onLoad del consumidor se llama una sola vez, con el evento que Image vuelve a
+// disparar sobre el <img> (isTrusted false).
 export const LoadedBeforeHydration: Story = {
   render: () => <div className="h-32 w-32" data-testid="ssr-container" />,
   play: async ({ canvasElement }) => {
     const container = within(canvasElement).getByTestId('ssr-container');
+    const onLoad = fn();
+    const ssrImage = <Image src={TINY_PNG} alt="Server image" onLoad={onLoad} />;
+    const browserEvents = countBrowserEvents(container);
     container.innerHTML = renderToString(ssrImage);
 
-    const img = container.querySelector('img')!;
-    await waitFor(() => expect(img.complete && img.naturalWidth > 0).toBe(true));
-    // Un frame más: el evento load ya se despachó (sin listener de React) antes de hidratar.
-    await new Promise((resolve) => requestAnimationFrame(resolve));
+    await waitFor(() => expect(browserEvents.load).toBe(1));
+    await expect(container.querySelector('img')!.naturalWidth).toBeGreaterThan(0);
 
     const root = hydrateRoot(container, ssrImage);
     try {
@@ -151,36 +168,40 @@ export const LoadedBeforeHydration: Story = {
         expect(container.querySelector('img')?.className).not.toContain('invisible'),
       );
       await expect(container.querySelector('.animate-pulse')).not.toBeInTheDocument();
+      await expect(onLoad).toHaveBeenCalledOnce();
+      await expect(onLoad.mock.calls[0][0].nativeEvent.isTrusted).toBe(false);
     } finally {
       root.unmount();
     }
   },
 };
 
-// 6. Lo mismo con una imagen que falla antes de hidratar: debe mostrarse el fallback.
-const ssrBrokenImage = (
-  <Image
-    src="data:image/png;base64,AAAA"
-    alt="Broken server image"
-    fallback={<span>No image</span>}
-  />
-);
-
+// 6. Lo mismo con una imagen que falla antes de hidratar: debe mostrarse el fallback y el
+// onError del consumidor se llama una sola vez.
 export const ErrorBeforeHydration: Story = {
   render: () => <div className="h-32 w-32" data-testid="ssr-container" />,
   play: async ({ canvasElement }) => {
     const container = within(canvasElement).getByTestId('ssr-container');
+    const onError = fn();
+    const ssrBrokenImage = (
+      <Image
+        src={BROKEN_SRC}
+        alt="Broken server image"
+        fallback={<span>No image</span>}
+        onError={onError}
+      />
+    );
+    const browserEvents = countBrowserEvents(container);
     container.innerHTML = renderToString(ssrBrokenImage);
 
-    const img = container.querySelector('img')!;
-    await waitFor(() => expect(img.complete).toBe(true));
-    await expect(img.naturalWidth).toBe(0);
-    await new Promise((resolve) => requestAnimationFrame(resolve));
+    await waitFor(() => expect(browserEvents.error).toBe(1));
 
     const root = hydrateRoot(container, ssrBrokenImage);
     try {
       await waitFor(() => expect(container).toHaveTextContent('No image'));
       await expect(container.querySelector('img')).not.toBeInTheDocument();
+      await expect(onError).toHaveBeenCalledOnce();
+      await expect(onError.mock.calls[0][0].nativeEvent.isTrusted).toBe(false);
     } finally {
       root.unmount();
     }
@@ -233,3 +254,57 @@ export const RecoversWhenSrcChanges: Story = {
     await expect(canvas.queryByText('No image')).not.toBeInTheDocument();
   },
 };
+
+// 9. Carga en el cliente, normal y con la imagen ya en caché: el callback del consumidor se
+// llama una sola vez. Con la imagen en caché, complete ya es true cuando corre el efecto de
+// Image y el evento real del navegador llega después: sin la guarda, onLoad/onError se
+// llamarían dos veces. Cada clic monta una imagen más; se espera el evento real antes de contar.
+function ImageList({
+  src,
+  onLoad,
+  onError,
+}: {
+  src: string;
+  onLoad: () => void;
+  onError: () => void;
+}) {
+  const [count, setCount] = React.useState(0);
+  return (
+    <div className="space-y-2">
+      <button type="button" onClick={() => setCount((c) => c + 1)}>
+        Agregar imagen
+      </button>
+      <div className="flex gap-2">
+        {Array.from({ length: count }, (_, i) => (
+          <div key={i} className="h-16 w-16">
+            <Image src={src} alt={`Imagen ${i + 1}`} onLoad={onLoad} onError={onError} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const callsOnceStory = (src: string, type: 'load' | 'error'): Story => ({
+  args: { onLoad: fn(), onError: fn() },
+  render: (args) => (
+    <ImageList src={src} onLoad={args.onLoad as () => void} onError={args.onError as () => void} />
+  ),
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const browserEvents = countBrowserEvents(canvasElement);
+    const callback = type === 'load' ? args.onLoad : args.onError;
+    const other = type === 'load' ? args.onError : args.onLoad;
+
+    // Primera imagen (carga normal) y segunda (el mismo src, ya en caché).
+    for (const n of [1, 2]) {
+      await userEvent.click(canvas.getByRole('button', { name: 'Agregar imagen' }));
+      await waitFor(() => expect(browserEvents[type]).toBe(n));
+      await expect(callback).toHaveBeenCalledTimes(n);
+    }
+    await expect(other).not.toHaveBeenCalled();
+  },
+});
+
+export const LoadCallsOnLoadOnce = callsOnceStory(TINY_PNG, 'load');
+export const ErrorCallsOnErrorOnce = callsOnceStory(BROKEN_SRC, 'error');

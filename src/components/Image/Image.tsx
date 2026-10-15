@@ -13,6 +13,14 @@ export interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   fallback?: React.ReactNode;
   /** Clases para el contenedor que envuelve <img> y el estado de carga/error. */
   containerClassName?: string;
+  /**
+   * Se llama una sola vez por `src`, también cuando la imagen terminó de cargar antes de la
+   * hidratación o ya estaba en caché. En ese caso Image vuelve a disparar el evento sobre el
+   * `<img>`, así que `event.nativeEvent.isTrusted` es `false`.
+   */
+  onLoad?: React.ReactEventHandler<HTMLImageElement>;
+  /** Igual que `onLoad`: una sola vez por `src`. Una `Image` sin `src` también lo llama. */
+  onError?: React.ReactEventHandler<HTMLImageElement>;
 }
 
 type ImageStatus = 'loading' | 'loaded' | 'error';
@@ -40,9 +48,26 @@ const Image = React.forwardRef<HTMLImageElement, ImageProps>(
     // Con renderizado en servidor, el <img> del HTML puede terminar de cargar (o fallar) antes
     // de que React se hidrate y conecte onLoad/onError: el evento se pierde y status quedaría
     // en 'loading' para siempre (reproducido en Image.stories, LoadedBeforeHydration). Al
-    // montar y al cambiar src se lee el resultado directo del elemento: complete con
-    // naturalWidth > 0 es una carga, con 0 es un error. Solo se resuelve desde 'loading', así
-    // que un onLoad/onError que ya llegó no se pisa.
+    // montar y al cambiar src se lee el resultado directo del elemento (complete con
+    // naturalWidth > 0 es una carga, con 0 es un error) y se vuelve a disparar ese evento sobre
+    // el <img>: el manejador de React ya está conectado, así que el estado cambia por el flujo
+    // normal y el onLoad/onError del consumidor también se llama.
+    //
+    // resolvedRef guarda el src cuyo resultado ya se entregó, y los manejadores ignoran un
+    // segundo evento para el mismo src. Hace falta en los dos sentidos: con la imagen en caché,
+    // complete ya es true en el efecto pero el load real llega después, en otra tarea (sin la
+    // guarda en el manejador, el consumidor recibiría dos onLoad). Se compara el src en vez de
+    // reiniciar un booleano: con StrictMode el efecto corre dos veces al montar y un reinicio
+    // volvería a disparar el evento.
+    const resolvedRef = React.useRef<{ src: typeof src } | null>(null);
+    // Se compara con null primero: sin src, resolvedRef.current?.src también sería undefined.
+    const markResolved = () => {
+      const resolved = resolvedRef.current;
+      if (resolved !== null && resolved.src === src) return false;
+      resolvedRef.current = { src };
+      return true;
+    };
+
     const imgRef = React.useRef<HTMLImageElement | null>(null);
     const setImgRef = React.useCallback(
       (node: HTMLImageElement | null) => {
@@ -55,9 +80,9 @@ const Image = React.forwardRef<HTMLImageElement, ImageProps>(
 
     React.useLayoutEffect(() => {
       const img = imgRef.current;
-      if (!img?.complete) return;
-      const result = img.naturalWidth > 0 ? 'loaded' : 'error';
-      setStatus((current) => (current === 'loading' ? result : current));
+      const resolved = resolvedRef.current;
+      if (!img?.complete || (resolved !== null && resolved.src === src)) return;
+      img.dispatchEvent(new Event(img.naturalWidth > 0 ? 'load' : 'error'));
     }, [src]);
 
     return (
@@ -78,10 +103,12 @@ const Image = React.forwardRef<HTMLImageElement, ImageProps>(
               className,
             )}
             onLoad={(event) => {
+              if (!markResolved()) return;
               setStatus('loaded');
               onLoad?.(event);
             }}
             onError={(event) => {
+              if (!markResolved()) return;
               setStatus('error');
               onError?.(event);
             }}

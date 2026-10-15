@@ -240,7 +240,10 @@ Nuevo peer: `cmdk@^1.1.1` (lo usa `Combobox`): `npm install cmdk@^1.1.1`. Depend
   renderizado en servidor (Next.js) cuando la imagen terminaba de cargar o fallaba antes de que
   la página se hidratara. Ahora el resultado se conserva siempre. Cambiar `src` sigue
   reiniciando el ciclo de carga. `Image` sin `src` ahora muestra el `fallback` (o nada, si no
-  hay `fallback`) en lugar del `Skeleton`.
+  hay `fallback`) en lugar del `Skeleton`, y llama a `onError`.
+  `onLoad` y `onError` se llaman también cuando la imagen terminó de cargar o falló antes de la
+  hidratación, o ya estaba en caché, y siempre una sola vez por `src`. En esos casos el evento
+  lo vuelve a disparar `Image` (`event.nativeEvent.isTrusted` es `false`).
 
 - **La ✕ de `Dialog` mostraba el anillo de foco también al hacer clic.** Ahora aparece solo al
   enfocarla con el teclado y se dibuja dentro del área táctil, igual que la ✕ de `Sheet`.
