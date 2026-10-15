@@ -26,6 +26,7 @@ export const CLIENT_ENTRY_POINTS = [
   'src/components/Tooltip/Tooltip.tsx',
   'src/components/Calendar/Calendar.tsx',
   'src/components/Chip/Chip.tsx',
+  'src/components/Combobox/Combobox.tsx',
   'src/components/DatePicker/DatePicker.tsx',
   'src/components/Image/Image.tsx',
   'src/components/Popover/Popover.tsx',
