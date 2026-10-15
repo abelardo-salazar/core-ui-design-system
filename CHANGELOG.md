@@ -7,7 +7,38 @@
 Nuevo peer: `@radix-ui/react-toggle-group@^1.1.20` (lo usa `ToggleGroup`). Instalarlo junto con
 los demás peers de Radix: `npm install @radix-ui/react-toggle-group@^1.1.20`.
 
+Nuevo peer: `cmdk@^1.1.1` (lo usa `Combobox`): `npm install cmdk@^1.1.1`. Depende de
+`@radix-ui/react-dialog`, que ya es peer del DS.
+
 ### Added
+
+- **`Combobox`**: campo de selección con buscador sobre `cmdk`. Client component.
+  - API por datos: `options: { value: string; label: string; disabled?: boolean }[]`. Modo
+    único (default) con `value`/`defaultValue`/`onValueChange` de tipo `string` (`''` sin
+    valor); con `multiple`, de tipo `string[]`. Elegir la opción actual en modo único no la
+    deselecciona.
+  - `mode?: 'popover' | 'inline'` (default `'popover'`). En popover, un disparador con el
+    estilo de `Select` abre el buscador y la lista; en modo único, elegir cierra el popover y
+    devuelve el foco al disparador; en múltiple, queda abierto. Escape cierra y devuelve el
+    foco. En línea, buscador y lista siempre visibles. **Dentro de un `Sheet` o `Dialog`, usar
+    `mode="inline"`.**
+  - Múltiple: las opciones elegidas se muestran como `Chip` con ✕, fuera del botón (encima del
+    buscador en línea). Al quitar uno, el foco pasa al Chip siguiente o, si no hay, al botón
+    (al buscador en línea).
+  - Filtro: busca el texto en cualquier parte de la etiqueta, sin distinguir mayúsculas ni
+    acentos ("mexico" encuentra "México"), y conserva el orden de `options`. No es
+    configurable.
+  - Accesibilidad: etiquetar con `<label htmlFor={id}>` o con `aria-label`. El disparador
+    anuncia la etiqueta y el valor actual ("País, México"); el popover, el buscador y la lista
+    toman el nombre de la etiqueta. Las opciones elegidas llevan `aria-checked="true"`
+    (`aria-selected` marca la opción resaltada). En línea, el `id` queda en el contenedor y
+    no en el buscador; la etiqueta igual nombra el buscador y lo enfoca al hacer clic.
+  - `size?: 'sm' | 'md' | 'lg'` (32 / 44 / 48px, alineado con `Input` y `Select`; default
+    `'md'`). `disabled` deshabilita el disparador, el buscador y los Chips.
+  - Textos configurables, en inglés por defecto: `placeholder` (`"Select..."`),
+    `searchPlaceholder` (`"Search..."`), `emptyLabel` (`"No results."`) y
+    `removeLabel: (label) => string` (`Remove ${label}`).
+  - Fuera de esta versión: búsqueda asíncrona, estado de carga y grupos.
 
 - **`ToggleGroup` y `ToggleGroupItem`**: un grupo de opciones que cambian un valor (una vista,
   un filtro); para cambiar qué panel se ve, `Tabs`. Client component.
