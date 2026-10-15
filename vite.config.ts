@@ -97,6 +97,7 @@ export default defineConfig({
         '@radix-ui/react-toggle',
         'sonner',
         '@tanstack/react-table',
+        'cmdk',
       ],
       plugins: [preserveUseClientDirective()],
       output: {

@@ -15,6 +15,7 @@ export * from './components/Checkbox';
 //   import { ChartContainer, BarChart, ... } from '@abelardo-salazar/core-ui-design-system/charts';
 // Ver src/charts.ts y CHANGELOG.md [0.4.1].
 export * from './components/Chip';
+export * from './components/Combobox';
 export * from './components/DataTable';
 export * from './components/DatePicker';
 export * from './components/Dialog';
