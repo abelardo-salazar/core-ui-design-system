@@ -28,11 +28,15 @@ Nuevo peer: `cmdk@^1.1.1` (lo usa `Combobox`): `npm install cmdk@^1.1.1`. Depend
   - Filtro: busca el texto en cualquier parte de la etiqueta, sin distinguir mayúsculas ni
     acentos ("mexico" encuentra "México"), y conserva el orden de `options`. No es
     configurable.
-  - Accesibilidad: etiquetar con `<label htmlFor={id}>` o con `aria-label`. El disparador
-    anuncia la etiqueta y el valor actual ("País, México"); el popover, el buscador y la lista
-    toman el nombre de la etiqueta. Las opciones elegidas llevan `aria-checked="true"`
-    (`aria-selected` marca la opción resaltada). En línea, el `id` queda en el contenedor y
-    no en el buscador; la etiqueta igual nombra el buscador y lo enfoca al hacer clic.
+  - Etiqueta: `label: string` dibuja la etiqueta visible, con el estilo de la de `Input`, o
+    `aria-label: string` nombra el campo sin etiqueta visible. Hace falta una de las dos, no
+    las dos (lo exigen los tipos). El disparador anuncia la etiqueta y el valor actual
+    ("País, México"); el popover, el buscador y la lista toman el nombre de la etiqueta. La
+    asociación ya viene en el HTML del servidor y sigue los cambios de `label`. Un clic en la
+    etiqueta abre el popover o, en línea, enfoca el buscador. `id` va en el botón (en línea,
+    en el contenedor) y no se usa para etiquetar.
+  - Las opciones elegidas llevan `aria-checked="true"` (`aria-selected` marca la opción
+    resaltada).
   - `size?: 'sm' | 'md' | 'lg'` (32 / 44 / 48px, alineado con `Input` y `Select`; default
     `'md'`). `disabled` deshabilita el disparador, el buscador y los Chips.
   - Textos configurables, en inglés por defecto: `placeholder` (`"Select..."`),

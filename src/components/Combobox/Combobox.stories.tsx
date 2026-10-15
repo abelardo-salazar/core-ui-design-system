@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
+import { renderToString } from 'react-dom/server';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { Button } from '../Button';
 import { Input } from '../Input';
@@ -50,13 +51,8 @@ const countries: ComboboxOption[] = [
 
 const body = () => within(document.body);
 
-const Field = ({ id, children }: { id: string; children: React.ReactNode }) => (
-  <div className="flex w-72 flex-col gap-1.5">
-    <label htmlFor={id} className="text-sm font-medium">
-      País
-    </label>
-    {children}
-  </div>
+const Field = ({ children }: { children: React.ReactNode }) => (
+  <div className="w-72">{children}</div>
 );
 
 // 1. Roles: el disparador anuncia la etiqueta y el valor; dentro del popover (dialog con el
@@ -64,13 +60,15 @@ const Field = ({ id, children }: { id: string; children: React.ReactNode }) => (
 // llega al DOM.
 export const Default: Story = {
   render: () => (
-    <Field id="country">
-      <Combobox id="country" options={countries} defaultValue="mx" size="md" />
+    <Field>
+      <Combobox label="País" options={countries} defaultValue="mx" size="md" />
     </Field>
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const trigger = await canvas.findByRole('button', { name: 'País México' });
+    const trigger = canvas.getByRole('button', { name: 'País México' });
+    const label = canvas.getByText('País', { selector: 'label' });
+    await expect(label).toHaveAttribute('for', trigger.id);
     await expect(trigger).toHaveAttribute('aria-haspopup', 'dialog');
     await expect(trigger).toHaveAttribute('aria-expanded', 'false');
 
@@ -106,8 +104,8 @@ export const Default: Story = {
 // original.
 export const Filter: Story = {
   render: () => (
-    <Field id="country-filter">
-      <Combobox id="country-filter" options={countries} />
+    <Field>
+      <Combobox label="País" options={countries} />
     </Field>
   ),
   play: async ({ canvasElement }) => {
@@ -188,9 +186,9 @@ export const SingleSelect: Story = {
 export const Multiple: Story = {
   args: { onValueChange: fn() },
   render: (args) => (
-    <Field id="countries">
+    <Field>
       <Combobox
-        id="countries"
+        label="País"
         multiple
         options={countries}
         defaultValue={['mx']}
@@ -241,9 +239,9 @@ export const Multiple: Story = {
 // 5. Quitar un Chip: el foco pasa al Chip siguiente; si no queda uno después, al botón.
 export const RemoveChipFocus: Story = {
   render: () => (
-    <Field id="countries-remove">
+    <Field>
       <Combobox
-        id="countries-remove"
+        label="País"
         multiple
         options={countries}
         defaultValue={['ar', 'mx', 'pe']}
@@ -268,8 +266,8 @@ export const RemoveChipFocus: Story = {
 // 6. Escape cierra el popover y devuelve el foco al disparador.
 export const EscapeCloses: Story = {
   render: () => (
-    <Field id="country-escape">
-      <Combobox id="country-escape" options={countries} />
+    <Field>
+      <Combobox label="País" options={countries} />
     </Field>
   ),
   play: async ({ canvasElement }) => {
@@ -287,7 +285,9 @@ export const EscapeCloses: Story = {
 };
 
 // 7. Modo en línea dentro de un Sheet bottom: buscador y lista siempre visibles, sin botón; los
-// Chips encima del buscador. El <label for> nombra el buscador y lo enfoca.
+// Chips encima del buscador. La etiqueta visible es solo visual (aria-hidden, sin for): el
+// buscador se nombra con la etiqueta oculta de cmdk, así el lector la lee una sola vez, y un
+// clic en la visible enfoca el buscador.
 export const InlineInSheet: Story = {
   render: () => (
     <Sheet>
@@ -300,19 +300,14 @@ export const InlineInSheet: Story = {
           <SheetDescription>Elige los países que quieres ver.</SheetDescription>
         </SheetHeader>
         <SheetBody>
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="countries-inline" className="text-sm font-medium">
-              País
-            </label>
-            <Combobox
-              id="countries-inline"
-              mode="inline"
-              multiple
-              size="lg"
-              options={countries}
-              defaultValue={['mx']}
-            />
-          </div>
+          <Combobox
+            label="País"
+            mode="inline"
+            multiple
+            size="lg"
+            options={countries}
+            defaultValue={['mx']}
+          />
         </SheetBody>
       </SheetContent>
     </Sheet>
@@ -323,8 +318,13 @@ export const InlineInSheet: Story = {
     const sheetScope = within(sheet);
 
     const input = sheetScope.getByRole('combobox', { name: 'País' });
-    const fieldLabel = sheetScope.getByText('País', { selector: 'label:not([cmdk-label])' });
-    await userEvent.click(fieldLabel);
+    const visibleLabel = sheetScope.getByText('País', { selector: 'span' });
+    await expect(visibleLabel).toHaveAttribute('aria-hidden', 'true');
+    // La única etiqueta expuesta es la de cmdk, que apunta al buscador.
+    const labels = sheet.querySelectorAll('label');
+    await expect(labels).toHaveLength(1);
+    await expect(labels[0].control).toBe(input);
+    await userEvent.click(visibleLabel);
     await expect(input).toHaveFocus();
     await expect(input).toHaveAttribute('aria-expanded', 'true');
     await expect(sheetScope.getByRole('listbox', { name: 'País' })).toBeVisible();
@@ -411,8 +411,8 @@ export const Sizes: Story = {
 // 9. Lista larga: hace scroll dentro del popover (max-h-72). Verificado en navegador real.
 export const LongList: Story = {
   render: () => (
-    <Field id="country-long">
-      <Combobox id="country-long" options={countries} />
+    <Field>
+      <Combobox label="País" options={countries} />
     </Field>
   ),
   play: async ({ canvasElement }) => {
@@ -427,13 +427,8 @@ function ControlledDemo() {
   const [value, setValue] = React.useState('cl');
   return (
     <div className="flex w-72 flex-col gap-2">
-      <Field id="country-controlled">
-        <Combobox
-          id="country-controlled"
-          options={countries}
-          value={value}
-          onValueChange={setValue}
-        />
+      <Field>
+        <Combobox label="País" options={countries} value={value} onValueChange={setValue} />
       </Field>
       <p className="text-sm">Valor: {value || '—'}</p>
       <Combobox aria-label="Deshabilitado" options={countries} defaultValue="ar" disabled />
@@ -447,5 +442,77 @@ export const ControlledAndDisabled: Story = {
     const canvas = within(canvasElement);
     await expect(await canvas.findByRole('button', { name: 'País Chile' })).toBeEnabled();
     await expect(canvas.getByRole('button', { name: 'Deshabilitado Argentina' })).toBeDisabled();
+  },
+};
+
+// 11. Renderizado en servidor: el HTML de renderToString ya trae la asociación entre la etiqueta
+// y el campo, sin efectos ni hidratación. Popover: <label for> sobre el botón y aria-labelledby
+// con la etiqueta y el valor. En línea: la etiqueta oculta de cmdk con el texto de `label`,
+// apuntando al buscador.
+export const ServerRendered: Story = {
+  render: () => <div data-testid="ssr-container" className="flex w-72 flex-col gap-4" />,
+  play: async ({ canvasElement }) => {
+    const container = within(canvasElement).getByTestId('ssr-container');
+    container.innerHTML = renderToString(
+      <>
+        <Combobox label="País" options={countries} defaultValue="mx" />
+        <Combobox label="Ciudad" mode="inline" options={countries} />
+      </>,
+    );
+    const ssr = within(container);
+
+    const trigger = ssr.getByRole('button', { name: 'País México' });
+    const label = ssr.getByText('País', { selector: 'label' });
+    await expect(label).toHaveAttribute('for', trigger.id);
+    await expect(trigger.getAttribute('aria-labelledby')?.split(' ')).toContain(label.id);
+
+    const input = ssr.getByRole('combobox', { name: 'Ciudad' });
+    const cmdkLabel = container.querySelector<HTMLLabelElement>('label[cmdk-label]');
+    await expect(cmdkLabel).toHaveTextContent('Ciudad');
+    await expect(cmdkLabel).toHaveAttribute('for', input.id);
+    await expect(ssr.getByRole('listbox', { name: 'Ciudad' })).toBeInTheDocument();
+    await expect(ssr.getByText('Ciudad', { selector: 'span' })).toHaveAttribute(
+      'aria-hidden',
+      'true',
+    );
+  },
+};
+
+// 12. Cambiar `label` entre renders actualiza el nombre accesible del disparador (sin abrir el
+// popover), del popover y del buscador en los dos modos.
+function LabelChangeDemo() {
+  const [label, setLabel] = React.useState('País');
+  return (
+    <div className="flex w-72 flex-col gap-4">
+      <Button variant="outline" onClick={() => setLabel('País de origen')}>
+        Cambiar etiqueta
+      </Button>
+      <Combobox label={label} options={countries} defaultValue="mx" />
+      <Combobox label={`${label} (en línea)`} mode="inline" options={countries.slice(0, 3)} />
+    </div>
+  );
+}
+
+export const LabelChange: Story = {
+  render: () => <LabelChangeDemo />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole('button', { name: 'País México' });
+    await expect(canvas.getByRole('combobox', { name: 'País (en línea)' })).toBeInTheDocument();
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Cambiar etiqueta' }));
+    await expect(trigger).toHaveAccessibleName('País de origen México');
+    await expect(body().queryByRole('dialog')).not.toBeInTheDocument();
+    await expect(
+      canvas.getByRole('combobox', { name: 'País de origen (en línea)' }),
+    ).toBeInTheDocument();
+    await expect(
+      canvas.getByRole('listbox', { name: 'País de origen (en línea)' }),
+    ).toBeInTheDocument();
+
+    await userEvent.click(trigger);
+    const dialog = await body().findByRole('dialog', { name: 'País de origen' });
+    await expect(within(dialog).getByRole('combobox')).toHaveAccessibleName('País de origen');
+    await userEvent.keyboard('{Escape}');
   },
 };
