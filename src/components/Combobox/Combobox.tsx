@@ -32,14 +32,8 @@ interface ComboboxBaseProps {
   mode?: 'popover' | 'inline';
   /** Alto del disparador y del buscador (32 / 44 / 48, la escala de Select e Input). @default 'md' */
   size?: ComboboxSize;
-  /**
-   * Id del campo, para un `<label htmlFor>`. En modo popover va en el botón; en línea, en el
-   * contenedor (cmdk fija el id del buscador), y la etiqueta igual nombra el buscador y lo enfoca
-   * al hacer clic.
-   */
+  /** Id del botón en modo popover; en línea, del contenedor (cmdk fija el id del buscador). */
   id?: string;
-  /** Nombre accesible cuando no hay un `<label htmlFor>`. */
-  'aria-label'?: string;
   disabled?: boolean;
   /** Texto del disparador sin valor. @default 'Select...' */
   placeholder?: string;
@@ -52,19 +46,35 @@ interface ComboboxBaseProps {
   className?: string;
 }
 
-export interface ComboboxSingleProps extends ComboboxBaseProps {
-  multiple?: false;
-  value?: string;
-  defaultValue?: string;
-  onValueChange?: (value: string) => void;
-}
+// Etiqueta visible (`label`) o solo para lectores de pantalla (`aria-label`): una de las dos.
+// Es un string porque cmdk solo acepta un texto para nombrar el buscador y la lista.
+export type ComboboxLabelProps =
+  | {
+      /** Etiqueta visible del campo. */
+      label: string;
+      'aria-label'?: never;
+    }
+  | {
+      label?: never;
+      /** Nombre accesible sin etiqueta visible. */
+      'aria-label': string;
+    };
 
-export interface ComboboxMultipleProps extends ComboboxBaseProps {
-  multiple: true;
-  value?: string[];
-  defaultValue?: string[];
-  onValueChange?: (value: string[]) => void;
-}
+export type ComboboxSingleProps = ComboboxBaseProps &
+  ComboboxLabelProps & {
+    multiple?: false;
+    value?: string;
+    defaultValue?: string;
+    onValueChange?: (value: string) => void;
+  };
+
+export type ComboboxMultipleProps = ComboboxBaseProps &
+  ComboboxLabelProps & {
+    multiple: true;
+    value?: string[];
+    defaultValue?: string[];
+    onValueChange?: (value: string[]) => void;
+  };
 
 export type ComboboxProps = ComboboxSingleProps | ComboboxMultipleProps;
 
@@ -74,46 +84,9 @@ const normalize = (text: string) =>
 
 const defaultRemoveLabel = (label: string) => `Remove ${label}`;
 
-const findLabels = (node: HTMLElement | null, id: string) => {
-  const root = node?.getRootNode() as Document | ShadowRoot | undefined;
-  if (!root?.querySelectorAll) return [];
-  return Array.from(root.querySelectorAll<HTMLLabelElement>(`label[for="${CSS.escape(id)}"]`));
-};
-
-// cmdk nombra su input y su lista solo con la prop `label` (string): escribe aria-labelledby del
-// input después del spread de props. Por eso, además de los ids de los <label for> (para el
-// disparador y el popover, que siguen los cambios del texto), se necesita su texto. Si un label
-// no tiene id se le asigna uno. Se vuelve a leer con cada `refreshKey` (la apertura del popover).
-function useFieldLabel(
-  id: string,
-  ariaLabel: string | undefined,
-  rootRef: React.RefObject<HTMLElement | null>,
-  refreshKey: unknown,
-) {
-  const [label, setLabel] = React.useState({ ids: '', text: ariaLabel ?? '' });
-
-  React.useEffect(() => {
-    const labels = findLabels(rootRef.current, id);
-    const ids = labels
-      .map((label, index) => {
-        if (!label.id) label.id = `${id}-label${index ? `-${index}` : ''}`;
-        return label.id;
-      })
-      .join(' ');
-    const text =
-      labels
-        .map((label) => label.textContent?.trim())
-        .filter(Boolean)
-        .join(' ') ||
-      ariaLabel ||
-      '';
-    setLabel((prev) => (prev.ids === ids && prev.text === text ? prev : { ids, text }));
-  }, [id, ariaLabel, rootRef, refreshKey]);
-
-  return label;
-}
-
 interface ComboboxImplProps extends ComboboxBaseProps {
+  label?: string;
+  'aria-label'?: string;
   multiple: boolean;
   selected: string[];
   onToggle: (value: string) => void;
@@ -129,6 +102,7 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
       mode = 'popover',
       size = 'md',
       id: idProp,
+      label,
       'aria-label': ariaLabel,
       disabled,
       placeholder = 'Select...',
@@ -142,19 +116,19 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
     const generatedId = React.useId();
     const id = idProp ?? generatedId;
     const valueId = `${id}-value`;
+    const labelId = `${id}-label`;
+    // Texto que nombra el buscador y la lista (prop `label` de cmdk).
+    const accessibleLabel = label ?? ariaLabel ?? '';
     const inline = mode === 'inline';
 
     const [open, setOpen] = React.useState(false);
     const [search, setSearch] = React.useState('');
 
-    const rootRef = React.useRef<HTMLDivElement>(null);
     const triggerRef = React.useRef<HTMLButtonElement>(null);
     const inputRef = React.useRef<HTMLInputElement>(null);
     const chipRefs = React.useRef(new Map<string, HTMLSpanElement>());
     // Valor del Chip que recibe el foco después de quitar otro; '' = el botón o el buscador.
     const pendingFocus = React.useRef<string | null>(null);
-
-    const label = useFieldLabel(id, ariaLabel, rootRef, open);
 
     const filtered = React.useMemo(() => {
       const query = normalize(search.trim());
@@ -189,19 +163,6 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
       }
     };
 
-    // En línea, el id no puede ir en el buscador: cmdk escribe el id de su input después de las
-    // props y lo usa para devolverle el foco al cambiar el ítem resaltado (getElementById), así
-    // que reemplazarlo manda el foco a la lista. El id queda en el contenedor; la etiqueta nombra
-    // el buscador por su texto (useFieldLabel) y un clic en ella lo enfoca, como haría el
-    // <label for> nativo.
-    React.useEffect(() => {
-      if (!inline) return;
-      const labels = findLabels(rootRef.current, id);
-      const focusInput = () => inputRef.current?.focus();
-      labels.forEach((label) => label.addEventListener('click', focusInput));
-      return () => labels.forEach((label) => label.removeEventListener('click', focusInput));
-    }, [id, inline]);
-
     const chips = selectedOptions.map((option) => (
       <Chip
         key={option.value}
@@ -222,7 +183,7 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
     const command = (
       <Command
         shouldFilter={false}
-        label={label.text}
+        label={accessibleLabel}
         defaultValue={multiple ? undefined : selected[0]}
         className={cn(
           'flex min-h-0 flex-col text-base-content',
@@ -242,7 +203,7 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
           />
         </div>
         <Command.List
-          label={label.text || undefined}
+          label={accessibleLabel || undefined}
           className="max-h-72 min-h-0 overflow-y-auto overscroll-contain p-1"
         >
           <Command.Empty className="py-6 text-center text-sm text-base-content/70">
@@ -276,15 +237,25 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
       </Command>
     );
 
-    const setRootRef = (node: HTMLDivElement | null) => {
-      rootRef.current = node;
-      if (typeof ref === 'function') ref(node);
-      else if (ref) ref.current = node;
-    };
+    // Mismo estilo que la etiqueta de Input.
+    const labelClassName = cn(
+      'text-sm font-medium leading-none text-base-content',
+      disabled && 'cursor-not-allowed opacity-70',
+    );
 
     if (inline) {
       return (
-        <div ref={setRootRef} id={id} className={cn('flex w-full flex-col gap-2', className)}>
+        <div ref={ref} id={id} className={cn('flex w-full flex-col gap-1.5', className)}>
+          {label !== undefined && (
+            // cmdk fija el id de su input y su aria-labelledby, que apunta a su propia etiqueta
+            // oculta (con el texto de `label`): una etiqueta visible no puede apuntarle con for.
+            // Esta es solo visual: aria-hidden para que el lector no lea la etiqueta dos veces,
+            // y el clic enfoca el buscador como lo haría un <label for>. No es enfocable, así que
+            // no necesita equivalente de teclado.
+            <span aria-hidden className={labelClassName} onClick={() => inputRef.current?.focus()}>
+              {label}
+            </span>
+          )}
           {multiple && chips.length > 0 && <div className="flex flex-wrap gap-1">{chips}</div>}
           {command}
         </div>
@@ -293,13 +264,8 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
 
     // Un <label for> sobre un botón reemplaza su contenido en el nombre accesible: el valor se
     // perdería. aria-labelledby junta la etiqueta y el valor; con aria-label, el botón se
-    // referencia a sí mismo (aporta su aria-label). Antes del efecto que resuelve la etiqueta,
-    // el <label for> nativo da al menos la etiqueta.
-    const triggerLabelledBy = label.ids
-      ? `${label.ids} ${valueId}`
-      : ariaLabel
-        ? `${id} ${valueId}`
-        : undefined;
+    // referencia a sí mismo (aporta su aria-label).
+    const triggerLabelledBy = `${label !== undefined ? labelId : id} ${valueId}`;
 
     const selectedText = selectedOptions.map((option) => option.label).join(', ');
     const chevron = <ChevronDownIcon aria-hidden className="h-4 w-4 shrink-0 opacity-50" />;
@@ -311,7 +277,7 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
           type="button"
           id={id}
           disabled={disabled}
-          aria-label={ariaLabel}
+          aria-label={label !== undefined ? undefined : ariaLabel}
           aria-labelledby={triggerLabelledBy}
           data-combobox-trigger=""
           className={
@@ -343,26 +309,32 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
           if (!next) setSearch('');
         }}
       >
-        {multiple ? (
-          <PopoverAnchor asChild>
-            <div
-              ref={setRootRef}
-              data-disabled={disabled ? '' : undefined}
-              className={cn(comboboxFieldVariants({ size }), className)}
-            >
-              {chips}
-              {trigger}
-            </div>
-          </PopoverAnchor>
-        ) : (
-          <div ref={setRootRef} className={cn('w-full', className)}>
-            {trigger}
-          </div>
-        )}
+        <div ref={ref} className={cn('flex w-full flex-col gap-1.5', className)}>
+          {label !== undefined && (
+            // Un clic activa el botón (comportamiento nativo de <label> sobre un botón), igual
+            // que un clic en el campo.
+            <label id={labelId} htmlFor={id} className={labelClassName}>
+              {label}
+            </label>
+          )}
+          {multiple ? (
+            <PopoverAnchor asChild>
+              <div
+                data-disabled={disabled ? '' : undefined}
+                className={comboboxFieldVariants({ size })}
+              >
+                {chips}
+                {trigger}
+              </div>
+            </PopoverAnchor>
+          ) : (
+            trigger
+          )}
+        </div>
         <PopoverContent
           align="start"
-          aria-labelledby={label.ids || undefined}
-          aria-label={label.ids ? undefined : ariaLabel}
+          aria-labelledby={label !== undefined ? labelId : undefined}
+          aria-label={label !== undefined ? undefined : ariaLabel}
           className="flex max-h-[var(--radix-popover-content-available-height)] w-[var(--radix-popover-trigger-width)] min-w-48 flex-col p-0"
         >
           {command}
@@ -431,8 +403,9 @@ MultipleCombobox.displayName = 'MultipleCombobox';
  * toma su nombre de la etiqueta del campo; Escape lo cierra y devuelve el foco. `mode="inline"`:
  * buscador y lista siempre visibles; **dentro de un `Sheet` o `Dialog`, usar `mode="inline"`**.
  *
- * Etiquetar con `<label htmlFor={id}>` o con `aria-label`. El disparador anuncia la etiqueta y
- * el valor actual. Las opciones elegidas llevan `aria-checked="true"`.
+ * Requiere `label` (etiqueta visible, con el estilo de la de Input) o `aria-label`, no los dos.
+ * El disparador anuncia la etiqueta y el valor actual; el popover, el buscador y la lista se
+ * nombran con la etiqueta. Las opciones elegidas llevan `aria-checked="true"`.
  */
 const Combobox = React.forwardRef<HTMLDivElement, ComboboxProps>((props, ref) =>
   props.multiple ? (
