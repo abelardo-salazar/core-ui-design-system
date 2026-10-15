@@ -10,7 +10,7 @@
 
 - Rama feat/ o fix/, PR, Squash & Merge. Nunca commits directos a main.
 - No publicar ni bumpear versión salvo que la tarea lo pida. Mientras 0.5.0 esté sin publicar, los cambios se agregan a su entrada del CHANGELOG.
-- No tocar DESIGN_SYSTEM.md (vive fuera del repo).
+- El catálogo de componentes (DESIGN_SYSTEM.md) vive fuera del repo y no se toca desde aquí. ARCHITECTURE.md (notas de arquitectura del theming y convención de releases) sí vive en el repo y se mantiene aquí.
 - Todo componente nuevo o modificado lleva test (play functions). El fixture headless de vitest-browser no aplica utilidades de Tailwind ni hace layout: aserciones sobre clases y DOM; medidas reales en Storybook con navegador real.
 - Comparaciones A/B: en un clon o worktree con su propio npm ci. Nunca junctions ni symlinks al node_modules principal.
 - Un componente es server-safe salvo que use hooks o construya handlers propios; los componentes cliente se registran en scripts/client-entry-points.mjs.

@@ -1,14 +1,18 @@
 # Changelog
 
-## [0.5.0] - 2026-10-04
+## [0.5.0] - 2026-10-15
 
 ### Instalación
 
-Nuevo peer: `@radix-ui/react-toggle-group@^1.1.20` (lo usa `ToggleGroup`). Instalarlo junto con
-los demás peers de Radix: `npm install @radix-ui/react-toggle-group@^1.1.20`.
+Dos peers nuevos: `@radix-ui/react-toggle-group@^1.1.20` (lo usa `ToggleGroup`) y `cmdk@^1.1.1`
+(lo usa `Combobox`; depende de `@radix-ui/react-dialog`, que ya es peer):
 
-Nuevo peer: `cmdk@^1.1.1` (lo usa `Combobox`): `npm install cmdk@^1.1.1`. Depende de
-`@radix-ui/react-dialog`, que ya es peer del DS.
+```bash
+npm install @radix-ui/react-toggle-group@^1.1.20 cmdk@^1.1.1
+```
+
+Antes de actualizar, revisar **Changed**: hay cambios incompatibles en las alturas de `Button`,
+`Input` y `Select`, en los tipos de `Input` y en `Badge`.
 
 ### Added
 
@@ -51,9 +55,9 @@ Nuevo peer: `cmdk@^1.1.1` (lo usa `Combobox`): `npm install cmdk@^1.1.1`. Depend
     controlado y no controlado. `type="multiple"`: `toolbar` con `aria-pressed`; puede quedar
     vacío. Acepta `value`/`defaultValue`/`onValueChange` con los tipos de Radix según `type`.
   - Teclado: un solo punto de tabulación; las flechas mueven el foco sin seleccionar y Space o
-    Enter seleccionan. En modo único esto se aparta a propósito del patrón de radio de ARIA (donde
-    la flecha también selecciona): cambiar el valor suele disparar una consulta, y recorrer las
-    opciones no debe disparar una por cada una.
+    Enter seleccionan. En modo único esto se aparta a propósito del patrón de radio de ARIA
+    (donde la flecha también selecciona): cambiar el valor suele disparar una consulta, y
+    recorrer las opciones no debe disparar una por cada una.
   - `size?: 'sm' | 'md' | 'lg'` (32 / 44 / 48px, la escala de `Button`; default `'md'`) en el
     grupo, que lo pasa a sus ítems; un ítem puede sobrescribirlo. El grupo mide lo mismo que sus
     ítems, así que queda alineado con un `Button` del mismo `size`.
@@ -86,15 +90,13 @@ Nuevo peer: `cmdk@^1.1.1` (lo usa `Combobox`): `npm install cmdk@^1.1.1`. Depend
     locales del subpath `/locale` (ver abajo) también las traducen y se aceptan igual.
   - `DataTable`: `previousLabel` (default `"Previous"`), `nextLabel` (default `"Next"`) y
     `pageLabel: (page, total) => string` (default `Page X of Y`; `page` empieza en 1).
-  - `SkipToContent`: usa `children` como texto si lo recibe (default `"Skip to content"`). Antes
-    un `children` del consumidor se ignoraba.
 
 - **Subpath `@abelardo-salazar/core-ui-design-system/locale`**: reexporta los locales de
   DayPicker, que son los de `date-fns` con meses y etiquetas de navegación traducidos
   (`import { es } from '@abelardo-salazar/core-ui-design-system/locale'`). Se pasan al `locale`
   de `DatePicker` o `Calendar`. Son datos, sin `'use client'`: se pueden importar desde un
-  Server Component. Solo se empaquetan los locales que se importan. **Migración:** si la app
-  importaba desde `@daypicker/react/locale/...`, cambiar el import por este subpath y quitar esa
+  Server Component. Solo se empaquetan los locales que se importan. Si la app importaba desde
+  `@daypicker/react/locale/...`, conviene cambiar el import por este subpath y quitar esa
   dependencia (con pnpm no se resolvía, y su versión podía no coincidir con la del DS).
 
 - **`announce(message, { politeness?: 'polite' | 'assertive' })`**: anuncia un mensaje a los
@@ -113,10 +115,9 @@ Nuevo peer: `cmdk@^1.1.1` (lo usa `Combobox`): `npm install cmdk@^1.1.1`. Depend
 - **`SheetBody`: zona con scroll del `Sheet`.** Se coloca entre `SheetHeader` y `SheetFooter`:
   el contenido largo hace scroll dentro del body y header y footer quedan siempre visibles, en
   los cuatro lados. `top` y `bottom` ocupan como máximo el 85% del alto. Sin `SheetBody` el
-  panel entero hace scroll y la ✕ se desplaza con el contenido; para migrar, envolver el bloque
-  central en `<SheetBody>`. El panel y la ✕ respetan el safe area de los bordes que tocan el
-  viewport si la app declara `viewportFit: 'cover'`, y el título de `SheetHeader` no queda
-  debajo de la ✕ aunque haya muesca. La ✕ muestra el anillo de foco solo con teclado.
+  panel entero hace scroll y la ✕ se desplaza con el contenido; para fijar header y footer,
+  envolver el bloque central en `<SheetBody>`. El panel y la ✕ respetan el safe area de los
+  bordes que tocan el viewport si la app declara `viewportFit: 'cover'`.
 
 - **`Input` gana un botón de limpiar: `clearable`, `onClear?: () => void` y `clearLabel?: string`**
   (`aria-label` del botón, default `"Clear"`). Vaciar el campo dispara el `onChange` del
@@ -127,54 +128,29 @@ Nuevo peer: `cmdk@^1.1.1` (lo usa `Combobox`): `npm install cmdk@^1.1.1`. Depend
   con `clearable`, y `onClear`/`clearLabel` no se admiten sin él (ver Changed). Los contenedores
   de `startIcon`/`endIcon` ganan `aria-hidden="true"`.
 
-- **`Chip` gana una escala de tamaños propia: `size?: 'sm' | 'md' | 'lg'`** (default `'sm'`,
-  compatible hacia atrás). `md` = 32px de alto; `lg` = 44px de alto, el tamaño táctil.
+- **`Chip` gana `size?: 'sm' | 'md' | 'lg'`** (default `'sm'`, el aspecto de siempre). `md` mide
+  32px de alto y `lg` 44px, el tamaño táctil, también en su área de respuesta.
 
-- **`Badge` gana una escala de tamaños propia** (`size?: 'sm' | 'md' | 'lg' | 'icon'`, default
-  `'sm'`): `sm` ≈ 22px de alto, `md` ≈ 26px, `lg` ≈ 30px, `icon` = 24px exactos (cuadrado, sin
-  padding horizontal — para un ícono o un número corto). Alturas = borde + padding vertical +
-  line-height del propio `text-*` de cada escalón, sin `h-*` fijas (salvo `icon`), medidas a
-  mano en Storybook con un navegador real.
+- **`Badge` gana una escala de tamaños propia: `size?: 'sm' | 'md' | 'lg' | 'icon'`** (default
+  `'sm'`): `sm` ≈ 22px de alto, `md` ≈ 26px, `lg` ≈ 30px e `icon` = 24px exactos (cuadrado, para
+  un ícono o un número corto). Ver Changed: el alto por defecto cambia.
 
 - **`Badge` gana `interactive?: boolean`** (default `false`). Con `interactive`, `Badge`
-  renderiza un `<button type="button">` real (foco, Enter/Space y `disabled` nativos del
-  navegador, sin que `Badge` sintetice ningún handler) en vez de un `<div>`; `cursor-pointer`,
-  el anillo de foco (`focus-visible:ring-2 ring-primary ring-offset-2`) y el hover por color
-  solo existen en ese caso — antes vivían siempre en la base, eran CSS muerto en un `<div>` sin
-  `tabIndex` (nunca dispara `:focus-visible`). `badgeVariants` (ya exportado) acepta
-  `interactive: true` para que un consumidor estilice su propio `<a>`/`Link` con el mismo look;
-  `Badge` no agrega `asChild` ni `href`. Un `Badge` interactivo compacto (~22px) no cumple el
-  objetivo táctil de 44px — es para usos incidentales (una etiqueta que abre algo), no para
-  controles táctiles (filtros): para eso está `Chip`, que ya mide 44px en `lg`.
+  renderiza un `<button type="button">` real (foco, Enter/Space y `disabled` nativos) en vez de
+  un `<div>`, con cursor, hover y anillo de foco. Debe ser un literal (`interactive`,
+  `interactive={false}` u omitido), no un `boolean` dinámico: ver el README. `badgeVariants`
+  acepta `interactive: true` para dar el mismo aspecto a un `<a>`/`Link` propio. Un `Badge`
+  interactivo mide ~22px y no cumple el objetivo táctil de 44px: es para usos incidentales (una
+  etiqueta que abre algo); para filtros y controles táctiles, `Chip` en `size="lg"`.
 
-- **`Button` gana `shape?: 'default' | 'pill'`** (default `'default'`). Con `shape="pill"`,
-  `rounded-full` en vez de `rounded-btn` — combinado con `size="icon"` da un círculo de 44x44;
-  el anillo de foco sigue la forma sin ningún cambio de código, porque usa el mismo
-  border-radius del elemento. `rounded-btn` deja de vivir en la base de `buttonVariants` y pasa
-  a ser solo el valor de `shape: 'default'` (mismo motivo que el fix de `Badge.size`: la base y
-  una variante no deben aplicar el mismo grupo de utilidades a la vez) — los consumidores que
-  llaman `buttonVariants({...})` sin pasar `shape` (`Calendar`, `SkipToContent`, `DatePicker`)
-  siguen resolviendo a `rounded-btn` vía `defaultVariants`, sin cambios.
+- **`Button` gana `shape?: 'default' | 'pill'`** (default `'default'`). `shape="pill"` redondea
+  por completo; con `size="icon"` da un círculo de 44x44. El anillo de foco sigue la forma.
 
 ### Changed
 
-- **Los textos por defecto de `DataTable` pasan a inglés.** `searchPlaceholder` (también nombre
-  accesible de la búsqueda) pasa de `"Buscar..."` a `"Search..."`; el estado vacío, de
-  "Sin resultados." a "No results."; la paginación, de "Anterior" / "Siguiente" /
-  "Página X de Y" a "Previous" / "Next" / "Page X of Y". Para conservar los textos en
-  español: `searchPlaceholder="Buscar..."`, `previousLabel="Anterior"`, `nextLabel="Siguiente"`,
-  ``pageLabel={(page, total) => `Página ${page} de ${total}`}`` y un `emptyState` propio. Los
-  tests que buscaban esos textos deben actualizarse.
-
-- **El estado vacío por defecto de `DataTable` cambia de aspecto.** El texto ahora se
-  ve como título (semibold, color de texto base) en vez de texto gris, y la fila es algo más
-  alta. Para conservar el aspecto anterior, pasar un `emptyState` propio, por ejemplo
-  `<span className="text-base-content/65">No results.</span>`.
-
-- **`SheetContent` ahora separa sus hijos con 16px.** El `gap-4` de la base estaba desde antes,
-  pero no hacía nada porque el panel no era flex; al pasar a `flex flex-col` se activa y afecta a
-  los Sheets existentes. Quien compensaba la separación a mano (por ejemplo, con `py-4` en el
-  bloque central) verá el espacio duplicado y debería quitar ese padding.
+- **Rompe: `Button` `size="md"`, `Input` `size="md"` y el trigger de `Select` pasan de 40px a
+  44px de alto**, alineados con `Button` `size="icon"` (44px) en una misma fila. `sm` (32px) y
+  `lg` (48px) no cambian. Para recuperar el alto anterior en un uso puntual: `className="h-10"`.
 
 - **Rompe: `InputProps` pasa de `interface` a unión discriminada por `clearable`.** El uso de
   `<Input>` no cambia (`endIcon` sin `clearable` compila igual), pero hay dos casos que sí:
@@ -185,121 +161,79 @@ Nuevo peer: `cmdk@^1.1.1` (lo usa `Combobox`): `npm install cmdk@^1.1.1`. Depend
     `type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never`,
     o a `Omit<InputBaseProps, K>` si no hacen falta `clearable`/`endIcon`.
 
-- **Rompe: el alto por defecto de `Badge` pasa de 32px a ~22px.** Era un efecto colateral del
-  fix de abajo (`size` no hacía nada, así que el único resultado posible era 32px) — ahora que
-  `size` es funcional, el default (`sm`) usa la escala propia y compacta de `Badge`, pensada
-  para una etiqueta de estado, no copiada de `Button`. Para recuperar el aspecto anterior en un
-  `Badge` puntual: `<Badge className="h-8 px-3">`.
+- **Rompe: el alto por defecto de `Badge` pasa de 32px a ~22px.** En 0.4.4 `size` no tenía
+  efecto (ver Fixed) y todo `Badge` medía 32px; ahora el default es `sm`, de la escala propia de
+  `Badge`. Para recuperar el aspecto anterior: `<Badge size="lg">` (~30px) o
+  `<Badge className="h-8 px-3">`.
 
-- **Rompe: `<Badge onClick={fn}>` sin `interactive` ya no compila.** Antes compilaba y el click
-  funcionaba, pero sobre un `<div>` sin foco por teclado ni semántica de botón (un bug de
-  accesibilidad real, silencioso). `BadgeProps` es una unión discriminada por `interactive`,
-  pero `Badge` también necesita dos firmas sobrecargadas (una por rama) para que esto se
-  cumpla de verdad: con un único parámetro de tipo unión, el chequeo de propiedades sobrantes
-  de JSX se relaja a "¿existe esta prop en ALGÚN miembro de la unión?", así que `onClick`/
-  `disabled`/`type` (presentes en la rama de botón) igual colaban sin `interactive` — regresión
-  real dentro de esta misma versión sin publicar, cubierta ahora con un test de tipos
-  (`Badge.types.test-d.tsx`, compilado por `tsc -b`). Migrar a `<Badge interactive onClick={fn}>`,
-  que renderiza un `<button>` real con foco/teclado/`disabled` correctos de fábrica.
+- **Rompe: `<Badge onClick={fn}>` sin `interactive` ya no compila** (tampoco `disabled` ni
+  `type`). Antes el click funcionaba sobre un `<div>` sin foco por teclado ni semántica de
+  botón. Migrar a `<Badge interactive onClick={fn}>`.
 
-- **Rompe: el hover y el anillo de foco de `Badge` ya no están presentes sin `interactive`.**
-  Si algún consumidor dependía de esas clases en un `<div>` no-interactivo (poco probable, eran
-  CSS muerto: nunca se veían al navegar por teclado), hay que agregar `interactive` o
-  replicarlas a mano vía `className`.
+- **Rompe: sin `interactive`, `Badge` ya no tiene cursor, hover ni anillo de foco.** Sobre un
+  `<div>` no enfocable el anillo nunca se veía. Si un `Badge` debe reaccionar al puntero, usar
+  `interactive`; para conservar solo el aspecto, agregar las clases con `className`.
 
-- **Rompe: `Button` `size="md"`, `Input` `size="md"` y el trigger de `Select` pasan de 40px a
-  44px de alto.** Los tres comparten la misma escala de alturas (son la misma familia de
-  controles de formulario) y antes medían 40px — una fila con un botón `size="icon"` (ya 44px
-  desde el fix de touch target) quedaba desalineada 4px contra su propio `Button` `md` al lado.
-  Mover los tres a la vez mantiene la fila alineada en vez de romperla de un lado. `sm` (32px)
-  y `lg` (48px) no cambian en `Button` ni en `Input`. Para recuperar el aspecto anterior en un
-  uso puntual: `className="h-10"` (gana sobre la variante vía `twMerge`, igual que cualquier
-  otro ajuste de tamaño por `className`).
+- **Los textos por defecto de `DataTable` pasan a inglés.** `searchPlaceholder` (también nombre
+  accesible de la búsqueda) pasa de `"Buscar..."` a `"Search..."`; el estado vacío, de
+  "Sin resultados." a "No results."; la paginación, de "Anterior" / "Siguiente" /
+  "Página X de Y" a "Previous" / "Next" / "Page X of Y". Para conservar los textos en
+  español: `searchPlaceholder="Buscar..."`, `previousLabel="Anterior"`, `nextLabel="Siguiente"`,
+  ``pageLabel={(page, total) => `Página ${page} de ${total}`}`` y un `emptyState` propio. Los
+  tests que buscaban esos textos deben actualizarse.
+
+- **El estado vacío por defecto de `DataTable` cambia de aspecto.** El texto ahora se ve como
+  título (semibold, color de texto base) en vez de texto gris, y la fila es algo más alta. Para
+  conservar el aspecto anterior, pasar un `emptyState` propio, por ejemplo
+  `<span className="text-base-content/65">No results.</span>`.
+
+- **`SheetContent` ahora separa sus hijos con 16px.** Quien compensaba la separación a mano (por
+  ejemplo, con `py-4` en el bloque central) verá el espacio duplicado y debería quitar ese
+  padding.
 
 ### Fixed
 
-- **Importar un componente ya no incluye el DS entero en el bundle del cliente.** Hasta 0.4.4,
-  el paquete no declaraba `sideEffects`, así que el bundler no podía descartar los módulos sin
+- **Importar un componente ya no incluye el DS entero en el bundle del cliente.** En 0.4.4 el
+  paquete no declaraba `sideEffects`, así que el bundler no podía descartar los módulos sin
   usar: en una app Next (webpack), `import { Button }` sumaba unos 270 kB de JS con el resto de
-  los componentes. Ahora el paquete declara `sideEffects` y ese import suma solo `Button` y lo
-  que necesita (unos 33 kB). No hay que cambiar nada en la app. Siguen marcados con efectos el
-  CSS (`import '@abelardo-salazar/core-ui-design-system/style.css'` no se descarta) y los
-  módulos de las dependencias internas que los declaran (el locale por defecto de los formatos
-  de número y fecha de `Chart`).
+  los componentes; ahora suma unos 33 kB. No hay que cambiar nada en la app. El CSS
+  (`import '@abelardo-salazar/core-ui-design-system/style.css'`) se sigue incluyendo.
 
-- **Halo blanco alrededor del anillo de foco en modo oscuro.** Al enfocar con el teclado
-  `Button`, `Input`, `Textarea`, `Select`, `Tabs`, `Chip`, `Badge` interactivo, `ToggleGroup` o
-  el botón de orden de `DataTable`, aparecía una franja blanca de 2px entre el control y el
-  anillo. Ahora la separación toma el color de fondo del tema (`base-100`) en todo el DS. Sobre
-  otra superficie, un `ring-offset-<color>` en el `className` sigue ganando (por ejemplo,
+- **Halo blanco alrededor del anillo de foco en modo oscuro.** Al enfocar con el teclado un
+  control (`Button`, `Input`, `Textarea`, `Select`, `Tabs`, `Chip`, el botón de orden de
+  `DataTable`…), aparecía una franja blanca de 2px entre el control y el anillo. Ahora la
+  separación toma el color de fondo del tema (`base-100`). Sobre otra superficie, un
+  `ring-offset-<color>` en el `className` sigue ganando (por ejemplo,
   `focus-visible:ring-offset-base-200` para un control sobre `bg-base-200`).
 
-- **`Image` podía quedarse invisible para siempre si la imagen fallaba o cargaba muy rápido.**
-  Con la imagen en caché y el navegador ocupado, el resultado de la carga podía perderse: la
-  imagen no se mostraba, el `fallback` tampoco y quedaba el `Skeleton`. Lo mismo pasaba con
-  renderizado en servidor (Next.js) cuando la imagen terminaba de cargar o fallaba antes de que
-  la página se hidratara. Ahora el resultado se conserva siempre. Cambiar `src` sigue
-  reiniciando el ciclo de carga. `Image` sin `src` ahora muestra el `fallback` (o nada, si no
-  hay `fallback`) en lugar del `Skeleton`, y llama a `onError`.
-  `onLoad` y `onError` se llaman también cuando la imagen terminó de cargar o falló antes de la
-  hidratación, o ya estaba en caché, y siempre una sola vez por `src`. En esos casos el evento
-  lo vuelve a disparar `Image` (`event.nativeEvent.isTrusted` es `false`).
+- **La ✕ de `Dialog` y de `Sheet` mostraba el anillo de foco también al hacer clic.** Ahora
+  aparece solo al enfocarla con el teclado y se dibuja dentro del área táctil.
 
-- **La ✕ de `Dialog` mostraba el anillo de foco también al hacer clic.** Ahora aparece solo al
-  enfocarla con el teclado y se dibuja dentro del área táctil, igual que la ✕ de `Sheet`.
+- **El título de `SheetHeader` podía quedar debajo de la ✕** cuando era largo. Ahora el header
+  reserva el espacio de la ✕, también con muesca.
+
+- **`Image` podía quedarse invisible para siempre.** Con la imagen en caché y el navegador
+  ocupado, o con renderizado en servidor (Next.js) cuando la imagen terminaba de cargar o fallaba
+  antes de la hidratación, el resultado se perdía: no se veía la imagen ni el `fallback`, solo el
+  `Skeleton`. Ahora el resultado se conserva siempre, y `onLoad`/`onError` se llaman también en
+  esos casos, una sola vez por `src` (cuando el evento llegó antes de la hidratación, `Image` lo
+  vuelve a disparar y `event.nativeEvent.isTrusted` es `false`). `Image` sin `src` muestra el
+  `fallback` (o nada, si no hay `fallback`) y llama a `onError`, en lugar de quedarse en el
+  `Skeleton`.
 
 - **`DatePicker` abre el calendario en el mes de la fecha elegida.** Antes abría siempre en el mes
   actual, aunque `date` estuviera en otro mes. Sin `date`, sigue abriendo en el mes actual.
 
-- **El área táctil real del `Chip` era solo el texto**, sin importar el tamaño: el padding que
-  da forma a la píldora vivía en el `<span>` raíz, que nunca es interactivo (evita anidar
-  `<button>` dentro de `<button>`), mientras que el `Toggle`/botón de cierre de adentro no tenía
-  padding propio. Tocar la píldora, fuera del texto mismo, no hacía nada. El padding ahora vive
-  en el cuerpo (`Toggle`/`span`) y el botón de cierre pasa a tamaño explícito en `md`/`lg`
-  (antes derivado del padding) — ambos cubren ahora el alto completo de la píldora y llegan a
-  su borde exterior, en los tres tamaños. **`sm` es pixel-idéntico al aspecto histórico en todos
-  los casos**, también con botón de cierre (`Removable`/`ToggleableAndRemovable`): la raíz
-  reintroduce ahí, y solo ahí, el padding que necesitaba para no perder su tamaño, y el botón de
-  cierre reclama esa zona como área de respuesta vía un `::after` invisible — sin agrandar su
-  caja visual, así que el anillo de foco del botón de cierre también queda idéntico (círculo de
-  24x24 en la misma posición). Verificado con bounding boxes A/B contra el commit previo a esta
-  escala (`1be50ab`) en navegador real, con tres largos de texto distintos, y con
-  `elementFromPoint` sobre la zona antes muerta.
+- **El área táctil de `Chip` era solo su texto.** Tocar la píldora fuera del texto no hacía nada
+  (ni en el cuerpo con `pressed`/`onPressedChange` ni junto a la ✕ de `onRemove`). Ahora el
+  cuerpo y la ✕ responden en todo el alto de la píldora hasta su borde, sin salirse de su
+  contorno redondeado. El aspecto de `size="sm"` (el de siempre) no cambia.
 
-- **El área de respuesta extendida no seguía la silueta de la píldora.** El `::after` del botón
-  de cierre era un rectángulo: sus esquinas exteriores quedaban fuera de la curva redondeada de
-  la píldora, así que un toque justo afuera del contorno visible, cerca de la esquina, disparaba
-  `onRemove` igual (confirmado con `elementFromPoint` + geometría: un punto a distancia 18.8px
-  del centro de la curva, con radio 14.6px, devolvía el botón). Ahora ese `::after` lleva
-  `rounded-r-full`, que redondea solo sus dos esquinas derechas con el mismo radio que la raíz.
+- **La prop `size` de `Badge` no tenía efecto**: todos los tamaños daban el mismo resultado.
+  Ahora aplica la escala propia de `Badge` (ver Added y Changed).
 
-- **`sm` con Toggle y botón de cierre a la vez dejaba ~2px sin respuesta arriba/abajo del
-  Toggle**, mientras que el botón de cierre sí los reclamaba: el Toggle solo se estira al alto
-  de la fila (24px), no al interior completo de la raíz (que la raíz agranda con su `py-0.5`
-  reintroducido). El Toggle gana ahora su propio `::after` (solo vertical, con `rounded-l-full`
-  por el mismo motivo de silueta, del lado opuesto) para alcanzar la misma franja que el botón
-  de cierre ya cubría.
-
-- **`md`/`lg` con botón de cierre: el botón desbordaba el borde inferior de la raíz por ~1px y
-  su ícono quedaba ~1px descentrado** — medido con `getBoundingClientRect` antes de corregir,
-  no asumido: su altura explícita (`h-8`/`h-11`) no respondía a `items-stretch`, así que no se
-  centraba con el Toggle (que sí se estira correctamente). Fix: se le quita la altura explícita
-  (queda solo `w-8`/`w-11`), así se estira igual que el Toggle/body y queda centrado. Además,
-  tanto el Toggle como el botón de cierre ganan en `md`/`lg` un `::after` que cubre el propio
-  borde de 1px de la raíz (a diferencia de `sm`, donde ese borde queda deliberadamente fuera):
-  en `lg`, el área de respuesta real de ambos alcanza así los 44px completos, el objetivo táctil
-  de esta escala — no solo su caja visual, que por construcción mide ~1px menos que la raíz.
-  `md`/`lg` no están publicados: este ajuste de ±1px en su reposo es una corrección, documentada
-  acá, no un cambio de API.
-
-- **La prop `size` de `Badge` era un no-op.** `Badge.tsx` desestructuraba `size` de las props
-  pero nunca lo pasaba a `badgeVariants()` — `<Badge>`, `<Badge size="lg">` y
-  `<Badge size="icon">` producían exactamente las mismas clases (el default de `cva`, una
-  escala copiada 1:1 de `Button`, con la que además convivía sin resolver el padding propio de
-  la base de `badgeVariants`). Confirmado renderizando el `Badge` real del `dist` publicado, no
-  solo leyendo el código. `size` ahora llega a `cva` y usa la escala propia de `Badge` (ver
-  Added) — el padding/alto/texto de cada tamaño ahora vive SOLO en la variante `size`, nunca
-  también en la base, para no depender de que algo resuelva un conflicto entre ambos.
+- **`SkipToContent` ignoraba sus `children`.** Ahora los usa como texto del enlace (sin
+  `children`, sigue diciendo `"Skip to content"`).
 
 ## [0.4.4] - 2026-10-04
 

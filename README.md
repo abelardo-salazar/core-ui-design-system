@@ -44,7 +44,7 @@ npm install @abelardo-salazar/core-ui-design-system
 
 ### Peer Dependencies
 
-El paquete declara React, Radix UI, TanStack Table y Sonner como `peerDependencies` — tu proyecto debe instalarlos aparte (evita instancias duplicadas y permite que Next.js resuelva sus propias directivas `'use client'`). Instalá el set completo:
+El paquete declara React, Radix UI, TanStack Table, cmdk (lo usa `Combobox`) y Sonner como `peerDependencies` — tu proyecto debe instalarlos aparte (evita instancias duplicadas y permite que Next.js resuelva sus propias directivas `'use client'`). Instala el set completo:
 
 ```bash
 npm install react@^19.0.0 react-dom@^19.0.0 \
@@ -61,6 +61,7 @@ npm install react@^19.0.0 react-dom@^19.0.0 \
   @radix-ui/react-toggle-group@^1.1.20 \
   @radix-ui/react-tooltip@^1.2.16 \
   @tanstack/react-table@^9.1.2 \
+  cmdk@^1.1.1 \
   sonner@^2.0.7
 ```
 
@@ -405,6 +406,18 @@ import Link from 'next/link';
 ```
 
 **Migración desde `<Badge onClick={fn}>` (sin `interactive`):** antes compilaba y el click funcionaba, pero sobre un `<div>` sin foco por teclado ni semántica de botón — un bug de accesibilidad real y silencioso. Ahora `onClick`, `disabled` y `type` sin `interactive` son errores de compilación (verificado con un test de tipos dedicado, no solo con el texto de este README); cambiar a `<Badge interactive onClick={fn}>`.
+
+**`interactive` debe ser un literal (`true`/`false` u omitido), no un `boolean` dinámico.** `Badge` tiene una firma por rama (`interactive: true` y `interactive?: false`) para que TypeScript rechace `onClick` sin `interactive`. Un valor de tipo `boolean`, como `interactive={isClickable}`, no encaja en ninguna de las dos y no compila (`No overload matches this call`). Si se decide en ejecución, usar dos `Badge` literales:
+
+```tsx
+const status = isClickable ? (
+  <Badge interactive onClick={openDetail}>
+    Pendiente
+  </Badge>
+) : (
+  <Badge>Pendiente</Badge>
+);
+```
 
 **`Badge` vs `Chip`:** un `Badge` interactivo compacto mide ~22px y **no cumple el objetivo táctil de 44px** (WCAG 2.5.5 / Apple HIG) — es para usos incidentales, una etiqueta que además abre algo al tocarla (p. ej. un estado que lleva al detalle). Para un control pensado para tocarse a propósito (filtros, chips seleccionables), usar `Chip`, que en `size="lg"` ya mide 44px de alto real, incluyendo el área de respuesta.
 
@@ -1595,6 +1608,8 @@ npm run storybook
 ```bash
 npm run build
 ```
+
+Las notas de arquitectura (theming) y la convención de versiones y tags para publicar viven en [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ---
 

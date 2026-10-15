@@ -1,5 +1,3 @@
-# Vive fuera del repo; no se toca desde aquí.
-DESIGN_SYSTEM.md
 package-lock.json
 dist
 storybook-static
