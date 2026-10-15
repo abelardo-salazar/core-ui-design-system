@@ -2,7 +2,7 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { hydrateRoot } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
-import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { Image } from './Image';
 
 const meta: Meta<typeof Image> = {
@@ -23,6 +23,13 @@ type Story = StoryObj<typeof Image>;
 // story usaba https://github.com/shadcn.png, una imagen real por red.
 const TINY_PNG =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+
+// Imagen que falla: un data URI que no se puede decodificar. Falla en el propio navegador, sin
+// pedir nada al servidor. Antes estas stories usaban /broken-image.jpg, que el servidor de vitest
+// no responde con un 404 sino con su HTML de fallback (200); el error dependía de cuánto
+// tardaba ese servidor (y de si el navegador revalidaba la respuesta en caché de una story
+// anterior), y las stories fallaban a veces con la máquina cargada.
+const BROKEN_SRC = 'data:image/png;base64,AAAA';
 
 // 1. Ciclo completo: Skeleton visible mientras carga -> imagen visible al cargar.
 export const LoadsSuccessfully: Story = {
@@ -53,7 +60,7 @@ export const ErrorWithFallback: Story = {
   render: () => (
     <div className="h-32 w-32">
       <Image
-        src="/broken-image.jpg"
+        src={BROKEN_SRC}
         alt="Broken"
         fallback={
           <span className="flex h-full w-full items-center justify-center bg-base-200 text-xs">
@@ -65,8 +72,6 @@ export const ErrorWithFallback: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    // Src dentro del propio origin (404, sin dependencia de red externa) — mismo patrón que
-    // Avatar.stories FallbackState.
     await expect(await canvas.findByText('No image')).toBeInTheDocument();
     await expect(canvas.queryByAltText('Broken')).not.toBeInTheDocument();
   },
@@ -74,17 +79,19 @@ export const ErrorWithFallback: Story = {
 
 // 3. Error sin fallback: comportamiento mínimo documentado — no renderiza nada.
 export const ErrorWithoutFallback: Story = {
-  render: () => (
+  args: { onError: fn() },
+  render: (args) => (
     <div className="h-32 w-32" data-testid="image-container">
-      <Image src="/broken-image.jpg" alt="Broken" />
+      <Image src={BROKEN_SRC} alt="Broken" onError={args.onError} />
     </div>
   ),
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     const container = canvas.getByTestId('image-container');
 
-    // Le damos tiempo al 404 a resolver antes de confirmar la ausencia total de contenido.
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    // Se espera el error en sí, no un tiempo fijo: la ausencia de contenido solo significa algo
+    // después de que la imagen falló.
+    await waitFor(() => expect(args.onError).toHaveBeenCalledOnce());
 
     // El wrapper interno de Image sigue montado (necesita seguir vivo por si src cambia), pero
     // no debe quedar ningún <img> ni contenido visible dentro — "no renderiza nada" documentado.
@@ -199,7 +206,7 @@ export const WithoutSrc: Story = {
 // 8. Cambio de src tras un error: el <img> vuelve a montarse y recorre de nuevo el ciclo de
 // carga, en vez de quedarse en el estado de error de la imagen anterior.
 function SwitchSrcAfterError() {
-  const [src, setSrc] = React.useState('/broken-image.jpg');
+  const [src, setSrc] = React.useState(BROKEN_SRC);
   return (
     <div className="space-y-2">
       <div className="h-32 w-32">
