@@ -95,7 +95,9 @@ Antes de actualizar, revisar **Changed**: hay cambios incompatibles en las altur
   DayPicker, que son los de `date-fns` con meses y etiquetas de navegación traducidos
   (`import { es } from '@abelardo-salazar/core-ui-design-system/locale'`). Se pasan al `locale`
   de `DatePicker` o `Calendar`. Son datos, sin `'use client'`: se pueden importar desde un
-  Server Component. Solo se empaquetan los locales que se importan. Si la app importaba desde
+  Server Component, pero no pasarse desde ahí como prop a `DatePicker` o `Calendar` (contienen
+  funciones): importarlos en el componente cliente. Solo se empaquetan los locales que se
+  importan. Si la app importaba desde
   `@daypicker/react/locale/...`, conviene cambiar el import por este subpath y quitar esa
   dependencia (con pnpm no se resolvía, y su versión podía no coincidir con la del DS).
 

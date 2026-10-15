@@ -1,10 +1,10 @@
 # Core UI Design System
 
 <!-- El badge de versión se actualiza a mano en cada bump (ver "version" en package.json) —
-     no hay automatización que lo sincronice. Si tocás package.json#version, actualizá esta
+     no hay automatización que lo sincronice. Si cambias package.json#version, actualiza esta
      línea en el mismo commit. -->
 
-![Version](https://img.shields.io/badge/version-0.3.15-blue.svg)
+![Version](https://img.shields.io/badge/version-0.5.0-blue.svg)
 ![React](https://img.shields.io/badge/react-19.0.0+-61DAFB.svg)
 ![TypeScript](https://img.shields.io/badge/typescript-5.9+-3178C6.svg)
 ![Private](https://img.shields.io/badge/registry-private-red.svg)
@@ -216,16 +216,25 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
     - [Switch — Uso y Props](#switch--uso-y-props)
     - [Calendar — Uso y Props](#calendar--uso-y-props)
     - [DatePicker — Uso y Props](#datepicker--uso-y-props)
+    - [Locales — subpath `/locale`](#locales--subpath-locale)
+    - [Combobox — Uso y Props](#combobox--uso-y-props)
+    - [QuantityStepper — Uso y Props](#quantitystepper--uso-y-props)
     - [📢 Feedback (Notificaciones)](#-feedback-notificaciones)
     - [Toast — Uso y Props](#toast--uso-y-props)
     - [Progress — Uso y Props](#progress--uso-y-props)
     - [ProgressRing — Uso y Props](#progressring--uso-y-props)
     - [Alert — Uso y Props](#alert--uso-y-props)
+    - [EmptyState — Uso y Props](#emptystate--uso-y-props)
+    - [♿ Accesibilidad](#-accesibilidad)
+    - [VisuallyHidden — Uso y Props](#visuallyhidden--uso-y-props)
+    - [announce() — Uso y opciones](#announce--uso-y-opciones)
     - [📊 Datos](#-datos)
     - [Table — Uso y Props](#table--uso-y-props)
     - [DataTable — Uso y Props](#datatable--uso-y-props)
     - [Chart — Uso y Props](#chart--uso-y-props)
+    - [🧾 Tipos y utilidades exportados](#-tipos-y-utilidades-exportados)
   - [💻 Desarrollo Local](#-desarrollo-local)
+  - [🤖 Integración Continua (CI)](#-integración-continua-ci)
 
 ---
 
@@ -260,7 +269,7 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
 
 La implementación usa `class-variance-authority` (`buttonVariants`, exportado para que un consumidor arme su propio elemento con el mismo look) para combinar variantes y tamaños. Variantes por defecto: `variant: 'primary'`, `size: 'md'`, `shape: 'default'`.
 
-> **Regla de alineación: `Button`, `Input` y el trigger de `Select` comparten la misma escala de alturas** (`sm` = 32px, `md` = 44px, `lg` = 48px — `Input`/`Select` no tienen `size="icon"`). En una misma fila (p. ej. un campo con un botón de búsqueda al lado, o un `Select` junto a un `Button`), usá el mismo `size` en los tres para que queden alineados por arriba y por abajo — ver el story `AlignedFormRow` en `FormDemo.stories.tsx`.
+> **Regla de alineación: `Button`, `Input` y el trigger de `Select` comparten la misma escala de alturas** (`sm` = 32px, `md` = 44px, `lg` = 48px — `Input`/`Select` no tienen `size="icon"`). En una misma fila (p. ej. un campo con un botón de búsqueda al lado, o un `Select` junto a un `Button`), usa el mismo `size` en los tres para que queden alineados por arriba y por abajo — ver el story `AlignedFormRow` en `FormDemo.stories.tsx`.
 
 > **Nota sobre `variant="destructive"` y el token `--error-focus-content`:** en primary/secondary/accent/neutral, tanto el color base como su `-focus` (hover) son oscuros en modo claro, así que un solo `-content` (blanco) sirve como color de texto para los dos estados. `error` es el único color del sistema donde eso no es cierto: el base (`--error`, `#ef4444`) es claro pero el `-focus` (`--error-focus`, `#b91c1c` en claro / `#f87171` en oscuro) es oscuro — la relación se invierte. Por eso `destructive` es la única variante que necesita `hover:text-error-focus-content` además de `hover:bg-error-focus`; sin ese token, el texto (`text-error-content`, negro) cae a 3.25:1 sobre el fondo de hover. No es un descuido de copiar/pegar de las otras variantes — no lo agregues a primary/secondary/accent/neutral, ahí un solo `-content` ya cubre ambos estados. Ver `src/index.css` para el detalle y el cálculo de contraste en ambos temas.
 
@@ -524,9 +533,10 @@ Nota: el estado "on" del Toggle siempre gana sobre `variant` (`has-[[data-state=
 - **Props principales:**
   - `fallback?: React.ReactNode` — nodo a mostrar si la imagen falla al cargar (patrón compositivo, igual que `AvatarFallback`).
   - `containerClassName?: string` — clases para el contenedor que envuelve el `<img>` y los estados de carga/error.
+  - `onLoad?` / `onError?` — se llaman **una sola vez por `src`** (ver abajo).
   - Acepta `React.ImgHTMLAttributes<HTMLImageElement>` (`src`, `alt`, `className`, etc.).
 
-**Comportamiento no obvio:** mientras carga, muestra un `Skeleton` cubriendo el contenedor. Si la carga falla y no se pasó `fallback`, **no renderiza nada** — no hornea un ícono de "imagen rota" por default; es una decisión explícita, no un olvido. El `<img>` se desmonta al fallar (si no, quedaría invisible pero seguiría en el DOM). Si cambia `src`, vuelve a pasar por el ciclo completo de carga en vez de conservar el estado de la imagen anterior. Requiere `'use client'` (a diferencia de `Avatar`, no hay una primitiva de Radix disponible para una imagen rectangular; el estado de carga/error solo se puede conocer vía `onLoad`/`onError` del `<img>` nativo). Pensada para usarse dentro de `AspectRatio` u otro contenedor con tamaño explícito — llena `h-full w-full` de su contenedor.
+**Comportamiento no obvio:** mientras carga, muestra un `Skeleton` cubriendo el contenedor. Si la carga falla y no se pasó `fallback`, **no renderiza nada** — no hornea un ícono de "imagen rota" por default; es una decisión explícita, no un olvido. El `<img>` se desmonta al fallar (si no, quedaría invisible pero seguiría en el DOM). Si cambia `src`, vuelve a pasar por el ciclo completo de carga en vez de conservar el estado de la imagen anterior. Sin `src`, muestra el `fallback` (o nada) y llama a `onError`. El resultado de la carga no se pierde aunque llegue antes de que React conecte sus manejadores (imagen en caché, o renderizado en servidor cuando la imagen terminó de cargar o falló antes de la hidratación): `onLoad`/`onError` se llaman igual, una sola vez por `src`. En ese caso el evento lo vuelve a disparar `Image` y `event.nativeEvent.isTrusted` es `false`. Requiere `'use client'` (a diferencia de `Avatar`, no hay una primitiva de Radix disponible para una imagen rectangular; el estado de carga/error solo se puede conocer vía `onLoad`/`onError` del `<img>` nativo). Pensada para usarse dentro de `AspectRatio` u otro contenedor con tamaño explícito — llena `h-full w-full` de su contenedor.
 
 Uso (ejemplos, extraídos de `Image.stories.tsx`):
 
@@ -553,15 +563,15 @@ Uso (ejemplos, extraídos de `Image.stories.tsx`):
 
 ### 🧬 Moléculas (Estructura)
 
-| Componente        | Descripción                     | API & Composición                                                                                                     |
-| ----------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| **`Card`**        | Contenedor de información.      | **Subcomponentes:** `<CardHeader>`, `<CardTitle>`, `<CardDescription>`, `<CardContent>`, `<CardFooter>`               |
-| **`Dialog`**      | Modal accesible.                | `open`: boolean; `onOpenChange`: (open: boolean) => void; **Subcomponentes:** `<DialogTrigger>`, `<DialogContent>`    |
-| **`Sheet`**       | Panel lateral (Drawer).         | `side`: "top" \| "right" \| "bottom" \| "left"                                                                        |
-| **`Container`**   | Wrapper de layout.              | `size`: 'sm' \| 'md' \| 'lg' \| 'xl' \| 'full' — controla `max-width` (ver sección `Layout` para el detalle).         |
-| **`AspectRatio`** | Fuerza una relación de aspecto. | `ratio`: number (ej. `16 / 9`). Se compone con otro contenido (`Image`, etc.), no es una API todo-en-uno.             |
-| **`Tabs`**        | Navegación por pestañas.        | `defaultValue`/`value`/`onValueChange` en el root; **Subcomponentes:** `<TabsList>`, `<TabsTrigger>`, `<TabsContent>` |
-| **`ToggleGroup`** | Opciones que cambian un valor.  | `type`: 'single'                                                                                                      | 'multiple'; `size`: 'sm' | 'md' | 'lg'; **Subcomponentes:** `<ToggleGroupItem>` |
+| Componente        | Descripción                     | API & Composición                                                                                                                          |
+| ----------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`Card`**        | Contenedor de información.      | **Subcomponentes:** `<CardHeader>`, `<CardTitle>`, `<CardDescription>`, `<CardContent>`, `<CardFooter>`                                    |
+| **`Dialog`**      | Modal accesible.                | `open`: boolean; `onOpenChange`: (open: boolean) => void; **Subcomponentes:** `<DialogTrigger>`, `<DialogContent>`                         |
+| **`Sheet`**       | Panel lateral (Drawer).         | `side`: "top" \| "right" \| "bottom" \| "left"; `closeLabel`; **Subcomponentes:** `<SheetHeader>`, `<SheetBody>` (scroll), `<SheetFooter>` |
+| **`Container`**   | Wrapper de layout.              | `size`: 'sm' \| 'md' \| 'lg' \| 'xl' \| 'full' — controla `max-width` (ver sección `Layout` para el detalle).                              |
+| **`AspectRatio`** | Fuerza una relación de aspecto. | `ratio`: number (ej. `16 / 9`). Se compone con otro contenido (`Image`, etc.), no es una API todo-en-uno.                                  |
+| **`Tabs`**        | Navegación por pestañas.        | `defaultValue`/`value`/`onValueChange` en el root; **Subcomponentes:** `<TabsList>`, `<TabsTrigger>`, `<TabsContent>`                      |
+| **`ToggleGroup`** | Opciones que cambian un valor.  | `type`: 'single' \| 'multiple'; `size`: 'sm' \| 'md' \| 'lg'; **Subcomponentes:** `<ToggleGroupItem>`                                      |
 
 ### Layout — Uso y Props
 
@@ -683,7 +693,7 @@ Notas:
 - **Principales props y comportamiento:**
   - `Dialog` (root): acepta `open?: boolean` y `onOpenChange?: (open: boolean) => void` si necesitas controlarlo desde estado externo; de lo contrario funciona como no controlado.
   - `DialogTrigger`: normalmente se usa como trigger y admite `asChild` para renderizar un elemento diferente (ej. `Button` o `a`).
-  - `DialogContent`: props comunes: `className?: string`, `children?: React.ReactNode` y otros props de `@radix-ui/react-dialog` Content (e.g. `onInteractOutside`). Soporta clases de animación y `sm:max-w-...` para controlar anchura.
+  - `DialogContent`: props comunes: `className?: string`, `children?: React.ReactNode` y otros props de `@radix-ui/react-dialog` Content (e.g. `onInteractOutside`). Soporta clases de animación y `sm:max-w-...` para controlar anchura. `closeLabel?: string` (default `'Close'`) es el nombre accesible de la ✕; su anillo de foco aparece solo al enfocarla con el teclado.
   - `DialogOverlay`: `className?: string` para ajustar color/transparencia/efecto backdrop.
   - `DialogClose`: botón que cierra el diálogo; puede usarse con `asChild` para que un `Button` actúe como cierre.
   - `DialogHeader`, `DialogFooter`, `DialogTitle`, `DialogDescription`: wrappers semánticos con `className?: string` para composición y tipografía.
@@ -729,15 +739,18 @@ Notas:
 
 ### Sheet — Uso y Props
 
-- **Exports:** `Sheet`, `SheetTrigger`, `SheetContent`, `SheetOverlay`, `SheetClose`, `SheetPortal`, `SheetHeader`, `SheetFooter`, `SheetTitle`, `SheetDescription`.
+- **Exports:** `Sheet`, `SheetTrigger`, `SheetContent`, `SheetOverlay`, `SheetClose`, `SheetPortal`, `SheetHeader`, `SheetBody`, `SheetFooter`, `SheetTitle`, `SheetDescription`.
 - **Props y comportamiento clave:**
   - `Sheet` (root): acepta `open?: boolean` y `onOpenChange?: (open: boolean) => void` para controlarlo externamente, o funciona no-controlado por defecto.
-  - `SheetContent`: `side?: 'top' | 'right' | 'bottom' | 'left'` — controla desde qué lado aparece el sheet (por defecto `right`); `className?: string`; `children?: React.ReactNode`.
+  - `SheetContent`: `side?: 'top' | 'right' | 'bottom' | 'left'` — controla desde qué lado aparece el sheet (por defecto `right`); `closeLabel?: string` (default `'Close'`) — nombre accesible de la ✕; `className?: string`; `children?: React.ReactNode`.
+  - `SheetHeader`, `SheetBody`, `SheetFooter`: la estructura recomendada del panel. `SheetBody` es la zona con scroll; header y footer quedan fijos. Los tres aceptan `className?: string` y `React.HTMLAttributes<HTMLDivElement>`.
   - `SheetTrigger`: `asChild?: boolean`, `className?: string` — se usa para disparar el sheet y puede renderizar un elemento existente (ej. `Button`) conservando estilos.
   - `SheetOverlay`: `className?: string` — fondo/backdrop (opacidad, blur) que se muestra detrás del contenido.
   - `SheetClose`: botón que cierra el sheet; admite `asChild` para usar un `Button` o enlace como cierre.
 
 La implementación utiliza `@radix-ui/react-dialog` con variantes visuales definidas en `sheetVariants.ts` (clases para `side` con animaciones y tamaños responsivos). El overlay y el content incluyen animaciones de entrada/salida; Radix gestiona foco y atributos ARIA para accesibilidad.
+
+**Comportamiento no obvio:** `SheetContent` es una columna flex que separa sus hijos con 16px (`gap-4`); no hace falta padding propio entre header, body y footer. Con `SheetBody`, el contenido largo hace scroll dentro del body y header y footer quedan siempre visibles, en los cuatro lados. Sin `SheetBody`, el panel entero hace scroll y la ✕ se desplaza con el contenido. `top` y `bottom` ocupan como máximo el 85% del alto; `left` y `right`, el alto completo. El panel, la ✕ y el header respetan el safe area (`env(safe-area-inset-*)`) de los bordes que tocan el viewport, así que el título no queda debajo de la ✕ aunque haya muesca; solo surte efecto si la app declara `viewport-fit=cover` (en Next.js: `export const viewport = { viewportFit: 'cover' }`). La ✕ muestra el anillo de foco solo al enfocarla con el teclado.
 
 Uso (ejemplo extraído de `Sheet.stories.tsx`):
 
@@ -747,7 +760,7 @@ Uso (ejemplo extraído de `Sheet.stories.tsx`):
     <Button variant="outline">Open right sheet</Button>
   </SheetTrigger>
 
-  <SheetContent side="right">
+  <SheetContent side="right" closeLabel="Cerrar">
     <SheetHeader>
       <SheetTitle>Edit profile</SheetTitle>
       <SheetDescription>
@@ -755,14 +768,14 @@ Uso (ejemplo extraído de `Sheet.stories.tsx`):
       </SheetDescription>
     </SheetHeader>
 
-    <div className="grid gap-4 py-4">
+    <SheetBody>
       <div className="grid grid-cols-4 items-center gap-4">
         <label htmlFor="name" className="text-right text-sm font-medium">
           Name
         </label>
         <Input id="name" defaultValue="Pedro Duarte" className="col-span-3" />
       </div>
-    </div>
+    </SheetBody>
 
     <SheetFooter>
       <SheetClose asChild>
@@ -776,6 +789,7 @@ Uso (ejemplo extraído de `Sheet.stories.tsx`):
 Notas:
 
 - `side` controla la orientación y las clases aplicadas (`sheetVariants.ts` contiene las opciones con `top`, `bottom`, `left`, `right`).
+- Dentro de un `Sheet`, un `Combobox` va en `mode="inline"` (ver [Combobox](#combobox--uso-y-props)).
 - Usa `SheetTrigger` y `SheetClose` con `asChild` para integrar botones existentes sin perder estilos.
 - `SheetOverlay` maneja el backdrop; personalízalo con `className` si necesitas distinta opacidad o blur.
 
@@ -837,7 +851,7 @@ Uso (ejemplo, extraído de `Tabs.stories.tsx`):
   - `ToggleGroup`: `type: 'single' | 'multiple'` (requerido); `value`/`defaultValue`/`onValueChange` (`string` en modo único, `string[]` en múltiple); `size?: 'sm' | 'md' | 'lg'` (32 / 44 / 48px, default `'md'`); `orientation`, `disabled` y `loop` pasan directo a Radix.
   - `ToggleGroupItem`: `value: string` (requerido), `size?` (sobrescribe el del grupo), `disabled?`. Si solo muestra un ícono, necesita `aria-label`.
 
-**Comportamiento no obvio:** `ToggleGroup` cambia un valor; `Tabs` cambia qué panel se ve. En modo único (`radiogroup`), una vez elegido un valor siempre hay uno: el clic sobre el ítem activo no lo desactiva y `onValueChange` nunca recibe `''`. En modo múltiple (`toolbar`, `aria-pressed`) puede quedar vacío. Las flechas mueven el foco **sin seleccionar** y Space o Enter seleccionan; en modo único esto se aparta a propósito del patrón de radio de ARIA, para que recorrer las opciones no dispare una consulta por cada una. El grupo mide lo mismo que sus ítems, así que queda alineado con un `Button` del mismo `size`.
+**Comportamiento no obvio:** `ToggleGroup` cambia un valor; `Tabs` cambia qué panel se ve. En modo único (`radiogroup`), una vez elegido un valor siempre hay uno: el clic sobre el ítem activo no lo desactiva y `onValueChange` nunca recibe `''`. En modo múltiple (`toolbar`, `aria-pressed`) puede quedar vacío. Las flechas mueven el foco **sin seleccionar** y Space o Enter seleccionan; en modo único esto se aparta a propósito del patrón de radio de ARIA, para que recorrer las opciones no dispare una consulta por cada una. El grupo mide lo mismo que sus ítems, así que queda alineado con un `Button` del mismo `size`. Tiene el estilo del segmento de `Tabs`: fondo `bg-base-200` e ítem activo `bg-primary`.
 
 ```tsx
 <ToggleGroup type="single" defaultValue="list" aria-label="Vista">
@@ -895,7 +909,7 @@ Uso (ejemplo, extraído de `Popover.stories.tsx`):
 
 **Comportamiento no obvio:** el hover pasa por el delay por defecto de Radix (`delayDuration = 700ms`) antes de abrir. El foco por teclado, en cambio, abre **de inmediato**, sin ese delay (`TooltipTrigger.onFocus` llama a `context.onOpen()` directo, sin pasar por el timer que sí usa el hover). El contenido vive en un Portal con `role="tooltip"`.
 
-**En dispositivos táctiles el contenido de `Tooltip` no está disponible — es una decisión de diseño aceptada, no un bug.** Radix nunca abre el tooltip ante un tap (ignora explícitamente `pointerType === 'touch'` en su handler de apertura), y `TooltipContent` añade `pointer-coarse:hidden` como capa defensiva de CSS: en un dispositivo cuyo input principal es de baja precisión (dedo) el panel queda oculto aunque algo intente mostrarlo. **`Tooltip` no es apto para información que el usuario necesite en touch.** Para esos casos usá [`Popover`](#popover--uso-y-props), que sí soporta tap de forma nativa.
+**En dispositivos táctiles el contenido de `Tooltip` no está disponible — es una decisión de diseño aceptada, no un bug.** Radix nunca abre el tooltip ante un tap (ignora explícitamente `pointerType === 'touch'` en su handler de apertura), y `TooltipContent` añade `pointer-coarse:hidden` como capa defensiva de CSS: en un dispositivo cuyo input principal es de baja precisión (dedo) el panel queda oculto aunque algo intente mostrarlo. **`Tooltip` no es apto para información que el usuario necesite en touch.** Para esos casos usa [`Popover`](#popover--uso-y-props), que sí soporta tap de forma nativa.
 
 Uso (ejemplo, extraído de `Tooltip.stories.tsx`):
 
@@ -950,15 +964,17 @@ Uso (ejemplo simplificado, extraído de `DropdownMenu.stories.tsx`):
 
 ### 📝 Formularios (Forms)
 
-| Componente   | Descripción                            | Props clave                                                                                                         |
-| :----------- | :------------------------------------- | :------------------------------------------------------------------------------------------------------------------ |
-| `Input`      | Campo de texto                         | `type`, `label?`, `error?`, `helperText?`, `startIcon?`, `endIcon?`, `variant?`, `size?`, `disabled?`, `className?` |
-| `Textarea`   | Texto multilinea                       | Standard HTML props, `variant?`, `error?`, `className?`                                                             |
-| `Select`     | Dropdown avanzado                      | `value?`, `defaultValue?`, `onValueChange?`, `placeholder?`, `className?`                                           |
-| `Switch`     | Toggle binario                         | `checked?`, `defaultChecked?`, `onCheckedChange?`, `disabled?`, `className?`                                        |
-| `Checkbox`   | Casilla de selección                   | `checked?`, `defaultChecked?`, `onCheckedChange?`, `disabled?`, `className?`                                        |
-| `Calendar`   | Grilla de calendario                   | `mode`, `selected`, `onSelect`, `showOutsideDays?` (todos los props de `DayPicker`)                                 |
-| `DatePicker` | Selector de fecha (Popover + Calendar) | `date?`, `onDateChange?`, `placeholder?`, `disabled?`, `className?`, `dialogLabel?`, `locale?`                      |
+| Componente        | Descripción                            | Props clave                                                                                                                                                  |
+| :---------------- | :------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Input`           | Campo de texto                         | `type`, `label?`, `error?`, `helperText?`, `startIcon?`, `endIcon?`, `clearable?`, `onClear?`, `clearLabel?`, `variant?`, `size?`, `disabled?`, `className?` |
+| `Textarea`        | Texto multilinea                       | Standard HTML props, `variant?`, `error?`, `className?`                                                                                                      |
+| `Select`          | Dropdown avanzado                      | `value?`, `defaultValue?`, `onValueChange?`, `placeholder?`, `className?`                                                                                    |
+| `Switch`          | Toggle binario                         | `checked?`, `defaultChecked?`, `onCheckedChange?`, `disabled?`, `className?`                                                                                 |
+| `Checkbox`        | Casilla de selección                   | `checked?`, `defaultChecked?`, `onCheckedChange?`, `disabled?`, `className?`                                                                                 |
+| `Calendar`        | Grilla de calendario                   | `mode`, `selected`, `onSelect`, `showOutsideDays?` (todos los props de `DayPicker`)                                                                          |
+| `Combobox`        | Selección con buscador (cmdk)          | `options`, `label` o `aria-label`, `multiple?`, `value?`, `defaultValue?`, `onValueChange?`, `mode?`, `size?`, `disabled?`                                   |
+| `QuantityStepper` | Campo numérico con botones − / +       | `value?`, `defaultValue?`, `onChange?`, `min?`, `max?`, `step?`, `decrementLabel?`, `incrementLabel?`                                                        |
+| `DatePicker`      | Selector de fecha (Popover + Calendar) | `date?`, `onDateChange?`, `placeholder?`, `disabled?`, `className?`, `dialogLabel?`, `locale?`                                                               |
 
 ### Checkbox — Uso y Props
 
@@ -1000,13 +1016,16 @@ Nota: para accesibilidad, envuelve el `Checkbox` con un `label` o usa `aria-labe
 
 ### Input — Uso y Props
 
-- **Exports:** `Input`.
+- **Exports:** `Input`, `inputVariants`; tipos `InputProps`, `InputBaseProps`, `InputWithEndIconProps`, `ClearableInputProps`.
 - **Props principales:**
   - `label?: string` — etiqueta accesible asociada al `input`.
   - `type?: string` — tipo estándar de `input` (`text`, `email`, `password`, etc.).
   - `error?: string` — mensaje de error; activa la variante visual `error` y `aria-invalid`.
   - `helperText?: string` — texto de ayuda descriptivo (vinculado mediante `aria-describedby`).
-  - `startIcon?: React.ReactNode`, `endIcon?: React.ReactNode` — iconos dentro del campo.
+  - `startIcon?: React.ReactNode`, `endIcon?: React.ReactNode` — iconos dentro del campo (decorativos: su contenedor lleva `aria-hidden="true"`).
+  - `clearable?: boolean` — muestra un botón para vaciar el campo mientras tenga valor. No se admite junto con `endIcon` (ocupa su lugar).
+  - `onClear?: () => void` — se llama después de vaciar el campo. Solo con `clearable`.
+  - `clearLabel?: string` (default `'Clear'`) — `aria-label` del botón de limpiar. Solo con `clearable`.
   - `variant?: 'default' | 'error'` — variantes visuales (definidas en `inputVariants.ts`).
   - `size?: 'sm' | 'md' | 'lg'` (default `'md'`) — alturas: `sm` = 32px, `md` = 44px, `lg` = 48px. Comparte escala con `Button` y el trigger de `Select` — ver la nota de alineación en la sección de `Button`.
   - `disabled?: boolean`, `className?: string` y el resto de `React.InputHTMLAttributes<HTMLInputElement>`.
@@ -1036,6 +1055,39 @@ Notas:
 
 - `Input` ajusta padding cuando hay `startIcon`/`endIcon` (`pl-10`/`pr-10`) y enlaza mensajes (`error`/`helperText`) para lectores de pantalla.
 - Para formularios controlados, usa `value` y `onChange` como en un `input` estándar.
+
+**Comportamiento no obvio (`clearable`):** vaciar el campo dispara el `onChange` del consumidor, en modo controlado, no controlado y con `register` de react-hook-form; después se llama a `onClear` y el foco vuelve al input. El botón solo se ve mientras el campo tiene valor (también tras `reset()`/`setValue()` de RHF) y no aparece con `disabled` ni `readOnly`. No limpia con Escape, para no interferir con el cierre de un `Dialog`/`Sheet`. `clearable` acepta un `boolean` dinámico.
+
+**Tipos:** `InputProps` es una unión discriminada por `clearable` (`InputWithEndIconProps | ClearableInputProps`), así que `endIcon` junto a `clearable`, o `onClear`/`clearLabel` sin `clearable`, no compilan. Dos consecuencias para quien deriva tipos de `Input`:
+
+- `interface X extends InputProps` no compila (una interface no puede extender una unión): extender `InputBaseProps`.
+- `Omit<InputProps, K>` compila, pero pierde en silencio esa exclusión, porque `Omit` no reparte sobre uniones. Usar un Omit por rama:
+
+```ts
+import type { InputProps } from '@abelardo-salazar/core-ui-design-system';
+
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+export type SearchFieldProps = DistributiveOmit<InputProps, 'type'>;
+```
+
+```tsx
+import { useState } from 'react';
+import { Input } from '@abelardo-salazar/core-ui-design-system';
+
+export function SearchField() {
+  const [query, setQuery] = useState('');
+  return (
+    <Input
+      label="Buscar"
+      value={query}
+      onChange={(event) => setQuery(event.target.value)}
+      clearable
+      clearLabel="Borrar búsqueda"
+      onClear={() => console.log('búsqueda vacía')}
+    />
+  );
+}
+```
 
 ### Textarea — Uso y Props
 
@@ -1184,7 +1236,7 @@ Uso (ejemplo, extraído de `Calendar.stories.tsx`):
   - `disabled?: boolean`.
   - `className?: string` — se aplica al `Button` trigger.
 
-**Comportamiento no obvio:** `DatePicker` es **100% controlado, sin estado interno propio** — compone `Popover` + `Button` (trigger) + `Calendar` (`mode="single"`) tal cual ya existen en el DS, no una API monolítica aparte. El consumidor maneja `date`/`onDateChange` desde afuera, igual que lo haría en una app real. Formatea la fecha visible con `date-fns` (`format(date, 'PPP', { locale })`).
+**Comportamiento no obvio:** `DatePicker` es **100% controlado, sin estado interno propio** — compone `Popover` + `Button` (trigger) + `Calendar` (`mode="single"`) tal cual ya existen en el DS, no una API monolítica aparte. El consumidor maneja `date`/`onDateChange` desde afuera, igual que lo haría en una app real. Formatea la fecha visible con `date-fns` (`format(date, 'PPP', { locale })`). El calendario abre en el mes de `date` (sin `date`, en el mes actual) y la navegación sigue libre. Para el `locale`, ver [Locales](#locales--subpath-locale): no se puede pasar desde un Server Component.
 
 Uso (ejemplo, extraído de `DatePicker.stories.tsx`):
 
@@ -1195,14 +1247,134 @@ function ControlledDatePicker() {
 }
 ```
 
+### Locales — subpath `/locale`
+
+- **Import:** `@abelardo-salazar/core-ui-design-system/locale`.
+- **Exports:** los locales de DayPicker (`es`, `enUS`, `ptBR`, `fr`, etc.: los de `date-fns`, con meses y etiquetas de navegación del calendario traducidos) y sus tipos (`DayPickerLocale`, `DayPickerLocaleLabels`, y los tipos de locale de `date-fns`, como `Locale`).
+- **Dónde se usan:** en `locale` de `DatePicker` y de `Calendar`.
+
+**Comportamiento no obvio:** el subpath son datos, sin `'use client'`, y solo se empaqueta el locale que se importa. Se puede importar desde un Server Component, pero un locale contiene funciones, así que **no se puede pasar como prop desde un Server Component a `DatePicker` o `Calendar`** (que son client components): React no serializa funciones. El error no aparece en `next build` sino al renderizar la página (`Functions cannot be passed directly to Client Components`). Importarlo en el componente cliente que renderiza el `DatePicker`. Con un locale de `date-fns` (en vez de este subpath), las etiquetas de navegación del calendario ("Go to the Next Month") quedan en inglés. No importar desde `@daypicker/react/locale`: es dependencia del DS, no de la app (con pnpm no se resuelve y su versión puede no coincidir).
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { DatePicker } from '@abelardo-salazar/core-ui-design-system';
+import { es } from '@abelardo-salazar/core-ui-design-system/locale';
+
+export function BookingDate() {
+  const [date, setDate] = useState<Date | undefined>(undefined);
+  return (
+    <DatePicker
+      date={date}
+      onDateChange={setDate}
+      locale={es}
+      placeholder="Elige una fecha"
+      dialogLabel="Elegir fecha"
+    />
+  );
+}
+```
+
+### Combobox — Uso y Props
+
+- **Exports:** `Combobox`; tipos `ComboboxProps`, `ComboboxSingleProps`, `ComboboxMultipleProps`, `ComboboxLabelProps`, `ComboboxOption`. Client component; requiere el peer `cmdk`.
+- **Props principales:**
+  - `options: { value: string; label: string; disabled?: boolean }[]` (requerido).
+  - `label: string` **o** `aria-label: string` — uno de los dos, no ambos (lo exigen los tipos). `label` dibuja la etiqueta visible, con el estilo de la de `Input`; `aria-label` nombra el campo sin etiqueta visible.
+  - `multiple?: boolean` — sin `multiple`: `value?`/`defaultValue?: string` (`''` sin valor) y `onValueChange?: (value: string) => void`. Con `multiple`: `string[]` y `(value: string[]) => void`.
+  - `mode?: 'popover' | 'inline'` (default `'popover'`).
+  - `size?: 'sm' | 'md' | 'lg'` (32 / 44 / 48px, la escala de `Input` y `Select`; default `'md'`).
+  - `disabled?: boolean` — deshabilita el disparador, el buscador y los Chips.
+  - `id?: string` — id del botón (en `mode="inline"`, del contenedor). No se usa para etiquetar: usar `label`.
+  - Textos, en inglés por defecto: `placeholder` (`'Select...'`), `searchPlaceholder` (`'Search...'`), `emptyLabel` (`'No results.'`), `removeLabel: (label: string) => string` (default `` (label) => `Remove ${label}` ``).
+  - `className?: string` — en el contenedor raíz (etiqueta + campo).
+
+**Comportamiento no obvio:**
+
+- **Popover:** un disparador con el estilo de `Select` abre el buscador y la lista. En modo único, elegir cierra el popover y devuelve el foco al disparador (elegir la opción actual no la deselecciona). En múltiple, el popover queda abierto. Escape cierra y devuelve el foco. Un clic en la etiqueta abre el popover.
+- **En línea:** buscador y lista siempre visibles, sin disparador; un clic en la etiqueta enfoca el buscador. **Dentro de un `Sheet` o `Dialog`, usar `mode="inline"`** (no se impone por código).
+- **Múltiple:** las opciones elegidas se muestran como `Chip` con ✕, fuera del botón (en línea, encima del buscador). Al quitar uno, el foco pasa al Chip siguiente o, si no hay, al botón (al buscador en línea).
+- **Filtro:** busca el texto en cualquier parte de la etiqueta, sin distinguir mayúsculas ni acentos ("mexico" encuentra "México"), y conserva el orden de `options`. No es configurable.
+- **Accesibilidad:** el disparador anuncia la etiqueta y el valor actual ("País, México"); el popover, el buscador y la lista toman el nombre de la etiqueta. La asociación ya viene en el HTML del servidor y sigue los cambios de `label`. Las opciones elegidas llevan `aria-checked="true"`; `aria-selected` marca la opción resaltada con el teclado.
+- Fuera de esta versión: búsqueda asíncrona, estado de carga y grupos.
+
+```tsx
+import { useState } from 'react';
+import { Combobox, type ComboboxOption } from '@abelardo-salazar/core-ui-design-system';
+
+const countries: ComboboxOption[] = [
+  { value: 'ar', label: 'Argentina' },
+  { value: 'mx', label: 'México' },
+  { value: 'pe', label: 'Perú', disabled: true },
+];
+
+export function CountryField() {
+  const [country, setCountry] = useState('');
+  return <Combobox label="País" options={countries} value={country} onValueChange={setCountry} />;
+}
+
+export function CountriesFilter() {
+  const [selected, setSelected] = useState<string[]>([]);
+  return (
+    <Combobox
+      aria-label="Países"
+      multiple
+      mode="inline"
+      options={countries}
+      value={selected}
+      onValueChange={setSelected}
+      placeholder="Elige..."
+      searchPlaceholder="Buscar..."
+      emptyLabel="Sin resultados."
+      removeLabel={(label) => `Quitar ${label}`}
+    />
+  );
+}
+```
+
+### QuantityStepper — Uso y Props
+
+- **Exports:** `QuantityStepper`; tipo `QuantityStepperProps`. Client component.
+- **Props principales:**
+  - `value?: number`, `defaultValue?: number` (default: `min` si es finito, si no `0`), `onChange?: (value: number) => void` — controlado o no controlado. `onChange` recibe un número, no un evento.
+  - `min?: number`, `max?: number` (sin límite por defecto), `step?: number` (default `1`).
+  - `disabled?: boolean`.
+  - `decrementLabel?: string` (default `'Decrease quantity'`), `incrementLabel?: string` (default `'Increase quantity'`) — nombres accesibles de los botones − y +.
+  - `aria-label?: string` (default `'Quantity'`) — nombre accesible del campo numérico.
+  - `className?: string` — en el contenedor (`role="group"`); el resto de los atributos de `<input>` van al campo.
+
+**Comportamiento no obvio:** los botones − y + se deshabilitan de verdad (no solo ignoran el clic) cuando el siguiente paso saldría de `min`/`max`. Lo que se escribe en el campo se recorta a `[min, max]`; el campo puede quedar vacío mientras se edita y, al perder el foco vacío, vuelve a `0` recortado al rango. Botones y campo miden 44px, alineados con `Button` e `Input` `md`.
+
+```tsx
+import { useState } from 'react';
+import { QuantityStepper } from '@abelardo-salazar/core-ui-design-system';
+
+export function CartQuantity() {
+  const [quantity, setQuantity] = useState(1);
+  return (
+    <QuantityStepper
+      value={quantity}
+      onChange={setQuantity}
+      min={1}
+      max={10}
+      aria-label="Cantidad"
+      decrementLabel="Quitar uno"
+      incrementLabel="Agregar uno"
+    />
+  );
+}
+```
+
 ### 📢 Feedback (Notificaciones)
 
-| Componente     | Descripción                         | Props clave                                                                                                          |
-| :------------- | :---------------------------------- | :------------------------------------------------------------------------------------------------------------------- |
-| `Toast`        | Notificaciones no-modales (Sonner)  | Ver props de `<Toaster />` más abajo                                                                                 |
-| `Progress`     | Barra de progreso lineal            | `value`, `max?`, `variant?: 'primary'\|'success'\|'warning'\|'error'`, `className?`                                  |
-| `ProgressRing` | Progreso circular (anillo SVG)      | `value`, `max?`, `variant?`, `size?`, `strokeWidth?`, `showValueLabel?`                                              |
-| `Alert`        | Aviso inline persistente (no-modal) | `variant?: 'info'\|'success'\|'warning'\|'error'`, `icon?`; **Subcomponentes:** `<AlertTitle>`, `<AlertDescription>` |
+| Componente     | Descripción                              | Props clave                                                                                                                        |
+| :------------- | :--------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------- |
+| `Toast`        | Notificaciones no-modales (Sonner)       | Ver props de `<Toaster />` más abajo                                                                                               |
+| `Progress`     | Barra de progreso lineal                 | `value`, `max?`, `variant?: 'primary'\|'success'\|'warning'\|'error'`, `className?`                                                |
+| `ProgressRing` | Progreso circular (anillo SVG)           | `value`, `max?`, `variant?`, `size?`, `strokeWidth?`, `showValueLabel?`                                                            |
+| `EmptyState`   | Estado vacío (sin datos, sin resultados) | `size?: 'sm'\|'md'`; **Subcomponentes:** `<EmptyStateIcon>`, `<EmptyStateTitle>`, `<EmptyStateDescription>`, `<EmptyStateActions>` |
+| `Alert`        | Aviso inline persistente (no-modal)      | `variant?: 'info'\|'success'\|'warning'\|'error'`, `icon?`; **Subcomponentes:** `<AlertTitle>`, `<AlertDescription>`               |
 
 El sistema de Toast utiliza **Sonner**.
 
@@ -1375,6 +1547,117 @@ Uso (ejemplos, extraídos de `Alert.stories.tsx`):
   <AlertTitle>No icon</AlertTitle>
   <AlertDescription>This alert explicitly opts out of any icon.</AlertDescription>
 </Alert>
+```
+
+Un `Alert` `info`/`success` que se **monta** dinámicamente no se anuncia: los lectores de pantalla solo anuncian cambios dentro de una región viva que ya existía. Para avisar el resultado de una acción, usar [`announce()`](#announce--uso-y-opciones) o dejar el `Alert` montado y cambiar su contenido. `alertVariants` y `alertIconVariants` (las clases de la raíz y del ícono por `variant`) también se exportan.
+
+### EmptyState — Uso y Props
+
+- **Exports:** `EmptyState`, `EmptyStateIcon`, `EmptyStateTitle`, `EmptyStateDescription`, `EmptyStateActions`; tipos `EmptyStateProps`, `EmptyStateTitleProps`. Server-safe.
+- **Props principales:**
+  - `EmptyState`: `size?: 'sm' | 'md'` (default `'md'`) — `sm` para tablas y tarjetas, `md` para una página; `className?: string` y `React.HTMLAttributes<HTMLDivElement>`.
+  - `EmptyStateIcon`: el ícono (decorativo, `aria-hidden`), dentro de un círculo.
+  - `EmptyStateTitle`: `as?: 'p' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'` (default `'p'`) — usar un heading cuando el estado vacío encabeza una sección.
+  - `EmptyStateDescription`: texto secundario.
+  - `EmptyStateActions`: fila de botones o enlaces.
+  - Todas las partes aceptan `className?: string`.
+
+**Comportamiento no obvio:** la raíz no tiene `role`. Si el estado vacío aparece como resultado de una acción (un filtro sin resultados), anunciarlo con [`announce()`](#announce--uso-y-opciones). El `size` llega a las partes por CSS, no por contexto de React, para que todo siga siendo server-safe. Por eso, en la raíz el `className` gana sobre el padding de `size`, pero en las partes los ajustes de `sm` ganan sobre el `className`; para cambiarlos, usar la misma variante (`group-data-[size=sm]/empty-state:…`). `DataTable` usa un `EmptyState` `sm` como estado vacío por defecto.
+
+```tsx
+import {
+  Button,
+  EmptyState,
+  EmptyStateActions,
+  EmptyStateDescription,
+  EmptyStateIcon,
+  EmptyStateTitle,
+} from '@abelardo-salazar/core-ui-design-system';
+
+export function NoResults({ onReset }: { onReset: () => void }) {
+  return (
+    <EmptyState size="sm">
+      <EmptyStateIcon>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+          <circle cx="11" cy="11" r="7" />
+          <path d="m20 20-4-4" />
+        </svg>
+      </EmptyStateIcon>
+      <EmptyStateTitle as="h2">Sin resultados</EmptyStateTitle>
+      <EmptyStateDescription>Prueba con otros filtros.</EmptyStateDescription>
+      <EmptyStateActions>
+        <Button variant="outline" onClick={onReset}>
+          Quitar filtros
+        </Button>
+      </EmptyStateActions>
+    </EmptyState>
+  );
+}
+```
+
+### ♿ Accesibilidad
+
+| Export           | Descripción                                                   | API                                                           |
+| :--------------- | :------------------------------------------------------------ | :------------------------------------------------------------ |
+| `VisuallyHidden` | Oculta contenido a la vista, visible para lectores            | `as?`, `className?`                                           |
+| `announce()`     | Anuncia un mensaje a los lectores de pantalla sin montar nada | `announce(message, { politeness?: 'polite' \| 'assertive' })` |
+
+### VisuallyHidden — Uso y Props
+
+- **Exports:** `VisuallyHidden`; tipo `VisuallyHiddenProps`. Server-safe.
+- **Props principales:** `as?: React.ElementType` (default `'span'`); `className?: string` y `React.HTMLAttributes<HTMLElement>`.
+
+**Comportamiento no obvio:** renderiza un `span`, que no puede envolver contenido de bloque; para envolver un `SheetTitle` o `DialogTitle` que el diseño no muestra (Radix exige el título), usar `as="div"`.
+
+```tsx
+import {
+  Button,
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+  VisuallyHidden,
+} from '@abelardo-salazar/core-ui-design-system';
+
+export function MenuSheet() {
+  return (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant="outline">Menú</Button>
+      </SheetTrigger>
+      <SheetContent side="left">
+        <VisuallyHidden as="div">
+          <SheetTitle>Menú principal</SheetTitle>
+        </VisuallyHidden>
+        <nav>…</nav>
+      </SheetContent>
+    </Sheet>
+  );
+}
+```
+
+### announce() — Uso y opciones
+
+- **Exports:** `announce`; tipo `AnnounceOptions`.
+- **Firma:** `announce(message: string, options?: { politeness?: 'polite' | 'assertive' }): void` (default `'polite'`).
+
+**Comportamiento no obvio:** no hay que montar nada: la primera llamada crea la región viva. La región no queda oculta con un `Dialog` o `Sheet` abierto, y no depende de que se haya importado el CSS del paquete. Repetir el mismo mensaje lo vuelve a anunciar; el texto se borra solo a los pocos segundos, y en el servidor la función no hace nada. Pensada para confirmaciones ("Producto agregado") y resultados de acciones que no mueven el foco. `'assertive'` interrumpe al lector: reservarlo para errores. No se ha probado con un lector de pantalla real.
+
+```tsx
+import { announce, Button } from '@abelardo-salazar/core-ui-design-system';
+
+export function AddToCart({ onAdd }: { onAdd: () => void }) {
+  return (
+    <Button
+      onClick={() => {
+        onAdd();
+        announce('Producto agregado al carrito');
+      }}
+    >
+      Agregar
+    </Button>
+  );
+}
 ```
 
 ### 📊 Datos
@@ -1591,6 +1874,31 @@ const teamConfig: ChartConfig = {
 </ChartContainer>;
 ```
 
+### 🧾 Tipos y utilidades exportados
+
+Además de los componentes, cada entry point exporta los tipos de sus props y algunas utilidades, para extender o envolver componentes sin redeclarar sus tipos.
+
+**`@abelardo-salazar/core-ui-design-system`**
+
+| Grupo                  | Exports                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| :--------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Tipos de props         | `AlertProps`, `AspectRatioProps`, `BadgeProps`, `ButtonProps`, `CalendarProps`, `CheckboxProps`, `ChipProps`, `ContainerProps`, `DataTableProps`, `DatePickerProps`, `HeadingProps`, `ImageProps`, `ProgressProps`, `ProgressRingProps`, `SwitchProps`, `TextProps`, `TextareaProps`                                                                                                                                                              |
+| Tipos de props (0.5.0) | `ComboboxProps`, `ComboboxSingleProps`, `ComboboxMultipleProps`, `ComboboxLabelProps`, `ComboboxOption`, `EmptyStateProps`, `EmptyStateTitleProps`, `InputProps`, `InputBaseProps`, `InputWithEndIconProps`, `ClearableInputProps`, `QuantityStepperProps`, `SheetContentProps`, `SkipToContentProps`, `ToggleGroupProps`, `ToggleGroupSingleProps`, `ToggleGroupMultipleProps`, `ToggleGroupItemProps`, `VisuallyHiddenProps`, `AnnounceOptions` |
+| Variantes (`cva`)      | `buttonVariants`, `badgeVariants`, `inputVariants`, `alertVariants`, `alertIconVariants` — devuelven las clases de cada variante, para dar el mismo aspecto a un elemento propio (por ejemplo, un `Link` con `buttonVariants({ variant: 'outline' })`)                                                                                                                                                                                            |
+| Utilidades             | `cn(...inputs)` — combina clases con `clsx` y resuelve conflictos de Tailwind con `tailwind-merge` (la última gana); `toast` (ver [Toast](#toast--uso-y-props)); `features` (ver [DataTable](#datatable--uso-y-props)); `announce` (ver [announce()](#announce--uso-y-opciones))                                                                                                                                                                  |
+
+**`@abelardo-salazar/core-ui-design-system/charts`**: además de los componentes de [Chart](#chart--uso-y-props), `ChartConfig`, `ChartColorToken` y `CHART_COLOR_TOKENS` (los tokens de color válidos en `config`), los tipos `ChartContainerProps`, `ChartTooltipProps`, `ChartTooltipContentProps`, `ChartLegendProps`, `ChartLegendContentProps`, y los tipos de props de los re-exports de recharts: `AreaProps`, `BarProps`, `CartesianGridProps`, `CellProps`, `LabelProps`, `LineProps`, `PieProps`, `ResponsiveContainerProps`, `XAxisProps`, `YAxisProps`.
+
+**`@abelardo-salazar/core-ui-design-system/locale`**: ver [Locales](#locales--subpath-locale).
+
+```tsx
+import { cn, type ButtonProps, Button } from '@abelardo-salazar/core-ui-design-system';
+
+export function ToolbarButton({ className, ...props }: ButtonProps) {
+  return <Button variant="ghost" size="sm" className={cn('gap-1', className)} {...props} />;
+}
+```
+
 ## 💻 Desarrollo Local
 
 Si deseas contribuir o modificar la librería:
@@ -1616,22 +1924,28 @@ Las notas de arquitectura (theming) y la convención de versiones y tags para pu
 ## 🤖 Integración Continua (CI)
 
 Cada Pull Request contra `main` (y cada push a `main`) dispara el workflow
-**`.github/workflows/ci.yml`** (GitHub Actions). Corre sobre **Node 22 LTS**, en
-este orden:
+**`.github/workflows/ci.yml`** (GitHub Actions), con un único job, `verify`, que es el check
+obligatorio para mergear. Corre sobre **Node 22 LTS**, con un límite de 20 minutos; si llega un
+push nuevo a la misma rama, se cancela el run anterior. Pasos, en orden:
 
-1. `npm ci` — instalación determinística desde `package-lock.json` (con cache de npm).
-2. `npx playwright install chromium --with-deps` — el runner no trae el navegador
-   que usa la suite de tests.
+1. `npm ci` — instalación determinística desde `package-lock.json` (con caché de npm).
+2. Chromium para Playwright: el navegador se guarda en caché con una clave que sigue la versión
+   de `playwright` del lockfile; solo si no hay caché se instala con
+   `npx playwright install chromium --only-shell` (Chrome Headless Shell, sin las dependencias
+   del sistema vía apt, que el runner ya trae).
 3. `npm run lint` — ESLint.
-4. `npx tsc -b` — typecheck.
-5. `npm run build` — incluye `verify-client-directives` (pre) + `tsc -b` + `vite build` +
-   `verify-client-directives --post-build` (post: falla si `dist/index.js` arrastra `recharts`).
-6. `npm run test` — Vitest en modo browser.
-7. `npm audit --audit-level=high` — falla solo ante vulnerabilidades `high` /
+4. `npm run format:check` — Prettier.
+5. `npx tsc -b` — typecheck.
+6. `npm run build` — `verify-client-directives` (pre: `CLIENT_ENTRY_POINTS` sincronizado y
+   ningún componente server-safe que arme handlers propios) + `tsc -b` + `vite build` +
+   `verify-client-directives --post-build` (post: `dist/index.js` sin `recharts`,
+   `dist/locale.js` sin el barrel raíz ni `recharts`, y `sideEffects` con los módulos con efectos
+   de las dependencias empaquetadas).
+7. `npm run test` — Vitest en modo browser.
+8. `npm audit --audit-level=high` — falla solo ante vulnerabilidades `high` /
    `critical`; `moderate` / `low` no bloquean.
 
-Cualquier paso que falle marca el PR en rojo. Es la misma batería de checks que
-antes se corría a mano.
+Cualquier paso que falle marca el PR en rojo.
 
 ---
 
