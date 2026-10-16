@@ -1,6 +1,7 @@
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import dts from 'vite-plugin-dts';
+import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import tailwindcss from '@tailwindcss/vite';
 import { CLIENT_ENTRY_POINTS as CLIENT_ENTRY_POINTS_RELATIVE } from './scripts/client-entry-points.mjs';
@@ -43,10 +44,28 @@ function preserveUseClientDirective(): Plugin {
   };
 }
 
+// Publica src/tailwind.css sin compilar como dist/tailwind.css (exports["./tailwind.css"])
+// para consumidores con Tailwind v4, que la compilan con su propio Tailwind. Copia literal:
+// sus @source y @plugin se resuelven relativos al archivo, ya dentro de dist/.
+function copyTailwindSource(): Plugin {
+  const source = resolve(__dirname, 'src/tailwind.css');
+  return {
+    name: 'copy-tailwind-source',
+    generateBundle() {
+      this.emitFile({
+        type: 'asset',
+        fileName: 'tailwind.css',
+        source: readFileSync(source, 'utf8'),
+      });
+    },
+  };
+}
+
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(), // Soporte Tailwind v4
+    copyTailwindSource(),
     dts({
       insertTypesEntry: true,
       tsconfigPath: './tsconfig.app.json', // Asegúrate que este sea tu tsconfig correcto

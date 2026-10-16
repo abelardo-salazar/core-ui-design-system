@@ -68,6 +68,11 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Compila el tarball de npm pack en un consumidor con Tailwind v4 que importa
+      # ./tailwind.css. Sin red: arma el consumidor a partir del tarball y de node_modules.
+      - name: Verify Tailwind consumer
+        run: npm run verify:tailwind-consumer
+
       - name: Test
         run: npm run test
 

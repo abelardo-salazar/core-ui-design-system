@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-// Tokens de color reales del DS (ver src/index.css, bloque `@theme` y `:root`). Deliberadamente
+// Tokens de color reales del DS (ver src/tailwind.css, bloque `@theme` y `:root`). Deliberadamente
 // no incluye `error`: ese token está reservado para estados de error (Alert, Button
 // destructive), no para diferenciar series de datos en un chart. Tampoco incluye `neutral`:
 // en modo oscuro `--neutral` es blanco puro, indistinguible del texto/ejes del chart.

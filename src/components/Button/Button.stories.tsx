@@ -321,7 +321,7 @@ export const AsLinkLoading: Story = {
 };
 
 // Separación del anillo de foco: por defecto toma el color de fondo del tema (base-100, regla
-// base de index.css). Sobre otra superficie, un ring-offset-<color> explícito gana sobre esa
+// base de tailwind.css). Sobre otra superficie, un ring-offset-<color> explícito gana sobre esa
 // regla. El color real con foco de teclado en ambos temas se verificó en Storybook con un
 // navegador real.
 export const FocusRingOnSurface: Story = {
