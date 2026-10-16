@@ -106,5 +106,16 @@ Una versión sin publicar acumula todos los PRs en una sola entrada del CHANGELO
 ### Tags
 
 - **Formato:** tag **anotado** `vX.Y.Z` (`git tag -a vX.Y.Z -m "vX.Y.Z"`), sobre el commit de `main` desde el que se publicó (el `gitHead` que registra el paquete: `npm view @abelardo-salazar/core-ui-design-system@X.Y.Z gitHead`).
+- **Si el `gitHead` no está en `main`:** pasa cuando la historia de `main` se reescribió después de publicar, por ejemplo para cambiar metadatos de autor. El commit original sigue existiendo en GitHub, pero ya no está en ninguna rama. No se le pone tag: lo volvería a hacer visible con los datos que la reescritura quitó. El tag va sobre el commit de `main` con el mismo árbol, que es el mismo contenido publicado. Para encontrarlo y comprobarlo:
+
+  ```bash
+  git fetch origin <gitHead>                   # trae el commit original por SHA
+  git rev-parse <gitHead>^{tree}               # árbol publicado
+  git rev-parse <commit-de-main>^{tree}        # debe ser idéntico
+  git merge-base --is-ancestor <commit-de-main> origin/main && echo en-main
+  ```
+
+  El candidato es el commit de `main` con el mismo título que el `gitHead`. Antes de poner el tag, verificar también que su `package.json` tenga la versión `X.Y.Z`.
+
 - **Cuándo:** después de publicar, no antes. Un tag sin versión publicada apuntaría a algo que no existe en el registro.
-- **Versiones anteriores:** `v0.4.1` y `v0.4.2` existen como tags ligeros (no anotados), creados antes de esta convención; apuntan al commit correcto y se dejan así. Las versiones anteriores a 0.4.1 no tienen tag.
+- **Versiones anteriores:** `v0.4.1` y `v0.4.2` existen como tags ligeros (no anotados), creados antes de esta convención, y se dejan así. Igual que `v0.4.3`, `v0.4.4` y `v0.5.0` (anotados, creados después de publicar), apuntan al commit de `main` con el mismo árbol que su `gitHead`, porque la historia se reescribió después de publicarlas. Las versiones anteriores a 0.4.1 no tienen tag.
