@@ -15,7 +15,7 @@ const ChartContainer = React.forwardRef<HTMLDivElement, ChartContainerProps>(
   ({ config, className, style, children, ...props }, ref) => {
     // Cada entrada de `config` se traduce a una custom property `--color-<dataKey>` que
     // apunta al token real del DS (`--color-primary`, `--color-secondary`, etc — definidas
-    // en index.css). Las piezas de datos (Bar/Line/Area) referencian esta variable vía
+    // en tailwind.css). Las piezas de datos (Bar/Line/Area) referencian esta variable vía
     // fill/stroke (ej. fill="var(--color-desktop)"), no un color fijo, así heredan el token
     // elegido y responden solas a claro/oscuro.
     //
@@ -23,7 +23,7 @@ const ChartContainer = React.forwardRef<HTMLDivElement, ChartContainerProps>(
     // inyecta un bloque <style> duplicado por tema (":root" / ".dark"): ahí hace falta
     // porque su `config` admite colores hex/hsl crudos sin noción de tema. Acá el config
     // solo acepta tokens del DS, y esos tokens ya cambian de valor solos al aplicarse `.dark`
-    // (ver src/index.css) — no hay nada que duplicar.
+    // (ver src/tailwind.css) — no hay nada que duplicar.
     const chartStyle = React.useMemo(() => {
       const vars: Record<string, string> = {};
       for (const [dataKey, { color }] of Object.entries(config)) {

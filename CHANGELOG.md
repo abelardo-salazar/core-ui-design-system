@@ -1,5 +1,52 @@
 # Changelog
 
+## [0.6.0] - 2026-10-16
+
+### Added
+
+- **`./tailwind.css`**: hoja de estilos para consumidores con Tailwind v4 (4.1 o posterior).
+  Trae los tokens del DS (`@theme`), las capas base y el plugin `tailwindcss-animate`, sin
+  compilar: la compila el Tailwind del consumidor, en una sola compilación, junto con sus
+  propias clases. Se importa después de Tailwind:
+
+  ```css
+  @import 'tailwindcss';
+  @import '@abelardo-salazar/core-ui-design-system/tailwind.css';
+  ```
+
+  Las clases que usan los componentes del DS se detectan solas; no hace falta un `@source`
+  hacia `node_modules`. Además, las utilidades de los tokens quedan disponibles para el código
+  del consumidor, con opacidad incluida (`bg-primary/5`, `text-base-content/65`).
+
+  No incluye la fuente: `./style.css` importa Ubuntu desde Google Fonts, `./tailwind.css` no.
+  El token `--font-sans` sigue apuntando a `'Ubuntu'`, así que la fuente la carga el
+  consumidor (por ejemplo con `next/font`, o con su propio `@import` de Google Fonts).
+
+### Fixed
+
+- **Consumidores con Tailwind que importaban `./style.css`**: `style.css` ya viene compilado,
+  y junto al Tailwind del consumidor quedaban dos compilaciones que el bundler (Next, por
+  ejemplo) fusiona en las mismas capas. Una utilidad que el consumidor también usaba pisaba a
+  la variante responsive del DS: `Container` no pasaba a `md:px-8`, `Heading` no crecía a
+  `lg:text-5xl` y `SheetHeader` no se alineaba a la izquierda desde `sm`. Las clases de tokens
+  que solo usaba el consumidor (`bg-primary/5`) no se generaban. Con `./tailwind.css` todo sale
+  de una sola compilación.
+
+### Instalación
+
+- `tailwindcss-animate` pasa a `dependencies`: se instala con el DS. Si el proyecto lo tenía
+  instalado solo para el DS, puede quitarlo.
+- `tailwindcss` (`>=4.1`) es peer opcional: hace falta solo para usar `./tailwind.css`.
+
+### Migración
+
+- **Con Tailwind v4**: reemplazar `import '@abelardo-salazar/core-ui-design-system/style.css'`
+  por el `@import` de `./tailwind.css` en la hoja de estilos global, después de
+  `@import 'tailwindcss'`, y cargar la fuente Ubuntu. Quitar un `@source` hacia el paquete si
+  se había agregado para generar sus clases. No importar las dos hojas a la vez: se vuelve al
+  problema de las dos compilaciones.
+- **Sin Tailwind**: nada cambia; `./style.css` sale igual que en 0.5.0.
+
 ## [0.5.0] - 2026-10-15
 
 ### Instalación

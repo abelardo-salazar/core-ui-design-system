@@ -1,6 +1,6 @@
 {
   "name": "@abelardo-salazar/core-ui-design-system",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -36,7 +36,8 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "recharts": "^3.10.1",
-    "tailwind-merge": "^3.4.0"
+    "tailwind-merge": "^3.4.0",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^4.1.3",
@@ -82,7 +83,6 @@
     "sonner": "^2.0.7",
     "storybook": "^10.1.11",
     "tailwindcss": "^4.1.18",
-    "tailwindcss-animate": "^1.0.7",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4",
@@ -102,7 +102,8 @@
       "types": "./dist/locale.d.ts",
       "import": "./dist/locale.js"
     },
-    "./style.css": "./dist/core-ui-design-system.css"
+    "./style.css": "./dist/core-ui-design-system.css",
+    "./tailwind.css": "./dist/tailwind.css"
   },
   "files": [
     "dist"
@@ -124,7 +125,13 @@
     "cmdk": "^1.1.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "sonner": "^2.0.7"
+    "sonner": "^2.0.7",
+    "tailwindcss": ">=4.1"
+  },
+  "peerDependenciesMeta": {
+    "tailwindcss": {
+      "optional": true
+    }
   },
   "overrides": {
     "@tailwindcss/cli": {

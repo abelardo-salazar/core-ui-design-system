@@ -19,7 +19,7 @@ export const buttonVariants = cva(
         link: 'text-primary underline-offset-4 hover:underline decoration-primary',
         // hover:text-error-focus-content es necesario: --error es claro y --error-focus es
         // oscuro (al revés que en las demás variantes), así que text-error-content (negro)
-        // solo da contraste suficiente en el estado base, no en hover. Ver index.css.
+        // solo da contraste suficiente en el estado base, no en hover. Ver tailwind.css.
         destructive:
           'bg-error text-error-content hover:bg-error-focus hover:text-error-focus-content shadow-sm',
       },

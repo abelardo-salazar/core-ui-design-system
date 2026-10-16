@@ -15,7 +15,7 @@ export const badgeVariants = cva(
         secondary: 'border-transparent bg-secondary text-secondary-content',
         // hover:text-error-focus-content es necesario: --error es claro y --error-focus es
         // oscuro (al revés que en las demás variantes), así que text-error-content (negro)
-        // solo da contraste suficiente en el estado base, no en hover. Ver index.css. El
+        // solo da contraste suficiente en el estado base, no en hover. Ver tailwind.css. El
         // hover en sí vive en compoundVariants (solo aplica si interactive=true).
         destructive: 'border-transparent bg-error text-error-content',
         outline: 'text-base-content border-base-content/20',
