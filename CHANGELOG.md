@@ -31,6 +31,13 @@
   `lg:text-5xl` y `SheetHeader` no se alineaba a la izquierda desde `sm`. Las clases de tokens
   que solo usaba el consumidor (`bg-primary/5`) no se generaban. Con `./tailwind.css` todo sale
   de una sola compilación.
+- **`SkipToContent`**: el z-index por defecto pasa de `z-50` a `z-60`. Con `z-50` empataba con
+  una cabecera fija `z-50` y, como la cabecera va después en el DOM, tapaba el enlace al
+  recibir el foco. Ahora queda por encima. También queda por encima de los overlays `z-50`
+  (`Dialog`, `Sheet`, `Popover`…), lo que no cambia nada en la práctica: el enlace se usa al
+  cargar la página, sin un modal abierto. `className` sigue pudiendo cambiar el z-index
+  (`className="z-10"`). **Migración:** si se había agregado un override para subirlo sobre la
+  cabecera, ya se puede quitar.
 
 ### Instalación
 

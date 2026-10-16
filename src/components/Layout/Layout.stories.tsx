@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { Container } from './Container';
 import { Separator } from './Separator';
 import { SkipToContent } from './SkipToContent';
@@ -119,5 +119,59 @@ export const SkipToContentCustomText: StoryObj = {
     const link = canvas.getByRole('link', { name: 'Saltar al contenido' });
     await expect(link).toHaveAttribute('href', '#contenido');
     await expect(canvas.queryByText('Skip to content')).not.toBeInTheDocument();
+  },
+};
+
+// Regresión: SkipToContent usaba z-50, el mismo valor que una cabecera fija típica; con empate
+// gana el orden del DOM y la cabecera (posterior al enlace) lo tapaba al recibir el foco. Tag
+// real-css: corre en el proyecto de vitest con Tailwind aplicado (ver vitest.config.ts); sin
+// él, el enlace no tiene posición ni z-index y la prueba falla con cualquier valor. La cabecera
+// va con estilos inline: lo que se prueba es el enlace. elementFromPoint en el centro del
+// enlace debe devolver el propio enlace; waitFor espera a que termine la transición.
+export const SkipToContentAboveFixedHeader: StoryObj = {
+  tags: ['real-css'],
+  render: () => (
+    <div className="relative h-48">
+      <SkipToContent />
+      <header
+        data-testid="fixed-header"
+        style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 96, zIndex: 50 }}
+        className="bg-base-200"
+      >
+        Cabecera fija
+      </header>
+      <main id="main-content" className="pt-28">
+        Contenido
+      </main>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const link = canvas.getByRole('link', { name: 'Skip to content' });
+
+    await userEvent.tab();
+    await expect(link).toHaveFocus();
+
+    await waitFor(() => {
+      const rect = link.getBoundingClientRect();
+      const top = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      expect(top?.closest('a, header')).toBe(link);
+    });
+  },
+};
+
+// El className del consumidor sigue ganando sobre el z-index por defecto (tailwind-merge).
+export const SkipToContentZIndexOverride: StoryObj = {
+  render: () => (
+    <div className="relative h-24">
+      <SkipToContent className="z-10" />
+      <main id="main-content">Contenido</main>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const link = within(canvasElement).getByRole('link', { name: 'Skip to content' });
+    const classes = link.className.split(' ');
+    await expect(classes).toContain('z-10');
+    await expect(classes.filter((c) => /^z-\d+$/.test(c))).toEqual(['z-10']);
   },
 };

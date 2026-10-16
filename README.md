@@ -607,6 +607,7 @@ Uso (ejemplos, extraídos de `Image.stories.tsx`):
   - **Exports:** `SkipToContent`.
   - **Props principales:** `href?: string` (por defecto `#main-content`); `children?: React.ReactNode` (por defecto `'Skip to content'`); `className?: string`; acepta `React.AnchorHTMLAttributes<HTMLAnchorElement>`.
   - **Descripción:** enlace accesible para saltar al contenido principal; está estilizado con `buttonVariants` y posicionamiento oculto hasta recibir foco (ideal para accesibilidad keyboard users / screen readers).
+  - **z-index:** `z-60` por defecto, así que al recibir el foco queda por encima de una cabecera fija `z-50`; `className` puede cambiarlo.
   - **Uso:**
 
 ```tsx
