@@ -90,7 +90,7 @@ Para proyectos con Tailwind v4 (4.1 o posterior; `tailwindcss` es peer opcional 
 **La fuente la cargas tú.** `./tailwind.css` no importa Google Fonts: así eliges cómo cargarla, por ejemplo autoalojada con `next/font`, sin una petición a un tercero que bloquee el renderizado. El token `--font-sans` vale `'Ubuntu', ui-sans-serif, system-ui, sans-serif`:
 
 - Con un `@import` de Google Fonts o un `@font-face` propio, basta con que la familia se llame `Ubuntu`. El `@import url(...)` va antes de `@import 'tailwindcss'`.
-- Con `next/font`, la familia queda con otro nombre (`__Ubuntu_<hash>`). Exponla en `--font-sans` con la opción `variable`:
+- Con `next/font`, exponla en `--font-sans` con la opción `variable`. Así `--font-sans` apunta a la familia que declara `next/font`, sin depender de su nombre, y suma la fuente de respaldo con métricas ajustadas que genera (`Ubuntu Fallback`), que evita saltos de layout mientras carga. Verificado con Next 15.5:
 
 ```tsx
 // app/layout.tsx

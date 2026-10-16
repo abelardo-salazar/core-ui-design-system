@@ -314,7 +314,7 @@ if (missing.length > 0 || stale.length > 0) {
     console.error('');
   }
 
-  console.error('  Agregá/quitá la entrada correspondiente en scripts/client-entry-points.mjs.');
+  console.error('  Agrega o quita la entrada correspondiente en scripts/client-entry-points.mjs.');
   process.exit(1);
 }
 
@@ -327,9 +327,9 @@ if (implicitClient.length > 0) {
   }
   console.error(
     '\n  Heurística estática, no perfecta: puede ser un falso positivo legítimo (revisar a mano) o un\n' +
-      "  componente que de verdad necesita 'use client'. Si es lo segundo, agregá la directiva y\n" +
-      '  registralo en scripts/client-entry-points.mjs; si es un falso positivo, dejá constancia de\n' +
-      '  por qué en el PR en vez de silenciarlo acá.',
+      "  componente que de verdad necesita 'use client'. Si es lo segundo, agrega la directiva y\n" +
+      '  regístralo en scripts/client-entry-points.mjs; si es un falso positivo, deja constancia de\n' +
+      '  por qué en el PR en vez de silenciarlo aquí.',
   );
   process.exit(1);
 }

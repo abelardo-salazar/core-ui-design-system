@@ -12,7 +12,7 @@
 // compartida, no dos.
 //
 // Rutas relativas a la raíz del repo. Al agregar un componente nuevo con 'use client' en su
-// fuente, agregá su ruta acá; `npm run build` falla si te olvidás.
+// fuente, agrega su ruta aquí; `npm run build` falla si se olvida.
 export const CLIENT_ENTRY_POINTS = [
   'src/components/Input/Input.tsx',
   'src/components/Textarea/Textarea.tsx',
