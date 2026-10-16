@@ -197,7 +197,7 @@ Esto funciona porque, por especificación de CSS Cascade Layers, **cualquier reg
 
 ### ⚠️ Qué NO hacer: override dentro de tu propio `@layer base`
 
-Si tu proyecto también usa Tailwind y seguís su convención de customización de tema poniendo tus overrides dentro de tu propio `@layer base { :root {...} }`, **la prioridad deja de estar garantizada** y pasa a depender del orden de import entre tu hoja de estilos y la del design system:
+Si tu proyecto también usa Tailwind y sigues su convención de customización de tema poniendo tus overrides dentro de tu propio `@layer base { :root {...} }`, **la prioridad deja de estar garantizada** y pasa a depender del orden de import entre tu hoja de estilos y la del design system:
 
 - Si tu `@layer base` se importa **después** del CSS del design system → tu override gana.
 - Si tu `@layer base` se importa **antes** del CSS del design system → tu override **NO gana**: el valor del design system prevalece.
