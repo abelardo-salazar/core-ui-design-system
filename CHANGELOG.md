@@ -20,7 +20,8 @@
 
   No incluye la fuente: `./style.css` importa Ubuntu desde Google Fonts, `./tailwind.css` no.
   El token `--font-sans` sigue apuntando a `'Ubuntu'`, así que la fuente la carga el
-  consumidor (por ejemplo con `next/font`, o con su propio `@import` de Google Fonts).
+  consumidor: con su propio `@import` de Google Fonts, o con `next/font` exponiendo la fuente
+  en `--font-sans` (ver README § Setup Inicial).
 
 ### Fixed
 
@@ -52,7 +53,7 @@
   `@import 'tailwindcss'`, y cargar la fuente Ubuntu. Quitar un `@source` hacia el paquete si
   se había agregado para generar sus clases. No importar las dos hojas a la vez: se vuelve al
   problema de las dos compilaciones.
-- **Sin Tailwind**: nada cambia; `./style.css` sale igual que en 0.5.0.
+- **Sin Tailwind**: nada cambia; `./style.css` no tiene cambios funcionales.
 
 ## [0.5.0] - 2026-10-15
 
@@ -334,8 +335,8 @@ Antes de actualizar, revisar **Changed**: hay cambios incompatibles en las altur
   esos otros, no agrupado con este fix.
 
   **Versiones publicadas afectadas: todas las que incluyen `Button` con `asChild`** (desde su
-  introducción). Si consumís `Button` con `asChild` desde un Server Component de Next.js App
-  Router, actualizá a `0.4.3`.
+  introducción). Si consumes `Button` con `asChild` desde un Server Component de Next.js App
+  Router, actualiza a `0.4.3`.
 
 ### Chore
 
@@ -356,8 +357,8 @@ Antes de actualizar, revisar **Changed**: hay cambios incompatibles en las altur
 
 ### Acción recomendada
 
-Si usás `Button` con `asChild` desde un Server Component (Next.js App Router u otro entorno
-RSC), actualizá a `0.4.3`.
+Si usas `Button` con `asChild` desde un Server Component (Next.js App Router u otro entorno
+RSC), actualiza a `0.4.3`.
 
 ## [0.4.2] - 2026-09-06
 
@@ -435,8 +436,8 @@ RSC), actualizá a `0.4.3`.
 
 ### Acción recomendada
 
-Si instalaste `@abelardo-salazar/core-ui-design-system@0.4.0` y lo consumís desde Next.js App
-Router (o cualquier entorno RSC), actualizá a `0.4.1`. Si usás `Chart`, además cambiá el
+Si instalaste `@abelardo-salazar/core-ui-design-system@0.4.0` y lo consumes desde Next.js App
+Router (o cualquier entorno RSC), actualiza a `0.4.1`. Si usas `Chart`, además cambia el
 import a `@abelardo-salazar/core-ui-design-system/charts`.
 
 ## [0.4.0] - 2026-08-31
@@ -505,6 +506,6 @@ import a `@abelardo-salazar/core-ui-design-system/charts`.
 
 ### Acción recomendada
 
-Si instalaste `@abelardo-salazar/core-ui-design-system@0.3.13` o `@0.3.14` y usás `Popover`,
-`Calendar`, `DatePicker` o `Progress` desde un Server Component, actualizá a `0.3.15` o
+Si instalaste `@abelardo-salazar/core-ui-design-system@0.3.13` o `@0.3.14` y usas `Popover`,
+`Calendar`, `DatePicker` o `Progress` desde un Server Component, actualiza a `0.3.15` o
 posterior.
