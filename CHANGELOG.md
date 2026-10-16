@@ -1,5 +1,33 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **`Combobox`: `listVisibility`** (`'always'` | `'focus'` | `'query'`, default `'always'`),
+  solo con `mode="inline"`; con el popover no compila. Decide cuándo se ve la lista:
+  `'focus'`, mientras el buscador tiene el foco; `'query'`, mientras tiene el foco y hay texto.
+  Pensado para un `Sheet` inferior, donde una lista larga siempre abierta hace scroll dentro de
+  `SheetBody`. Con `'focus'` y `'query'`:
+  - `aria-expanded` del buscador refleja si la lista se ve.
+  - Al elegir una opción en modo múltiple, el texto se vacía y el foco se queda en el buscador
+    (con `'query'`, la lista se oculta).
+  - Al perder el foco, la lista se oculta. El mensaje de vacío solo aparece con la lista visible.
+  - Con la lista visible, Escape la oculta sin cerrar el `Sheet` o `Dialog` que la contiene; el
+    siguiente Escape lo cierra. No hace falta `onEscapeKeyDown` en el contenedor.
+  - En modo único, el valor elegido se muestra como `Chip`, y su ✕ vacía el valor (`''`).
+
+  Tipos nuevos: `ComboboxListVisibility` y `ComboboxModeProps`. `mode` sin `listVisibility`
+  acepta lo mismo que antes, también un valor dinámico (`mode={modo}`).
+
+### Changed
+
+- **`Combobox`: los Chips del modo múltiple siguen el `size`** del Combobox (antes, siempre
+  `sm`). En `md`, el ✕ pasa de 24 a 32px de alto; en `lg`, a 44px. Con un Chip, el campo del
+  popover en `lg` mide 53px en vez de 48 (en `sm` y `md` no cambia: 32 y 44px). **Migración:**
+  nada que cambiar en el código; revisar la alineación de un Combobox múltiple `lg` en una fila
+  con otros campos `lg`.
+
 ## [0.6.0] - 2026-10-16
 
 ### Added
