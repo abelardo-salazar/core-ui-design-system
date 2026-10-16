@@ -516,3 +516,268 @@ export const LabelChange: Story = {
     await userEvent.keyboard('{Escape}');
   },
 };
+
+// 13. listVisibility="query": la lista solo se ve con foco y texto (sin contar espacios).
+// aria-expanded acompaña cada estado, y el mensaje de vacío solo aparece con la lista visible.
+export const InlineQuery: Story = {
+  render: () => (
+    <Field>
+      <Combobox label="País" mode="inline" listVisibility="query" options={countries} />
+    </Field>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const input = canvas.getByRole('combobox', { name: 'País' });
+    const listbox = canvas.getByRole('listbox', { hidden: true });
+    await expect(input).toHaveAttribute('aria-expanded', 'false');
+    await expect(input).toHaveAttribute('aria-controls', listbox.id);
+    await expect(listbox).not.toBeVisible();
+
+    await userEvent.click(input);
+    await expect(input).toHaveFocus();
+    await expect(listbox).not.toBeVisible();
+    await expect(input).toHaveAttribute('aria-expanded', 'false');
+    await expect(canvas.queryByText('No results.')).not.toBeInTheDocument();
+
+    await userEvent.type(input, '   ');
+    await expect(listbox).not.toBeVisible();
+
+    await userEvent.clear(input);
+    await userEvent.type(input, 'pe');
+    await expect(listbox).toBeVisible();
+    await expect(input).toHaveAttribute('aria-expanded', 'true');
+    await expect(
+      within(listbox)
+        .getAllByRole('option')
+        .map((o) => o.textContent),
+    ).toEqual(['Perú']);
+
+    await userEvent.type(input, 'zzz');
+    await expect(canvas.getByText('No results.')).toBeVisible();
+
+    await userEvent.clear(input);
+    await expect(listbox).not.toBeVisible();
+    await expect(input).toHaveAttribute('aria-expanded', 'false');
+    await expect(canvas.queryByText('No results.')).not.toBeInTheDocument();
+    // Con la lista oculta no hay opciones: Enter no elige nada invisible.
+    await expect(within(listbox).queryAllByRole('option', { hidden: true })).toHaveLength(0);
+  },
+};
+
+// 14. listVisibility="focus": visible mientras el buscador tiene el foco. Escape la oculta sin
+// sacar el foco; escribir la vuelve a mostrar.
+export const InlineFocus: Story = {
+  render: () => (
+    <div className="flex w-72 flex-col gap-4">
+      <Combobox label="País" mode="inline" listVisibility="focus" options={countries} />
+      <Button variant="outline">Siguiente</Button>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const input = canvas.getByRole('combobox', { name: 'País' });
+    const listbox = canvas.getByRole('listbox', { hidden: true });
+    await expect(listbox).not.toBeVisible();
+    await expect(input).toHaveAttribute('aria-expanded', 'false');
+
+    await userEvent.click(input);
+    await expect(listbox).toBeVisible();
+    await expect(input).toHaveAttribute('aria-expanded', 'true');
+    await expect(within(listbox).getAllByRole('option')).toHaveLength(countries.length);
+
+    await userEvent.keyboard('{Escape}');
+    await expect(listbox).not.toBeVisible();
+    await expect(input).toHaveFocus();
+    await expect(input).toHaveAttribute('aria-expanded', 'false');
+    await userEvent.type(input, 'c');
+    await expect(listbox).toBeVisible();
+
+    await userEvent.tab();
+    await expect(canvas.getByRole('button', { name: 'Siguiente' })).toHaveFocus();
+    await expect(listbox).not.toBeVisible();
+    await expect(input).toHaveAttribute('aria-expanded', 'false');
+  },
+};
+
+// 15. Múltiple con listVisibility="query": elegir con Enter y con clic vacía el texto, deja el
+// foco en el buscador y oculta la lista (el texto quedó vacío). Con "focus" la lista sigue.
+export const InlineQueryMultiple: Story = {
+  args: { onValueChange: fn() },
+  render: (args) => (
+    <div className="flex w-72 flex-col gap-4">
+      <Combobox
+        label="Países"
+        mode="inline"
+        listVisibility="query"
+        multiple
+        options={countries}
+        onValueChange={args.onValueChange as (value: string[]) => void}
+      />
+      <Combobox
+        label="Con foco"
+        mode="inline"
+        listVisibility="focus"
+        multiple
+        options={countries}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const input = canvas.getByRole('combobox', { name: 'Países' });
+    const listbox = canvas.getAllByRole('listbox', { hidden: true })[0];
+
+    await userEvent.type(input, 'chi');
+    await expect(listbox).toBeVisible();
+    await userEvent.keyboard('{Enter}');
+    await expect(args.onValueChange).toHaveBeenLastCalledWith(['cl']);
+    await expect(input).toHaveValue('');
+    await expect(input).toHaveFocus();
+    await expect(listbox).not.toBeVisible();
+    await expect(input).toHaveAttribute('aria-expanded', 'false');
+
+    await userEvent.type(input, 'per');
+    await userEvent.click(within(listbox).getByRole('option', { name: 'Perú' }));
+    await expect(args.onValueChange).toHaveBeenLastCalledWith(['cl', 'pe']);
+    await expect(input).toHaveValue('');
+    await expect(input).toHaveFocus();
+    await expect(listbox).not.toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Remove Perú' })).toBeInTheDocument();
+
+    const focusInput = canvas.getByRole('combobox', { name: 'Con foco' });
+    const focusListbox = canvas.getAllByRole('listbox', { hidden: true })[1];
+    await userEvent.type(focusInput, 'bol');
+    await userEvent.keyboard('{Enter}');
+    await expect(focusInput).toHaveValue('');
+    await expect(focusInput).toHaveFocus();
+    await expect(focusListbox).toBeVisible();
+    await expect(focusInput).toHaveAttribute('aria-expanded', 'true');
+    await expect(within(focusListbox).getByRole('option', { name: 'Bolivia' })).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+  },
+};
+
+// 16. Único con lista condicionada: el valor se muestra como Chip (con la lista oculta no habría
+// otra forma de verlo); su ✕ vacía el valor y devuelve el foco al buscador.
+export const InlineFocusSingle: Story = {
+  args: { onValueChange: fn() },
+  render: (args) => (
+    <Field>
+      <Combobox
+        label="País"
+        mode="inline"
+        listVisibility="focus"
+        options={countries}
+        defaultValue="mx"
+        onValueChange={args.onValueChange as (value: string) => void}
+      />
+    </Field>
+  ),
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const input = canvas.getByRole('combobox', { name: 'País' });
+    await userEvent.click(canvas.getByRole('button', { name: 'Remove México' }));
+    await expect(args.onValueChange).toHaveBeenLastCalledWith('');
+    await expect(input).toHaveFocus();
+    await expect(canvas.getByRole('listbox')).toBeVisible();
+
+    await userEvent.type(input, 'chi');
+    await userEvent.keyboard('{Enter}');
+    await expect(args.onValueChange).toHaveBeenLastCalledWith('cl');
+    await expect(input).toHaveValue('');
+    await expect(canvas.getByRole('button', { name: 'Remove Chile' })).toBeInTheDocument();
+  },
+};
+
+// 17. Dentro de un Sheet bottom: con la lista visible, el primer Escape la oculta y el Sheet
+// sigue abierto; el segundo lo cierra.
+export const InlineQueryInSheet: Story = {
+  render: () => (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant="outline">Filtrar</Button>
+      </SheetTrigger>
+      <SheetContent side="bottom">
+        <SheetHeader>
+          <SheetTitle>Filtros</SheetTitle>
+          <SheetDescription>Elige los países que quieres ver.</SheetDescription>
+        </SheetHeader>
+        <SheetBody>
+          <Combobox
+            label="País"
+            mode="inline"
+            listVisibility="query"
+            multiple
+            size="lg"
+            options={countries}
+          />
+        </SheetBody>
+      </SheetContent>
+    </Sheet>
+  ),
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Filtrar' }));
+    const sheet = await body().findByRole('dialog', { name: 'Filtros' });
+    const input = within(sheet).getByRole('combobox', { name: 'País' });
+    const listbox = within(sheet).getByRole('listbox', { hidden: true });
+
+    await userEvent.type(input, 'ar');
+    await expect(listbox).toBeVisible();
+    await userEvent.keyboard('{Escape}');
+    await expect(listbox).not.toBeVisible();
+    await expect(input).toHaveAttribute('aria-expanded', 'false');
+    await expect(input).toHaveFocus();
+    await expect(input).toHaveValue('ar');
+    await expect(body().getByRole('dialog', { name: 'Filtros' })).toBeInTheDocument();
+
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() =>
+      expect(body().queryByRole('dialog', { name: 'Filtros' })).not.toBeInTheDocument(),
+    );
+  },
+};
+
+// 18. Los Chips siguen el size del Combobox (sm / md / lg), en popover y en línea. Medido en
+// Storybook con navegador real, campo múltiple del popover con un Chip: sm 32px (Chip 29), md
+// 44px (Chip 32), lg 53px (Chip 44 + py-1 + borde: supera el min-h-12 de 48). Con más Chips de
+// los que entran en una línea, el campo crece en los tres tamaños (flex-wrap).
+export const ChipSizes: Story = {
+  render: () => (
+    <div className="flex w-72 flex-col gap-4">
+      {(['sm', 'md', 'lg'] as const).map((size) => (
+        <React.Fragment key={size}>
+          <Combobox
+            aria-label={`Popover ${size}`}
+            size={size}
+            multiple
+            options={countries}
+            defaultValue={['mx']}
+            removeLabel={(label) => `Quitar ${label} popover ${size}`}
+          />
+          <Combobox
+            aria-label={`En línea ${size}`}
+            mode="inline"
+            size={size}
+            multiple
+            options={countries}
+            defaultValue={['mx']}
+            removeLabel={(label) => `Quitar ${label} en línea ${size}`}
+          />
+        </React.Fragment>
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // Clases de chipVariants por tamaño (sm no fija alto).
+    const chipClasses = { sm: ['text-xs'], md: ['text-sm', 'h-8'], lg: ['text-base', 'h-11'] };
+    for (const size of ['sm', 'md', 'lg'] as const) {
+      for (const where of ['popover', 'en línea']) {
+        const remove = canvas.getByRole('button', { name: `Quitar México ${where} ${size}` });
+        await expect(remove.parentElement).toHaveClass(...chipClasses[size]);
+      }
+    }
+  },
+};

@@ -22,14 +22,11 @@ export interface ComboboxOption {
   disabled?: boolean;
 }
 
+/** Cuándo se ve la lista en `mode="inline"`. */
+export type ComboboxListVisibility = 'always' | 'focus' | 'query';
+
 interface ComboboxBaseProps {
   options: ComboboxOption[];
-  /**
-   * `'popover'`: un disparador con el estilo de Select abre el buscador y la lista.
-   * `'inline'`: buscador y lista siempre visibles. Dentro de un `Sheet` o `Dialog`, usar
-   * `'inline'`. @default 'popover'
-   */
-  mode?: 'popover' | 'inline';
   /** Alto del disparador y del buscador (32 / 44 / 48, la escala de Select e Input). @default 'md' */
   size?: ComboboxSize;
   /** Id del botón en modo popover; en línea, del contenedor (cmdk fija el id del buscador). */
@@ -46,6 +43,31 @@ interface ComboboxBaseProps {
   className?: string;
 }
 
+// Unión discriminada por `mode`, mismo patrón que `clearable`/`endIcon` en Input:
+// `listVisibility` solo existe en línea (en el popover la lista se ve mientras está abierto).
+// La primera rama admite los dos modos (no solo 'popover') para que `mode={dinámico}` sin
+// `listVisibility` siga compilando.
+export type ComboboxModeProps =
+  | {
+      /**
+       * `'popover'`: un disparador con el estilo de Select abre el buscador y la lista.
+       * `'inline'`: buscador y lista en el flujo del formulario. Dentro de un `Sheet` o `Dialog`,
+       * usar `'inline'`. @default 'popover'
+       */
+      mode?: 'popover' | 'inline';
+      listVisibility?: never;
+    }
+  | {
+      mode: 'inline';
+      /**
+       * `'always'`: la lista se ve siempre. `'focus'`: mientras el buscador tiene el foco.
+       * `'query'`: mientras tiene el foco y hay texto (sin contar espacios). Con `'focus'` y
+       * `'query'`, Escape oculta la lista sin cerrar el `Sheet`/`Dialog` que la contiene.
+       * @default 'always'
+       */
+      listVisibility?: ComboboxListVisibility;
+    };
+
 // Etiqueta visible (`label`) o solo para lectores de pantalla (`aria-label`): una de las dos.
 // Es un string porque cmdk solo acepta un texto para nombrar el buscador y la lista.
 export type ComboboxLabelProps =
@@ -61,7 +83,8 @@ export type ComboboxLabelProps =
     };
 
 export type ComboboxSingleProps = ComboboxBaseProps &
-  ComboboxLabelProps & {
+  ComboboxLabelProps &
+  ComboboxModeProps & {
     multiple?: false;
     value?: string;
     defaultValue?: string;
@@ -69,7 +92,8 @@ export type ComboboxSingleProps = ComboboxBaseProps &
   };
 
 export type ComboboxMultipleProps = ComboboxBaseProps &
-  ComboboxLabelProps & {
+  ComboboxLabelProps &
+  ComboboxModeProps & {
     multiple: true;
     value?: string[];
     defaultValue?: string[];
@@ -85,11 +109,15 @@ const normalize = (text: string) =>
 const defaultRemoveLabel = (label: string) => `Remove ${label}`;
 
 interface ComboboxImplProps extends ComboboxBaseProps {
+  mode?: 'popover' | 'inline';
+  listVisibility?: ComboboxListVisibility;
   label?: string;
   'aria-label'?: string;
   multiple: boolean;
   selected: string[];
   onToggle: (value: string) => void;
+  /** Quitar con el ✕ del Chip: en único vacía el valor (`onToggle` no deselecciona). */
+  onRemove: (value: string) => void;
 }
 
 const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
@@ -99,7 +127,9 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
       multiple,
       selected,
       onToggle,
+      onRemove,
       mode = 'popover',
+      listVisibility = 'always',
       size = 'md',
       id: idProp,
       label,
@@ -123,6 +153,14 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
 
     const [open, setOpen] = React.useState(false);
     const [search, setSearch] = React.useState('');
+    // Lista condicionada al foco (en línea con 'focus' o 'query'). `dismissed`: Escape la ocultó;
+    // vuelve al escribir o al volver a enfocar.
+    const collapsible = inline && listVisibility !== 'always';
+    const [focused, setFocused] = React.useState(false);
+    const [dismissed, setDismissed] = React.useState(false);
+    const listVisible =
+      !collapsible ||
+      (focused && !dismissed && (listVisibility === 'focus' || search.trim() !== ''));
 
     const triggerRef = React.useRef<HTMLButtonElement>(null);
     const inputRef = React.useRef<HTMLInputElement>(null);
@@ -139,6 +177,29 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
       .map((value) => options.find((option) => option.value === value))
       .filter((option): option is ComboboxOption => option !== undefined);
 
+    // cmdk escribe aria-expanded="true" después de las props, así que no se puede pasar como prop.
+    // React no vuelve a escribir el atributo mientras cmdk no cambie su valor (siempre true): el
+    // que se fija acá se mantiene. En el HTML del servidor queda el "true" de cmdk hasta hidratar.
+    React.useLayoutEffect(() => {
+      if (collapsible) inputRef.current?.setAttribute('aria-expanded', String(listVisible));
+    });
+
+    // Radix (Dialog, Sheet, Popover) escucha Escape en document, en fase de captura: un handler en
+    // el buscador llega tarde. Un listener en window, también en captura, corre antes; con
+    // preventDefault, Radix no cierra la capa (DismissableLayer solo cierra si el evento no fue
+    // prevenido). Solo está activo con la lista visible, así el segundo Escape cierra el contenedor.
+    React.useEffect(() => {
+      if (!collapsible || !listVisible) return;
+      const onKeyDown = (event: KeyboardEvent) => {
+        if (event.key !== 'Escape' || event.isComposing || event.target !== inputRef.current)
+          return;
+        event.preventDefault();
+        setDismissed(true);
+      };
+      window.addEventListener('keydown', onKeyDown, { capture: true });
+      return () => window.removeEventListener('keydown', onKeyDown, { capture: true });
+    }, [collapsible, listVisible]);
+
     React.useEffect(() => {
       const target = pendingFocus.current;
       if (target === null) return;
@@ -152,7 +213,7 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
     const removeChip = (value: string) => {
       const index = selectedOptions.findIndex((option) => option.value === value);
       pendingFocus.current = selectedOptions[index + 1]?.value ?? '';
-      onToggle(value);
+      onRemove(value);
     };
 
     const handleSelect = (value: string) => {
@@ -161,6 +222,9 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
         setOpen(false);
         setSearch('');
       }
+      // Con 'query', vaciar el texto oculta la lista; con 'focus' sigue visible. El foco no se
+      // mueve: el puntero no lo saca del buscador (onMouseDown de la lista).
+      if (collapsible) setSearch('');
     };
 
     const chips = selectedOptions.map((option) => (
@@ -171,7 +235,7 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
           else chipRefs.current.delete(option.value);
         }}
         variant="ghost"
-        size="sm"
+        size={size}
         disabled={disabled || option.disabled}
         onRemove={() => removeChip(option.value)}
         removeLabel={removeLabel(option.label)}
@@ -191,25 +255,45 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
             'overflow-hidden rounded-btn border border-base-300 bg-base-100 focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2',
         )}
       >
-        <div className="flex items-center gap-2 border-b border-base-300 px-3">
+        <div
+          className={cn('flex items-center gap-2 px-3', listVisible && 'border-b border-base-300')}
+        >
           <MagnifyingGlassIcon aria-hidden className="h-4 w-4 shrink-0 opacity-50" />
           <Command.Input
             ref={inputRef}
             value={search}
-            onValueChange={setSearch}
+            onValueChange={(next) => {
+              setSearch(next);
+              setDismissed(false);
+            }}
+            onFocus={() => {
+              setFocused(true);
+              setDismissed(false);
+            }}
+            onBlur={() => setFocused(false)}
             placeholder={searchPlaceholder}
             disabled={disabled}
             className={comboboxSearchVariants({ size })}
           />
         </div>
+        {/* Oculta (hidden), la lista sigue en el DOM para que aria-controls del buscador apunte a
+            algo, pero sin opciones: así Enter y las flechas de cmdk no eligen ni resaltan nada
+            invisible, y Command.Empty (que cmdk muestra cuando no hay opciones) no aparece.
+            onMouseDown: el foco se queda en el buscador al usar el puntero en la lista. Sin esto
+            pasaría a la lista (tabIndex -1) o al body, en múltiple se perdería el texto en curso
+            como destino, y con 'focus'/'query' el blur ocultaría la lista antes del clic. */}
         <Command.List
           label={accessibleLabel || undefined}
+          hidden={!listVisible}
+          onMouseDown={(event) => event.preventDefault()}
           className="max-h-72 min-h-0 overflow-y-auto overscroll-contain p-1"
         >
-          <Command.Empty className="py-6 text-center text-sm text-base-content/70">
-            {emptyLabel}
-          </Command.Empty>
-          {filtered.map((option) => {
+          {listVisible && (
+            <Command.Empty className="py-6 text-center text-sm text-base-content/70">
+              {emptyLabel}
+            </Command.Empty>
+          )}
+          {(listVisible ? filtered : []).map((option) => {
             const isSelected = selected.includes(option.value);
             return (
               <Command.Item
@@ -217,9 +301,6 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
                 value={option.value}
                 disabled={disabled || option.disabled}
                 onSelect={() => handleSelect(option.value)}
-                // El foco se queda en el buscador al elegir con el puntero: sin esto pasaría a la
-                // lista (tabIndex -1), y en múltiple se perdería el texto en curso como destino.
-                onMouseDown={(event) => event.preventDefault()}
                 // aria-selected lo usa cmdk para el ítem resaltado (y lo escribe después de las
                 // props): el estado elegido va en aria-checked, que ARIA 1.2 admite en option.
                 aria-checked={isSelected}
@@ -256,7 +337,11 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
               {label}
             </span>
           )}
-          {multiple && chips.length > 0 && <div className="flex flex-wrap gap-1">{chips}</div>}
+          {/* En único con lista condicionada, el Chip es lo único que muestra el valor cuando la
+              lista está oculta. */}
+          {(multiple || collapsible) && chips.length > 0 && (
+            <div className="flex flex-wrap gap-1">{chips}</div>
+          )}
           {command}
         </div>
       );
@@ -359,6 +444,7 @@ const SingleCombobox = React.forwardRef<HTMLDivElement, ComboboxSingleProps>(
         multiple={false}
         selected={value ? [value] : []}
         onToggle={setValue}
+        onRemove={() => setValue('')}
       />
     );
   },
@@ -383,6 +469,7 @@ const MultipleCombobox = React.forwardRef<HTMLDivElement, ComboboxMultipleProps>
             value.includes(toggled) ? value.filter((v) => v !== toggled) : [...value, toggled],
           )
         }
+        onRemove={(removed) => setValue(value.filter((v) => v !== removed))}
       />
     );
   },
@@ -401,7 +488,9 @@ MultipleCombobox.displayName = 'MultipleCombobox';
  *
  * `mode="popover"` (default): el buscador es un `combobox` dentro de un popover (`dialog`) que
  * toma su nombre de la etiqueta del campo; Escape lo cierra y devuelve el foco. `mode="inline"`:
- * buscador y lista siempre visibles; **dentro de un `Sheet` o `Dialog`, usar `mode="inline"`**.
+ * buscador y lista en el flujo del formulario; **dentro de un `Sheet` o `Dialog`, usar
+ * `mode="inline"`**. `listVisibility` (`'always'` | `'focus'` | `'query'`) decide cuándo se ve la
+ * lista en línea; con `'focus'`/`'query'`, el valor de único también se muestra como `Chip`.
  *
  * Requiere `label` (etiqueta visible, con el estilo de la de Input) o `aria-label`, no los dos.
  * El disparador anuncia la etiqueta y el valor actual; el popover, el buscador y la lista se
