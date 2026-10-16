@@ -12,7 +12,7 @@ const SkipToContent = React.forwardRef<HTMLAnchorElement, SkipToContentProps>(
         href={href}
         className={cn(
           buttonVariants({ variant: 'primary' }),
-          'absolute left-4 top-4 z-50 -translate-y-[150%] transition-transform focus:translate-y-0',
+          'absolute left-4 top-4 z-60 -translate-y-[150%] transition-transform focus:translate-y-0',
           className,
         )}
         {...props}
