@@ -6,18 +6,18 @@ Este documento reúne decisiones y mecanismos internos del design system que no 
 
 ### Dónde viven los tokens
 
-Los tokens semánticos de color y radio (`--primary`, `--base-100`, `--error-focus`, etc.) están definidos en `src/index.css`, dentro de:
+Los tokens semánticos de color y radio (`--primary`, `--base-100`, `--error-focus`, etc.) están definidos en `src/tailwind.css` (ver [más abajo](#srctailwindcss-fuente-única-de-tokens-y-capas-base)), dentro de:
 
 - `@layer base { :root {...} }` — valores por defecto (tema claro).
 - `@layer base { :root:has(.dark), .dark {...} }` — overrides de tema oscuro.
 
-El orden real de capas en el CSS compilado (Tailwind v4) es:
+El orden real de capas en `style.css` compilado (Tailwind v4) es el siguiente; con `./tailwind.css` lo fija la compilación del consumidor:
 
 ```
 components < properties < theme < base < utilities
 ```
 
-Los tokens semánticos viven en `base`. Las utilidades de color (`bg-primary`, `text-primary-content`, etc.) se generan en `@theme` apuntando a estos tokens vía `var(...)` (ver el bloque `@theme` al inicio de `src/index.css`), y a su vez cada token semántico apunta a un token `--palette-*` (`--primary: var(--palette-navy)`). Esa indirección es implementación interna: **`--palette-*` no es la superficie pública de override** — ver [README § Theming](./README.md#-4-theming-custom-properties) para la lista de tokens que sí lo son.
+Los tokens semánticos viven en `base`. Las utilidades de color (`bg-primary`, `text-primary-content`, etc.) se generan en `@theme` apuntando a estos tokens vía `var(...)` (ver el bloque `@theme` de `src/tailwind.css`), y a su vez cada token semántico apunta a un token `--palette-*` (`--primary: var(--palette-navy)`). Esa indirección es implementación interna: **`--palette-*` no es la superficie pública de override** — ver [README § Theming](./README.md#-4-theming-custom-properties) para la lista de tokens que sí lo son.
 
 ### Por qué el override recomendado es "CSS sin capa"
 
@@ -36,9 +36,66 @@ Los cuatro resultados coincidieron exactamente con lo que predice la teoría de 
 
 Por eso el override sin capa es el único patrón que se documenta como soportado — ver el bloque copy-paste y la lista completa de tokens en [README § Theming](./README.md#-4-theming-custom-properties).
 
-### `src/index.css` no cambia
+## Hojas de estilos: `style.css` y `tailwind.css`
 
-Esta arquitectura ya funciona tal cual está; no requirió (ni requiere) cambios en `src/index.css`. El trabajo de esta sección fue documentar y verificar el mecanismo existente, no modificarlo.
+Qué hoja importar según el proyecto está en [README § Setup Inicial](./README.md#️-3-setup-inicial). Acá va el porqué.
+
+### `src/tailwind.css`: fuente única de tokens y capas base
+
+`src/tailwind.css` contiene, en este orden:
+
+- `@source "./"` y `@source not "./node_modules"` (ver abajo).
+- `@plugin "tailwindcss-animate"`.
+- `@theme { ... }`: la fuente (`--font-sans`), los colores (`--color-*: var(--token)`) y los radios.
+- `@layer base { ... }`: los tokens `--palette-*` y los semánticos, tema claro y oscuro.
+- `@layer base { ... }`: `--tw-ring-offset-color` para todo el DS y los estilos de `html` y `body`.
+
+No contiene `@import 'tailwindcss'` ni la fuente. La importan dos lugares:
+
+- **`src/index.css`**: fuente de Google Fonts + `@import 'tailwindcss'` + `@import './tailwind.css'`. De ahí salen `style.css` (`vite build`) y los estilos de Storybook (`.storybook/preview.ts`).
+- **El paquete publicado**: el plugin `copyTailwindSource` de `vite.config.ts` copia el archivo sin compilar a `dist/tailwind.css` (`exports["./tailwind.css"]`), y lo compila el Tailwind del consumidor.
+
+**Los `@source`** son relativos al propio archivo, así que en `dist/` escanean el JS publicado. Hacen falta porque la detección automática de Tailwind ignora `node_modules`: sin ellos, el consumidor no generaría las clases que solo existen en el JS del paquete (por ejemplo `sm:text-left`, de `SheetHeader`).
+
+**`@source not "./node_modules"`**: `dist/node_modules` contiene las dependencias que `preserveModules` empaqueta (`d3-*`, `@reduxjs`, `@radix-ui`…). No tienen clases del DS, y escanearlas mete unas 94 utilidades de sobra, unos 13 KB minificados. `@source not` existe desde Tailwind 4.1, y de ahí viene el peer `tailwindcss >=4.1`.
+
+**`tailwindcss-animate` está en `dependencies`**: el `@plugin` se resuelve desde `dist/`, dentro del `node_modules` del consumidor. Como devDependency, el consumidor falla con `Can't resolve 'tailwindcss-animate'`.
+
+**En el repo, los `@source` no agregan nada**: `vite build` ya escanea todo el repo salvo lo ignorado por git, docs y scripts incluidos. Por eso `style.css` también genera clases que solo aparecen en la documentación, como el `bg-primary/5` del CHANGELOG. Limitar el escaneo a `src/` quitaría de `style.css` reglas que hoy salen de esos archivos (`ring-offset-2`, `pl-10`, `mx-3`…). Si se quiere, es un cambio aparte; no es un efecto de `tailwind.css`.
+
+### Orden de utilidades entre dos compilaciones
+
+`style.css` sale ya compilado. Un consumidor con su propio Tailwind que además lo importa termina con dos compilaciones. Las dos declaran las mismas capas con nombre (`base`, `utilities`…), y el navegador fusiona las capas que tienen el mismo nombre aunque vengan de hojas distintas. El caso se observó en Next.
+
+Dentro de una capa, con la misma especificidad, gana la última regla. Una utilidad responsive es una clase dentro de un `@media`, así que tiene la misma especificidad que la utilidad base. Ejemplo con `Container`, que usa `px-4 md:px-8`:
+
+1. `style.css` emite `.px-4` y, después, `.md\:px-8`.
+2. El consumidor usa `px-4` en su código, así que su compilación vuelve a emitir `.px-4`, más abajo en la capa `utilities`.
+3. A partir de `md`, el `.px-4` del consumidor pisa al `.md\:px-8` del DS y el padding no crece.
+
+Pasa lo mismo con `lg:text-5xl` de `Heading`, con `sm:text-left` de `SheetHeader` y con cualquier utilidad base que el consumidor también use. **Cambiar el orden de los imports solo traslada el problema**: con `style.css` al final, sus utilidades base pisan a las responsive del consumidor. Las variantes con pseudo-clase (`hover:`, `disabled:`) no se ven afectadas, porque `.hover\:bg-x:hover` tiene más especificidad que `.bg-x`.
+
+Hay además un segundo síntoma: la compilación del DS no conoce las clases del consumidor, y la del consumidor no conoce los tokens del DS. Por eso clases como `bg-primary/5` no se generan en ninguna de las dos.
+
+`./tailwind.css` lo resuelve con una sola compilación: el Tailwind del consumidor genera cada utilidad una vez, en el orden correcto, y conoce los tokens. `style.css` queda para consumidores sin Tailwind.
+
+**La guardia** (`scripts/verify-tailwind-consumer.mjs`, paso `verify:tailwind-consumer` del CI) lo verifica contra el paquete real:
+
+1. Hace `npm pack`.
+2. Arma un consumidor sin red, en un directorio temporal fuera del repo: extrae el tarball y copia `tailwindcss` y cada paquete de `@plugin` que el manifiesto empaquetado declara en `dependencies`.
+3. Compila con `@tailwindcss/cli` un `@import 'tailwindcss'` más el de `./tailwind.css`.
+
+Falla si:
+
+- `md:px-8` no queda después de `px-4`;
+- no se genera `bg-primary/5`, que solo usa el fixture;
+- no se genera `sm:text-left`, que solo existe en el JS de `dist/components`;
+- hay más de un preflight;
+- aparece `googleapis`;
+- el CSS pesa más que `style.css`, la señal de que se escaneó `dist/node_modules`;
+- un `@plugin` no está en `dependencies`.
+
+**Por qué `./tailwind.css` no trae la fuente**: así el consumidor elige cómo cargarla (con `next/font` se autoaloja) y la guardia no depende de la red.
 
 ## Versiones y tags
 

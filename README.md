@@ -4,7 +4,7 @@
      no hay automatización que lo sincronice. Si cambias package.json#version, actualiza esta
      línea en el mismo commit. -->
 
-![Version](https://img.shields.io/badge/version-0.5.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.6.0-blue.svg)
 ![React](https://img.shields.io/badge/react-19.0.0+-61DAFB.svg)
 ![TypeScript](https://img.shields.io/badge/typescript-5.9+-3178C6.svg)
 ![Private](https://img.shields.io/badge/registry-private-red.svg)
@@ -71,7 +71,49 @@ npm install react@^19.0.0 react-dom@^19.0.0 \
 
 ## ⚙️ 3. Setup Inicial
 
-Para que los estilos de Tailwind y las fuentes funcionen correctamente, debes importar la hoja de estilos **una sola vez** en el punto de entrada de tu aplicación (ej. `main.tsx`, `App.tsx` o `layout.tsx`).
+Hay dos hojas de estilos, según si tu proyecto usa Tailwind. Se importa **una sola**, una sola vez.
+
+### Con Tailwind v4
+
+Para proyectos con Tailwind v4 (4.1 o posterior; `tailwindcss` es peer opcional del paquete). En tu hoja de estilos global (`globals.css`, `index.css`…), después de Tailwind:
+
+```css
+@import 'tailwindcss';
+@import '@abelardo-salazar/core-ui-design-system/tailwind.css';
+```
+
+- `./tailwind.css` trae los tokens, las capas base y `tailwindcss-animate` sin compilar: los compila tu Tailwind, junto con tus clases, en una sola compilación.
+- Las clases que usan los componentes del paquete se detectan solas; no agregues un `@source` hacia `node_modules`.
+- Las utilidades de los tokens quedan disponibles para tu código, con opacidad incluida: `bg-primary/5`, `text-base-content/65`, `border-error/40`.
+- **No la combines con `style.css`**: `style.css` ya viene compilado, y junto a tu Tailwind quedan dos compilaciones en las mismas capas. Algunas utilidades responsive de los componentes dejan de aplicarse (por ejemplo, el `md:px-8` de `Container`). El porqué está en [ARCHITECTURE § Orden de utilidades entre dos compilaciones](./ARCHITECTURE.md#orden-de-utilidades-entre-dos-compilaciones).
+
+**La fuente la cargas tú.** `./tailwind.css` no importa Google Fonts: así eliges cómo cargarla, por ejemplo autoalojada con `next/font`, sin una petición a un tercero que bloquee el renderizado. El token `--font-sans` vale `'Ubuntu', ui-sans-serif, system-ui, sans-serif`:
+
+- Con un `@import` de Google Fonts o un `@font-face` propio, basta con que la familia se llame `Ubuntu`. El `@import url(...)` va antes de `@import 'tailwindcss'`.
+- Con `next/font`, la familia queda con otro nombre (`__Ubuntu_<hash>`). Exponla en `--font-sans` con la opción `variable`:
+
+```tsx
+// app/layout.tsx
+import { Ubuntu } from 'next/font/google';
+
+const ubuntu = Ubuntu({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '700'],
+  variable: '--font-sans',
+});
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="es" className={ubuntu.variable}>
+      <body>{children}</body>
+    </html>
+  );
+}
+```
+
+### Sin Tailwind
+
+Importa `style.css`, ya compilado y con la fuente Ubuntu de Google Fonts incluida, en el punto de entrada de tu aplicación (ej. `main.tsx`, `App.tsx` o `layout.tsx`):
 
 ```tsx
 // main.tsx
@@ -124,14 +166,14 @@ Estos son los tokens semánticos soportados como superficie pública de theming,
 | `--error-focus`         | `#b91c1c`       | `#f87171`                    |
 | `--error-focus-content` | `#ffffff`       | `#000000`                    |
 
-> `--info`, `--success` y `--warning` **no** tienen variantes `-focus`/`-content` en el sistema actual — solo `--error` las tiene completas (por el contraste de texto que necesita, ver comentarios en `src/index.css`). No agregues `--info-focus`, `--success-content`, etc. asumiendo simetría: no existen y no tienen efecto salvo que también se definan.
+> `--info`, `--success` y `--warning` **no** tienen variantes `-focus`/`-content` en el sistema actual — solo `--error` las tiene completas (por el contraste de texto que necesita, ver comentarios en `src/tailwind.css`). No agregues `--info-focus`, `--success-content`, etc. asumiendo simetría: no existen y no tienen efecto salvo que también se definan.
 
 ### Patrón sancionado: override sin capa (`@layer`)
 
 La única forma de override que garantiza ganar sobre los tokens del design system **sin importar el orden de import** entre tu hoja de estilos y la del paquete es CSS declarado **fuera de cualquier `@layer`**, apuntando a `:root` (claro) y `.dark` (oscuro):
 
 ```css
-/* tu-tema.css — importado en cualquier orden respecto al style.css del design system */
+/* tu-tema.css — en cualquier orden respecto a la hoja del design system (tailwind.css o style.css) */
 :root {
   --primary: #1d4ed8;
   --primary-focus: #1e40af;
@@ -168,7 +210,7 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
 
 ### `--palette-*` es interno, no es la API de theming
 
-`src/index.css` también define tokens `--palette-*` (`--palette-navy`, `--palette-red-dark`, etc.) que son la implementación interna de los tokens semánticos (`--primary: var(--palette-navy)`, por ejemplo). **No están pensados para ser overrideados directamente** y no forman parte de la superficie pública de theming — pueden renombrarse o reestructurarse en cualquier momento sin que eso cuente como breaking change. Overrideá siempre el token semántico (`--primary`, `--base-100`, etc.), nunca `--palette-*`.
+`src/tailwind.css` también define tokens `--palette-*` (`--palette-navy`, `--palette-red-dark`, etc.) que son la implementación interna de los tokens semánticos (`--primary: var(--palette-navy)`, por ejemplo). **No están pensados para ser overrideados directamente** y no forman parte de la superficie pública de theming — pueden renombrarse o reestructurarse en cualquier momento sin que eso cuente como breaking change. Overrideá siempre el token semántico (`--primary`, `--base-100`, etc.), nunca `--palette-*`.
 
 ---
 
@@ -181,6 +223,8 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
   - [📦 2. Instalación](#-2-instalación)
     - [Peer Dependencies](#peer-dependencies)
   - [⚙️ 3. Setup Inicial](#️-3-setup-inicial)
+    - [Con Tailwind v4](#con-tailwind-v4)
+    - [Sin Tailwind](#sin-tailwind)
   - [🎨 4. Theming (Custom Properties)](#-4-theming-custom-properties)
     - [Tokens overrideables](#tokens-overrideables)
     - [Patrón sancionado: override sin capa (`@layer`)](#patrón-sancionado-override-sin-capa-layer)
@@ -271,7 +315,7 @@ La implementación usa `class-variance-authority` (`buttonVariants`, exportado p
 
 > **Regla de alineación: `Button`, `Input` y el trigger de `Select` comparten la misma escala de alturas** (`sm` = 32px, `md` = 44px, `lg` = 48px — `Input`/`Select` no tienen `size="icon"`). En una misma fila (p. ej. un campo con un botón de búsqueda al lado, o un `Select` junto a un `Button`), usa el mismo `size` en los tres para que queden alineados por arriba y por abajo — ver el story `AlignedFormRow` en `FormDemo.stories.tsx`.
 
-> **Nota sobre `variant="destructive"` y el token `--error-focus-content`:** en primary/secondary/accent/neutral, tanto el color base como su `-focus` (hover) son oscuros en modo claro, así que un solo `-content` (blanco) sirve como color de texto para los dos estados. `error` es el único color del sistema donde eso no es cierto: el base (`--error`, `#ef4444`) es claro pero el `-focus` (`--error-focus`, `#b91c1c` en claro / `#f87171` en oscuro) es oscuro — la relación se invierte. Por eso `destructive` es la única variante que necesita `hover:text-error-focus-content` además de `hover:bg-error-focus`; sin ese token, el texto (`text-error-content`, negro) cae a 3.25:1 sobre el fondo de hover. No es un descuido de copiar/pegar de las otras variantes — no lo agregues a primary/secondary/accent/neutral, ahí un solo `-content` ya cubre ambos estados. Ver `src/index.css` para el detalle y el cálculo de contraste en ambos temas.
+> **Nota sobre `variant="destructive"` y el token `--error-focus-content`:** en primary/secondary/accent/neutral, tanto el color base como su `-focus` (hover) son oscuros en modo claro, así que un solo `-content` (blanco) sirve como color de texto para los dos estados. `error` es el único color del sistema donde eso no es cierto: el base (`--error`, `#ef4444`) es claro pero el `-focus` (`--error-focus`, `#b91c1c` en claro / `#f87171` en oscuro) es oscuro — la relación se invierte. Por eso `destructive` es la única variante que necesita `hover:text-error-focus-content` además de `hover:bg-error-focus`; sin ese token, el texto (`text-error-content`, negro) cae a 3.25:1 sobre el fondo de hover. No es un descuido de copiar/pegar de las otras variantes — no lo agregues a primary/secondary/accent/neutral, ahí un solo `-content` ya cubre ambos estados. Ver `src/tailwind.css` para el detalle y el cálculo de contraste en ambos temas.
 
 Uso (ejemplos):
 
@@ -378,7 +422,7 @@ Nota: usa `className` para ajuste fino (color, margen, tracking). Para mantener 
 
 La implementación usa `class-variance-authority` con variantes definidas en `badgeVariants.ts`. Las variantes por defecto son `variant: 'default'`, `size: 'sm'`, `interactive: false`.
 
-> **Nota sobre `variant="destructive"` y el token `--error-focus-content`:** mismo caso que `Button` (`variant="destructive"`) — `error` es el único color del sistema donde el base es claro y su `-focus` (hover) es oscuro, así que el texto necesita un `-focus-content` propio (`hover:text-error-focus-content`) distinto del `-content` del estado base. Esta clase, como el resto del hover, solo se aplica con `interactive: true`. Ver la nota en la sección de `Button` y `src/index.css` para el detalle completo.
+> **Nota sobre `variant="destructive"` y el token `--error-focus-content`:** mismo caso que `Button` (`variant="destructive"`) — `error` es el único color del sistema donde el base es claro y su `-focus` (hover) es oscuro, así que el texto necesita un `-focus-content` propio (`hover:text-error-focus-content`) distinto del `-content` del estado base. Esta clase, como el resto del hover, solo se aplica con `interactive: true`. Ver la nota en la sección de `Button` y `src/tailwind.css` para el detalle completo.
 
 Uso (ejemplos):
 
@@ -1918,7 +1962,7 @@ npm run storybook
 npm run build
 ```
 
-Las notas de arquitectura (theming) y la convención de versiones y tags para publicar viven en [ARCHITECTURE.md](./ARCHITECTURE.md).
+Las notas de arquitectura (theming, `src/tailwind.css` y las dos hojas de estilos) y la convención de versiones y tags para publicar viven en [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ---
 
@@ -1942,8 +1986,16 @@ push nuevo a la misma rama, se cancela el run anterior. Pasos, en orden:
    `verify-client-directives --post-build` (post: `dist/index.js` sin `recharts`,
    `dist/locale.js` sin el barrel raíz ni `recharts`, y `sideEffects` con los módulos con efectos
    de las dependencias empaquetadas).
-7. `npm run test` — Vitest en modo browser.
-8. `npm audit --audit-level=high` — falla solo ante vulnerabilidades `high` /
+7. `npm run verify:tailwind-consumer` — empaqueta con `npm pack`, arma sin red un consumidor
+   con Tailwind v4 que importa `./tailwind.css` y lo compila con `@tailwindcss/cli`. Qué
+   verifica y por qué: [ARCHITECTURE § Orden de utilidades entre dos compilaciones](./ARCHITECTURE.md#orden-de-utilidades-entre-dos-compilaciones).
+8. `npm run test` — Vitest en modo browser (Chromium headless), con las stories como tests, en
+   dos proyectos que corren uno después del otro:
+   - `storybook`: todas las stories salvo las de tag `real-css`. No aplica las utilidades de
+     Tailwind, así que sus aserciones van sobre clases y DOM.
+   - `storybook-css`: solo las stories con tag `real-css`, las que necesitan el CSS aplicado
+     (posición, z-index, `elementFromPoint`). Para sumar una, agregar `tags: ['real-css']`.
+9. `npm audit --audit-level=high` — falla solo ante vulnerabilidades `high` /
    `critical`; `moderate` / `low` no bloquean.
 
 Cualquier paso que falle marca el PR en rojo.

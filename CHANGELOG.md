@@ -20,7 +20,8 @@
 
   No incluye la fuente: `./style.css` importa Ubuntu desde Google Fonts, `./tailwind.css` no.
   El token `--font-sans` sigue apuntando a `'Ubuntu'`, así que la fuente la carga el
-  consumidor (por ejemplo con `next/font`, o con su propio `@import` de Google Fonts).
+  consumidor: con su propio `@import` de Google Fonts, o con `next/font` exponiendo la fuente
+  en `--font-sans` (ver README § Setup Inicial).
 
 ### Fixed
 
@@ -52,7 +53,7 @@
   `@import 'tailwindcss'`, y cargar la fuente Ubuntu. Quitar un `@source` hacia el paquete si
   se había agregado para generar sus clases. No importar las dos hojas a la vez: se vuelve al
   problema de las dos compilaciones.
-- **Sin Tailwind**: nada cambia; `./style.css` sale igual que en 0.5.0.
+- **Sin Tailwind**: nada cambia; `./style.css` no tiene cambios funcionales.
 
 ## [0.5.0] - 2026-10-15
 
