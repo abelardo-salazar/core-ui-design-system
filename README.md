@@ -210,7 +210,7 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
 
 ### `--palette-*` es interno, no es la API de theming
 
-`src/tailwind.css` también define tokens `--palette-*` (`--palette-navy`, `--palette-red-dark`, etc.) que son la implementación interna de los tokens semánticos (`--primary: var(--palette-navy)`, por ejemplo). **No están pensados para ser overrideados directamente** y no forman parte de la superficie pública de theming — pueden renombrarse o reestructurarse en cualquier momento sin que eso cuente como breaking change. Overrideá siempre el token semántico (`--primary`, `--base-100`, etc.), nunca `--palette-*`.
+`src/tailwind.css` también define tokens `--palette-*` (`--palette-navy`, `--palette-red-dark`, etc.) que son la implementación interna de los tokens semánticos (`--primary: var(--palette-navy)`, por ejemplo). **No están pensados para ser overrideados directamente** y no forman parte de la superficie pública de theming — pueden renombrarse o reestructurarse en cualquier momento sin que eso cuente como breaking change. Sobrescribe siempre el token semántico (`--primary`, `--base-100`, etc.), nunca `--palette-*`.
 
 ---
 

@@ -38,7 +38,7 @@ Por eso el override sin capa es el único patrón que se documenta como soportad
 
 ## Hojas de estilos: `style.css` y `tailwind.css`
 
-Qué hoja importar según el proyecto está en [README § Setup Inicial](./README.md#️-3-setup-inicial). Acá va el porqué.
+Qué hoja importar según el proyecto está en [README § Setup Inicial](./README.md#️-3-setup-inicial). Aquí va el porqué.
 
 ### `src/tailwind.css`: fuente única de tokens y capas base
 
