@@ -1,0 +1,30 @@
+name: Audit
+
+# Weekly audit of main: catches advisories published against dependencies that haven't
+# changed. It doesn't block PRs; a failed run notifies by email.
+on:
+  schedule:
+    - cron: '0 9 * * 1' # Mondays 09:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: main
+
+      # npm audit only reads package-lock.json: no npm ci needed.
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Audit
+        run: npm audit --audit-level=high

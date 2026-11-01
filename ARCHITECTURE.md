@@ -208,3 +208,13 @@ El paquete se distribuye por GitHub Packages. El `.npmrc` del consumidor (ver [R
 ### Fuera del DS
 
 Lo específico de un consumidor queda fuera del design system. Precedente: Kanban, que es un proyecto aparte.
+
+### Detección de vulnerabilidades
+
+La detección responde tres preguntas por separado, cada una con su mecanismo:
+
+- **Qué introduce un PR:** `actions/dependency-review-action`, dentro del job `verify`, solo en `pull_request`. Compara las dependencias del PR contra las de `main` y falla desde severidad high. Bloquea, porque el riesgo lo trae el propio PR.
+- **Qué se volvió vulnerable sin cambios:** `npm audit --audit-level=high` sobre `main`, en un workflow semanal (`.github/workflows/audit.yml`) que también se puede lanzar a mano. Avisa, no bloquea: un aviso publicado contra una dependencia que nadie tocó no es responsabilidad del PR que esté abierto.
+- **Quién propone el arreglo:** Dependabot (`.github/dependabot.yml`), solo con actualizaciones de seguridad. Las familias que se versionan juntas van en un mismo grupo, para que el arreglo no rompa sus peers exactos.
+
+Razón: el audit dentro del check obligatorio no es determinista. El mismo commit pasa un día y falla al siguiente por avisos nuevos, sin relación con lo que cambia el PR. Precedente: el 2026-11-01, un aviso de Storybook bloqueó el PR #69, que solo cambiaba Markdown.

@@ -76,6 +76,11 @@ jobs:
       - name: Test
         run: npm run test
 
-      # Falla solo ante vulnerabilidades high/critical; moderate/low no bloquean.
-      - name: Audit
-        run: npm audit --audit-level=high
+      # Fails only on high/critical vulnerabilities introduced by the PR's own dependency
+      # changes. Advisories published later against unchanged dependencies are caught by
+      # the weekly audit (audit.yml), so they don't block unrelated PRs.
+      - name: Dependency review
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@v5
+        with:
+          fail-on-severity: high

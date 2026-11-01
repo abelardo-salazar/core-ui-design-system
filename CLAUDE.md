@@ -15,6 +15,7 @@
 ## Flujo de trabajo (aplica a todas las tareas)
 
 - El prefijo de la rama es el tipo del título del PR, de la lista cerrada `feat/`, `fix/`, `docs/`, `chore/` (convención).
+- Excepción: las ramas `dependabot/` las crea Dependabot y no siguen la convención de prefijos. Antes de mergear un PR de Dependabot que toca `dependencies`, agregar en su rama la entrada del CHANGELOG y re-verificar el [criterio de peer o dependency](./ARCHITECTURE.md#peer-o-dependency).
 - PR obligatorio con el check `verify`, también para admins; solo squash, con el título del PR como título del commit (lo fuerza GitHub). Nunca commits directos a main.
 - Mergear un PR solo con autorización explícita del usuario en la conversación, que nombre ese PR; nunca para destrabar otra tarea.
 - Título del PR en Conventional Commits (convención, sin verificación automática).
