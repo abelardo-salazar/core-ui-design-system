@@ -22,6 +22,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
+      # Fails only on high/critical vulnerabilities introduced by the PR's own dependency
+      # changes. Advisories published later against unchanged dependencies are caught by
+      # the weekly audit (audit.yml), so they don't block unrelated PRs. It reads the
+      # dependency diff from the GitHub API and needs no install, so it runs first.
+      - name: Dependency review
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@v5
+        with:
+          fail-on-severity: high
+
       # Node 22 LTS: el repo no declara engines; es la intersección de los rangos
       # de las deps instaladas (vitest 4 excluye Node 23, vite 7 pide >=22.12).
       - name: Setup Node
@@ -79,12 +89,3 @@ jobs:
 
       - name: Test
         run: npm run test
-
-      # Fails only on high/critical vulnerabilities introduced by the PR's own dependency
-      # changes. Advisories published later against unchanged dependencies are caught by
-      # the weekly audit (audit.yml), so they don't block unrelated PRs.
-      - name: Dependency review
-        if: github.event_name == 'pull_request'
-        uses: actions/dependency-review-action@v5
-        with:
-          fail-on-severity: high

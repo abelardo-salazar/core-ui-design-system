@@ -1,0 +1,115 @@
+name: Release
+
+# Publishes the package to GitHub Packages when a vX.Y.Z tag is pushed. The tag defines what
+# gets published: the tagged commit must be on main and its package.json must have version
+# X.Y.Z. Release flow: ARCHITECTURE.md § Versiones y tags.
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: read
+  packages: write
+
+# Never cancel a release half-way; a second push of the same tag waits for the first run.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      # Full history so the tagged commit can be checked against main.
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Check tag against package.json and main
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $version (expected v$version)."
+            exit 1
+          fi
+          commit="$(git rev-parse "$GITHUB_REF^{commit}")"
+          git fetch --no-tags origin main
+          if ! git merge-base --is-ancestor "$commit" origin/main; then
+            echo "::error::Tag $GITHUB_REF_NAME points to $commit, which is not on main."
+            exit 1
+          fi
+          echo "Tag $GITHUB_REF_NAME matches package.json and $commit is on main."
+
+      # Node 22 LTS, same as ci.yml. registry-url writes an .npmrc that authenticates
+      # npm view and npm publish against GitHub Packages with NODE_AUTH_TOKEN.
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@abelardo-salazar'
+
+      # Fails before the long steps if the version is already in the registry. A failing
+      # npm view (auth, network) also fails the job: publishing is never attempted blind.
+      - name: Check version is not published
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          name="$(node -p "require('./package.json').name")"
+          version="$(node -p "require('./package.json').version")"
+          published="$(npm view "$name" versions --json)"
+          if node -e 'const v = [].concat(JSON.parse(process.argv[1])); process.exit(v.includes(process.argv[2]) ? 0 : 1)' "$published" "$version"; then
+            echo "::error::$name@$version is already published. Bump the version in a release PR and tag the new version."
+            exit 1
+          fi
+          echo "$name@$version is not published yet."
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Same verification as the verify job in ci.yml; keep both in sync.
+      - name: Get Playwright version
+        id: playwright
+        run: echo "version=$(node -p "require('playwright/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-chromium-shell
+
+      - name: Install Playwright Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install chromium --only-shell
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format
+        run: npm run format:check
+
+      - name: Verify README
+        run: npm run verify:readme
+
+      - name: Typecheck
+        run: npx tsc -b
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify Tailwind consumer
+        run: npm run verify:tailwind-consumer
+
+      - name: Test
+        run: npm run test
+
+      # Publishes the dist/ built and tested above. publishConfig.registry in package.json
+      # points to GitHub Packages; the registry also rejects a version that already exists.
+      - name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm publish

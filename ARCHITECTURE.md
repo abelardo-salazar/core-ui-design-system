@@ -105,20 +105,19 @@ Una versión sin publicar acumula todos los PRs en una sola entrada del CHANGELO
 
 ### Tags
 
-- **Formato:** tag **anotado** `vX.Y.Z` (`git tag -a vX.Y.Z -m "vX.Y.Z"`), sobre el commit de `main` desde el que se publicó (el `gitHead` que registra el paquete: `npm view @abelardo-salazar/core-ui-design-system@X.Y.Z gitHead`).
-- **Si el `gitHead` no está en `main`:** pasa cuando la historia de `main` se reescribió después de publicar, por ejemplo para cambiar metadatos de autor. El commit original sigue existiendo en GitHub, pero ya no está en ninguna rama. No se le pone tag: lo volvería a hacer visible con los datos que la reescritura quitó. El tag va sobre el commit de `main` con el mismo árbol, que es el mismo contenido publicado. Para encontrarlo y comprobarlo:
+Se publica empujando un tag. El flujo:
 
-  ```bash
-  git fetch origin <gitHead>                   # trae el commit original por SHA
-  git rev-parse <gitHead>^{tree}               # árbol publicado
-  git rev-parse <commit-de-main>^{tree}        # debe ser idéntico
-  git merge-base --is-ancestor <commit-de-main> origin/main && echo en-main
-  ```
+1. **PR de release:** sube `version` en `package.json` y `package-lock.json`, cierra la entrada del CHANGELOG (de `[Unreleased]` a `[X.Y.Z] - <fecha>`, con el delta neto) y actualiza el badge y la línea de versión del README. `verify:readme` comprueba que coincidan.
+2. **Merge** del PR a `main`.
+3. **Tag anotado** `vX.Y.Z` sobre el commit del merge: `git tag -a vX.Y.Z -m "vX.Y.Z" <commit>`.
+4. **Push del tag:** `git push origin vX.Y.Z`.
+5. **El workflow `release.yml` publica.** Falla sin publicar si el tag no es `v` + `package.json#version`, si su commit no está en `main` o si esa versión ya está en el registro. Si no falla, corre la misma verificación que `ci.yml` y publica en GitHub Packages con `GITHUB_TOKEN`.
 
-  El candidato es el commit de `main` con el mismo título que el `gitHead`. Antes de poner el tag, verificar también que su `package.json` tenga la versión `X.Y.Z`.
+Razón: el tag define lo que se publica. Antes se publicaba a mano con `npm publish` desde una máquina local y el tag se ponía después, reconstruyendo qué commit se había publicado. Ahora el paquete sale del commit con tag, verificado en CI, y no hay nada que reconstruir.
 
-- **Cuándo:** después de publicar, no antes. Un tag sin versión publicada apuntaría a algo que no existe en el registro.
-- **Versiones anteriores:** `v0.4.1` y `v0.4.2` existen como tags ligeros (no anotados), creados antes de esta convención, y se dejan así. Igual que `v0.4.3`, `v0.4.4` y `v0.5.0` (anotados, creados después de publicar), apuntan al commit de `main` con el mismo árbol que su `gitHead`, porque la historia se reescribió después de publicarlas. Las versiones anteriores a 0.4.1 no tienen tag.
+Un tag que falló no se mueve para reintentar: se corrige en un PR, se sube la versión si el error ya estaba en el commit con tag y se empuja un tag nuevo. Si la falla fue externa (el registro, la red), se vuelve a correr el workflow.
+
+**Nota histórica:** antes de este flujo, los tags se ubicaban con el `gitHead` del paquete publicado (`npm view …@X.Y.Z gitHead`). GitHub Packages no lo expone (devuelve vacío), así que los tags anteriores se ubicaron por la hora de publicación que registra el registro. Está verificado para 0.6.0 y 0.7.0. `v0.4.1` y `v0.4.2` son tags ligeros (no anotados), creados antes de la convención de tags anotados, y se dejan así. Las versiones anteriores a 0.4.1 no tienen tag.
 
 ## Decisiones
 
