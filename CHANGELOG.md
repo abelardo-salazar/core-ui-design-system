@@ -9,7 +9,7 @@
   no son los componentes del DS) y `dist/vite.svg`. Ya no se publican. No formaban parte de la API:
   no se exportaban ni se podían importar por el mapa `exports`. Con ellos, `style.css` deja de
   generar 11 utilidades de Tailwind que solo usaba ese ejemplo (colores de acento y secundario,
-  una sombra, un margen y transiciones, entre otras); la lista está en el PR #PRNUM. Los componentes
+  una sombra, un margen y transiciones, entre otras); la lista está en el [PR #82](https://github.com/abelardo-salazar/core-ui-design-system/pull/82). Los componentes
   no las usan. **Migración:** solo si un proyecto sin Tailwind usaba alguna de ellas en su propio
   código, tiene que definirla él.
 
