@@ -5,7 +5,7 @@
 ![TypeScript](https://img.shields.io/badge/typescript-5.9+-3178C6.svg)
 ![Registry](https://img.shields.io/badge/registry-GitHub%20Packages-181717.svg)
 
-**Última versión publicada:** `0.7.1`.
+**Última versión publicada:** `0.7.1`. `main` tiene cambios sin publicar: ver [CHANGELOG § Unreleased](./CHANGELOG.md#unreleased).
 
 **Core UI** es la biblioteca de componentes oficial para nuestros productos digitales. Construida sobre **React 19**, **Radix UI** y **Tailwind CSS v4**, ofrece componentes accesibles (A11y), ligeros y listos para producción.
 
