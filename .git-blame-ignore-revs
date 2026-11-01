@@ -1,5 +1,9 @@
-# Commits de solo formato, ignorados por git blame. GitHub lo lee automáticamente; en local:
+# Formatting-only and comment-only commits, ignored by git blame. GitHub reads this file
+# automatically; locally:
 #   git config blame.ignoreRevsFile .git-blame-ignore-revs
 
 # fix: formatear el repo con Prettier y fijar fin de línea LF (#46)
 91d40835fcf2196b4967a46d71f4aa1042b4b1b3
+
+# chore: comentarios de código y salida de scripts en inglés (#83)
+10886ab4702e20e56e93a40915d61eb70f69d979
