@@ -77,22 +77,22 @@ export const EditProfileExample: Story = {
     const dialog = await body.findByRole('dialog');
     const dialogScope = within(dialog);
 
-    // Touch target: p-3.5 (14px) lleva el hit box a 44x44 (Apple HIG) sin que el ícono
-    // (h-4 w-4, 16x16) cambie de tamaño; right-0.5/top-0.5 (16px - 14px de padding)
-    // compensa el offset para que el ícono quede en el mismo lugar visual que con
-    // right-4/top-4 sin padding. El fixture de vitest-browser no aplica el CSS de
-    // utilidades de Tailwind (mismo issue documentado en el story Destructive de Button),
-    // así que la aserción va sobre las clases; el tamaño y la posición reales en píxeles
-    // (44x44, ícono a 16px del borde superior/derecho) se verificaron a mano en Storybook
-    // con devtools de un navegador real, en ambos temas.
+    // Touch target: p-3.5 (14px) takes the hit box to 44x44 (Apple HIG) without the icon
+    // (h-4 w-4, 16x16) changing size; right-0.5/top-0.5 (16px - 14px of padding)
+    // compensates the offset so the icon stays in the same visual spot as with
+    // right-4/top-4 without padding. The vitest-browser fixture doesn't apply Tailwind's
+    // utility CSS (same issue documented in Button's Destructive story),
+    // so the assertion is on the classes; the real pixel size and position
+    // (44x44, icon 16px from the top/right edge) were checked by hand in Storybook
+    // with the devtools of a real browser, in both themes.
     const closeButton = dialogScope.getByRole('button', { name: 'Close' });
     const closeClasses = closeButton.className.split(' ');
     await expect(closeClasses).toContain('p-3.5');
     await expect(closeClasses).toContain('right-0.5');
     await expect(closeClasses).toContain('top-0.5');
     await expect(closeButton.querySelector('svg')).toHaveClass('h-4', 'w-4');
-    // Anillo igual al de la ✕ de Sheet: solo con teclado (focus-visible), dentro del área
-    // táctil y sin separación. Con el mouse no aparece.
+    // Ring same as Sheet's ✕: keyboard only (focus-visible), inside the touch
+    // area and without offset. It doesn't appear with the mouse.
     await expect(closeButton).toHaveClass(
       'focus-visible:ring-2',
       'focus-visible:ring-inset',
@@ -100,23 +100,23 @@ export const EditProfileExample: Story = {
     );
     await expect(closeButton.className).not.toMatch(/(^|\s)focus:|ring-offset/);
 
-    // axe: label — los inputs no tenían label real, solo texto suelto sin htmlFor.
+    // axe: label; the inputs had no real label, only loose text without htmlFor.
     await expect(dialogScope.getByLabelText('Name')).toHaveValue('Pedro Duarte');
     await expect(dialogScope.getByLabelText('Username')).toHaveValue('@pedrodev');
 
-    // Radix mueve el foco dentro del contenido al abrir (FocusScope), delegado sin test hasta ahora.
+    // Radix moves focus inside the content on opening (FocusScope), left untested until now.
     await expect(dialog.contains(document.activeElement)).toBe(true);
 
-    // Escape cierra el diálogo (DismissableLayer de Radix).
+    // Escape closes the dialog (Radix's DismissableLayer).
     await userEvent.keyboard('{Escape}');
     await waitFor(() => expect(body.queryByRole('dialog')).not.toBeInTheDocument());
 
-    // El foco vuelve al trigger tras cerrar (onCloseAutoFocus por defecto de Radix).
+    // Focus returns to the trigger after closing (Radix's default onCloseAutoFocus).
     await expect(trigger).toHaveFocus();
   },
 };
 
-// closeLabel cambia el nombre accesible de la ✕ (por defecto "Close") y no llega al DOM.
+// closeLabel changes the accessible name of the ✕ ("Close" by default) and doesn't reach the DOM.
 export const CustomCloseLabel: Story = {
   render: () => (
     <Dialog defaultOpen>

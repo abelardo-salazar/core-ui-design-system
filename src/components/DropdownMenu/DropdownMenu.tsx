@@ -5,16 +5,16 @@ import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { CheckIcon, DotFilledIcon } from '@radix-ui/react-icons';
 import { cn } from '../../utils/cn';
 
-// Alcance recortado a propósito: sin Sub/SubTrigger/SubContent (submenús anidados) ni
-// Shortcut. Si se necesitan, se agregan en un cambio aparte.
+// Scope trimmed on purpose: no Sub/SubTrigger/SubContent (nested submenus) or
+// Shortcut. If they're needed, they're added in a separate change.
 const DropdownMenu = DropdownMenuPrimitive.Root;
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
 const DropdownMenuGroup = DropdownMenuPrimitive.Group;
 const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup;
 
 // -----------------------------------------------------------------------------
-// Content — mismo shell visual que SelectContent (bg-base-100, rounded-box,
-// border-base-300, shadow-md, animaciones por data-state/data-side).
+// Content: same visual shell as SelectContent (bg-base-100, rounded-box,
+// border-base-300, shadow-md, animations by data-state/data-side).
 // -----------------------------------------------------------------------------
 const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
@@ -38,7 +38,7 @@ const DropdownMenuContent = React.forwardRef<
 DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName;
 
 // -----------------------------------------------------------------------------
-// Item — focus:bg-base-200, mismo token que el highlight de SelectItem.
+// Item: focus:bg-base-200, same token as SelectItem's highlight.
 // -----------------------------------------------------------------------------
 const DropdownMenuItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Item>,
@@ -58,10 +58,10 @@ const DropdownMenuItem = React.forwardRef<
 DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName;
 
 // -----------------------------------------------------------------------------
-// CheckboxItem — CheckIcon vía ItemIndicator, mismo layout de indicador absoluto
-// que SelectItem. Radix no ofrece modo no controlado acá (sin defaultChecked, a
-// diferencia de Checkbox/Switch): checked + onCheckedChange quedan a cargo de quien
-// consume, este wrapper no le agrega un fallback que la propia primitiva no tiene.
+// CheckboxItem: CheckIcon through ItemIndicator, same absolute indicator layout
+// as SelectItem. Radix offers no uncontrolled mode here (no defaultChecked, unlike
+// Checkbox/Switch): checked + onCheckedChange are up to the consumer, this wrapper
+// doesn't add a fallback the primitive itself doesn't have.
 // -----------------------------------------------------------------------------
 const DropdownMenuCheckboxItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.CheckboxItem>,
@@ -88,7 +88,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
 DropdownMenuCheckboxItem.displayName = DropdownMenuPrimitive.CheckboxItem.displayName;
 
 // -----------------------------------------------------------------------------
-// RadioItem — DotFilledIcon vía ItemIndicator, mismo criterio que CheckboxItem.
+// RadioItem: DotFilledIcon through ItemIndicator, same criterion as CheckboxItem.
 // -----------------------------------------------------------------------------
 const DropdownMenuRadioItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.RadioItem>,
@@ -115,8 +115,8 @@ const DropdownMenuRadioItem = React.forwardRef<
 DropdownMenuRadioItem.displayName = DropdownMenuPrimitive.RadioItem.displayName;
 
 // -----------------------------------------------------------------------------
-// Label — texto secundario, mismo patrón que helperText de Input/Textarea (no el
-// de SelectLabel: acá se pidió deliberadamente el estilo más sutil).
+// Label: secondary text, same pattern as Input/Textarea's helperText (not
+// SelectLabel's: the subtler style was deliberately requested here).
 // -----------------------------------------------------------------------------
 const DropdownMenuLabel = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Label>,
@@ -131,7 +131,7 @@ const DropdownMenuLabel = React.forwardRef<
 DropdownMenuLabel.displayName = DropdownMenuPrimitive.Label.displayName;
 
 // -----------------------------------------------------------------------------
-// Separator — mismas clases que SelectSeparator.
+// Separator: same classes as SelectSeparator.
 // -----------------------------------------------------------------------------
 const DropdownMenuSeparator = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Separator>,

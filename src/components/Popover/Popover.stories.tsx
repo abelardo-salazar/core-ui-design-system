@@ -30,17 +30,17 @@ export const Default: Story = {
     const canvas = within(canvasElement);
     const trigger = canvas.getByRole('button', { name: 'Open popover' });
 
-    // El content vive en un Portal fuera de canvasElement, así que se busca en document.body.
+    // The content lives in a Portal outside canvasElement, so it's searched in document.body.
     const body = within(document.body);
     await expect(body.queryByText('This is the popover content.')).not.toBeInTheDocument();
 
     await userEvent.click(trigger);
 
-    // PopoverPrimitive.Content se renderiza con role="dialog".
+    // PopoverPrimitive.Content renders with role="dialog".
     const contentPanel = await body.findByRole('dialog');
     await expect(contentPanel).toHaveTextContent('This is the popover content.');
 
-    // Debe usar la misma superficie del DS que el resto de los overlays (Select, Dialog).
+    // Must use the same DS surface as the rest of the overlays (Select, Dialog).
     await expect(contentPanel.className.split(' ')).toContain('bg-base-100');
   },
 };

@@ -9,8 +9,8 @@ import { cn } from '../../utils/cn';
 
 export interface QuantityStepperProps extends Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
-  // 'size' choca con la variante de tamaño de Input (string), no con el atributo nativo
-  // (number) — mismo Omit que ya usa InputProps.
+  // 'size' clashes with Input's size variant (string), not with the native attribute
+  // (number); same Omit that InputProps already uses.
   'value' | 'defaultValue' | 'onChange' | 'type' | 'min' | 'max' | 'step' | 'size'
 > {
   value?: number;
@@ -18,12 +18,12 @@ export interface QuantityStepperProps extends Omit<
   onChange?: (value: number) => void;
   min?: number;
   max?: number;
-  /** Incremento/decremento por click. @default 1 */
+  /** Increment/decrement per click. @default 1 */
   step?: number;
   disabled?: boolean;
-  /** Nombre accesible del botón −. @default 'Decrease quantity' */
+  /** Accessible name of the − button. @default 'Decrease quantity' */
   decrementLabel?: string;
-  /** Nombre accesible del botón +. @default 'Increase quantity' */
+  /** Accessible name of the + button. @default 'Increase quantity' */
   incrementLabel?: string;
 }
 
@@ -58,8 +58,8 @@ const QuantityStepper = React.forwardRef<HTMLInputElement, QuantityStepperProps>
 
     const safeValue = currentValue ?? 0;
 
-    // Deshabilitado real vía prop `disabled` de Button, no un no-op en el handler:
-    // el botón no debe recibir foco/click cuando ya no hay a dónde mover el valor.
+    // Really disabled through Button's `disabled` prop, not a no-op in the handler:
+    // the button must not get focus/clicks when there's nowhere left to move the value.
     const canDecrement = !disabled && safeValue - step >= min;
     const canIncrement = !disabled && safeValue + step <= max;
 
@@ -73,8 +73,8 @@ const QuantityStepper = React.forwardRef<HTMLInputElement, QuantityStepperProps>
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       const raw = event.target.value;
-      // Permitimos que el campo quede vacío mientras se edita (seleccionar todo + borrar);
-      // onBlur lo devuelve a un valor válido. El valor controlado nunca llega a estar vacío.
+      // We let the field be empty while editing (select all + delete);
+      // onBlur brings it back to a valid value. The controlled value is never empty.
       if (raw === '') return;
       const parsed = Number(raw);
       if (Number.isNaN(parsed)) return;
@@ -112,17 +112,17 @@ const QuantityStepper = React.forwardRef<HTMLInputElement, QuantityStepperProps>
           value={safeValue}
           onChange={handleInputChange}
           onBlur={handleBlur}
-          // role="spinbutton" (implícito de type="number") exige nombre accesible; sin label
-          // visible propio, el a11y addon de Storybook lo marca "Critical" (Form label).
+          // role="spinbutton" (implicit from type="number") requires an accessible name; without a
+          // visible label of its own, Storybook's a11y addon flags it as "Critical" (Form label).
           aria-label={ariaLabel ?? 'Quantity'}
           className={cn(
-            // Sin override de altura acá: Input md ya da 44px por su cuenta (misma familia de
-            // controles de formulario que Button), alineado de fábrica con los botones +/-
-            // (size="icon" de Button, también 44px) — antes hacía falta pisarlo a mano con
-            // className="h-11" porque Input md medía 40px; ya no.
+            // No height override here: Input md already gives 44px on its own (same family of
+            // form controls as Button), aligned out of the box with the +/- buttons
+            // (Button's size="icon", also 44px); before, it had to be overridden by hand with
+            // className="h-11" because Input md measured 40px; not anymore.
             'w-full text-center',
-            // El input number nativo trae sus propias flechas de +/-; las ocultamos para
-            // que no convivan visualmente con los botones custom de este componente.
+            // The native number input has its own +/- arrows; we hide them so
+            // they don't coexist visually with this component's custom buttons.
             '[&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [appearance:textfield]',
           )}
         />

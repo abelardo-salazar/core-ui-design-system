@@ -17,8 +17,8 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      // h-11 (44px): alinea con Button md e Input md, la misma familia de controles de
-      // formulario — antes h-10 (40px), desalineado contra Button md tras su propio fix.
+      // h-11 (44px): aligns with Button md and Input md, the same family of form
+      // controls; before it was h-10 (40px), misaligned against Button md after its own fix.
       'flex h-11 w-full items-center justify-between rounded-btn border border-base-300 bg-base-100 px-3 py-2 text-sm placeholder:text-base-content/50',
       'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
       'disabled:cursor-not-allowed disabled:opacity-50',

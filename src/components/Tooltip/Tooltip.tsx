@@ -4,8 +4,8 @@ import * as React from 'react';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import { cn } from '../../utils/cn';
 
-// Provider sin estilos propios: se monta una sola vez en un nivel alto del árbol
-// de la app consumidora (mismo rol que <Toast /> en el root layout).
+// Provider without styles of its own: it's mounted once at a high level of the
+// consuming app's tree (same role as <Toast /> in the root layout).
 const TooltipProvider = TooltipPrimitive.Provider;
 
 const Tooltip = TooltipPrimitive.Root;
@@ -26,8 +26,8 @@ const TooltipContent = React.forwardRef<
         // tooltip never opens on a coarse-pointer device. This also hides the content via
         // CSS on those devices. Tooltip is not for touch-critical info — use Popover there.
         'pointer-coarse:hidden',
-        // El data-state de Tooltip no es "open"/"closed" como en Popover: Radix distingue
-        // "delayed-open" (hover) de "instant-open" (foco por teclado), además de "closed".
+        // Tooltip's data-state isn't "open"/"closed" like in Popover: Radix tells
+        // "delayed-open" (hover) apart from "instant-open" (keyboard focus), besides "closed".
         'data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95',
         'data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in-0 data-[state=delayed-open]:zoom-in-95',
         'data-[state=instant-open]:animate-in data-[state=instant-open]:fade-in-0 data-[state=instant-open]:zoom-in-95',

@@ -66,16 +66,16 @@ export const Interactive: Story = {
     const canvas = within(canvasElement);
     const successButton = canvas.getByRole('button', { name: 'Success' });
 
-    // Dispara la notificación vía la API imperativa de Sonner (toast.success).
+    // Fires the notification through Sonner's imperative API (toast.success).
     await userEvent.click(successButton);
 
-    // El toast vive en el portal de Sonner, fuera de canvasElement.
+    // The toast lives in Sonner's portal, outside canvasElement.
     const body = within(document.body);
     const message = await body.findByText('Event created successfully!');
     const toastEl = message.closest('[data-sonner-toast]');
 
     await expect(toastEl).toBeInTheDocument();
-    // Tokens del DS ya migrados en la auditoría anterior (no los slate-* viejos).
+    // DS tokens already migrated in the previous audit (not the old slate-* ones).
     await expect(toastEl?.className).toContain('group-[.toaster]:bg-base-100');
     await expect(toastEl?.className).not.toMatch(/slate/);
   },

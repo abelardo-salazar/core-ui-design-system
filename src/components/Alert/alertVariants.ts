@@ -1,11 +1,11 @@
 import { cva } from 'class-variance-authority';
 
-// Los tokens --info/--success/--warning no tienen variante "-content" ni override de dark
-// mode en tailwind.css (a diferencia de --error) — están pensados como acento, no como fondo
-// sólido con texto encima. Por eso el contenedor usa el color a /10 de opacidad + borde a
-// /30, y el texto del cuerpo queda en base-content (ver alertIconVariants para el acento
-// pleno en el ícono). Se aplica el mismo criterio a error por consistencia visual entre las
-// cuatro variantes, aunque error sí tenga tokens de sobra para fondo sólido.
+// The --info/--success/--warning tokens have no "-content" variant or dark mode override
+// in tailwind.css (unlike --error); they're meant as an accent, not as a solid background
+// with text on top. That's why the container uses the color at /10 opacity + a border at
+// /30, and the body text stays base-content (see alertIconVariants for the full accent
+// on the icon). The same criterion is applied to error for visual consistency across the
+// four variants, even though error does have plenty of tokens for a solid background.
 export const alertVariants = cva('relative flex w-full gap-3 rounded-box border p-4', {
   variants: {
     variant: {

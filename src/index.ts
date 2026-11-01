@@ -9,11 +9,11 @@ export * from './components/Button';
 export * from './components/Calendar';
 export * from './components/Card';
 export * from './components/Checkbox';
-// `Chart` NO se exporta desde el barrel raíz: arrastra recharts, que llama createContext()
-// a nivel de módulo y rompe el barrel entero en Server Components (react-server). Vive en su
-// propio subpath, client-only completo:
+// `Chart` is NOT exported from the root barrel: it pulls in recharts, which calls
+// createContext() at module level and breaks the whole barrel in Server Components
+// (react-server). It lives in its own subpath, fully client-only:
 //   import { ChartContainer, BarChart, ... } from '@abelardo-salazar/core-ui-design-system/charts';
-// Ver src/charts.ts y CHANGELOG.md [0.4.1].
+// See src/charts.ts and CHANGELOG.md [0.4.1].
 export * from './components/Chip';
 export * from './components/Combobox';
 export * from './components/DataTable';
@@ -41,6 +41,6 @@ export * from './components/Tooltip';
 export * from './components/Typography'; // Heading, Text
 export * from './components/VisuallyHidden';
 
-// Exportar utilidades si son necesarias externamente
+// Export utilities that are needed externally
 export { cn } from './utils/cn';
 export { announce, type AnnounceOptions } from './utils/announce';

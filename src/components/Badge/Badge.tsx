@@ -7,7 +7,7 @@ type BadgeVariantProps = Omit<VariantProps<typeof badgeVariants>, 'interactive'>
 
 export interface InteractiveBadgeProps
   extends BadgeVariantProps, React.ButtonHTMLAttributes<HTMLButtonElement> {
-  /** Renderiza un <button> real: foco, Enter/Space y disabled nativos, sin handlers propios. */
+  /** Renders a real <button>: native focus, Enter/Space and disabled, with no handlers of its own. */
   interactive: true;
 }
 
@@ -16,33 +16,33 @@ export interface StaticBadgeProps
   interactive?: false;
 }
 
-// Unión discriminada por `interactive`, no un solo tipo con todo opcional: así
-// `<Badge onClick={fn}>` sin `interactive` es un error de compilación (antes compilaba y
-// renderizaba un <div> con el click funcionando pero sin foco por teclado ni semántica de
-// botón) en vez de perder el hover/foco en silencio. `onClick` se omite explícitamente del
-// lado <div> en vez de dejarlo heredar de HTMLAttributes para que el error sea sobre esa
-// prop puntual, no sobre toda la forma del objeto.
+// Union discriminated by `interactive`, not a single type with everything optional: that way
+// `<Badge onClick={fn}>` without `interactive` is a compile error (before, it compiled and
+// rendered a <div> with a working click but without keyboard focus or button
+// semantics) instead of silently losing the hover/focus. `onClick` is explicitly omitted on
+// the <div> side instead of letting it inherit from HTMLAttributes so the error is about that
+// specific prop, not about the whole shape of the object.
 export type BadgeProps = InteractiveBadgeProps | StaticBadgeProps;
 
-// La unión sola NO alcanza: en `StaticBadgeProps`, `interactive` es opcional
-// (`interactive?: false`), así que al omitirlo TS no puede usarlo para discriminar y el
-// chequeo de propiedades sobrantes de JSX cae a "¿existe esta prop en ALGÚN miembro de la
-// unión?" — onClick/disabled/type existen en InteractiveBadgeProps, así que `<Badge onClick>`
-// sin `interactive` compilaba igual (bug real de #34, reproducido contra main antes de este
-// fix). Dos firmas sobrecargadas, una por rama, arreglan esto: TS chequea las props sobrantes
-// contra la firma CONCRETA que intenta primero, no contra la unión — ninguna de las dos admite
-// onClick/disabled/type sin `interactive: true` literal. (`disabled`/`type` ni siquiera son
-// parte de HTMLAttributes<HTMLDivElement> — por eso esto también los cubre a ellos, no solo a
-// onClick, sin necesitar ningún Omit/never adicional.)
+// The union alone is NOT enough: in `StaticBadgeProps`, `interactive` is optional
+// (`interactive?: false`), so when it's omitted TS can't use it to discriminate and JSX's
+// excess property check falls back to "does this prop exist in ANY member of the
+// union?"; onClick/disabled/type exist in InteractiveBadgeProps, so `<Badge onClick>`
+// without `interactive` compiled anyway (real bug of #34, reproduced against main before this
+// fix). Two overloaded signatures, one per branch, fix this: TS checks excess props
+// against the CONCRETE signature it tries first, not against the union; neither of them allows
+// onClick/disabled/type without a literal `interactive: true`. (`disabled`/`type` aren't even
+// part of HTMLAttributes<HTMLDivElement>, which is why this also covers them, not just
+// onClick, without needing any extra Omit/never.)
 function Badge(props: InteractiveBadgeProps): React.ReactElement;
 function Badge(props: StaticBadgeProps): React.ReactElement;
 function Badge(props: BadgeProps) {
   const { className, variant, size, interactive = false, ...rest } = props;
 
   if (interactive) {
-    // El cast hace falta porque TS no sigue el discriminante `interactive` a través de un
-    // rest-spread sobre una unión (el chequeo en runtime ya garantiza que `rest` es la rama
-    // de botón acá; TS no puede inferirlo solo).
+    // The cast is needed because TS doesn't follow the `interactive` discriminant through a
+    // rest-spread over a union (the runtime check already guarantees that `rest` is the button
+    // branch here; TS can't infer it on its own).
     const { type = 'button', ...buttonProps } = rest as Omit<
       InteractiveBadgeProps,
       'className' | 'variant' | 'size' | 'interactive'

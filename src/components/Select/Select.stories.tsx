@@ -36,14 +36,14 @@ const SelectDemo = () => (
   </Select>
 );
 
-// 1. Default: abrir con click, seleccionar con click.
+// 1. Default: open with a click, select with a click.
 export const Default: Story = {
   render: () => <SelectDemo />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const trigger = canvas.getByRole('combobox');
 
-    // El contenido vive en un Portal fuera de canvasElement (mismo patrón que
+    // The content lives in a Portal outside canvasElement (same pattern as
     // Dialog/Sheet/Popover/Toast).
     const body = within(document.body);
     await expect(body.queryByRole('listbox')).not.toBeInTheDocument();
@@ -59,8 +59,8 @@ export const Default: Story = {
   },
 };
 
-// 2. KeyboardSelection: abrir con click (patrón consistente con Default), navegar y
-// seleccionar con teclado (flecha + Enter) — nunca verificado hasta ahora.
+// 2. KeyboardSelection: open with a click (pattern consistent with Default), navigate and
+// select with the keyboard (arrow + Enter); never checked until now.
 export const KeyboardSelection: Story = {
   render: () => <SelectDemo />,
   play: async ({ canvasElement }) => {

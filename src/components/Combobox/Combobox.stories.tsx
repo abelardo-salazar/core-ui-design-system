@@ -55,9 +55,9 @@ const Field = ({ children }: { children: React.ReactNode }) => (
   <div className="w-72">{children}</div>
 );
 
-// 1. Roles: el disparador anuncia la etiqueta y el valor; dentro del popover (dialog con el
-// nombre de la etiqueta), el buscador es un combobox y la lista un listbox de option. size no
-// llega al DOM.
+// 1. Roles: the trigger announces the label and the value; inside the popover (a dialog named
+// after the label), the search field is a combobox and the list a listbox of options. size
+// doesn't reach the DOM.
 export const Default: Story = {
   render: () => (
     <Field>
@@ -100,8 +100,8 @@ export const Default: Story = {
   },
 };
 
-// 2. Filtro propio: sin mayúsculas ni acentos, en cualquier parte de la etiqueta y en el orden
-// original.
+// 2. Own filter: ignoring case and accents, anywhere in the label and in the original
+// order.
 export const Filter: Story = {
   render: () => (
     <Field>
@@ -142,8 +142,8 @@ export const Filter: Story = {
   },
 };
 
-// 3. Selección única: elegir cierra el popover, devuelve el foco al disparador y actualiza su
-// nombre. Con aria-label (sin <label>) el disparador también anuncia etiqueta y valor.
+// 3. Single selection: choosing closes the popover, returns focus to the trigger and updates
+// its name. With aria-label (no <label>) the trigger also announces label and value.
 export const SingleSelect: Story = {
   args: { onValueChange: fn() },
   render: (args) => (
@@ -169,7 +169,7 @@ export const SingleSelect: Story = {
     await expect(args.onValueChange).toHaveBeenCalledExactlyOnceWith('pe');
     await expect(trigger).toHaveAccessibleName('País Perú');
 
-    // Al reabrir, el buscador está vacío y la opción elegida es la resaltada.
+    // On reopening, the search field is empty and the chosen option is the highlighted one.
     await userEvent.click(trigger);
     const reopened = await body().findByRole('dialog');
     await expect(within(reopened).getByRole('combobox')).toHaveValue('');
@@ -181,8 +181,8 @@ export const SingleSelect: Story = {
   },
 };
 
-// 4. Selección múltiple: aria-checked en las elegidas, el popover sigue abierto, y los Chips y el
-// nombre del disparador reflejan el valor.
+// 4. Multiple selection: aria-checked on the chosen ones, the popover stays open, and the Chips
+// and the trigger name reflect the value.
 export const Multiple: Story = {
   args: { onValueChange: fn() },
   render: (args) => (
@@ -219,7 +219,7 @@ export const Multiple: Story = {
     );
     await expect(args.onValueChange).toHaveBeenLastCalledWith(['mx', 'cl', 'pe']);
 
-    // Volver a elegir una opción la quita.
+    // Choosing an option again removes it.
     await userEvent.click(within(dialog).getByRole('option', { name: 'Chile' }));
     await expect(within(dialog).getByRole('option', { name: 'Chile' })).toHaveAttribute(
       'aria-checked',
@@ -231,12 +231,12 @@ export const Multiple: Story = {
     await expect(trigger).toHaveFocus();
     await expect(trigger).toHaveAccessibleName('País México, Perú');
     await expect(canvas.getByRole('button', { name: 'Remove Perú' })).toBeInTheDocument();
-    // Los Chips no van dentro del botón.
+    // The Chips don't go inside the button.
     await expect(trigger.querySelector('button')).toBeNull();
   },
 };
 
-// 5. Quitar un Chip: el foco pasa al Chip siguiente; si no queda uno después, al botón.
+// 5. Removing a Chip: focus moves to the next Chip; if there's none after it, to the button.
 export const RemoveChipFocus: Story = {
   render: () => (
     <Field>
@@ -263,7 +263,7 @@ export const RemoveChipFocus: Story = {
   },
 };
 
-// 6. Escape cierra el popover y devuelve el foco al disparador.
+// 6. Escape closes the popover and returns focus to the trigger.
 export const EscapeCloses: Story = {
   render: () => (
     <Field>
@@ -284,10 +284,10 @@ export const EscapeCloses: Story = {
   },
 };
 
-// 7. Modo en línea dentro de un Sheet bottom: buscador y lista siempre visibles, sin botón; los
-// Chips encima del buscador. La etiqueta visible es solo visual (aria-hidden, sin for): el
-// buscador se nombra con la etiqueta oculta de cmdk, así el lector la lee una sola vez, y un
-// clic en la visible enfoca el buscador.
+// 7. Inline mode inside a bottom Sheet: search field and list always visible, no button; the
+// Chips above the search field. The visible label is visual only (aria-hidden, no for): the
+// search field is named by cmdk's hidden label, so the reader reads it only once, and a
+// click on the visible one focuses the search field.
 export const InlineInSheet: Story = {
   render: () => (
     <Sheet>
@@ -320,7 +320,7 @@ export const InlineInSheet: Story = {
     const input = sheetScope.getByRole('combobox', { name: 'País' });
     const visibleLabel = sheetScope.getByText('País', { selector: 'span' });
     await expect(visibleLabel).toHaveAttribute('aria-hidden', 'true');
-    // La única etiqueta expuesta es la de cmdk, que apunta al buscador.
+    // The only exposed label is cmdk's, which points to the search field.
     const labels = sheet.querySelectorAll('label');
     await expect(labels).toHaveLength(1);
     await expect(labels[0].control).toBe(input);
@@ -338,7 +338,7 @@ export const InlineInSheet: Story = {
     await expect(sheetScope.getByRole('button', { name: 'Remove Uruguay' })).toBeInTheDocument();
     await expect(body().getByRole('dialog', { name: 'Filtros' })).toBeInTheDocument();
 
-    // Chips encima del buscador; quitar el último devuelve el foco al buscador.
+    // Chips above the search field; removing the last one returns focus to the search field.
     const chip = sheetScope.getByRole('button', { name: 'Remove Uruguay' });
     await expect(chip.compareDocumentPosition(input) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING,
@@ -350,8 +350,8 @@ export const InlineInSheet: Story = {
   },
 };
 
-// 8. Alturas: cada fila (Combobox único, múltiple, Select, Input) debe medir 32 / 44 / 48. Medido
-// en Storybook con navegador real; el fixture headless no aplica Tailwind.
+// 8. Heights: each row (single Combobox, multiple, Select, Input) must measure 32 / 44 / 48.
+// Measured in Storybook with a real browser; the headless fixture doesn't apply Tailwind.
 export const Sizes: Story = {
   render: () => (
     <div className="flex flex-col gap-4">
@@ -408,7 +408,7 @@ export const Sizes: Story = {
   },
 };
 
-// 9. Lista larga: hace scroll dentro del popover (max-h-72). Verificado en navegador real.
+// 9. Long list: scrolls inside the popover (max-h-72). Checked in a real browser.
 export const LongList: Story = {
   render: () => (
     <Field>
@@ -422,7 +422,7 @@ export const LongList: Story = {
   },
 };
 
-// 10. Controlado y deshabilitado.
+// 10. Controlled and disabled.
 function ControlledDemo() {
   const [value, setValue] = React.useState('cl');
   return (
@@ -445,10 +445,10 @@ export const ControlledAndDisabled: Story = {
   },
 };
 
-// 11. Renderizado en servidor: el HTML de renderToString ya trae la asociación entre la etiqueta
-// y el campo, sin efectos ni hidratación. Popover: <label for> sobre el botón y aria-labelledby
-// con la etiqueta y el valor. En línea: la etiqueta oculta de cmdk con el texto de `label`,
-// apuntando al buscador.
+// 11. Server rendering: the renderToString HTML already has the association between the label
+// and the field, without effects or hydration. Popover: <label for> on the button and
+// aria-labelledby with the label and the value. Inline: cmdk's hidden label with the `label`
+// text, pointing to the search field.
 export const ServerRendered: Story = {
   render: () => <div data-testid="ssr-container" className="flex w-72 flex-col gap-4" />,
   play: async ({ canvasElement }) => {
@@ -478,8 +478,8 @@ export const ServerRendered: Story = {
   },
 };
 
-// 12. Cambiar `label` entre renders actualiza el nombre accesible del disparador (sin abrir el
-// popover), del popover y del buscador en los dos modos.
+// 12. Changing `label` between renders updates the accessible name of the trigger (without
+// opening the popover), of the popover and of the search field in both modes.
 function LabelChangeDemo() {
   const [label, setLabel] = React.useState('País');
   return (
@@ -517,8 +517,8 @@ export const LabelChange: Story = {
   },
 };
 
-// 13. listVisibility="query": la lista solo se ve con foco y texto (sin contar espacios).
-// aria-expanded acompaña cada estado, y el mensaje de vacío solo aparece con la lista visible.
+// 13. listVisibility="query": the list only shows with focus and text (ignoring spaces).
+// aria-expanded follows each state, and the empty message only appears with the list visible.
 export const InlineQuery: Story = {
   render: () => (
     <Field>
@@ -559,13 +559,13 @@ export const InlineQuery: Story = {
     await expect(listbox).not.toBeVisible();
     await expect(input).toHaveAttribute('aria-expanded', 'false');
     await expect(canvas.queryByText('No results.')).not.toBeInTheDocument();
-    // Con la lista oculta no hay opciones: Enter no elige nada invisible.
+    // With the list hidden there are no options: Enter chooses nothing invisible.
     await expect(within(listbox).queryAllByRole('option', { hidden: true })).toHaveLength(0);
   },
 };
 
-// 14. listVisibility="focus": visible mientras el buscador tiene el foco. Escape la oculta sin
-// sacar el foco; escribir la vuelve a mostrar.
+// 14. listVisibility="focus": visible while the search field has focus. Escape hides it without
+// moving focus; typing shows it again.
 export const InlineFocus: Story = {
   render: () => (
     <div className="flex w-72 flex-col gap-4">
@@ -599,8 +599,9 @@ export const InlineFocus: Story = {
   },
 };
 
-// 15. Múltiple con listVisibility="query": elegir con Enter y con clic vacía el texto, deja el
-// foco en el buscador y oculta la lista (el texto quedó vacío). Con "focus" la lista sigue.
+// 15. Multiple with listVisibility="query": choosing with Enter and with a click clears the
+// text, keeps focus in the search field and hides the list (the text is now empty). With
+// "focus" the list stays.
 export const InlineQueryMultiple: Story = {
   args: { onValueChange: fn() },
   render: (args) => (
@@ -659,8 +660,8 @@ export const InlineQueryMultiple: Story = {
   },
 };
 
-// 16. Único con lista condicionada: el valor se muestra como Chip (con la lista oculta no habría
-// otra forma de verlo); su ✕ vacía el valor y devuelve el foco al buscador.
+// 16. Single with a conditional list: the value is shown as a Chip (with the list hidden there
+// would be no other way to see it); its ✕ clears the value and returns focus to the search field.
 export const InlineFocusSingle: Story = {
   args: { onValueChange: fn() },
   render: (args) => (
@@ -691,8 +692,8 @@ export const InlineFocusSingle: Story = {
   },
 };
 
-// 17. Dentro de un Sheet bottom: con la lista visible, el primer Escape la oculta y el Sheet
-// sigue abierto; el segundo lo cierra.
+// 17. Inside a bottom Sheet: with the list visible, the first Escape hides it and the Sheet
+// stays open; the second one closes it.
 export const InlineQueryInSheet: Story = {
   render: () => (
     <Sheet>
@@ -739,10 +740,10 @@ export const InlineQueryInSheet: Story = {
   },
 };
 
-// 18. Los Chips siguen el size del Combobox (sm / md / lg), en popover y en línea. Medido en
-// Storybook con navegador real, campo múltiple del popover con un Chip: sm 32px (Chip 29), md
-// 44px (Chip 32), lg 53px (Chip 44 + py-1 + borde: supera el min-h-12 de 48). Con más Chips de
-// los que entran en una línea, el campo crece en los tres tamaños (flex-wrap).
+// 18. The Chips follow the Combobox size (sm / md / lg), in popover and inline. Measured in
+// Storybook with a real browser, multiple popover field with one Chip: sm 32px (Chip 29), md
+// 44px (Chip 32), lg 53px (Chip 44 + py-1 + border: exceeds the min-h-12 of 48). With more
+// Chips than fit on one line, the field grows in all three sizes (flex-wrap).
 export const ChipSizes: Story = {
   render: () => (
     <div className="flex w-72 flex-col gap-4">
@@ -771,7 +772,7 @@ export const ChipSizes: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    // Clases de chipVariants por tamaño (sm no fija alto).
+    // chipVariants classes per size (sm doesn't set a height).
     const chipClasses = { sm: ['text-xs'], md: ['text-sm', 'h-8'], lg: ['text-base', 'h-11'] };
     for (const size of ['sm', 'md', 'lg'] as const) {
       for (const where of ['popover', 'en línea']) {

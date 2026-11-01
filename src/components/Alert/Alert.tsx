@@ -11,10 +11,10 @@ import { alertVariants, alertIconVariants } from './alertVariants';
 
 type AlertVariant = NonNullable<VariantProps<typeof alertVariants>['variant']>;
 
-// error/warning son "algo salió mal" → asertivo (interrumpe al lector de pantalla).
-// info/success son "así está el estado" → cortés (espera a que termine lo que se esté
-// leyendo). Derivado de la variante, no una prop: no hay override, no surgió una razón
-// concreta para necesitarlo durante la implementación.
+// error/warning mean "something went wrong" → assertive (interrupts the screen reader).
+// info/success mean "this is the state" → polite (waits for whatever is being read to
+// finish). Derived from the variant, not a prop: there's no override, no concrete reason
+// to need it came up during the implementation.
 const ROLE_BY_VARIANT: Record<AlertVariant, 'alert' | 'status'> = {
   info: 'status',
   success: 'status',
@@ -35,10 +35,10 @@ const DEFAULT_ICON_BY_VARIANT: Record<
 export interface AlertProps
   extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof alertVariants> {
   /**
-   * Reemplaza el ícono default de la variante (patrón compositivo, igual que `fallback` en
-   * Image). Si no se pasa (`undefined`), se usa el ícono default de `variant`. Si se pasa
-   * cualquier valor -- incluido `null` o `false` -- se usa tal cual, lo que permite ocultar
-   * el ícono explícitamente sin una prop separada.
+   * Replaces the variant's default icon (compositional pattern, same as `fallback` in
+   * Image). If it isn't passed (`undefined`), the `variant` default icon is used. If any
+   * value is passed -- including `null` or `false` -- it's used as is, which lets you hide
+   * the icon explicitly without a separate prop.
    */
   icon?: React.ReactNode;
 }
@@ -47,11 +47,11 @@ export interface AlertProps
 // Alert Root
 // -----------------------------------------------------------------------------
 /**
- * Mensaje en línea. `error`/`warning` usan `role="alert"`; `info`/`success`, `role="status"`.
+ * Inline message. `error`/`warning` use `role="alert"`; `info`/`success`, `role="status"`.
  *
- * Limitación: un `info`/`success` que se monta dinámicamente no se anuncia, porque los
- * lectores solo leen los cambios de una región `status` que ya estaba en el DOM. Para
- * anunciarlo, usar `announce()` o dejar el `Alert` montado y cambiar su contenido.
+ * Limitation: an `info`/`success` that mounts dynamically isn't announced, because
+ * readers only read the changes of a `status` region that was already in the DOM. To
+ * announce it, use `announce()` or keep the `Alert` mounted and change its content.
  */
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
   ({ className, variant, icon, children, ...props }, ref) => {
@@ -79,10 +79,10 @@ Alert.displayName = 'Alert';
 // -----------------------------------------------------------------------------
 // Alert Title
 // -----------------------------------------------------------------------------
-// Deliberadamente un <div>, no un <h*>: a diferencia de CardTitle, un Alert puede aparecer
-// en cualquier punto del árbol (inyectado por un formulario, un toast, etc.) sin que el
-// componente pueda saber qué nivel de heading le corresponde ahí. Forzar un nivel fijo
-// podría romper el orden de headings de la página consumidora.
+// Deliberately a <div>, not an <h*>: unlike CardTitle, an Alert can show up
+// anywhere in the tree (injected by a form, a toast, etc.) without the
+// component being able to know which heading level belongs there. Forcing a fixed level
+// could break the heading order of the consuming page.
 const AlertTitle = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div

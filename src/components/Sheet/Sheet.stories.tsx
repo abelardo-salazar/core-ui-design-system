@@ -29,8 +29,8 @@ type Story = StoryObj<typeof meta>;
 const CLOSE_SAFE_TOP = 'top-[calc(0.125rem_+_env(safe-area-inset-top))]';
 const CLOSE_SAFE_RIGHT = 'right-[calc(0.125rem_+_env(safe-area-inset-right))]';
 
-// Anillo dentro del área táctil y sin separación, para que el overflow del panel no lo
-// recorte; solo con teclado (focus-visible).
+// Ring inside the touch area and without offset, so the panel's overflow doesn't clip
+// it; keyboard only (focus-visible).
 const expectInsetFocusRing = async (closeButton: HTMLElement) => {
   await expect(closeButton).toHaveClass('focus-visible:ring-2', 'focus-visible:ring-inset');
   await expect(closeButton.className).not.toMatch(/ring-offset/);
@@ -82,18 +82,18 @@ export const Right: Story = {
 
     await userEvent.click(trigger);
 
-    // Sheet envuelve la misma primitiva de Radix Dialog, así que comparte el mismo
-    // set de aserciones de foco que Dialog.
+    // Sheet wraps the same Radix Dialog primitive, so it shares the same
+    // set of focus assertions as Dialog.
     const dialog = await body.findByRole('dialog');
     await expect(dialog.className.split(' ')).toContain('right-0');
     await expect(dialog.contains(document.activeElement)).toBe(true);
 
-    // Touch target: p-3.5 (14px) lleva el hit box a 44x44 (Apple HIG) sin que el ícono
-    // (h-4 w-4, 16x16) cambie de tamaño; el offset de 2px + safe area deja el ícono a 16px
-    // del borde. El fixture de vitest-browser no aplica el CSS de utilidades de Tailwind
-    // (mismo issue documentado en el story Destructive de Button), así que la aserción va
-    // sobre las clases; el tamaño y la posición reales en píxeles se verificaron a mano en
-    // Storybook con un navegador real.
+    // Touch target: p-3.5 (14px) takes the hit box to 44x44 (Apple HIG) without the icon
+    // (h-4 w-4, 16x16) changing size; the 2px offset + safe area leaves the icon 16px
+    // from the edge. The vitest-browser fixture doesn't apply Tailwind's utility CSS
+    // (same issue documented in Button's Destructive story), so the assertion is
+    // on the classes; the real pixel size and position were checked by hand in
+    // Storybook with a real browser.
     const closeButton = within(dialog).getByRole('button', { name: 'Close' });
     await expect(closeButton).toHaveClass('p-3.5', CLOSE_SAFE_TOP, CLOSE_SAFE_RIGHT);
     await expectInsetFocusRing(closeButton);
@@ -115,7 +115,7 @@ export const Left: Story = {
     const dialog = await within(document.body).findByRole('dialog');
     await expect(dialog.className.split(' ')).toContain('left-0');
 
-    // El lado derecho del panel es el borde interior: la ✕ no suma safe area ahí.
+    // The panel's right edge is the inner one: the ✕ doesn't add safe area there.
     const closeButton = within(dialog).getByRole('button', { name: 'Close' });
     await expect(closeButton).toHaveClass(CLOSE_SAFE_TOP, 'right-0.5');
     await expectInsetFocusRing(closeButton);
@@ -144,7 +144,7 @@ export const Bottom: Story = {
     const dialog = await within(document.body).findByRole('dialog');
     await expect(dialog.className.split(' ')).toContain('bottom-0');
 
-    // El borde superior del panel es el interior: la ✕ no suma safe area ahí.
+    // The panel's top edge is the inner one: the ✕ doesn't add safe area there.
     const closeButton = within(dialog).getByRole('button', { name: 'Close' });
     await expect(closeButton).toHaveClass('top-0.5', CLOSE_SAFE_RIGHT);
     await expectInsetFocusRing(closeButton);
@@ -153,9 +153,9 @@ export const Bottom: Story = {
 
 type Side = 'top' | 'right' | 'bottom' | 'left';
 
-// Contenido largo dentro de SheetBody: el body hace scroll y header/footer quedan fijos.
-// Los inputs ocupan todo el ancho del body (y el primero y el último tocan su borde superior
-// e inferior) para comprobar en un navegador real que el overflow no recorta el anillo de foco.
+// Long content inside SheetBody: the body scrolls and header/footer stay fixed.
+// The inputs take the full width of the body (and the first and last touch its top
+// and bottom edges) to check in a real browser that the overflow doesn't clip the focus ring.
 const LongSheetDemo = ({ side }: { side: Side }) => (
   <Sheet>
     <SheetTrigger asChild>
@@ -184,9 +184,9 @@ const LongSheetDemo = ({ side }: { side: Side }) => (
   </Sheet>
 );
 
-// Estructura, no medidas: el fixture headless no aplica Tailwind ni hace layout. Que el
-// footer quede visible, el alto máximo de top/bottom y los anillos sin recorte se verificaron
-// a mano en Storybook con un navegador real.
+// Structure, not measurements: the headless fixture doesn't apply Tailwind or do layout. That
+// the footer stays visible, the max height of top/bottom and the unclipped rings were checked
+// by hand in Storybook with a real browser.
 const assertLongSheetStructure =
   (side: Side): Story['play'] =>
   async ({ canvasElement }) => {
@@ -201,8 +201,8 @@ const assertLongSheetStructure =
     const header = within(dialog).getByText('Edit profile').parentElement!;
     const footer = within(dialog).getByRole('button', { name: 'Save changes' }).parentElement!;
     await expect(header.parentElement).toBe(dialog);
-    // Reserva de la ✕ con el safe area derecho (sin inset resuelve a 24px; medido en
-    // navegador real), simétrica en móvil para conservar el centrado.
+    // Room for the ✕ with the right safe area (without an inset it resolves to 24px; measured in
+    // a real browser), symmetric on mobile to keep the centering.
     await expect(header).toHaveClass('px-[calc(1.5rem_+_env(safe-area-inset-right))]', 'sm:pl-0');
     await expect(footer.parentElement).toBe(dialog);
     await expect(sheetBody.contains(header)).toBe(false);
@@ -232,7 +232,7 @@ export const LongContentBottom: Story = {
   play: assertLongSheetStructure('bottom'),
 };
 
-// closeLabel cambia el nombre accesible de la ✕ (por defecto "Close") y no llega al DOM.
+// closeLabel changes the accessible name of the ✕ ("Close" by default) and doesn't reach the DOM.
 export const CustomCloseLabel: Story = {
   render: () => (
     <Sheet defaultOpen>

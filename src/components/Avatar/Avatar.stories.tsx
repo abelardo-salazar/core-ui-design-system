@@ -12,10 +12,10 @@ const meta: Meta<typeof Avatar> = {
 export default meta;
 type Story = StoryObj<typeof Avatar>;
 
-// PNG 1x1 embebido: sin dependencia de red externa ni de que Storybook esté sirviendo un
-// archivo local correctamente (mismo criterio aplicado en Image.stories.tsx). UserProfile y
-// UserCard usaban https://github.com/shadcn.png y https://github.com/google.png respectivamente
-// — causa del flake reportado durante la tarea de Tabs.
+// Embedded 1x1 PNG: no dependency on an external network or on Storybook serving a
+// local file correctly (same criterion applied in Image.stories.tsx). UserProfile and
+// UserCard used https://github.com/shadcn.png and https://github.com/google.png respectively,
+// the cause of the flake reported during the Tabs task.
 const TINY_PNG =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
 
@@ -35,15 +35,16 @@ export const UserProfile: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    // Fix del commit 8dd5b87 (axe: image-alt). Radix AvatarImage solo monta el <img> una vez
-    // que la carga resuelve, de ahí el find* async (ver UserCard más abajo para el mismo patrón).
+    // Fix from commit 8dd5b87 (axe: image-alt). Radix AvatarImage only mounts the <img> once
+    // the load resolves, hence the async find* (see UserCard below for the same pattern).
     await expect(await canvas.findByAltText('@shadcn')).toBeInTheDocument();
   },
 };
 
-// 2. Fallback tras un error de carga. El src es un data URI que no se puede decodificar: falla
-// en el navegador, sin pedir nada al servidor (en vitest, una ruta inexistente no da 404 sino
-// el HTML de fallback del servidor, con un tiempo que depende de lo ocupado que esté).
+// 2. Fallback after a load error. The src is a data URI that can't be decoded: it fails
+// in the browser, without requesting anything from the server (in vitest, a missing path
+// doesn't give a 404 but the server's fallback HTML, with a timing that depends on how busy
+// it is).
 export const FallbackState: StoryObj<typeof AvatarImage> = {
   args: { onLoadingStatusChange: fn() },
   render: (args) => (
@@ -62,8 +63,8 @@ export const FallbackState: StoryObj<typeof AvatarImage> = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
 
-    // AvatarFallback también se ve mientras la imagen carga, así que verlo no prueba nada por
-    // sí solo: primero se espera a que Radix informe el error.
+    // AvatarFallback also shows while the image loads, so seeing it proves nothing on
+    // its own: first we wait for Radix to report the error.
     await waitFor(() => expect(args.onLoadingStatusChange).toHaveBeenLastCalledWith('error'));
     await expect(canvas.queryByAltText('@user')).not.toBeInTheDocument();
     await expect(canvas.getByText('JD')).toBeInTheDocument();
@@ -76,8 +77,8 @@ export const Badges: Story = {
     <div className="flex gap-2">
       <Badge>Default</Badge>
       <Badge variant="secondary">Secondary</Badge>
-      {/* interactive: true — el hover (compoundVariants) solo existe cuando el badge es
-          interactivo; sin esto no habría ninguna clase hover: que verificar acá abajo. */}
+      {/* interactive: true; the hover (compoundVariants) only exists when the badge is
+          interactive; without it there would be no hover: class to check below. */}
       <Badge variant="destructive" interactive>
         Removed
       </Badge>
@@ -87,22 +88,22 @@ export const Badges: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const destructiveBadge = canvas.getByText('Removed');
-    // Mismo token error-content que Button destructive (ver Button.stories.tsx para el porqué
-    // de comprobar el custom property crudo en vez de getComputedStyle().color acá).
+    // Same error-content token as Button destructive (see Button.stories.tsx for why
+    // we check the raw custom property instead of getComputedStyle().color here).
     await expect(destructiveBadge.className.split(' ')).toContain('text-error-content');
     await expect(
       getComputedStyle(document.documentElement).getPropertyValue('--error-content'),
     ).toBe('#000000');
 
-    // Hover: mismo caso que Button destructive — --error-focus (fondo) es oscuro mientras
-    // --error (fondo base) es claro, así que hace falta -focus-content propio para el texto.
+    // Hover: same case as Button destructive; --error-focus (background) is dark while
+    // --error (base background) is light, so the text needs its own -focus-content.
     await expect(destructiveBadge.className.split(' ')).toContain('hover:text-error-focus-content');
     await expect(
       getComputedStyle(document.documentElement).getPropertyValue('--error-focus-content'),
     ).toBe('#ffffff');
 
-    // Dark mode invierte cuál color necesita más contraste (--error-focus pasa a ser un rojo
-    // claro), así que --error-focus-content también se invierte: negro, no blanco.
+    // Dark mode flips which color needs more contrast (--error-focus becomes a light
+    // red), so --error-focus-content flips too: black, not white.
     document.documentElement.classList.add('dark');
     await expect(
       getComputedStyle(document.documentElement).getPropertyValue('--error-focus-content'),
@@ -111,7 +112,7 @@ export const Badges: Story = {
   },
 };
 
-// 4. Integración Real (Card + Avatar + Badge)
+// 4. Real integration (Card + Avatar + Badge)
 import { Card, CardHeader, CardTitle } from '../Card';
 
 export const UserCard: Story = {
@@ -136,8 +137,8 @@ export const UserCard: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    // axe: image-alt — AvatarImage se renderizaba sin alt (las otras dos stories de Avatar sí lo pasan).
-    // AvatarImage (Radix) solo monta el <img> una vez que la carga de red resuelve, de ahí el find* async.
+    // axe: image-alt; AvatarImage was rendered without alt (the other two Avatar stories do pass it).
+    // AvatarImage (Radix) only mounts the <img> once the network load resolves, hence the async find*.
     await expect(await canvas.findByAltText('Google Team logo')).toBeInTheDocument();
   },
 };

@@ -1,11 +1,11 @@
 import { cva } from 'class-variance-authority';
 
-// La base NO lleva padding/alto/texto propios: viven solo en `size` (ver abajo). Si la base
-// tuviera su propio px/py/text-* además de `size`, ambos juegos de clases conviven en el
-// className final — cuál "gana" depende del orden en que Tailwind emite las reglas en la
-// hoja de estilos, no del orden en el string, así que es un empate ambiguo en vez de un
-// override real. Esto es justo lo que hacía que el bug histórico de `size` (nunca llegaba a
-// cva desde Badge.tsx) fuera invisible: la base sola ya daba un resultado plausible.
+// The base has NO padding/height/text of its own: they live only in `size` (see below). If the
+// base had its own px/py/text-* besides `size`, both sets of classes would coexist in the
+// final className; which one "wins" depends on the order in which Tailwind emits the rules in
+// the stylesheet, not on the order in the string, so it's an ambiguous tie instead of a
+// real override. That's exactly what made the historical `size` bug (it never reached
+// cva from Badge.tsx) invisible: the base alone already gave a plausible result.
 export const badgeVariants = cva(
   'inline-flex items-center justify-center rounded-full border text-center font-semibold transition-colors',
   {
@@ -13,43 +13,43 @@ export const badgeVariants = cva(
       variant: {
         default: 'border-transparent bg-primary text-primary-content',
         secondary: 'border-transparent bg-secondary text-secondary-content',
-        // hover:text-error-focus-content es necesario: --error es claro y --error-focus es
-        // oscuro (al revés que en las demás variantes), así que text-error-content (negro)
-        // solo da contraste suficiente en el estado base, no en hover. Ver tailwind.css. El
-        // hover en sí vive en compoundVariants (solo aplica si interactive=true).
+        // hover:text-error-focus-content is needed: --error is light and --error-focus is
+        // dark (the opposite of the other variants), so text-error-content (black)
+        // only gives enough contrast in the base state, not on hover. See tailwind.css. The
+        // hover itself lives in compoundVariants (it only applies if interactive=true).
         destructive: 'border-transparent bg-error text-error-content',
         outline: 'text-base-content border-base-content/20',
         ghost: 'border-transparent bg-base-200 text-base-content',
       },
 
-      // Escala propia de Badge (no la de Button): compacta, para una etiqueta de estado, no
-      // un control. Sin h-* fijas (salvo icon): el alto sale de borde + padding vertical +
-      // line-height del propio text-*, así nunca queda un h-* peleando con el texto si el
-      // consumidor cambia className. Alturas reales medidas en navegador (Storybook, ver PR):
-      // sm ≈ 22px, md ≈ 26px, lg ≈ 30px, icon = 24px exactos (size-6).
+      // Badge's own scale (not Button's): compact, for a status label, not
+      // a control. No fixed h-* (except icon): the height comes from border + vertical padding +
+      // the line-height of the text-* itself, so there's never an h-* fighting the text if the
+      // consumer changes className. Real heights measured in the browser (Storybook, see the PR):
+      // sm ≈ 22px, md ≈ 26px, lg ≈ 30px, icon = exactly 24px (size-6).
       size: {
         sm: 'px-2.5 py-0.5 text-xs',
         md: 'px-3 py-1 text-xs',
         lg: 'px-3.5 py-1 text-sm',
-        // Cuadrado, sin padding horizontal: para un badge que es solo un ícono o un número
-        // corto (p. ej. un contador), no una etiqueta de texto.
+        // Square, no horizontal padding: for a badge that's just an icon or a short number
+        // (e.g. a counter), not a text label.
         icon: 'size-6',
       },
 
-      // false (default): Badge es un <div>, sin ningún estilo de interacción — hover/foco en
-      // un <div> no interactivo es CSS muerto (nunca se dispara :focus-visible porque un <div>
-      // sin tabIndex no es foco-able) y además engaña visualmente a quien sí le agrega
-      // onClick a mano. true: Badge es un <button> real (ver Badge.tsx) y estas clases SÍ
-      // tienen sentido. focus-visible (no focus:) es la convención del resto del DS.
+      // false (default): Badge is a <div>, without any interaction style; hover/focus on
+      // a non-interactive <div> is dead CSS (:focus-visible never fires because a <div>
+      // without tabIndex isn't focusable) and it also visually misleads whoever adds
+      // onClick by hand. true: Badge is a real <button> (see Badge.tsx) and these classes DO
+      // make sense. focus-visible (not focus:) is the convention in the rest of the DS.
       interactive: {
         true: 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
       },
     },
 
-    // El hover depende de variant Y de interactive a la vez (no tiene sentido como parte de
-    // `variant` solo, porque un Badge no-interactivo no debe mostrar hover). outline no tenía
-    // hover antes: un elemento interactivo sin feedback visual no tiene sentido, así que gana
-    // uno acá (no estaba definido para el div no-interactivo, nunca se notaba).
+    // The hover depends on variant AND interactive at once (it makes no sense as part of
+    // `variant` alone, because a non-interactive Badge must not show a hover). outline had no
+    // hover before: an interactive element without visual feedback makes no sense, so it gets
+    // one here (it wasn't defined for the non-interactive div, it was never noticed).
     compoundVariants: [
       { variant: 'default', interactive: true, class: 'hover:bg-primary-focus' },
       { variant: 'secondary', interactive: true, class: 'hover:bg-secondary-focus' },

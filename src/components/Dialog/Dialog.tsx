@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { Cross2Icon } from '@radix-ui/react-icons'; // Icono estándar de cierre
+import { Cross2Icon } from '@radix-ui/react-icons'; // Standard close icon
 import { cn } from '../../utils/cn';
 
 // 1. Root & Trigger
@@ -33,7 +33,7 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
-    /** Nombre accesible del botón ✕. @default 'Close' */
+    /** Accessible name of the ✕ button. @default 'Close' */
     closeLabel?: string;
   }
 >(({ className, children, closeLabel = 'Close', ...props }, ref) => (
@@ -55,9 +55,9 @@ const DialogContent = React.forwardRef<
     >
       {children}
 
-      {/* Área táctil 44x44 (Apple HIG) sin mover el ícono: p-3.5 (14px) agranda el hit box,
-          right-0.5/top-0.5 (16px - 14px) compensa el offset para que el ícono termine en el
-          mismo lugar visual que con right-4/top-4 sin padding. */}
+      {/* 44x44 touch area (Apple HIG) without moving the icon: p-3.5 (14px) enlarges the hit box,
+          right-0.5/top-0.5 (16px - 14px) compensates the offset so the icon ends up in the
+          same visual spot as with right-4/top-4 without padding. */}
       <DialogPrimitive.Close className="absolute right-0.5 top-0.5 rounded-sm p-3.5 opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary disabled:pointer-events-none data-[state=open]:bg-base-200 data-[state=open]:text-base-content/50">
         <Cross2Icon className="h-4 w-4" />
         <span className="sr-only">{closeLabel}</span>

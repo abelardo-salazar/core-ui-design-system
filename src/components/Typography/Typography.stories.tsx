@@ -12,9 +12,9 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj;
 
-// 1. Heading levels: los seis niveles h1-h6 renderizan la etiqueta semántica correcta.
-// headingVariants solo define tamaño para h1-h4 (vía `level`); h5/h6 solo se alcanzan con
-// `as`, no existe un `level="h5"` válido.
+// 1. Heading levels: the six levels h1-h6 render the correct semantic tag.
+// headingVariants only defines a size for h1-h4 (through `level`); h5/h6 are only reachable with
+// `as`, there's no valid `level="h5"`.
 export const HeadingLevels: Story = {
   render: () => (
     <div className="space-y-2">
@@ -50,9 +50,9 @@ export const HeadingLevels: Story = {
   },
 };
 
-// 2. Heading no tiene asChild/Slot: el mecanismo real para desacoplar el tag semántico del
-// tamaño visual es la prop `as`, que gana sobre `level` para el tag renderizado pero no
-// afecta las clases (headingVariants sigue usando `level` para el tamaño).
+// 2. Heading has no asChild/Slot: the real mechanism to decouple the semantic tag from the
+// visual size is the `as` prop, which wins over `level` for the rendered tag but doesn't
+// affect the classes (headingVariants still uses `level` for the size).
 export const HeadingAsOverride: Story = {
   render: () => (
     <Heading level="h1" as="h2">
@@ -67,7 +67,7 @@ export const HeadingAsOverride: Story = {
   },
 };
 
-// 3. Text: `size` aplica la clase correspondiente.
+// 3. Text: `size` applies the matching class.
 export const TextSizes: Story = {
   render: () => (
     <div className="space-y-2">
@@ -89,7 +89,7 @@ export const TextSizes: Story = {
   },
 };
 
-// 4. Text también resuelve el tag vía `as` (por defecto <p>), igual que Heading.
+// 4. Text also resolves the tag through `as` (<p> by default), same as Heading.
 export const TextAsOverride: Story = {
   render: () => <Text as="span">Inline text</Text>,
   play: async ({ canvasElement }) => {

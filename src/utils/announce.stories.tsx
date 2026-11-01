@@ -22,8 +22,8 @@ type Story = StoryObj<typeof meta>;
 const POLITE = '[data-core-ui-announcer="polite"]';
 const ASSERTIVE = '[data-core-ui-announcer="assertive"]';
 
-// Las stories de este archivo comparten document: se borran las regiones de las anteriores
-// para que cada una pruebe la creación desde cero.
+// The stories in this file share document: the regions from the previous ones are removed
+// so each one tests the creation from scratch.
 const resetRegions = () =>
   document.querySelectorAll('[data-core-ui-announcer]').forEach((el) => el.remove());
 
@@ -57,7 +57,7 @@ export const Regions: Story = {
     announce('Dos');
     announce('Urgente', { politeness: 'assertive' });
 
-    // Una sola región por nivel, aunque se llame varias veces.
+    // A single region per level, even when called several times.
     await expect(document.querySelectorAll(POLITE)).toHaveLength(1);
     await expect(document.querySelectorAll(ASSERTIVE)).toHaveLength(1);
 
@@ -66,8 +66,8 @@ export const Regions: Story = {
     await expect(polite.parentElement).toBe(document.body);
     await expect(polite).toHaveAttribute('aria-live', 'polite');
     await expect(assertive).toHaveAttribute('aria-live', 'assertive');
-    // Oculta con el equivalente en línea de sr-only (sin depender del CSS del paquete), no
-    // con display:none ni hidden: una región oculta así no se anuncia.
+    // Hidden with the inline equivalent of sr-only (without depending on the package CSS), not
+    // with display:none or hidden: a region hidden that way isn't announced.
     await expect(polite.style.position).toBe('absolute');
     await expect(polite.style.width).toBe('1px');
     await expect(polite.style.height).toBe('1px');
@@ -90,8 +90,8 @@ export const RepeatedMessage: Story = {
     const region = getRegion(POLITE)!;
     await waitFor(() => expect(region).toHaveTextContent('Cambios guardados'));
 
-    // El mismo texto otra vez: la región se vacía y se vuelve a escribir, que es lo que hace
-    // que el lector lo anuncie de nuevo.
+    // The same text again: the region is emptied and written again, which is what makes
+    // the reader announce it again.
     const writes: string[] = [];
     const observer = new MutationObserver(() => writes.push(region.textContent ?? ''));
     observer.observe(region, { childList: true, characterData: true, subtree: true });
@@ -108,14 +108,14 @@ export const ClearsText: Story = {
     announce('Temporal');
     const region = getRegion(POLITE)!;
     await waitFor(() => expect(region).toHaveTextContent('Temporal'));
-    // Se borra a los 5s.
+    // Cleared after 5s.
     await waitFor(() => expect(region).toBeEmptyDOMElement(), { timeout: 7000 });
   },
 };
 
-// hideOthers (aria-hidden, usado por Radix Dialog) pone aria-hidden en los hermanos del
-// portal al abrir. El hijo de body que contiene el canvas sí debe quedar oculto: eso confirma
-// que hideOthers corrió y que la aserción sobre la región no pasa por casualidad.
+// hideOthers (aria-hidden, used by Radix Dialog) sets aria-hidden on the portal's siblings
+// when opening. The body child that contains the canvas must be hidden: that confirms
+// hideOthers ran and that the assertion on the region doesn't pass by chance.
 const expectRegionNotHidden = async (region: HTMLElement, canvasElement: HTMLElement) => {
   const appRoot = [...document.body.children].find((el) => el.contains(canvasElement));
   await expect(appRoot).toHaveAttribute('aria-hidden', 'true');

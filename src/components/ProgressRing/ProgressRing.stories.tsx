@@ -16,7 +16,7 @@ const meta: Meta<typeof ProgressRing> = {
 export default meta;
 type Story = StoryObj<typeof ProgressRing>;
 
-// 1. Default (variant primary, sin label)
+// 1. Default (primary variant, no label)
 export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -33,7 +33,7 @@ export const Default: Story = {
   },
 };
 
-// 2. Con label centrado (opt-in)
+// 2. With centered label (opt-in)
 export const WithLabel: Story = {
   args: { value: 72, showValueLabel: true },
   play: async ({ canvasElement }) => {
@@ -75,7 +75,7 @@ export const ErrorVariant: Story = {
   },
 };
 
-// 6. Tamaño y grosor personalizados
+// 6. Custom size and thickness
 export const CustomSize: Story = {
   args: { value: 40, size: 120, strokeWidth: 10, showValueLabel: true },
   play: async ({ canvasElement }) => {
@@ -85,7 +85,7 @@ export const CustomSize: Story = {
   },
 };
 
-// 7. Valor por encima del máximo (clamping)
+// 7. Value above the maximum (clamping)
 export const ClampedOverflow: Story = {
   args: { value: 150, max: 100, showValueLabel: true },
   play: async ({ canvasElement }) => {

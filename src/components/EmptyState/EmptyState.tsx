@@ -2,29 +2,29 @@ import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { emptyStateVariants } from './emptyStateVariants';
 
-// Server-safe: la raíz recibe `size` como prop y lo resuelve con cva; a las partes les llega
-// por CSS (data-size en la raíz + group-data-[size=…]/empty-state en cada parte), no por un
-// contexto de React, que lo volvería client. Grupo con nombre para no reaccionar a un `group`
-// externo. Cada parte tiene su base en md y el override de sm en una variante, que Tailwind
-// emite después de las utilidades base: por eso gana sobre el className del consumidor (ver
-// JSDoc de las partes).
+// Server-safe: the root gets `size` as a prop and resolves it with cva; the parts get it
+// through CSS (data-size on the root + group-data-[size=…]/empty-state on each part), not
+// through a React context, which would make it client. A named group so it doesn't react to an
+// external `group`. Each part has its base in md and the sm override in a variant, which
+// Tailwind emits after the base utilities: that's why it wins over the consumer's className
+// (see the parts' JSDoc).
 
 export interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** `sm` para tablas y tarjetas; `md` para una página entera. */
+  /** `sm` for tables and cards; `md` for a whole page. */
   size?: 'sm' | 'md';
 }
 
 /**
- * Estado vacío: ícono, título, descripción y acciones, centrados.
+ * Empty state: icon, title, description and actions, centered.
  *
- * Es un `div` sin `role`. Un estado vacío que aparece tras una acción del usuario (por
- * ejemplo, un filtro sin resultados) no se anuncia solo: usar `announce()`.
+ * It's a `div` without `role`. An empty state that shows up after a user action (for
+ * example, a filter with no results) isn't announced on its own: use `announce()`.
  */
 const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
   ({ className, size = 'md', ...props }, ref) => (
     <div
       ref={ref}
-      // Solo para las partes (group-data); la raíz se estiliza con cva.
+      // Only for the parts (group-data); the root is styled with cva.
       data-size={size}
       className={cn(emptyStateVariants({ size }), className)}
       {...props}
@@ -34,15 +34,15 @@ const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
 EmptyState.displayName = 'EmptyState';
 
 /**
- * Ícono decorativo: `aria-hidden` va después del spread para que no se pueda deshacer. Fija
- * el tamaño del SVG desde el contenedor.
+ * Decorative icon: `aria-hidden` goes after the spread so it can't be undone. Sets
+ * the SVG size from the container.
  *
- * En `size="sm"` los ajustes de tamaño ganan sobre el `className` por especificidad, no por
- * orden: el selector de la variante (`.clase:is(:where(.group/empty-state)[data-size=sm] *)`)
- * pesa (0,2,0) y una clase sola (0,1,0). Es el costo de seguir siendo server-safe. Para
- * cambiarlos en sm, usar la misma variante en `className` (por ejemplo,
- * `group-data-[size=sm]/empty-state:size-8`): twMerge la reconoce como conflicto y descarta el
- * ajuste del DS.
+ * With `size="sm"` the size adjustments win over `className` by specificity, not by
+ * order: the variant selector (`.class:is(:where(.group/empty-state)[data-size=sm] *)`)
+ * weighs (0,2,0) and a lone class (0,1,0). It's the cost of staying server-safe. To
+ * change them in sm, use the same variant in `className` (for example,
+ * `group-data-[size=sm]/empty-state:size-8`): twMerge sees it as a conflict and drops the
+ * DS adjustment.
  */
 const EmptyStateIcon = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
@@ -64,21 +64,21 @@ export interface EmptyStateTitleProps extends React.HTMLAttributes<
   HTMLParagraphElement | HTMLHeadingElement
 > {
   /**
-   * Por defecto `p`: el componente no conoce su contexto, así que no impone un nivel de
-   * encabezado. Pasar `h2`–`h6` cuando el estado vacío ocupa una sección o página.
+   * `p` by default: the component doesn't know its context, so it doesn't impose a heading
+   * level. Pass `h2`–`h6` when the empty state fills a section or page.
    */
   as?: 'p' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 }
 
 /**
- * Título del estado vacío. Renderiza un `p` salvo que `as` indique un encabezado.
+ * Empty state title. Renders a `p` unless `as` sets a heading.
  *
- * En `size="sm"` los ajustes de tamaño ganan sobre el `className` por especificidad, no por
- * orden: el selector de la variante (`.clase:is(:where(.group/empty-state)[data-size=sm] *)`)
- * pesa (0,2,0) y una clase sola (0,1,0). Es el costo de seguir siendo server-safe. Para
- * cambiarlos en sm, usar la misma variante en `className` (por ejemplo,
- * `group-data-[size=sm]/empty-state:text-base`): twMerge la reconoce como conflicto y descarta el
- * ajuste del DS.
+ * With `size="sm"` the size adjustments win over `className` by specificity, not by
+ * order: the variant selector (`.class:is(:where(.group/empty-state)[data-size=sm] *)`)
+ * weighs (0,2,0) and a lone class (0,1,0). It's the cost of staying server-safe. To
+ * change them in sm, use the same variant in `className` (for example,
+ * `group-data-[size=sm]/empty-state:text-base`): twMerge sees it as a conflict and drops the
+ * DS adjustment.
  */
 const EmptyStateTitle = React.forwardRef<
   HTMLParagraphElement | HTMLHeadingElement,
@@ -97,14 +97,14 @@ const EmptyStateTitle = React.forwardRef<
 EmptyStateTitle.displayName = 'EmptyStateTitle';
 
 /**
- * Texto secundario del estado vacío.
+ * Secondary text of the empty state.
  *
- * En `size="sm"` los ajustes de tamaño ganan sobre el `className` por especificidad, no por
- * orden: el selector de la variante (`.clase:is(:where(.group/empty-state)[data-size=sm] *)`)
- * pesa (0,2,0) y una clase sola (0,1,0). Es el costo de seguir siendo server-safe. Para
- * cambiarlos en sm, usar la misma variante en `className` (por ejemplo,
- * `group-data-[size=sm]/empty-state:max-w-sm`): twMerge la reconoce como conflicto y descarta el
- * ajuste del DS.
+ * With `size="sm"` the size adjustments win over `className` by specificity, not by
+ * order: the variant selector (`.class:is(:where(.group/empty-state)[data-size=sm] *)`)
+ * weighs (0,2,0) and a lone class (0,1,0). It's the cost of staying server-safe. To
+ * change them in sm, use the same variant in `className` (for example,
+ * `group-data-[size=sm]/empty-state:max-w-sm`): twMerge sees it as a conflict and drops the
+ * DS adjustment.
  */
 const EmptyStateDescription = React.forwardRef<
   HTMLParagraphElement,
@@ -122,14 +122,14 @@ const EmptyStateDescription = React.forwardRef<
 EmptyStateDescription.displayName = 'EmptyStateDescription';
 
 /**
- * Botones o enlaces del estado vacío, centrados.
+ * Buttons or links of the empty state, centered.
  *
- * En `size="sm"` los ajustes de tamaño ganan sobre el `className` por especificidad, no por
- * orden: el selector de la variante (`.clase:is(:where(.group/empty-state)[data-size=sm] *)`)
- * pesa (0,2,0) y una clase sola (0,1,0). Es el costo de seguir siendo server-safe. Para
- * cambiarlos en sm, usar la misma variante en `className` (por ejemplo,
- * `group-data-[size=sm]/empty-state:mt-3`): twMerge la reconoce como conflicto y descarta el
- * ajuste del DS.
+ * With `size="sm"` the size adjustments win over `className` by specificity, not by
+ * order: the variant selector (`.class:is(:where(.group/empty-state)[data-size=sm] *)`)
+ * weighs (0,2,0) and a lone class (0,1,0). It's the cost of staying server-safe. To
+ * change them in sm, use the same variant in `className` (for example,
+ * `group-data-[size=sm]/empty-state:mt-3`): twMerge sees it as a conflict and drops the
+ * DS adjustment.
  */
 const EmptyStateActions = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (

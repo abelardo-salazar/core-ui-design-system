@@ -3,9 +3,9 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { expect, fireEvent, fn, userEvent, within } from 'storybook/test';
 import { QuantityStepper, type QuantityStepperProps } from './QuantityStepper';
 
-// QuantityStepper es controlado (sin estado interno propio salvo el fallback no controlado):
-// el consumidor maneja value/onChange, igual que se haría en una app real. Mismo patrón que
-// ControlledDatePicker en DatePicker.stories.tsx.
+// QuantityStepper is controlled (no internal state of its own except the uncontrolled fallback):
+// the consumer handles value/onChange, as one would in a real app. Same pattern as
+// ControlledDatePicker in DatePicker.stories.tsx.
 function ControlledStepper(props: QuantityStepperProps) {
   const [value, setValue] = React.useState(props.value);
   return (
@@ -31,7 +31,7 @@ const meta: Meta<typeof QuantityStepper> = {
 export default meta;
 type Story = StoryObj<typeof QuantityStepper>;
 
-// 1. No controlado: solo defaultValue, sin value/onChange — el consumidor no maneja estado.
+// 1. Uncontrolled: only defaultValue, no value/onChange; the consumer handles no state.
 export const Uncontrolled: Story = {
   args: {
     defaultValue: 3,
@@ -43,13 +43,13 @@ export const Uncontrolled: Story = {
     const input = canvas.getByRole('spinbutton');
     await expect(input).toHaveValue(3);
 
-    // Touch target: los botones heredan el size="icon" de Button (44x44). El input queda
-    // alineado en altura porque Input md ya mide 44px por su cuenta (misma familia de
-    // controles de formulario que Button/Select) — ya no hace falta pisarlo con un className
-    // puntual como antes de esa escala compartida. El fixture de vitest-browser no aplica el
-    // CSS de utilidades de Tailwind (mismo issue documentado en el story Destructive de
-    // Button), así que la aserción va sobre las clases; el tamaño real en píxeles y la
-    // alineación visual se verificaron a mano en Storybook, A/B contra main.
+    // Touch target: the buttons inherit Button's size="icon" (44x44). The input stays
+    // aligned in height because Input md already measures 44px on its own (same family of
+    // form controls as Button/Select); there's no longer any need to override it with a one-off
+    // className as before that shared scale. The vitest-browser fixture doesn't apply
+    // Tailwind's utility CSS (same issue documented in Button's Destructive story), so the
+    // assertion is on the classes; the real pixel size and the visual alignment were
+    // checked by hand in Storybook, A/B against main.
     const incrementButton = canvas.getByRole('button', { name: 'Increase quantity' });
     await expect(incrementButton.className.split(' ')).toEqual(
       expect.arrayContaining(['h-11', 'w-11']),
@@ -65,9 +65,9 @@ export const Uncontrolled: Story = {
   },
 };
 
-// 2. Controlado: value + onChange, step distinto de 1. El wrapper realimenta value con lo
-// que devuelve onChange, como haría un consumidor real — así se ejercita el ida y vuelta
-// completo, no solo que se dispare el callback.
+// 2. Controlled: value + onChange, step other than 1. The wrapper feeds value back with what
+// onChange returns, as a real consumer would, so the full round trip is exercised, not just
+// that the callback fires.
 export const ControlledWithStep: Story = {
   args: {
     value: 5,
@@ -92,7 +92,7 @@ export const ControlledWithStep: Story = {
   },
 };
 
-// 3. En max: el botón "+" se deshabilita (prop disabled real, no un no-op) y no dispara onChange.
+// 3. At max: the "+" button is disabled (a real disabled prop, not a no-op) and doesn't fire onChange.
 export const AtMax: Story = {
   args: {
     value: 10,
@@ -113,7 +113,7 @@ export const AtMax: Story = {
   },
 };
 
-// 4. En min: el botón "-" se deshabilita y no dispara onChange.
+// 4. At min: the "-" button is disabled and doesn't fire onChange.
 export const AtMin: Story = {
   args: {
     value: 0,
@@ -134,14 +134,14 @@ export const AtMin: Story = {
   },
 };
 
-// 5. Tipear directo en el input un valor fuera de rango lo clampea (no solo los botones).
-// No controlado a propósito: el clamping debe reflejarse solo, sin depender de que un padre
-// re-alimente `value` desde `onChange` (ver ControlledStepper arriba).
+// 5. Typing an out-of-range value directly in the input clamps it (not just the buttons).
+// Uncontrolled on purpose: the clamping must show on its own, without relying on a parent
+// feeding `value` back from `onChange` (see ControlledStepper above).
 //
-// fireEvent.change (no userEvent.clear/type) porque <input type="number"> no soporta
-// setSelectionRange/select() en Chromium — userEvent.clear() depende de esa API y falla en
-// silencio ahí, dejando el valor previo intacto. fireEvent.change fija el valor completo de
-// una vez, ejercitando el mismo onChange que dispararía un tipeo real, sin ese problema.
+// fireEvent.change (not userEvent.clear/type) because <input type="number"> doesn't support
+// setSelectionRange/select() in Chromium; userEvent.clear() depends on that API and silently
+// fails there, leaving the previous value intact. fireEvent.change sets the whole value at
+// once, exercising the same onChange a real typing would fire, without that problem.
 export const TypedOutOfRangeClamps: Story = {
   args: {
     defaultValue: 5,
@@ -163,7 +163,7 @@ export const TypedOutOfRangeClamps: Story = {
   },
 };
 
-// 6. disabled: ninguno de los tres controles responde.
+// 6. disabled: none of the three controls responds.
 export const Disabled: Story = {
   args: {
     defaultValue: 5,
@@ -179,8 +179,8 @@ export const Disabled: Story = {
   },
 };
 
-// 7. Etiquetas propias: decrementLabel/incrementLabel reemplazan el nombre accesible de los
-// botones y no llegan al input como atributos.
+// 7. Custom labels: decrementLabel/incrementLabel replace the accessible name of the
+// buttons and don't reach the input as attributes.
 export const CustomLabels: Story = {
   args: {
     defaultValue: 2,

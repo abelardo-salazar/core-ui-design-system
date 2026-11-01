@@ -39,7 +39,7 @@ export const Simple: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    // CardTitle usa <h3> semánticamente.
+    // CardTitle uses <h3> semantically.
     await expect(
       canvas.getByRole('heading', { level: 3, name: 'Create project' }),
     ).toBeInTheDocument();
@@ -48,9 +48,9 @@ export const Simple: Story = {
       canvas.getByText('Your project will be deployed to the edge network instantly.'),
     ).toBeInTheDocument();
 
-    // CardFooter: exportado pero sin ninguna mención en tests hasta ahora. Confirmamos que
-    // ambos botones comparten el mismo contenedor (compone correctamente) y que retiene sus
-    // clases base además de las que agrega el consumidor (className se mergea, no reemplaza).
+    // CardFooter: exported but not mentioned in any test until now. We confirm that
+    // both buttons share the same container (it composes correctly) and that it keeps its
+    // base classes in addition to the ones the consumer adds (className is merged, not replaced).
     const cancelButton = canvas.getByRole('button', { name: 'Cancel' });
     const deployButton = canvas.getByRole('button', { name: 'Deploy' });
     const footer = cancelButton.parentElement;

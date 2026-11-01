@@ -21,16 +21,16 @@ export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    // Header de días de la semana presente (grid renderizado).
+    // Weekday header present (grid rendered).
     await expect(canvas.getByText('Mo')).toBeInTheDocument();
 
     const nextButton = canvas.getByRole('button', { name: 'Go to the Next Month' });
     const previousButton = canvas.getByRole('button', { name: 'Go to the Previous Month' });
 
-    // El botón "next" debe usar el mismo estilo que Button (outline) del DS.
+    // The "next" button must use the same style as the DS's Button (outline).
     await expect(nextButton.className.split(' ')).toContain('border-base-300');
 
-    // CaptionLabel se renderiza con role="status" (formato "Month Year", agnóstico de locale).
+    // CaptionLabel renders with role="status" ("Month Year" format, locale-agnostic).
     const caption = canvas.getByRole('status');
     const captionBefore = caption.textContent;
 

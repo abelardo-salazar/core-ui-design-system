@@ -29,20 +29,20 @@ SheetOverlay.displayName = SheetPrimitive.Overlay.displayName;
 
 export type SheetContentProps = React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content> &
   VariantProps<typeof sheetVariants> & {
-    /** Nombre accesible del botón ✕. @default 'Close' */
+    /** Accessible name of the ✕ button. @default 'Close' */
     closeLabel?: string;
   };
 
 /**
- * Panel del Sheet: columna flex con `gap-4` entre hijos. Estructura recomendada:
- * `SheetHeader`, `SheetBody` y `SheetFooter`. El body hace scroll y header/footer quedan
- * fijos. Sin `SheetBody`, el panel entero hace scroll como respaldo, pero la ✕ se desplaza
- * con el contenido; lo correcto es usar `SheetBody`.
+ * Sheet panel: flex column with `gap-4` between children. Recommended structure:
+ * `SheetHeader`, `SheetBody` and `SheetFooter`. The body scrolls and header/footer stay
+ * fixed. Without `SheetBody`, the whole panel scrolls as a fallback, but the ✕ moves
+ * with the content; the right way is to use `SheetBody`.
  *
- * `top` y `bottom` tienen un alto máximo de 85dvh; `left` y `right`, el alto completo.
+ * `top` and `bottom` have a max height of 85dvh; `left` and `right`, the full height.
  *
- * Los bordes que tocan el viewport respetan el safe area (`env(safe-area-inset-*)`). Solo
- * surte efecto si la app declara `viewport-fit=cover` (en Next.js:
+ * The edges that touch the viewport respect the safe area (`env(safe-area-inset-*)`). It
+ * only takes effect if the app declares `viewport-fit=cover` (in Next.js:
  * `export const viewport = { viewportFit: 'cover' }`).
  */
 const SheetContent = React.forwardRef<
@@ -53,7 +53,7 @@ const SheetContent = React.forwardRef<
     <SheetOverlay />
     <SheetPrimitive.Content ref={ref} className={cn(sheetVariants({ side }), className)} {...props}>
       {children}
-      {/* Área táctil 44x44 (Apple HIG); posición y anillo en sheetCloseVariants. */}
+      {/* 44x44 touch area (Apple HIG); position and ring in sheetCloseVariants. */}
       <SheetPrimitive.Close className={sheetCloseVariants({ side })}>
         <Cross2Icon className="h-4 w-4" />
         <span className="sr-only">{closeLabel}</span>
@@ -63,13 +63,13 @@ const SheetContent = React.forwardRef<
 ));
 SheetContent.displayName = SheetPrimitive.Content.displayName;
 
-// El padding reserva el espacio de la ✕: 1.5rem (44px a 2px del borde, menos los 24px de
-// padding del panel) más env(safe-area-inset-right), porque la ✕ se corre ese inset y el
-// panel no siempre lo absorbe (con muesca en horizontal el título quedaba debajo). Se aplica
-// en los cuatro lados en vez de leer un data-side del Content: en `left` el borde derecho es
-// interior y sobra el inset, pero el header no queda acoplado al Content. Sin inset resuelve
-// a los mismos 24px. En móvil el texto va centrado, así que se reserva en ambos lados para no
-// descentrarlo.
+// The padding reserves the ✕'s space: 1.5rem (44px at 2px from the edge, minus the panel's
+// 24px of padding) plus env(safe-area-inset-right), because the ✕ shifts by that inset and the
+// panel doesn't always absorb it (with a notch in landscape the title ended up under it). It's
+// applied on all four sides instead of reading a data-side from the Content: in `left` the right
+// edge is inner and the inset is extra, but the header isn't coupled to the Content. Without an
+// inset it resolves to the same 24px. On mobile the text is centered, so it's reserved on both
+// sides so it isn't off-center.
 const SheetHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
@@ -82,10 +82,10 @@ const SheetHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElemen
 SheetHeader.displayName = 'SheetHeader';
 
 /**
- * Zona con scroll del Sheet; header y footer quedan fijos por estar fuera de ella. Los
- * márgenes negativos compensan el padding del panel para que el overflow no recorte los
- * anillos de foco de los controles en el borde (ring-2 + offset-2 = 4px en vertical) y la
- * barra de scroll quede pegada al borde del panel.
+ * Scrolling area of the Sheet; header and footer stay fixed because they're outside it. The
+ * negative margins compensate for the panel padding so the overflow doesn't clip the
+ * focus rings of controls at the edge (ring-2 + offset-2 = 4px vertically) and the
+ * scrollbar sits against the panel edge.
  */
 const SheetBody = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div

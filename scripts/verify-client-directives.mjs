@@ -1,31 +1,31 @@
 #!/usr/bin/env node
-// Guardrail de build: evita que un componente con 'use client' en su fuente se publique
-// sin la directiva en dist/ (pasó con Popover, Progress, Calendar, DatePicker, Chip e Image
-// — ver CHANGELOG.md). El bug no era el build en sí, era que CLIENT_ENTRY_POINTS es una
-// lista mantenida a mano que nadie actualizaba al agregar un componente nuevo. Este script
-// no reemplaza esa lista, solo la valida contra la realidad de src/components/ en cada build.
+// Build guardrail: keeps a component with 'use client' in its source from being published
+// without the directive in dist/ (it happened with Popover, Progress, Calendar, DatePicker, Chip
+// and Image; see CHANGELOG.md). The bug was not the build itself but that CLIENT_ENTRY_POINTS
+// is a hand-maintained list nobody updated when adding a new component. This script does not
+// replace that list; it only checks it against the actual src/components/ on every build.
 //
-// Falla (exit 1) si:
-//   - un .tsx de src/components/ tiene 'use client' en su primera línea y no está en
-//     CLIENT_ENTRY_POINTS (el caso que rompió producción).
-//   - una entrada de CLIENT_ENTRY_POINTS ya no existe, o su archivo ya no tiene la
-//     directiva (lista desactualizada en el otro sentido — no rompe el build hoy, pero es
-//     la misma clase de desalineamiento silencioso).
+// Fails (exit 1) if:
+//   - a .tsx in src/components/ has 'use client' on its first line and is not in
+//     CLIENT_ENTRY_POINTS (the case that broke production).
+//   - a CLIENT_ENTRY_POINTS entry no longer exists, or its file no longer has the
+//     directive (list out of date the other way: it doesn't break the build today, but it's
+//     the same kind of silent drift).
 //
-// Modo `--post-build` (corre DESPUÉS de `vite build`, ver package.json): valida el artefacto
-// real. Falla si el barrel raíz publicado (dist/index.js) arrastra recharts — directa o
-// transitivamente por cualquier import relativo alcanzable. recharts (ResponsiveContainer.js)
-// llama createContext(...) a nivel de módulo, lo cual explota en el entorno react-server de
-// Next.js; dist/index.js es el único archivo que un consumidor real importa, así que debe
-// quedar 100% libre de recharts. Chart vive ahora en el subpath ./charts (dist/charts.js),
-// que es client-only completo y sí puede traer recharts. Ver CHANGELOG.md [0.4.1]. También
-// valida dist/locale.js (subpath ./locale): no puede alcanzar ni el barrel ni recharts.
+// `--post-build` mode (runs AFTER `vite build`, see package.json): checks the real artifact.
+// Fails if the published root barrel (dist/index.js) pulls in recharts, directly or
+// transitively through any reachable relative import. recharts (ResponsiveContainer.js)
+// calls createContext(...) at module level, which blows up in the Next.js react-server
+// environment; dist/index.js is the only file a real consumer imports, so it must stay 100%
+// free of recharts. Chart now lives in the ./charts subpath (dist/charts.js), which is fully
+// client-only and may bring recharts. See CHANGELOG.md [0.4.1]. It also checks dist/locale.js
+// (./locale subpath): it can reach neither the barrel nor recharts.
 //
-// Chequeo adicional del modo por defecto (heurística estática, ver más abajo): detecta un
-// componente sin 'use client' que declara una función localmente y la usa como handler JSX
-// (onClick={handleX}) — el patrón que rompió Button (handleClick se arma siempre dentro del
-// branch asChild y se cuelga de onClick={handleClick} sobre Slot; ninguna combinación de
-// props lo evita). Ver CHANGELOG.md [0.4.3].
+// Extra check in the default mode (static heuristic, see below): detects a component without
+// 'use client' that declares a function locally and uses it as a JSX handler
+// (onClick={handleX}), the pattern that broke Button (handleClick is always built inside the
+// asChild branch and attached as onClick={handleClick} to Slot; no combination of props
+// avoids it). See CHANGELOG.md [0.4.3].
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -39,21 +39,21 @@ function toPosix(p) {
   return p.replace(/\\/g, '/');
 }
 
-// --- Modo post-build: lo que cada entry publicado puede alcanzar --------------------------
+// --- Post-build mode: what each published entry can reach ---------------------------------
 //
-// dist/index.js no puede alcanzar recharts (ver cabecera). dist/locale.js (subpath ./locale,
-// src/locale.ts) es datos puros y server-safe: no puede alcanzar recharts ni el barrel raíz —
-// si lo hiciera, importar un locale arrastraría el DS entero y su frontera 'use client'.
+// dist/index.js cannot reach recharts (see header). dist/locale.js (./locale subpath,
+// src/locale.ts) is pure data and server-safe: it cannot reach recharts or the root barrel;
+// if it did, importing a locale would pull in the whole DS and its 'use client' boundary.
 
 if (process.argv.includes('--post-build')) {
-  // Todo `import ... from '<spec>'` / `export ... from '<spec>'` (y `import '<spec>'`) del chunk.
+  // Every `import ... from '<spec>'` / `export ... from '<spec>'` (and `import '<spec>'`) in the chunk.
   const FROM_RE = /(?:import|export)\b[^'"]*?\bfrom\s*['"]([^'"]+)['"]|import\s*['"]([^'"]+)['"]/g;
   const RECHARTS_RE = /(^|\/)recharts(\/|$)/;
   const BARREL = join(ROOT, 'dist/index.js');
 
-  // Recorre el grafo de imports relativos desde `entry` (los bare specifiers externalizados
-  // —react, @radix-ui/*— no se abren). Devuelve los archivos visitados y los imports que
-  // violan alguna regla: `{ file, spec, reason }`.
+  // Walks the graph of relative imports from `entry` (externalized bare specifiers, such as
+  // react and @radix-ui/*, are not opened). Returns the visited files and the imports that
+  // break a rule: `{ file, spec, reason }`.
   function inspect(entry, { forbidBarrel }) {
     const visited = new Set();
     const queue = [entry];
@@ -85,7 +85,7 @@ if (process.argv.includes('--post-build')) {
           for (const cand of [target, `${target}.js`, join(target, 'index.js')]) {
             if (existsSync(cand) && statSync(cand).isFile()) {
               if (forbidBarrel && cand === BARREL) {
-                offenders.push({ file, spec, reason: 'barrel raíz (dist/index.js)' });
+                offenders.push({ file, spec, reason: 'root barrel (dist/index.js)' });
               } else {
                 queue.push(cand);
               }
@@ -102,18 +102,18 @@ if (process.argv.includes('--post-build')) {
     {
       entry: 'dist/index.js',
       forbidBarrel: false,
-      ok: 'está libre de recharts',
-      fail: 'El barrel raíz publicado (dist/index.js) arrastra recharts y NO es seguro para Server Components',
+      ok: 'is free of recharts',
+      fail: 'The published root barrel (dist/index.js) pulls in recharts and is NOT safe for Server Components',
       hint:
-        '  recharts solo puede vivir bajo el subpath ./charts (src/charts.ts → dist/charts.js).\n' +
-        '  Revisa que src/index.ts no reexporte nada de src/components/Chart/ (ni transitivamente).',
+        '  recharts can only live under the ./charts subpath (src/charts.ts → dist/charts.js).\n' +
+        '  Check that src/index.ts re-exports nothing from src/components/Chart/ (not even transitively).',
     },
     {
       entry: 'dist/locale.js',
       forbidBarrel: true,
-      ok: 'no alcanza ni el barrel raíz ni recharts',
-      fail: 'El subpath ./locale (dist/locale.js) alcanza módulos que no le corresponden',
-      hint: '  src/locale.ts solo puede reexportar locales de DayPicker: nada del barrel ni de components/.',
+      ok: 'reaches neither the root barrel nor recharts',
+      fail: 'The ./locale subpath (dist/locale.js) reaches modules it must not reach',
+      hint: '  src/locale.ts can only re-export DayPicker locales: nothing from the barrel or components/.',
     },
   ];
 
@@ -121,7 +121,7 @@ if (process.argv.includes('--post-build')) {
   for (const { entry, forbidBarrel, ok, fail, hint } of CHECKS) {
     const abs = join(ROOT, entry);
     if (!existsSync(abs)) {
-      console.error(`✗ ${entry} no existe — ¿corriste este check antes de \`vite build\`?`);
+      console.error(`✗ ${entry} does not exist. Did you run this check before \`vite build\`?`);
       failed = true;
       continue;
     }
@@ -135,19 +135,19 @@ if (process.argv.includes('--post-build')) {
       failed = true;
       continue;
     }
-    console.log(`✓ ${entry} ${ok} (${visited.size} módulos inspeccionados).`);
+    console.log(`✓ ${entry} ${ok} (${visited.size} modules inspected).`);
   }
 
-  // `sideEffects` del DS vs. las dependencias empaquetadas en dist/node_modules/. Para el
-  // bundler del consumidor, esas copias son archivos del DS: el campo del DS reemplaza al de
-  // cada dependencia. Si una dependencia declara un módulo JS con efectos (d3-format,
-  // d3-time-format: src/defaultLocale.js) y está en el dist, su ruta tiene que figurar en el
-  // `sideEffects` del DS; y cada ruta JS declarada tiene que existir (preserveModules puede
-  // mover el layout de dist/node_modules/).
+  // The DS `sideEffects` vs. the dependencies bundled in dist/node_modules/. For the
+  // consumer's bundler, those copies are DS files: the DS field replaces each dependency's
+  // field. If a dependency declares a JS module with side effects (d3-format, d3-time-format:
+  // src/defaultLocale.js) and it is in dist, its path must be listed in the DS `sideEffects`;
+  // and every declared JS path must exist (preserveModules can change the layout of
+  // dist/node_modules/).
   const declared = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).sideEffects ?? [];
   const isCss = (pattern) => /\.css$/.test(pattern);
 
-  // dist/node_modules/<pkg> refleja node_modules/<pkg> del repo (también anidados).
+  // dist/node_modules/<pkg> mirrors the repo's node_modules/<pkg> (nested ones too).
   function bundledPackages(rel = 'node_modules') {
     const distDir = join(ROOT, 'dist', rel);
     if (!existsSync(distDir)) return [];
@@ -189,21 +189,19 @@ if (process.argv.includes('--post-build')) {
   const staleDecl = declared.filter((p) => !isCss(p) && !existsSync(join(ROOT, p)));
 
   if (missingDecl.length > 0 || unmappable.length > 0 || staleDecl.length > 0) {
-    console.error('✗ `sideEffects` de package.json no refleja las dependencias empaquetadas:\n');
-    for (const p of missingDecl) console.error(`    falta declarar: "${p}"`);
-    for (const p of unmappable) console.error(`    glob JS sin traducir (revisar a mano): ${p}`);
-    for (const p of staleDecl) console.error(`    declarado pero no existe en dist/: "${p}"`);
+    console.error('✗ package.json `sideEffects` does not match the bundled dependencies:\n');
+    for (const p of missingDecl) console.error(`    not declared: "${p}"`);
+    for (const p of unmappable) console.error(`    JS glob not mapped (check by hand): ${p}`);
+    for (const p of staleDecl) console.error(`    declared but missing from dist/: "${p}"`);
     failed = true;
   } else {
-    console.log(
-      '✓ `sideEffects` incluye los módulos con efectos de las dependencias empaquetadas.',
-    );
+    console.log('✓ `sideEffects` includes the side-effect modules of the bundled dependencies.');
   }
 
   process.exit(failed ? 1 : 0);
 }
 
-// --- Modo por defecto (pre-build): CLIENT_ENTRY_POINTS sincronizado con src/components/ --
+// --- Default mode (pre-build): CLIENT_ENTRY_POINTS in sync with src/components/ ------------
 
 function firstLine(absPath) {
   const content = readFileSync(absPath, 'utf8');
@@ -226,28 +224,28 @@ function findTsxFiles(dir) {
   return results;
 }
 
-// Detecta `const NOMBRE = (...) => {...}` / `const NOMBRE = function(...) {...}` y
-// `function NOMBRE(...) {...}` declarados a nivel de archivo (no importa si están dentro del
-// cuerpo del componente, solo que el identificador se declare con `const`/`function`, no que
-// venga desdestructurado de props). Deliberadamente NO cubre wrappers como
-// `useCallback(...)`/`useMemo(...)` — la heurística es la que pide la tarea, no más: ver
-// comentario de cabecera. Falsos negativos ahí quedan para juicio humano.
+// Detects `const NAME = (...) => {...}` / `const NAME = function(...) {...}` and
+// `function NAME(...) {...}` declared anywhere in the file (it doesn't matter whether they are
+// inside the component body, only that the identifier is declared with `const`/`function`
+// rather than destructured from props). It deliberately does NOT cover wrappers such as
+// `useCallback(...)`/`useMemo(...)`: the heuristic is what the task asked for, no more (see the
+// header comment). False negatives there are left to human judgment.
 const LOCAL_FN_DECL_RE =
   /\bconst\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s+)?\(|\bfunction\s+([A-Za-z_$][\w$]*)\s*\(/g;
 
-// `onClick={handleClick}`, `onKeyDown={onKeyDown}`, etc. Solo identificadores simples entre
-// llaves — `onClick={() => ...}` o `onClick={props.onClick}` no matchean, a propósito: el
-// caso que nos interesa es un identificador que además aparece en LOCAL_FN_DECL_RE.
+// `onClick={handleClick}`, `onKeyDown={onKeyDown}`, etc. Only plain identifiers inside
+// braces: `onClick={() => ...}` or `onClick={props.onClick}` don't match, on purpose. The case
+// we care about is an identifier that also shows up in LOCAL_FN_DECL_RE.
 const HANDLER_PROP_USE_RE = /\b(on[A-Z]\w*)\s*=\s*\{\s*([A-Za-z_$][\w$]*)\s*\}/g;
 
-// Los .stories.tsx nunca se publican en dist/ (son fixtures de Storybook/vitest-browser) y
-// usan libremente `const x = () => {...}` dentro de sus play(), sin relación con RSC — se
-// excluyen para no generar ruido ajeno al propósito del check.
+// *.stories.tsx files are never published in dist/ (they are Storybook/vitest-browser
+// fixtures) and freely use `const x = () => {...}` inside their play(), unrelated to RSC;
+// they are excluded so they don't add noise unrelated to the purpose of the check.
 const STORY_FILE_RE = /\.stories\.tsx$/;
 
 function findImplicitClientHandlers(absPath, relPath) {
   if (STORY_FILE_RE.test(relPath)) return null;
-  if (USE_CLIENT_RE.test(firstLine(absPath))) return null; // ya declarado, no aplica
+  if (USE_CLIENT_RE.test(firstLine(absPath))) return null; // already declared, not applicable
 
   const content = readFileSync(absPath, 'utf8');
 
@@ -268,9 +266,9 @@ function findImplicitClientHandlers(absPath, relPath) {
 }
 
 const declared = new Set(CLIENT_ENTRY_POINTS.map(toPosix));
-const missing = []; // tiene 'use client' pero no está declarado
-const stale = []; // declarado pero no existe, o ya no tiene 'use client'
-const implicitClient = []; // sin 'use client', pero arma un handler localmente y lo usa en JSX
+const missing = []; // has 'use client' but is not declared
+const stale = []; // declared but missing, or no longer has 'use client'
+const implicitClient = []; // no 'use client', but builds a handler locally and uses it in JSX
 
 for (const absPath of findTsxFiles(COMPONENTS_DIR)) {
   const relPath = toPosix(relative(ROOT, absPath));
@@ -287,56 +285,54 @@ for (const absPath of findTsxFiles(COMPONENTS_DIR)) {
 for (const relPath of declared) {
   const absPath = join(ROOT, relPath);
   if (!existsSync(absPath)) {
-    stale.push(`${relPath} (el archivo ya no existe)`);
+    stale.push(`${relPath} (the file no longer exists)`);
     continue;
   }
   if (!USE_CLIENT_RE.test(firstLine(absPath))) {
-    stale.push(`${relPath} (ya no tiene 'use client' en la primera línea)`);
+    stale.push(`${relPath} (no longer has 'use client' on its first line)`);
   }
 }
 
 if (missing.length > 0 || stale.length > 0) {
   console.error(
-    '✗ CLIENT_ENTRY_POINTS (scripts/client-entry-points.mjs) está desalineado con src/components/:\n',
+    '✗ CLIENT_ENTRY_POINTS (scripts/client-entry-points.mjs) is out of sync with src/components/:\n',
   );
 
   if (missing.length > 0) {
     console.error(
-      `  Tienen 'use client' pero NO están en CLIENT_ENTRY_POINTS (dist/ va a perder la directiva):`,
+      `  Have 'use client' but are NOT in CLIENT_ENTRY_POINTS (dist/ will lose the directive):`,
     );
     for (const p of missing) console.error(`    - ${p}`);
     console.error('');
   }
 
   if (stale.length > 0) {
-    console.error(`  Están en CLIENT_ENTRY_POINTS pero ya no corresponde:`);
+    console.error(`  Are in CLIENT_ENTRY_POINTS but no longer belong there:`);
     for (const p of stale) console.error(`    - ${p}`);
     console.error('');
   }
 
-  console.error('  Agrega o quita la entrada correspondiente en scripts/client-entry-points.mjs.');
+  console.error('  Add or remove the matching entry in scripts/client-entry-points.mjs.');
   process.exit(1);
 }
 
 if (implicitClient.length > 0) {
   console.error(
-    "✗ Componente(s) sin 'use client' que arman un handler localmente y lo usan como prop JSX (patrón que rompió Button — ver CHANGELOG.md [0.4.3]):\n",
+    "✗ Component(s) without 'use client' that build a handler locally and pass it as a JSX prop (the pattern that broke Button, see CHANGELOG.md [0.4.3]):\n",
   );
   for (const { relPath, offenses } of implicitClient) {
     console.error(`    - ${relPath}  →  ${offenses.join(', ')}`);
   }
   console.error(
-    '\n  Heurística estática, no perfecta: puede ser un falso positivo legítimo (revisar a mano) o un\n' +
-      "  componente que de verdad necesita 'use client'. Si es lo segundo, agrega la directiva y\n" +
-      '  regístralo en scripts/client-entry-points.mjs; si es un falso positivo, deja constancia de\n' +
-      '  por qué en el PR en vez de silenciarlo aquí.',
+    '\n  Static heuristic, not perfect: it may be a genuine false positive (check by hand) or a\n' +
+      "  component that really needs 'use client'. If the latter, add the directive and register\n" +
+      '  it in scripts/client-entry-points.mjs; if it is a false positive, explain why in the PR\n' +
+      '  instead of silencing it here.',
   );
   process.exit(1);
 }
 
+console.log(`✓ CLIENT_ENTRY_POINTS is in sync with src/components/ (${declared.size} components).`);
 console.log(
-  `✓ CLIENT_ENTRY_POINTS está sincronizado con src/components/ (${declared.size} componentes).`,
-);
-console.log(
-  `✓ Ningún componente server-safe arma un handler local y lo usa como prop JSX (heurística de handlers implícitos).`,
+  `✓ No server-safe component builds a local handler and passes it as a JSX prop (implicit handler heuristic).`,
 );

@@ -15,34 +15,34 @@ import { Input } from '../Input';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../Table';
 import { features } from './dataTableFeatures';
 
-// `features` se re-exporta desde este directorio vía index.ts (dataTableFeatures.ts),
-// no desde este archivo, para que quien consuma el componente pueda tipar su propio array
-// de columnas: ColumnDef<typeof features, TData>[] — requisito real de los generics de v9
-// (ver JSDoc de createColumnHelper), no un detalle opcional.
+// `features` is re-exported from this directory through index.ts (dataTableFeatures.ts),
+// not from this file, so the component's consumer can type their own array
+// of columns: ColumnDef<typeof features, TData>[], a real requirement of the v9 generics
+// (see createColumnHelper's JSDoc), not an optional detail.
 
 export interface DataTableProps<TData extends RowData> {
   /**
-   * Definiciones de columnas armadas con las herramientas propias de @tanstack/react-table
-   * (createColumnHelper, etc.) tipadas contra `typeof features` exportado por este módulo.
+   * Column definitions built with @tanstack/react-table's own tools
+   * (createColumnHelper, etc.) typed against the `typeof features` exported by this module.
    */
   columns: ColumnDef<typeof features, TData>[];
   data: TData[];
   /**
-   * Placeholder (y nombre accesible) de la caja de búsqueda global. Siempre visible: no es
-   * opcional vía prop. @default 'Search...'
+   * Placeholder (and accessible name) of the global search box. Always visible: it can't be
+   * turned off through a prop. @default 'Search...'
    */
   searchPlaceholder?: string;
   /**
-   * Contenido de la fila vacía (sin datos o filtro sin resultados). Por defecto, un
-   * `EmptyState` `sm` con el título "No results.".
+   * Content of the empty row (no data or a filter with no results). By default, an
+   * `EmptyState` `sm` with the title "No results.".
    */
   emptyState?: React.ReactNode;
-  /** Texto del botón de página anterior. @default 'Previous' */
+  /** Text of the previous page button. @default 'Previous' */
   previousLabel?: string;
-  /** Texto del botón de página siguiente. @default 'Next' */
+  /** Text of the next page button. @default 'Next' */
   nextLabel?: string;
   /**
-   * Texto del indicador de página. Recibe la página actual (desde 1) y el total (mínimo 1).
+   * Text of the page indicator. Gets the current page (from 1) and the total (at least 1).
    * @default (page, total) => `Page ${page} of ${total}`
    */
   pageLabel?: (page: number, total: number) => string;
@@ -123,10 +123,10 @@ function DataTable<TData extends RowData>({
             rows.map((row) => (
               <TableRow key={row.id}>
                 {row.getAllCells().map((cell) => {
-                  // data-label para el modo tarjeta de Table (responsive): si el header de
-                  // la columna es un string lo usamos tal cual (caso real de uso del DS);
-                  // si es una función/JSX no se puede aplanar a un valor de attr(), así que
-                  // cae a column.id antes que dejar la celda sin etiqueta.
+                  // data-label for Table's card mode (responsive): if the column header
+                  // is a string we use it as is (the real use case of the DS);
+                  // if it's a function/JSX it can't be flattened into an attr() value, so
+                  // it falls back to column.id rather than leaving the cell without a label.
                   const header = cell.column.columnDef.header;
                   const dataLabel = typeof header === 'string' ? header : cell.column.id;
 
@@ -140,9 +140,9 @@ function DataTable<TData extends RowData>({
             ))
           ) : (
             <TableRow>
-              {/* Sin data-label: en modo tarjeta no cuelga ninguna etiqueta de columna. El
-                  div w-full es necesario porque bajo `lg` Table pone el td en flex
-                  justify-between, que dejaría un hijo único pegado a la izquierda. */}
+              {/* No data-label: in card mode no column label is attached. The
+                  w-full div is needed because below `lg` Table makes the td flex
+                  justify-between, which would push a single child to the left. */}
               <TableCell colSpan={columnCount} className="text-center">
                 <div className="w-full">{emptyState}</div>
               </TableCell>
@@ -152,10 +152,10 @@ function DataTable<TData extends RowData>({
       </Table>
 
       {/*
-        Breakpoint `md` (no `lg`, a diferencia del colapso a tarjeta de la tabla arriba):
-        estos son solo un input + 2 botones + texto de página, entran en una fila en más
-        anchos que una tabla completa de columnas — usar `lg` acá forzaría un stack
-        innecesario en una tablet donde el toolbar entra perfecto en horizontal.
+        Breakpoint `md` (not `lg`, unlike the table's card collapse above): this is just
+        an input + 2 buttons + page text, which fit in one row at more widths than a full
+        table of columns; using `lg` here would force an unnecessary stack on a tablet
+        where the toolbar fits perfectly horizontally.
       */}
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-end md:gap-4">
         <p className="text-sm text-base-content/65">

@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { Slot, Slottable } from '@radix-ui/react-slot';
-import { ReloadIcon } from '@radix-ui/react-icons'; // Importamos el icono
+import { ReloadIcon } from '@radix-ui/react-icons'; // Import the icon
 import { type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import { buttonVariants } from './buttonVariants';
@@ -36,10 +36,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref,
   ) => {
     const Comp = asChild ? Slot : 'button';
-    // `classes` se computa UNA sola vez y alimenta las dos ramas de abajo (nativa y asChild) —
-    // por eso basta con desestructurar `shape` acá arriba y pasarlo acá: si no se desestructura,
-    // se esparce a `...props` y termina como atributo HTML `shape="pill"` en el DOM en vez de
-    // aplicar la clase (mismo riesgo que ya pasó con `size` en Badge).
+    // `classes` is computed ONCE and feeds both branches below (native and asChild), which is
+    // why it's enough to destructure `shape` up here and pass it here: if it isn't destructured,
+    // it spreads into `...props` and ends up as an HTML attribute `shape="pill"` in the DOM
+    // instead of applying the class (same risk that already happened with `size` in Badge).
     const classes = cn(buttonVariants({ variant, size, shape, fullWidth, className }));
     const isDisabled = isLoading || disabled;
 

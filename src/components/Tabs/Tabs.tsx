@@ -5,19 +5,19 @@ import * as TabsPrimitive from '@radix-ui/react-tabs';
 import { cn } from '../../utils/cn';
 
 /**
- * Cambia qué panel de contenido se ve. Para cambiar un valor (una vista, un filtro), usar
+ * Changes which content panel is shown. To change a value (a view, a filter), use
  * `ToggleGroup`.
  *
- * Por defecto (`activationMode="automatic"`), mover el foco con las flechas también muestra el
- * panel. `activationMode="manual"` conviene cuando mostrar un panel es costoso (carga datos o
- * renderiza mucho): las flechas solo mueven el foco y Space o Enter muestran el panel.
+ * By default (`activationMode="automatic"`), moving focus with the arrows also shows the
+ * panel. `activationMode="manual"` is better when showing a panel is expensive (it loads data or
+ * renders a lot): the arrows only move focus and Space or Enter show the panel.
  */
 const Tabs = TabsPrimitive.Root;
 
 // -----------------------------------------------------------------------------
-// List — segmento/píldora: bg-base-200 conteniendo los triggers, mismo radius
-// token que DropdownMenuContent (rounded-box). Pensado para grupos chicos (2-5
-// opciones), no para una fila larga de tabs de dashboard.
+// List: segment/pill; bg-base-200 holding the triggers, same radius
+// token as DropdownMenuContent (rounded-box). Meant for small groups (2-5
+// options), not for a long row of dashboard tabs.
 // -----------------------------------------------------------------------------
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
@@ -32,10 +32,10 @@ const TabsList = React.forwardRef<
 TabsList.displayName = TabsPrimitive.List.displayName;
 
 // -----------------------------------------------------------------------------
-// Trigger — el estado activo (data-state="active") usa bg-primary/text-primary-content,
-// el mismo criterio de color que Chip aplica al estado "on" (ver chipVariants.ts:
-// has-[[data-state=on]]:bg-primary). Acá no hace falta el selector has-* porque
-// data-state vive directo en el propio Trigger, no en un hijo.
+// Trigger: the active state (data-state="active") uses bg-primary/text-primary-content,
+// the same color criterion Chip applies to the "on" state (see chipVariants.ts:
+// has-[[data-state=on]]:bg-primary). The has-* selector isn't needed here because
+// data-state lives directly on the Trigger itself, not on a child.
 // -----------------------------------------------------------------------------
 const TabsTrigger = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Trigger>,
@@ -57,8 +57,8 @@ const TabsTrigger = React.forwardRef<
 TabsTrigger.displayName = TabsPrimitive.Trigger.displayName;
 
 // -----------------------------------------------------------------------------
-// Content — sin Portal: a diferencia de DropdownMenuContent/TooltipContent, el
-// contenido de un tab vive en el flujo normal del documento.
+// Content: no Portal; unlike DropdownMenuContent/TooltipContent, a tab's
+// content lives in the normal document flow.
 // -----------------------------------------------------------------------------
 const TabsContent = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Content>,

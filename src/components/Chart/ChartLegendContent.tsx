@@ -4,12 +4,12 @@ import { cn } from '../../utils/cn';
 
 export interface ChartLegendContentProps extends Pick<DefaultLegendContentProps, 'payload'> {
   className?: string;
-  /** Mismo config pasado a ChartContainer — resuelve label y color por dataKey. */
+  /** Same config passed to ChartContainer; resolves label and color by dataKey. */
   config: ChartConfig;
 }
 
-// Se usa vía <Legend content={<ChartLegendContent config={chartConfig} />} /> de Recharts,
-// mismo mecanismo de cloneElement que ChartTooltipContent. Sin hooks, sin 'use client'.
+// Used through Recharts' <Legend content={<ChartLegendContent config={chartConfig} />} />,
+// same cloneElement mechanism as ChartTooltipContent. No hooks, no 'use client'.
 function ChartLegendContent({ payload, className, config }: ChartLegendContentProps) {
   if (!payload?.length) {
     return null;
@@ -18,13 +18,13 @@ function ChartLegendContent({ payload, className, config }: ChartLegendContentPr
   return (
     <div className={cn('flex flex-wrap items-center justify-center gap-4', className)}>
       {payload.map((entry, index) => {
-        // entry.value antes que entry.dataKey a propósito: mismo caso que
-        // ChartTooltipContent — para Pie, dataKey es el mismo string en todas las porciones
-        // (el campo que indica el valor numérico), y la única key que distingue cada porción
-        // es `value` (el nombre resuelto por nameKey). Verificado con un Pie real: el payload
-        // del legend trae dataKey:"value" repetido en cada entry y value:"design"/
-        // "engineering" distinto por entry — con dataKey primero, todas las porciones
-        // colapsaban a var(--color-value), que ChartContainer nunca inyecta.
+        // entry.value before entry.dataKey on purpose: same case as
+        // ChartTooltipContent; for Pie, dataKey is the same string in all the slices
+        // (the field holding the numeric value), and the only key that tells each slice apart
+        // is `value` (the name resolved by nameKey). Verified with a real Pie: the legend
+        // payload has dataKey:"value" repeated in every entry and value:"design"/
+        // "engineering" different per entry; with dataKey first, all the slices
+        // collapsed into var(--color-value), which ChartContainer never injects.
         const key = String(entry.value ?? entry.dataKey ?? index);
         const itemConfig = config[key];
         const itemLabel = itemConfig?.label ?? entry.value ?? key;

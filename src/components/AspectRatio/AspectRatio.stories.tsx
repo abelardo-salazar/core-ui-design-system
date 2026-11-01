@@ -15,20 +15,20 @@ const meta: Meta<typeof AspectRatio> = {
 export default meta;
 type Story = StoryObj<typeof AspectRatio>;
 
-// PNG 1x1 embebido: sin dependencia de red externa (mismo valor ya usado en
-// Image.stories.tsx y Avatar.stories.tsx). Acá el riesgo era más directo que en esos dos
-// casos: Image (el propio del DS, no AvatarImage de Radix) se desmonta a sí misma si la
-// carga falla y no hay fallback, y la play de abajo usa getByAltText sin find*/waitFor —
-// un fallo de red externa habría hecho que ese assert síncrono no encontrara el <img>.
+// Embedded 1x1 PNG: no dependency on an external network (same value already used in
+// Image.stories.tsx and Avatar.stories.tsx). Here the risk was more direct than in those two
+// cases: Image (the DS's own, not Radix's AvatarImage) unmounts itself if loading
+// fails and there's no fallback, and the play below uses getByAltText without find*/waitFor;
+// an external network failure would have made that synchronous assert miss the <img>.
 const TINY_PNG =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
 
-// 1. Ratio puro: verifica el mecanismo real (padding-bottom % que calcula la propia primitiva
-// de Radix a partir de ratio), no una medición de layout en vivo — getBoundingClientRect en el
-// runner headless de vitest-browser puede no reflejar aún el padding-bottom trick en el momento
-// en que corre play() (a diferencia del navegador real de Storybook, donde sí se verificó
-// visualmente: la caja resultante es 16:9). El padding-bottom inline es lo que efectivamente
-// dirige el layout en cualquier navegador estándar, así que es la comprobación más estable.
+// 1. Pure ratio: checks the real mechanism (the padding-bottom % that the Radix primitive
+// itself computes from ratio), not a live layout measurement; getBoundingClientRect in
+// vitest-browser's headless runner may not reflect the padding-bottom trick yet when
+// play() runs (unlike Storybook's real browser, where it was checked
+// visually: the resulting box is 16:9). The inline padding-bottom is what actually
+// drives the layout in any standard browser, so it's the most stable check.
 export const Default: Story = {
   render: () => (
     <div style={{ width: 320 }}>
@@ -46,14 +46,14 @@ export const Default: Story = {
     await expect(parseFloat(wrapper!.style.paddingBottom)).toBeCloseTo(100 / (16 / 9), 1);
     await expect(wrapper!.style.width).toBe('100%');
 
-    // El contenido pasado como children cae en el div absolute inset-0 que Radix pone dentro
-    // del wrapper — confirma que la composición cablea el hijo en el lugar correcto.
+    // The content passed as children lands in the absolute inset-0 div that Radix puts inside
+    // the wrapper; confirms the composition wires the child in the right place.
     await expect(wrapper).toContainElement(content);
   },
 };
 
-// 2. AspectRatio + Image: dos componentes separados que se componen entre sí, no una sola API
-// con prop de ratio — mismo criterio que Popover/Calendar y Popover/DatePicker.
+// 2. AspectRatio + Image: two separate components that compose together, not a single API
+// with a ratio prop; same criterion as Popover/Calendar and Popover/DatePicker.
 export const WithImage: Story = {
   render: () => (
     <div style={{ width: 320 }}>

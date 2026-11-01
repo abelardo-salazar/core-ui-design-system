@@ -17,24 +17,24 @@ const meta: Meta<typeof Image> = {
 export default meta;
 type Story = StoryObj<typeof Image>;
 
-// PNG 1x1 embebido: sin dependencia de red externa ni de que Storybook esté sirviendo un
-// archivo local correctamente (a diferencia de una ruta como /broken-image.jpg, que acá
-// necesitamos que SIEMPRE cargue con éxito, no que falle). Causante del flake original: esta
-// story usaba https://github.com/shadcn.png, una imagen real por red.
+// Embedded 1x1 PNG: no dependency on an external network or on Storybook serving a local
+// file correctly (unlike a path such as /broken-image.jpg, which here we need to ALWAYS
+// load successfully, not fail). Cause of the original flake: this story used
+// https://github.com/shadcn.png, a real image over the network.
 const TINY_PNG =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
 
-// Imagen que falla: un data URI que no se puede decodificar. Falla en el propio navegador, sin
-// pedir nada al servidor. Antes estas stories usaban /broken-image.jpg, que el servidor de vitest
-// no responde con un 404 sino con su HTML de fallback (200); el error dependía de cuánto
-// tardaba ese servidor (y de si el navegador revalidaba la respuesta en caché de una story
-// anterior), y las stories fallaban a veces con la máquina cargada.
+// Image that fails: a data URI that can't be decoded. It fails in the browser itself, without
+// requesting anything from the server. Before, these stories used /broken-image.jpg, which the
+// vitest server doesn't answer with a 404 but with its fallback HTML (200); the error depended
+// on how long that server took (and on whether the browser revalidated the cached response
+// from a previous story), and the stories sometimes failed on a busy machine.
 const BROKEN_SRC = 'data:image/png;base64,AAAA';
 
-// Cuenta los eventos load/error que dispara el navegador (isTrusted) dentro de un contenedor.
-// load y error no burbujean, pero sí pasan por la fase de captura. Sirve para comprobar que un
-// callback se llamó "exactamente una vez" sin esperar un tiempo fijo: una vez llegado el evento
-// real del navegador, ya no puede llegar otro para ese src.
+// Counts the load/error events the browser fires (isTrusted) inside a container.
+// load and error don't bubble, but they do go through the capture phase. It's used to check
+// that a callback was called "exactly once" without waiting a fixed time: once the real
+// browser event has arrived, no other one can arrive for that src.
 function countBrowserEvents(container: HTMLElement) {
   const counts = { load: 0, error: 0 };
   const listener = (event: Event) => {
@@ -47,7 +47,7 @@ function countBrowserEvents(container: HTMLElement) {
   return counts;
 }
 
-// 1. Ciclo completo: Skeleton visible mientras carga -> imagen visible al cargar.
+// 1. Full cycle: Skeleton visible while loading -> image visible once loaded.
 export const LoadsSuccessfully: Story = {
   render: () => (
     <div className="h-32 w-32">
@@ -57,12 +57,12 @@ export const LoadsSuccessfully: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    // La carga real puede resolver antes o después de que el assert corra (mismo caso
-    // documentado en Avatar.stories UserProfile), así que no afirmamos el estado inicial de
-    // carga por timing — eso se verifica visualmente en el navegador (ver AGENT notes). A
-    // diferencia de AvatarImage (Radix), nuestro <img> se monta de entrada (con alt ya
-    // presente) para poder disparar onLoad/onError, así que findByAltText resuelve apenas se
-    // monta, no cuando termina de cargar: hay que esperar el evento load real (img.complete).
+    // The real load can resolve before or after the assert runs (same case documented in
+    // Avatar.stories UserProfile), so we don't assert the initial loading state through
+    // timing; that is checked visually in the browser (see AGENT notes). Unlike
+    // AvatarImage (Radix), our <img> is mounted right away (with alt already present) to be
+    // able to fire onLoad/onError, so findByAltText resolves as soon as it mounts, not
+    // when it finishes loading: we have to wait for the real load event (img.complete).
     const img = canvas.getByAltText('Loaded photo');
     await waitFor(() => expect(img.complete && img.naturalWidth > 0).toBe(true));
     await waitFor(() => expect(img.className).not.toContain('invisible'));
@@ -70,7 +70,7 @@ export const LoadsSuccessfully: Story = {
   },
 };
 
-// 2. Error con fallback: se desmonta <img>, se muestra el nodo de fallback (compositivo, como
+// 2. Error with fallback: <img> is unmounted, the fallback node is shown (compositional, like
 // AvatarFallback).
 export const ErrorWithFallback: Story = {
   render: () => (
@@ -93,7 +93,7 @@ export const ErrorWithFallback: Story = {
   },
 };
 
-// 3. Error sin fallback: comportamiento mínimo documentado — no renderiza nada.
+// 3. Error without fallback: documented minimal behavior; it renders nothing.
 export const ErrorWithoutFallback: Story = {
   args: { onError: fn() },
   render: (args) => (
@@ -105,23 +105,23 @@ export const ErrorWithoutFallback: Story = {
     const canvas = within(canvasElement);
     const container = canvas.getByTestId('image-container');
 
-    // Se espera el error en sí, no un tiempo fijo: la ausencia de contenido solo significa algo
-    // después de que la imagen falló.
+    // Wait for the error itself, not a fixed time: the absence of content only means something
+    // after the image failed.
     await waitFor(() => expect(args.onError).toHaveBeenCalledOnce());
 
-    // El wrapper interno de Image sigue montado (necesita seguir vivo por si src cambia), pero
-    // no debe quedar ningún <img> ni contenido visible dentro — "no renderiza nada" documentado.
+    // Image's inner wrapper stays mounted (it has to stay alive in case src changes), but
+    // no <img> or visible content must remain inside it: the documented "renders nothing".
     await expect(canvas.queryByAltText('Broken')).not.toBeInTheDocument();
     await expect(container.querySelector('img')).not.toBeInTheDocument();
     await expect(container).toHaveTextContent('');
   },
 };
 
-// 4. Carrera error-antes-del-efecto: si el <img> falla antes de que React ejecute los efectos
-// pasivos del montaje (src en caché con la máquina cargada), el error no debe perderse. El
-// wrapper dispara el `error` desde un useLayoutEffect, que corre antes de esos efectos. El
-// <img> es lazy dentro de un contenedor display:none (inline: el fixture headless no aplica
-// Tailwind), así que el navegador nunca lo carga y ningún evento real tapa el resultado.
+// 4. Error-before-effect race: if the <img> fails before React runs the passive mount
+// effects (cached src on a busy machine), the error must not be lost. The
+// wrapper fires the `error` from a useLayoutEffect, which runs before those effects. The
+// <img> is lazy inside a display:none container (inline: the headless fixture doesn't apply
+// Tailwind), so the browser never loads it and no real event covers up the result.
 function ErrorBeforeEffects() {
   const containerRef = React.useRef<HTMLDivElement>(null);
   React.useLayoutEffect(() => {
@@ -138,18 +138,18 @@ export const ErrorBeforeMountEffects: Story = {
   render: () => <ErrorBeforeEffects />,
   play: async ({ canvasElement }) => {
     const container = within(canvasElement).getByTestId('image-container');
-    // Sin espera: el error ya ocurrió de forma síncrona durante el montaje.
+    // No waiting: the error already happened synchronously during mount.
     await new Promise((resolve) => requestAnimationFrame(resolve));
     await expect(container.querySelector('img')).not.toBeInTheDocument();
   },
 };
 
-// 5. Renderizado en servidor: el HTML del servidor trae el <img>, que puede terminar de cargar
-// antes de que React se hidrate y conecte onLoad. La imagen no debe quedarse en 'loading'
-// (invisible, con el Skeleton encima). El play hace lo que haría Next: renderToString, inyecta
-// el HTML, espera el evento load del navegador (sin listener de React) y recién entonces
-// hidrata. El onLoad del consumidor se llama una sola vez, con el evento que Image vuelve a
-// disparar sobre el <img> (isTrusted false).
+// 5. Server rendering: the server HTML brings the <img>, which can finish loading
+// before React hydrates and attaches onLoad. The image must not stay 'loading'
+// (invisible, with the Skeleton on top). The play does what Next would: renderToString, injects
+// the HTML, waits for the browser load event (without a React listener) and only then
+// hydrates. The consumer's onLoad is called once, with the event that Image fires again
+// on the <img> (isTrusted false).
 export const LoadedBeforeHydration: Story = {
   render: () => <div className="h-32 w-32" data-testid="ssr-container" />,
   play: async ({ canvasElement }) => {
@@ -176,8 +176,8 @@ export const LoadedBeforeHydration: Story = {
   },
 };
 
-// 6. Lo mismo con una imagen que falla antes de hidratar: debe mostrarse el fallback y el
-// onError del consumidor se llama una sola vez.
+// 6. Same with an image that fails before hydration: the fallback must show and the
+// consumer's onError is called once.
 export const ErrorBeforeHydration: Story = {
   render: () => <div className="h-32 w-32" data-testid="ssr-container" />,
   play: async ({ canvasElement }) => {
@@ -208,8 +208,8 @@ export const ErrorBeforeHydration: Story = {
   },
 };
 
-// 7. Sin src: un <img> sin src queda complete con naturalWidth 0, así que cuenta como error y
-// se muestra el fallback (antes quedaba el Skeleton para siempre: nunca llega load ni error).
+// 7. No src: an <img> without src is complete with naturalWidth 0, so it counts as an error and
+// the fallback is shown (before, the Skeleton stayed forever: neither load nor error ever arrives).
 export const WithoutSrc: Story = {
   render: () => (
     <div className="h-32 w-32">
@@ -224,8 +224,8 @@ export const WithoutSrc: Story = {
   },
 };
 
-// 8. Cambio de src tras un error: el <img> vuelve a montarse y recorre de nuevo el ciclo de
-// carga, en vez de quedarse en el estado de error de la imagen anterior.
+// 8. src change after an error: the <img> mounts again and goes through the load cycle
+// again, instead of staying in the previous image's error state.
 function SwitchSrcAfterError() {
   const [src, setSrc] = React.useState(BROKEN_SRC);
   return (
@@ -255,10 +255,10 @@ export const RecoversWhenSrcChanges: Story = {
   },
 };
 
-// 9. Carga en el cliente, normal y con la imagen ya en caché: el callback del consumidor se
-// llama una sola vez. Con la imagen en caché, complete ya es true cuando corre el efecto de
-// Image y el evento real del navegador llega después: sin la guarda, onLoad/onError se
-// llamarían dos veces. Cada clic monta una imagen más; se espera el evento real antes de contar.
+// 9. Load on the client, normal and with the image already cached: the consumer's callback is
+// called once. With the image cached, complete is already true when Image's effect runs and
+// the real browser event arrives later: without the guard, onLoad/onError would be
+// called twice. Each click mounts one more image; we wait for the real event before counting.
 function ImageList({
   src,
   onLoad,
@@ -296,7 +296,7 @@ const callsOnceStory = (src: string, type: 'load' | 'error'): Story => ({
     const callback = type === 'load' ? args.onLoad : args.onError;
     const other = type === 'load' ? args.onError : args.onLoad;
 
-    // Primera imagen (carga normal) y segunda (el mismo src, ya en caché).
+    // First image (normal load) and second one (the same src, already cached).
     for (const n of [1, 2]) {
       await userEvent.click(canvas.getByRole('button', { name: 'Agregar imagen' }));
       await waitFor(() => expect(browserEvents[type]).toBe(n));

@@ -34,9 +34,9 @@ export const Default: Story = {
   },
 };
 
-// Un Sheet sin título visible: el título queda oculto pero Radix lo encuentra, así que no
-// muestra el aviso de título faltante y el diálogo conserva su nombre accesible. as="div"
-// porque SheetTitle es un h2, que no puede ir dentro de un span.
+// A Sheet without a visible title: the title is hidden but Radix finds it, so it doesn't
+// show the missing-title warning and the dialog keeps its accessible name. as="div"
+// because SheetTitle is an h2, which can't go inside a span.
 export const HiddenSheetTitle: Story = {
   render: () => (
     <Sheet>
@@ -56,10 +56,10 @@ export const HiddenSheetTitle: Story = {
   play: async ({ canvasElement }) => {
     await userEvent.click(within(canvasElement).getByRole('button', { name: 'Abrir menú' }));
 
-    // @radix-ui/react-dialog 1.1.23 ya no emite el aviso de título faltante (WarningProvider
-    // no hace nada), así que espiar console.error no podría fallar. Lo que el aviso protegía
-    // es el nombre accesible: el diálogo lo toma del título oculto vía aria-labelledby, y sin
-    // SheetTitle esta búsqueda falla.
+    // @radix-ui/react-dialog 1.1.23 no longer emits the missing-title warning (WarningProvider
+    // does nothing), so spying on console.error couldn't fail. What the warning protected
+    // is the accessible name: the dialog takes it from the hidden title through aria-labelledby, and without
+    // SheetTitle this query fails.
     const dialog = await within(document.body).findByRole('dialog', { name: 'Menú principal' });
 
     const title = within(dialog).getByText('Menú principal');

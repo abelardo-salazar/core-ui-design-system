@@ -11,7 +11,7 @@ const ToggleGroupSizeContext = React.createContext<ToggleGroupSize>('md');
 const groupClassName = 'inline-flex items-center gap-1 rounded-btn bg-base-200';
 
 interface ToggleGroupSizeProps {
-  /** Alto de los ítems (32 / 44 / 48, la escala de Button). Cada ítem puede sobrescribirlo. @default 'md' */
+  /** Height of the items (32 / 44 / 48, Button's scale). Each item can override it. @default 'md' */
   size?: ToggleGroupSize;
 }
 
@@ -21,9 +21,9 @@ export type ToggleGroupMultipleProps = ToggleGroupPrimitive.ToggleGroupMultipleP
   ToggleGroupSizeProps;
 export type ToggleGroupProps = ToggleGroupSingleProps | ToggleGroupMultipleProps;
 
-// Radix nunca guarda estado propio: el DS le pasa siempre `value`. En modo único, Radix emite ''
-// al hacer clic sobre el ítem activo; filtrarlo en onValueChange no alcanzaría en modo no
-// controlado, porque el estado interno de Radix ya habría cambiado.
+// Radix never keeps its own state: the DS always passes it `value`. In single mode, Radix emits ''
+// when clicking the active item; filtering it in onValueChange wouldn't be enough in uncontrolled
+// mode, because Radix's internal state would already have changed.
 const SingleToggleGroup = React.forwardRef<HTMLDivElement, ToggleGroupSingleProps>(
   (
     { value: valueProp, defaultValue, onValueChange, size = 'md', className, children, ...props },
@@ -81,20 +81,20 @@ const MultipleToggleGroup = React.forwardRef<HTMLDivElement, ToggleGroupMultiple
 MultipleToggleGroup.displayName = 'MultipleToggleGroup';
 
 /**
- * Grupo de opciones que cambian un valor (una vista, un filtro, un formato). Para cambiar qué
- * panel de contenido se ve, usar `Tabs`.
+ * Group of options that change a value (a view, a filter, a format). To change which
+ * content panel is shown, use `Tabs`.
  *
- * - `type="single"`: `radiogroup` con ítems `radio` (`aria-checked`). Una vez elegido un valor,
- *   siempre hay uno: el clic sobre el ítem activo no lo desactiva y `onValueChange` nunca recibe
- *   `''`. Antes de la primera elección el valor es `''` (salvo `defaultValue`/`value`).
- * - `type="multiple"`: `toolbar` con ítems `aria-pressed`. Puede quedar vacío.
+ * - `type="single"`: `radiogroup` with `radio` items (`aria-checked`). Once a value is chosen,
+ *   there's always one: clicking the active item doesn't turn it off and `onValueChange` never
+ *   gets `''`. Before the first choice the value is `''` (unless `defaultValue`/`value`).
+ * - `type="multiple"`: `toolbar` with `aria-pressed` items. It can be empty.
  *
- * Teclado: un solo punto de tabulación; las flechas mueven el foco **sin seleccionar** y Space o
- * Enter seleccionan. En modo único esto se aparta del patrón de radio de ARIA (donde la flecha
- * también selecciona) a propósito: cambiar el valor suele disparar una consulta, y recorrer las
- * opciones con las flechas no debe disparar una por cada una.
+ * Keyboard: a single tab stop; the arrows move focus **without selecting** and Space or
+ * Enter select. In single mode this departs from the ARIA radio pattern (where the arrow
+ * also selects) on purpose: changing the value usually fires a query, and going through the
+ * options with the arrows must not fire one for each.
  *
- * `orientation`, `disabled` y `loop` pasan directo a Radix.
+ * `orientation`, `disabled` and `loop` go straight to Radix.
  */
 const ToggleGroup = React.forwardRef<HTMLDivElement, ToggleGroupProps>((props, ref) =>
   props.type === 'single' ? (
@@ -109,9 +109,9 @@ export interface ToggleGroupItemProps
   extends React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Item>, ToggleGroupSizeProps {}
 
 /**
- * Opción de un `ToggleGroup`. Si solo muestra un ícono, necesita `aria-label` (por ejemplo,
- * `aria-label="Vista de lista"`): el ícono no da nombre accesible. `size` sobrescribe el del
- * grupo.
+ * Option of a `ToggleGroup`. If it only shows an icon, it needs `aria-label` (for example,
+ * `aria-label="List view"`): the icon doesn't provide an accessible name. `size` overrides the
+ * group's.
  */
 const ToggleGroupItem = React.forwardRef<
   React.ElementRef<typeof ToggleGroupPrimitive.Item>,

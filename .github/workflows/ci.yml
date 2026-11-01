@@ -9,7 +9,7 @@ on:
 permissions:
   contents: read
 
-# Un solo run por rama: si llegan pushes nuevos, se cancela el anterior.
+# One run per branch: when new pushes arrive, the previous run is cancelled.
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -32,8 +32,8 @@ jobs:
         with:
           fail-on-severity: high
 
-      # Node 22 LTS: el repo no declara engines; es la intersección de los rangos
-      # de las deps instaladas (vitest 4 excluye Node 23, vite 7 pide >=22.12).
+      # Node 22 LTS: the repo doesn't declare engines; it's the intersection of the ranges
+      # of the installed deps (vitest 4 excludes Node 23, vite 7 requires >=22.12).
       - name: Setup Node
         uses: actions/setup-node@v5
         with:
@@ -43,17 +43,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # La suite corre Vitest en modo browser (Playwright, headless). Sin --with-deps: las
-      # dependencias del sistema salen de apt, que llegó a tardar 12 minutos en bajar 32 MB
-      # (#43, #44), y el runner ya las trae por tener Google Chrome preinstalado. Si alguna
-      # falta, Playwright falla al lanzar el navegador y la nombra. --only-shell: headless
-      # usa Chrome Headless Shell, así que Chrome for Testing no hace falta en CI.
+      # The suite runs Vitest in browser mode (Playwright, headless). No --with-deps: the
+      # system dependencies come from apt, which once took 12 minutes to download 32 MB
+      # (#43, #44), and the runner already has them because Google Chrome is preinstalled. If one
+      # is missing, Playwright fails when launching the browser and names it. --only-shell: headless
+      # uses Chrome Headless Shell, so Chrome for Testing isn't needed in CI.
       - name: Get Playwright version
         id: playwright
         run: echo "version=$(node -p "require('playwright/package.json').version")" >> "$GITHUB_OUTPUT"
 
-      # La clave sigue la versión instalada desde el lockfile: cambia sola al actualizar
-      # Playwright.
+      # The key follows the version installed from the lockfile: it changes on its own when
+      # Playwright is updated.
       - name: Cache Playwright browsers
         id: playwright-cache
         uses: actions/cache@v6
@@ -78,12 +78,12 @@ jobs:
       - name: Typecheck
         run: npx tsc -b
 
-      # build ya incluye scripts/verify-client-directives.mjs como prestep.
+      # build already runs scripts/verify-client-directives.mjs as a prestep.
       - name: Build
         run: npm run build
 
-      # Compila el tarball de npm pack en un consumidor con Tailwind v4 que importa
-      # ./tailwind.css. Sin red: arma el consumidor a partir del tarball y de node_modules.
+      # Compiles the npm pack tarball in a Tailwind v4 consumer that imports
+      # ./tailwind.css. No network: builds the consumer from the tarball and node_modules.
       - name: Verify Tailwind consumer
         run: npm run verify:tailwind-consumer
 

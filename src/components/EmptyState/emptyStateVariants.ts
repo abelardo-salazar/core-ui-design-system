@@ -1,9 +1,9 @@
 import { cva } from 'class-variance-authority';
 
-// El padding vive solo en `size`, no en la base: así twMerge resuelve el conflicto con el
-// className del consumidor (`size="sm" className="py-2"` aplica py-2). Con una variante por
-// atributo (data-[size=sm]:py-6) el selector tendría más especificidad y el className
-// perdería en sm.
+// The padding lives only in `size`, not in the base: that way twMerge resolves the conflict
+// with the consumer's className (`size="sm" className="py-2"` applies py-2). With an
+// attribute variant (data-[size=sm]:py-6) the selector would be more specific and the
+// className would lose in sm.
 export const emptyStateVariants = cva(
   'group/empty-state flex w-full flex-col items-center gap-2 text-center',
   {

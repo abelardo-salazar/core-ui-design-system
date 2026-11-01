@@ -27,12 +27,12 @@ export const Default: Story = {
   ),
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    // Radix Switch es un <button role="switch">: mismo patrón de interacción que Checkbox,
-    // solo cambia la primitiva por debajo.
+    // Radix Switch is a <button role="switch">: same interaction pattern as Checkbox,
+    // only the primitive underneath changes.
     const switchControl = canvas.getByRole('switch');
 
-    // --ring/--color-ring no existen en el sistema de tokens: ring-ring no resolvía a
-    // ningún color y el anillo de foco quedaba invisible al navegar por teclado.
+    // --ring/--color-ring don't exist in the token system: ring-ring didn't resolve to
+    // any color and the focus ring was invisible when navigating with the keyboard.
     await expect(switchControl.className.split(' ')).toContain('focus-visible:ring-primary');
     await expect(switchControl.className.split(' ')).not.toContain('focus-visible:ring-ring');
 
@@ -43,7 +43,7 @@ export const Default: Story = {
     await expect(switchControl).toHaveAttribute('aria-checked', 'true');
     await expect(args.onCheckedChange).toHaveBeenLastCalledWith(true);
 
-    // Teclado (Space) sobre el control ya enfocado por el click anterior: toggle a unchecked.
+    // Keyboard (Space) on the control already focused by the previous click: toggles to unchecked.
     await userEvent.keyboard(' ');
     await expect(switchControl).toHaveAttribute('aria-checked', 'false');
     await expect(args.onCheckedChange).toHaveBeenLastCalledWith(false);

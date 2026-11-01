@@ -22,37 +22,37 @@ export interface ComboboxOption {
   disabled?: boolean;
 }
 
-/** Cuándo se ve la lista en `mode="inline"`. */
+/** When the list is visible in `mode="inline"`. */
 export type ComboboxListVisibility = 'always' | 'focus' | 'query';
 
 interface ComboboxBaseProps {
   options: ComboboxOption[];
-  /** Alto del disparador y del buscador (32 / 44 / 48, la escala de Select e Input). @default 'md' */
+  /** Height of the trigger and the search field (32 / 44 / 48, the Select and Input scale). @default 'md' */
   size?: ComboboxSize;
-  /** Id del botón en modo popover; en línea, del contenedor (cmdk fija el id del buscador). */
+  /** Id of the button in popover mode; inline, of the container (cmdk sets the search field id). */
   id?: string;
   disabled?: boolean;
-  /** Texto del disparador sin valor. @default 'Select...' */
+  /** Trigger text with no value. @default 'Select...' */
   placeholder?: string;
   /** @default 'Search...' */
   searchPlaceholder?: string;
-  /** Texto cuando el filtro no encuentra opciones. @default 'No results.' */
+  /** Text when the filter finds no options. @default 'No results.' */
   emptyLabel?: string;
-  /** Nombre accesible del ✕ de cada Chip (modo múltiple). @default (label) => `Remove ${label}` */
+  /** Accessible name of each Chip's ✕ (multiple mode). @default (label) => `Remove ${label}` */
   removeLabel?: (label: string) => string;
   className?: string;
 }
 
-// Unión discriminada por `mode`, mismo patrón que `clearable`/`endIcon` en Input:
-// `listVisibility` solo existe en línea (en el popover la lista se ve mientras está abierto).
-// La primera rama admite los dos modos (no solo 'popover') para que `mode={dinámico}` sin
-// `listVisibility` siga compilando.
+// Union discriminated by `mode`, same pattern as `clearable`/`endIcon` in Input:
+// `listVisibility` only exists inline (in the popover the list is visible while it's open).
+// The first branch accepts both modes (not just 'popover') so that `mode={dynamic}` without
+// `listVisibility` still compiles.
 export type ComboboxModeProps =
   | {
       /**
-       * `'popover'`: un disparador con el estilo de Select abre el buscador y la lista.
-       * `'inline'`: buscador y lista en el flujo del formulario. Dentro de un `Sheet` o `Dialog`,
-       * usar `'inline'`. @default 'popover'
+       * `'popover'`: a trigger styled like Select opens the search field and the list.
+       * `'inline'`: search field and list in the form flow. Inside a `Sheet` or `Dialog`,
+       * use `'inline'`. @default 'popover'
        */
       mode?: 'popover' | 'inline';
       listVisibility?: never;
@@ -60,25 +60,25 @@ export type ComboboxModeProps =
   | {
       mode: 'inline';
       /**
-       * `'always'`: la lista se ve siempre. `'focus'`: mientras el buscador tiene el foco.
-       * `'query'`: mientras tiene el foco y hay texto (sin contar espacios). Con `'focus'` y
-       * `'query'`, Escape oculta la lista sin cerrar el `Sheet`/`Dialog` que la contiene.
+       * `'always'`: the list is always visible. `'focus'`: while the search field has focus.
+       * `'query'`: while it has focus and there is text (ignoring spaces). With `'focus'` and
+       * `'query'`, Escape hides the list without closing the `Sheet`/`Dialog` that contains it.
        * @default 'always'
        */
       listVisibility?: ComboboxListVisibility;
     };
 
-// Etiqueta visible (`label`) o solo para lectores de pantalla (`aria-label`): una de las dos.
-// Es un string porque cmdk solo acepta un texto para nombrar el buscador y la lista.
+// Visible label (`label`) or screen-reader-only label (`aria-label`): one of the two.
+// It's a string because cmdk only accepts a text to name the search field and the list.
 export type ComboboxLabelProps =
   | {
-      /** Etiqueta visible del campo. */
+      /** Visible label of the field. */
       label: string;
       'aria-label'?: never;
     }
   | {
       label?: never;
-      /** Nombre accesible sin etiqueta visible. */
+      /** Accessible name without a visible label. */
       'aria-label': string;
     };
 
@@ -102,7 +102,7 @@ export type ComboboxMultipleProps = ComboboxBaseProps &
 
 export type ComboboxProps = ComboboxSingleProps | ComboboxMultipleProps;
 
-// Sin mayúsculas ni marcas diacríticas: "mexico" encuentra "México".
+// Without case or diacritics: "mexico" finds "México".
 const normalize = (text: string) =>
   text.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase();
 
@@ -116,7 +116,7 @@ interface ComboboxImplProps extends ComboboxBaseProps {
   multiple: boolean;
   selected: string[];
   onToggle: (value: string) => void;
-  /** Quitar con el ✕ del Chip: en único vacía el valor (`onToggle` no deselecciona). */
+  /** Remove with the Chip's ✕: in single mode it clears the value (`onToggle` doesn't deselect). */
   onRemove: (value: string) => void;
 }
 
@@ -147,14 +147,14 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
     const id = idProp ?? generatedId;
     const valueId = `${id}-value`;
     const labelId = `${id}-label`;
-    // Texto que nombra el buscador y la lista (prop `label` de cmdk).
+    // Text that names the search field and the list (cmdk's `label` prop).
     const accessibleLabel = label ?? ariaLabel ?? '';
     const inline = mode === 'inline';
 
     const [open, setOpen] = React.useState(false);
     const [search, setSearch] = React.useState('');
-    // Lista condicionada al foco (en línea con 'focus' o 'query'). `dismissed`: Escape la ocultó;
-    // vuelve al escribir o al volver a enfocar.
+    // List tied to focus (inline with 'focus' or 'query'). `dismissed`: Escape hid it;
+    // it comes back on typing or on focusing again.
     const collapsible = inline && listVisibility !== 'always';
     const [focused, setFocused] = React.useState(false);
     const [dismissed, setDismissed] = React.useState(false);
@@ -165,7 +165,7 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
     const triggerRef = React.useRef<HTMLButtonElement>(null);
     const inputRef = React.useRef<HTMLInputElement>(null);
     const chipRefs = React.useRef(new Map<string, HTMLSpanElement>());
-    // Valor del Chip que recibe el foco después de quitar otro; '' = el botón o el buscador.
+    // Value of the Chip that gets focus after removing another; '' = the button or the search field.
     const pendingFocus = React.useRef<string | null>(null);
 
     const filtered = React.useMemo(() => {
@@ -177,17 +177,18 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
       .map((value) => options.find((option) => option.value === value))
       .filter((option): option is ComboboxOption => option !== undefined);
 
-    // cmdk escribe aria-expanded="true" después de las props, así que no se puede pasar como prop.
-    // React no vuelve a escribir el atributo mientras cmdk no cambie su valor (siempre true): el
-    // que se fija acá se mantiene. En el HTML del servidor queda el "true" de cmdk hasta hidratar.
+    // cmdk writes aria-expanded="true" after the props, so it can't be passed as a prop.
+    // React doesn't write the attribute again while cmdk doesn't change its value (always true):
+    // the one set here stays. In the server HTML, cmdk's "true" remains until hydration.
     React.useLayoutEffect(() => {
       if (collapsible) inputRef.current?.setAttribute('aria-expanded', String(listVisible));
     });
 
-    // Radix (Dialog, Sheet, Popover) escucha Escape en document, en fase de captura: un handler en
-    // el buscador llega tarde. Un listener en window, también en captura, corre antes; con
-    // preventDefault, Radix no cierra la capa (DismissableLayer solo cierra si el evento no fue
-    // prevenido). Solo está activo con la lista visible, así el segundo Escape cierra el contenedor.
+    // Radix (Dialog, Sheet, Popover) listens for Escape on document, in the capture phase: a
+    // handler on the search field arrives too late. A listener on window, also in capture, runs
+    // first; with preventDefault, Radix doesn't close the layer (DismissableLayer only closes if the
+    // event wasn't prevented). It's only active while the list is visible, so the second Escape
+    // closes the container.
     React.useEffect(() => {
       if (!collapsible || !listVisible) return;
       const onKeyDown = (event: KeyboardEvent) => {
@@ -208,8 +209,8 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
       (chipButton ?? (inline ? inputRef.current : triggerRef.current))?.focus();
     }, [selected, inline]);
 
-    // El foco pasa al siguiente elemento enfocable en el orden del DOM: el Chip siguiente o,
-    // si era el último, el botón (el buscador en línea).
+    // Focus moves to the next focusable element in DOM order: the next Chip or, if it was the
+    // last one, the button (the search field inline).
     const removeChip = (value: string) => {
       const index = selectedOptions.findIndex((option) => option.value === value);
       pendingFocus.current = selectedOptions[index + 1]?.value ?? '';
@@ -222,8 +223,8 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
         setOpen(false);
         setSearch('');
       }
-      // Con 'query', vaciar el texto oculta la lista; con 'focus' sigue visible. El foco no se
-      // mueve: el puntero no lo saca del buscador (onMouseDown de la lista).
+      // With 'query', clearing the text hides the list; with 'focus' it stays visible. Focus doesn't
+      // move: the pointer doesn't take it out of the search field (the list's onMouseDown).
       if (collapsible) setSearch('');
     };
 
@@ -276,12 +277,14 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
             className={comboboxSearchVariants({ size })}
           />
         </div>
-        {/* Oculta (hidden), la lista sigue en el DOM para que aria-controls del buscador apunte a
-            algo, pero sin opciones: así Enter y las flechas de cmdk no eligen ni resaltan nada
-            invisible, y Command.Empty (que cmdk muestra cuando no hay opciones) no aparece.
-            onMouseDown: el foco se queda en el buscador al usar el puntero en la lista. Sin esto
-            pasaría a la lista (tabIndex -1) o al body, en múltiple se perdería el texto en curso
-            como destino, y con 'focus'/'query' el blur ocultaría la lista antes del clic. */}
+        {/* Hidden (hidden), the list stays in the DOM so the search field's aria-controls points
+            to something, but without options: that way Enter and cmdk's arrow keys don't choose
+            or highlight anything invisible, and Command.Empty (which cmdk shows when there are no
+            options) doesn't appear.
+            onMouseDown: focus stays in the search field when using the pointer on the list.
+            Without it, focus would move to the list (tabIndex -1) or to the body, in multiple mode
+            the text being typed would lose its target, and with 'focus'/'query' the blur would
+            hide the list before the click. */}
         <Command.List
           label={accessibleLabel || undefined}
           hidden={!listVisible}
@@ -301,8 +304,8 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
                 value={option.value}
                 disabled={disabled || option.disabled}
                 onSelect={() => handleSelect(option.value)}
-                // aria-selected lo usa cmdk para el ítem resaltado (y lo escribe después de las
-                // props): el estado elegido va en aria-checked, que ARIA 1.2 admite en option.
+                // cmdk uses aria-selected for the highlighted item (and writes it after the
+                // props): the chosen state goes in aria-checked, which ARIA 1.2 allows on option.
                 aria-checked={isSelected}
                 className={comboboxItemVariants({ size })}
               >
@@ -318,7 +321,7 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
       </Command>
     );
 
-    // Mismo estilo que la etiqueta de Input.
+    // Same style as Input's label.
     const labelClassName = cn(
       'text-sm font-medium leading-none text-base-content',
       disabled && 'cursor-not-allowed opacity-70',
@@ -328,17 +331,17 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
       return (
         <div ref={ref} id={id} className={cn('flex w-full flex-col gap-1.5', className)}>
           {label !== undefined && (
-            // cmdk fija el id de su input y su aria-labelledby, que apunta a su propia etiqueta
-            // oculta (con el texto de `label`): una etiqueta visible no puede apuntarle con for.
-            // Esta es solo visual: aria-hidden para que el lector no lea la etiqueta dos veces,
-            // y el clic enfoca el buscador como lo haría un <label for>. No es enfocable, así que
-            // no necesita equivalente de teclado.
+            // cmdk sets the id of its input and its aria-labelledby, which points to its own hidden
+            // label (with the `label` text): a visible label can't point to it with for.
+            // This one is visual only: aria-hidden so the reader doesn't read the label twice,
+            // and clicking focuses the search field like a <label for> would. It isn't focusable, so
+            // it doesn't need a keyboard equivalent.
             <span aria-hidden className={labelClassName} onClick={() => inputRef.current?.focus()}>
               {label}
             </span>
           )}
-          {/* En único con lista condicionada, el Chip es lo único que muestra el valor cuando la
-              lista está oculta. */}
+          {/* In single mode with a conditional list, the Chip is the only thing showing the
+              value while the list is hidden. */}
           {(multiple || collapsible) && chips.length > 0 && (
             <div className="flex flex-wrap gap-1">{chips}</div>
           )}
@@ -347,9 +350,9 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
       );
     }
 
-    // Un <label for> sobre un botón reemplaza su contenido en el nombre accesible: el valor se
-    // perdería. aria-labelledby junta la etiqueta y el valor; con aria-label, el botón se
-    // referencia a sí mismo (aporta su aria-label).
+    // A <label for> on a button replaces its content in the accessible name: the value would be
+    // lost. aria-labelledby joins the label and the value; with aria-label, the button
+    // references itself (it contributes its aria-label).
     const triggerLabelledBy = `${label !== undefined ? labelId : id} ${valueId}`;
 
     const selectedText = selectedOptions.map((option) => option.label).join(', ');
@@ -396,8 +399,8 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
       >
         <div ref={ref} className={cn('flex w-full flex-col gap-1.5', className)}>
           {label !== undefined && (
-            // Un clic activa el botón (comportamiento nativo de <label> sobre un botón), igual
-            // que un clic en el campo.
+            // A click activates the button (native behavior of a <label> on a button), same
+            // as a click on the field.
             <label id={labelId} htmlFor={id} className={labelClassName}>
               {label}
             </label>
@@ -477,24 +480,24 @@ const MultipleCombobox = React.forwardRef<HTMLDivElement, ComboboxMultipleProps>
 MultipleCombobox.displayName = 'MultipleCombobox';
 
 /**
- * Campo de selección con buscador sobre una lista de opciones (`options`). El filtro busca el
- * texto en cualquier parte de la etiqueta, sin distinguir mayúsculas ni acentos, y conserva el
- * orden de `options`.
+ * Selection field with a search box over a list of options (`options`). The filter looks for
+ * the text anywhere in the label, ignoring case and accents, and keeps the order of
+ * `options`.
  *
- * - Modo único (default): `value: string` (`''` sin valor). Elegir una opción cierra el popover
- *   y devuelve el foco al disparador; elegir la actual no la deselecciona.
- * - `multiple`: `value: string[]`. El popover queda abierto al elegir; las opciones elegidas se
- *   muestran como `Chip` que se quitan con su ✕ (el foco pasa al Chip siguiente, o al botón).
+ * - Single mode (default): `value: string` (`''` with no value). Choosing an option closes the
+ *   popover and returns focus to the trigger; choosing the current one doesn't deselect it.
+ * - `multiple`: `value: string[]`. The popover stays open on choosing; the chosen options are
+ *   shown as a `Chip` removed with its ✕ (focus moves to the next Chip, or to the button).
  *
- * `mode="popover"` (default): el buscador es un `combobox` dentro de un popover (`dialog`) que
- * toma su nombre de la etiqueta del campo; Escape lo cierra y devuelve el foco. `mode="inline"`:
- * buscador y lista en el flujo del formulario; **dentro de un `Sheet` o `Dialog`, usar
- * `mode="inline"`**. `listVisibility` (`'always'` | `'focus'` | `'query'`) decide cuándo se ve la
- * lista en línea; con `'focus'`/`'query'`, el valor de único también se muestra como `Chip`.
+ * `mode="popover"` (default): the search field is a `combobox` inside a popover (`dialog`)
+ * that takes its name from the field label; Escape closes it and returns focus.
+ * `mode="inline"`: search field and list in the form flow; **inside a `Sheet` or `Dialog`,
+ * use `mode="inline"`**. `listVisibility` (`'always'` | `'focus'` | `'query'`) decides when the
+ * list is visible inline; with `'focus'`/`'query'`, the single value is also shown as a `Chip`.
  *
- * Requiere `label` (etiqueta visible, con el estilo de la de Input) o `aria-label`, no los dos.
- * El disparador anuncia la etiqueta y el valor actual; el popover, el buscador y la lista se
- * nombran con la etiqueta. Las opciones elegidas llevan `aria-checked="true"`.
+ * Requires `label` (visible label, styled like Input's) or `aria-label`, not both.
+ * The trigger announces the label and the current value; the popover, the search field and
+ * the list are named with the label. Chosen options have `aria-checked="true"`.
  */
 const Combobox = React.forwardRef<HTMLDivElement, ComboboxProps>((props, ref) =>
   props.multiple ? (
