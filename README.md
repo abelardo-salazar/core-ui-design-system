@@ -327,6 +327,7 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
     - [🧾 Tipos y utilidades exportados](#-tipos-y-utilidades-exportados)
   - [💻 Desarrollo Local](#-desarrollo-local)
   - [🤖 Integración Continua (CI)](#-integración-continua-ci)
+    - [Publicación (mantenedores)](#publicación-mantenedores)
   - [⚖️ Licencia](#️-licencia)
 
 ---
@@ -2074,37 +2075,38 @@ Cada Pull Request contra `main` (y cada push a `main`) dispara el workflow
 obligatorio para mergear. Corre sobre **Node 22 LTS**, con un límite de 20 minutos; si llega un
 push nuevo a la misma rama, se cancela el run anterior. Pasos, en orden:
 
-1. `npm ci` — instalación determinística desde `package-lock.json` (con caché de npm).
-2. Chromium para Playwright: el navegador se guarda en caché con una clave que sigue la versión
+1. Dependency review (solo en Pull Requests) — `actions/dependency-review-action` compara las
+   dependencias del PR contra `main` y falla si el PR introduce una vulnerabilidad `high` /
+   `critical`; `moderate` / `low` no bloquean. Va primero porque no necesita instalar nada.
+2. `npm ci` — instalación determinística desde `package-lock.json` (con caché de npm).
+3. Chromium para Playwright: el navegador se guarda en caché con una clave que sigue la versión
    de `playwright` del lockfile; solo si no hay caché se instala con
    `npx playwright install chromium --only-shell` (Chrome Headless Shell, sin las dependencias
    del sistema vía apt, que el runner ya trae).
-3. `npm run lint` — ESLint.
-4. `npm run format:check` — Prettier.
-5. `npm run verify:readme` — el README sigue al paquete: el badge y la línea de versión
+4. `npm run lint` — ESLint.
+5. `npm run format:check` — Prettier.
+6. `npm run verify:readme` — el README sigue al paquete: el badge y la línea de versión
    coinciden con `package.json#version`; el primer encabezado del CHANGELOG es `[Unreleased]` o
    el de esa versión, y la línea de versión menciona los cambios sin publicar solo si lo es
    `[Unreleased]`; la tabla de [Server Components](#server-components) lista cada componente
    exportado, con «No» si su archivo está en `CLIENT_ENTRY_POINTS` y «Sí» si no.
-6. `npx tsc -b` — typecheck.
-7. `npm run build` — `verify-client-directives` (pre: `CLIENT_ENTRY_POINTS` sincronizado y
+7. `npx tsc -b` — typecheck.
+8. `npm run build` — `verify-client-directives` (pre: `CLIENT_ENTRY_POINTS` sincronizado y
    ningún componente server-safe que arme handlers propios) + `tsc -b` + `vite build` +
    `verify-client-directives --post-build` (post: `dist/index.js` sin `recharts`,
    `dist/locale.js` sin el barrel raíz ni `recharts`, y `sideEffects` con los módulos con efectos
    de las dependencias empaquetadas) + `verify-third-party-notices` (cada paquete de
    `dist/node_modules` aparece en `dist/THIRD-PARTY-NOTICES.txt`).
-8. `npm run verify:tailwind-consumer` — empaqueta con `npm pack`, arma sin red un consumidor
+9. `npm run verify:tailwind-consumer` — empaqueta con `npm pack`, arma sin red un consumidor
    con Tailwind v4 que importa `./tailwind.css` y lo compila con `@tailwindcss/cli`. Qué
    verifica y por qué: [ARCHITECTURE § Orden de utilidades entre dos compilaciones](./ARCHITECTURE.md#orden-de-utilidades-entre-dos-compilaciones).
-9. `npm run test` — Vitest en modo browser (Chromium headless), con las stories como tests, en
-   dos proyectos que corren uno después del otro:
-   - `storybook`: todas las stories salvo las de tag `real-css`. No aplica las utilidades de
-     Tailwind, así que sus aserciones van sobre clases y DOM.
-   - `storybook-css`: solo las stories con tag `real-css`, las que necesitan el CSS aplicado
-     (posición, z-index, `elementFromPoint`). Para sumar una, agregar `tags: ['real-css']`.
-10. Dependency review (solo en Pull Requests) — `actions/dependency-review-action` compara las
-    dependencias del PR contra `main` y falla si el PR introduce una vulnerabilidad `high` /
-    `critical`; `moderate` / `low` no bloquean.
+10. `npm run test` — Vitest en modo browser (Chromium headless), con las stories como tests, en
+    dos proyectos que corren uno después del otro:
+
+- `storybook`: todas las stories salvo las de tag `real-css`. No aplica las utilidades de
+  Tailwind, así que sus aserciones van sobre clases y DOM.
+- `storybook-css`: solo las stories con tag `real-css`, las que necesitan el CSS aplicado
+  (posición, z-index, `elementFromPoint`). Para sumar una, agregar `tags: ['real-css']`.
 
 Cualquier paso que falle marca el PR en rojo.
 
@@ -2112,6 +2114,25 @@ Además, el workflow **`.github/workflows/audit.yml`** corre `npm audit --audit-
 `main` cada semana (y a mano, desde la pestaña Actions). Detecta avisos nuevos contra
 dependencias que no cambiaron; no forma parte del check obligatorio, así que no bloquea PRs.
 Por qué está separado: [ARCHITECTURE § Detección de vulnerabilidades](./ARCHITECTURE.md#detección-de-vulnerabilidades).
+
+### Publicación (mantenedores)
+
+El paquete se publica empujando un tag; nadie corre `npm publish` a mano. Por qué: [ARCHITECTURE § Tags](./ARCHITECTURE.md#tags).
+
+1. PR de release: `npm version X.Y.Z --no-git-tag-version` (sube `package.json` y `package-lock.json`), la entrada del CHANGELOG pasa de `[Unreleased]` a `[X.Y.Z] - <fecha>` con el delta neto contra la última versión publicada, y el badge y la línea de versión del README pasan a `X.Y.Z`. `verify:readme` falla si alguno queda desalineado.
+2. Merge del PR a `main`.
+3. Tag anotado sobre el commit del merge y push del tag:
+
+   ```bash
+   git fetch origin main
+   sha=$(gh pr view <número-del-PR> --json mergeCommit --jq .mergeCommit.oid)
+   git tag -a vX.Y.Z -m "vX.Y.Z" "$sha"
+   git push origin vX.Y.Z
+   ```
+
+4. **`.github/workflows/release.yml`** publica. Antes de instalar nada, falla si el tag no es `v` + `package.json#version`, si su commit no está en `main` o si esa versión ya está en GitHub Packages. Después corre los mismos pasos que `verify` (salvo el dependency review) y publica con `GITHUB_TOKEN` (permisos `contents: read` y `packages: write`).
+
+Si el paso de publicación falla con un 403, el repositorio no tiene acceso de Actions al paquete: en la configuración del paquete en GitHub, en **Manage Actions access**, agregar este repositorio con rol **Write**.
 
 ## ⚖️ Licencia
 

@@ -19,6 +19,7 @@
 - Excepción: las ramas `dependabot/` las crea Dependabot y no siguen la convención de prefijos. Antes de mergear un PR de Dependabot que toca `dependencies`, agregar en su rama la entrada del CHANGELOG y re-verificar el [criterio de peer o dependency](./ARCHITECTURE.md#peer-o-dependency). Si actualiza un paquete que también está en `peerDependencies`, evaluar subir el piso del peer; subirlo cambia algo para el consumidor: título `fix:` y entrada en el CHANGELOG.
 - PR obligatorio con el check `verify`, también para admins; solo squash, con el título del PR como título del commit (lo fuerza GitHub). Nunca commits directos a main.
 - Mergear un PR solo con autorización explícita del usuario en la conversación, que nombre ese PR; nunca para destrabar otra tarea.
+- Crear o empujar un tag `v*` solo con autorización explícita del usuario en la conversación, que nombre esa versión: empujar el tag publica el paquete ([flujo de release](./ARCHITECTURE.md#tags)).
 - Título del PR en Conventional Commits (convención, sin verificación automática).
 - No publicar ni bumpear versión salvo que la tarea lo pida. Si la versión de package.json todavía no está publicada (`npm view <paquete> versions`), los cambios se agregan a su entrada del CHANGELOG; si ya lo está, a una entrada `[Unreleased]`.
 - CHANGELOG: describir API, comportamiento y migración para el consumidor. Los detalles de implementación van en los comentarios del código. Los PR `docs:` y `chore:` no llevan entrada salvo que cambien algo para el consumidor.
