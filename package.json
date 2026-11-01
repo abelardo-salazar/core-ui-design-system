@@ -13,7 +13,6 @@
   ],
   "description": "Sistema de diseño privado",
   "scripts": {
-    "dev": "vite",
     "test": "vitest run",
     "build": "node scripts/verify-client-directives.mjs && tsc -b && vite build && node scripts/verify-client-directives.mjs --post-build && node scripts/verify-third-party-notices.mjs",
     "verify:client-directives": "node scripts/verify-client-directives.mjs",
@@ -24,7 +23,6 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },

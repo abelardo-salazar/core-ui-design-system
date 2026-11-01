@@ -1,5 +1,18 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- **El paquete incluía archivos del proyecto de ejemplo de Vite y Storybook**: `dist/App.d.ts`,
+  `dist/main.d.ts`, `dist/stories/` (declaraciones de `Button`, `Header` y `Page` de ejemplo, que
+  no son los componentes del DS) y `dist/vite.svg`. Ya no se publican. No formaban parte de la API:
+  no se exportaban ni se podían importar por el mapa `exports`. Con ellos, `style.css` deja de
+  generar 11 utilidades de Tailwind que solo usaba ese ejemplo (colores de acento y secundario,
+  una sombra, un margen y transiciones, entre otras); la lista está en el PR #PRNUM. Los componentes
+  no las usan. **Migración:** solo si un proyecto sin Tailwind usaba alguna de ellas en su propio
+  código, tiene que definirla él.
+
 ## [0.7.1] - 2026-11-01
 
 ### Added
