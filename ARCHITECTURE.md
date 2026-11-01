@@ -126,7 +126,7 @@ Cada decisión con su razón. Las listas concretas (qué paquete es peer, qué c
 
 ### Peer o dependency
 
-Un paquete va en `peerDependencies` si trae `'use client'` propio o si puede duplicar instancias: contextos de React, primitivas de Radix con estado, Sonner, TanStack Table, cmdk. Va en `dependencies` si no trae directiva ni estado compartido.
+Un paquete va en `peerDependencies` si trae `'use client'` propio o si puede duplicar instancias: contextos de React, primitivas de Radix con estado, Sonner, TanStack Table, cmdk. Va en `dependencies` si no trae directiva ni estado compartido. El criterio se aplica a la versión que se empaqueta, la del lockfile en el momento del build, y se re-verifica cada vez que esa versión cambia.
 
 Razón: con `preserveModules`, Rollup pierde las directivas de los chunks que no son entry, así que un paquete cliente empaquetado en `dist/node_modules` llega al consumidor sin su `'use client'`. Y una instancia duplicada (la empaquetada más la del consumidor) rompe los contextos: el provider de una copia no lo ve el consumidor de la otra.
 
@@ -165,7 +165,7 @@ Los componentes usan solo tokens semánticos para color. Son la superficie públ
 
 Todo control interactivo apunta a un objetivo táctil de 44px. Los tamaños compactos (`sm`) existen y se documentan como tales. Cuando el visual queda por debajo de 44px, la hit area se extiende con un `::after` que sigue la silueta del control (patrón de Chip).
 
-Button, Input y Select comparten escala para alinear en una misma fila: `sm` 32px, `md` 44px, `lg` 48px. Select hoy solo tiene `md`.
+Button, Input y Select comparten escala para alinear en una misma fila: `sm` 32px, `md` 44px, `lg` 48px.
 
 ### Íconos internos
 

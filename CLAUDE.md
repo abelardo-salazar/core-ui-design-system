@@ -3,7 +3,7 @@
 ## Constraints
 
 - No modificar la API pública de componentes ya en producción sin justificar el breaking change.
-- No agregar dependencias externas sin verificar antes en el propio repo si ya existe algo que cubra el caso. Si se agrega, va como peer o dependency según [el criterio](./ARCHITECTURE.md#peer-o-dependency).
+- No agregar dependencias externas sin verificar antes en el propio repo si ya existe algo que cubra el caso. Al agregar o actualizar un paquete de `dependencies`, comprobar en la versión del lockfile si trae `'use client'` o estado compartido y aplicar [el criterio de peer o dependency](./ARCHITECTURE.md#peer-o-dependency).
 - Si una tarea contradice una decisión de ARCHITECTURE.md, detenerse y avisar en vez de implementarla.
 
 ## Documentación
