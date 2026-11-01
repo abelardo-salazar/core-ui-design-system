@@ -1,13 +1,11 @@
 # Core UI Design System
 
-<!-- El badge de versión se actualiza a mano en cada bump (ver "version" en package.json) —
-     no hay automatización que lo sincronice. Si cambias package.json#version, actualiza esta
-     línea en el mismo commit. -->
-
 ![Version](https://img.shields.io/badge/version-0.7.0-blue.svg)
 ![React](https://img.shields.io/badge/react-19.0.0+-61DAFB.svg)
 ![TypeScript](https://img.shields.io/badge/typescript-5.9+-3178C6.svg)
-![Private](https://img.shields.io/badge/registry-private-red.svg)
+![Registry](https://img.shields.io/badge/registry-GitHub%20Packages-181717.svg)
+
+**Última versión publicada:** `0.7.0`. `main` tiene cambios sin publicar: ver [CHANGELOG § Unreleased](./CHANGELOG.md#unreleased).
 
 **Core UI** es la biblioteca de componentes oficial para nuestros productos digitales. Construida sobre **React 19**, **Radix UI** y **Tailwind CSS v4**, ofrece componentes accesibles (A11y), ligeros y listos para producción.
 
@@ -130,6 +128,55 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 );
 ```
 
+### Server Components
+
+Qué componentes se pueden usar en un Server Component (React Server Components, por ejemplo el App Router de Next.js) sin pasar a cliente:
+
+- **Sí:** el componente no declara `'use client'` y se renderiza en el servidor.
+- **No:** el componente lleva `'use client'` en el paquete publicado. Se puede importar y renderizar desde un Server Component, pero es un client component: sus props tienen que ser serializables, así que no recibe funciones (handlers, `locale`…) desde el servidor.
+
+Importar desde el barrel principal es seguro en un Server Component; el subpath `/charts` es cliente entero.
+
+| Componente                                                                                                                                                                                                                         | Server Component |
+| :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------- |
+| `Alert`, `AlertTitle`, `AlertDescription`                                                                                                                                                                                          | Sí               |
+| `AspectRatio`                                                                                                                                                                                                                      | Sí               |
+| `Avatar`, `AvatarImage`, `AvatarFallback`                                                                                                                                                                                          | No               |
+| `Badge`                                                                                                                                                                                                                            | Sí               |
+| `Button`                                                                                                                                                                                                                           | No               |
+| `Calendar`                                                                                                                                                                                                                         | No               |
+| `Card`, `CardHeader`, `CardFooter`, `CardTitle`, `CardDescription`, `CardContent`                                                                                                                                                  | Sí               |
+| Todo el subpath `/charts` (`ChartContainer`, `ChartTooltipContent`, `ChartLegendContent` y los re-exports de recharts)                                                                                                             | No               |
+| `Checkbox`                                                                                                                                                                                                                         | No               |
+| `Chip`                                                                                                                                                                                                                             | No               |
+| `Combobox`                                                                                                                                                                                                                         | No               |
+| `DataTable`                                                                                                                                                                                                                        | No               |
+| `DatePicker`                                                                                                                                                                                                                       | No               |
+| `Dialog`, `DialogPortal`, `DialogOverlay`, `DialogTrigger`, `DialogClose`, `DialogContent`, `DialogHeader`, `DialogFooter`, `DialogTitle`, `DialogDescription`                                                                     | No               |
+| `DropdownMenu`, `DropdownMenuTrigger`, `DropdownMenuGroup`, `DropdownMenuContent`, `DropdownMenuItem`, `DropdownMenuCheckboxItem`, `DropdownMenuRadioGroup`, `DropdownMenuRadioItem`, `DropdownMenuLabel`, `DropdownMenuSeparator` | No               |
+| `EmptyState`, `EmptyStateIcon`, `EmptyStateTitle`, `EmptyStateDescription`, `EmptyStateActions`                                                                                                                                    | Sí               |
+| `Image`                                                                                                                                                                                                                            | No               |
+| `Input`                                                                                                                                                                                                                            | No               |
+| `Container`                                                                                                                                                                                                                        | Sí               |
+| `Separator`                                                                                                                                                                                                                        | Sí               |
+| `SkipToContent`                                                                                                                                                                                                                    | Sí               |
+| `Popover`, `PopoverTrigger`, `PopoverAnchor`, `PopoverContent`                                                                                                                                                                     | No               |
+| `Progress`                                                                                                                                                                                                                         | No               |
+| `ProgressRing`                                                                                                                                                                                                                     | Sí               |
+| `QuantityStepper`                                                                                                                                                                                                                  | No               |
+| `Select`, `SelectGroup`, `SelectValue`, `SelectTrigger`, `SelectContent`, `SelectLabel`, `SelectItem`, `SelectSeparator`, `SelectScrollUpButton`, `SelectScrollDownButton`                                                         | No               |
+| `Sheet`, `SheetPortal`, `SheetOverlay`, `SheetTrigger`, `SheetClose`, `SheetContent`, `SheetHeader`, `SheetBody`, `SheetFooter`, `SheetTitle`, `SheetDescription`                                                                  | No               |
+| `Skeleton`                                                                                                                                                                                                                         | Sí               |
+| `Switch`                                                                                                                                                                                                                           | No               |
+| `Table`, `TableHeader`, `TableBody`, `TableFooter`, `TableRow`, `TableHead`, `TableCell`, `TableCaption`                                                                                                                           | Sí               |
+| `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent`                                                                                                                                                                                   | No               |
+| `Textarea`                                                                                                                                                                                                                         | No               |
+| `Toast`                                                                                                                                                                                                                            | No               |
+| `ToggleGroup`, `ToggleGroupItem`                                                                                                                                                                                                   | No               |
+| `TooltipProvider`, `Tooltip`, `TooltipTrigger`, `TooltipContent`                                                                                                                                                                   | No               |
+| `Heading`, `Text`                                                                                                                                                                                                                  | Sí               |
+| `VisuallyHidden`                                                                                                                                                                                                                   | Sí               |
+
 ---
 
 ## 🎨 4. Theming (Custom Properties)
@@ -225,6 +272,7 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
   - [⚙️ 3. Setup Inicial](#️-3-setup-inicial)
     - [Con Tailwind v4](#con-tailwind-v4)
     - [Sin Tailwind](#sin-tailwind)
+    - [Server Components](#server-components)
   - [🎨 4. Theming (Custom Properties)](#-4-theming-custom-properties)
     - [Tokens overrideables](#tokens-overrideables)
     - [Patrón sancionado: override sin capa (`@layer`)](#patrón-sancionado-override-sin-capa-layer)
@@ -285,6 +333,8 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
 
 ## 🧩 5. Documentación de API
 
+Cada sección indica desde qué versión existe el componente (**Desde 0.4.**), y cada prop agregada después lleva _(desde X.Y)_. Las marcas son por minor. Sin marca: desde 0.3.0, la primera versión publicada (o un 0.3.x posterior). Si un componente se puede usar en un Server Component está en [Server Components](#server-components).
+
 ### 🧱 Átomos (Fundamentos)
 
 | Componente  | Descripción                      | Props clave                                                                                  |
@@ -305,7 +355,7 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
 - **Props principales:**
   - `variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'link' | 'destructive'` — define el estilo visual (ver `buttonVariants.ts`).
   - `size?: 'sm' | 'md' | 'lg' | 'icon'` (default `'md'`) — define la altura y el padding. Alturas: `sm` = 32px, `md` = 44px, `lg` = 48px, `icon` = 44x44 (cuadrado). `sm` es un tamaño compacto, por debajo del objetivo táctil de 44px (WCAG 2.5.5 / Apple HIG) — para una acción secundaria de baja frecuencia, no para el control principal de una fila táctil.
-  - `shape?: 'default' | 'pill'` (default `'default'`) — `default` = `rounded-btn` (el radio estándar del DS); `pill` = `rounded-full`. Con `shape="pill"` y `size="icon"`, el resultado es un círculo de 44x44; el anillo de foco sigue la forma sin configuración adicional.
+  - `shape?: 'default' | 'pill'` (default `'default'`) _(desde 0.5)_ — `default` = `rounded-btn` (el radio estándar del DS); `pill` = `rounded-full`. Con `shape="pill"` y `size="icon"`, el resultado es un círculo de 44x44; el anillo de foco sigue la forma sin configuración adicional.
   - `isLoading?: boolean` — muestra un spinner (`ReloadIcon`) y deshabilita la interacción.
   - `asChild?: boolean` — usa `@radix-ui/react-slot` para renderizar un elemento distinto (p. ej. `<a>`) preservando estilos.
   - `startIcon?: React.ReactNode`, `endIcon?: React.ReactNode` — iconos antes/después del texto.
@@ -417,7 +467,7 @@ Nota: usa `className` para ajuste fino (color, margen, tracking). Para mantener 
 - **Props principales:**
   - `variant?: 'default' | 'secondary' | 'destructive' | 'outline' | 'ghost'` — define el estilo visual.
   - `size?: 'sm' | 'md' | 'lg' | 'icon'` (default `'sm'`) — escala **propia de `Badge`** (no la de `Button`), compacta, pensada para una etiqueta de estado, no un control. Alturas reales (borde + padding vertical + line-height del propio `text-*`, sin `h-*` fijas salvo `icon`, medidas en navegador): `sm` ≈ 22px, `md` ≈ 26px, `lg` ≈ 30px, `icon` = 24px exactos (cuadrado, sin padding horizontal — para un ícono o un número corto).
-  - `interactive?: boolean` (default `false`) — con `interactive`, `Badge` renderiza un `<button type="button">` real: foco por teclado, `Enter`/`Space` y `disabled` nativos del navegador, sin que `Badge` sintetice ningún handler propio. Sin `interactive`, sigue siendo un `<div>`. `cursor-pointer`, el anillo de foco (`focus-visible:ring-2 ring-primary ring-offset-2`) y el hover por color **solo existen cuando `interactive` es `true`** — en un `<div>` no-interactivo serían CSS muerto (nunca se dispara `:focus-visible` sin `tabIndex`).
+  - `interactive?: boolean` (default `false`) _(desde 0.5)_ — con `interactive`, `Badge` renderiza un `<button type="button">` real: foco por teclado, `Enter`/`Space` y `disabled` nativos del navegador, sin que `Badge` sintetice ningún handler propio. Sin `interactive`, sigue siendo un `<div>`. `cursor-pointer`, el anillo de foco (`focus-visible:ring-2 ring-primary ring-offset-2`) y el hover por color **solo existen cuando `interactive` es `true`** — en un `<div>` no-interactivo serían CSS muerto (nunca se dispara `:focus-visible` sin `tabIndex`).
   - `className?: string` — clases adicionales.
   - **Con `interactive: true`:** acepta `React.ButtonHTMLAttributes<HTMLButtonElement>` (`onClick`, `disabled`, `type`, etc). **Sin `interactive`** (o `interactive: false`): acepta `React.HTMLAttributes<HTMLDivElement>` — atributos legítimos de un `<div>` (`title`, `id`, `style`, `role`, `aria-*`, `data-*`, `children`, etc.), **sin `onClick`, `disabled` ni `type`**. `BadgeProps` es una unión discriminada por `interactive`, pero la unión sola no alcanza para que esto se cumpla en el compilador: `Badge` está declarada con dos firmas sobrecargadas (una por rama) para que el chequeo de propiedades sobrantes de JSX se haga contra la firma concreta, no contra la unión completa. `<Badge onClick={fn}>`, `<Badge disabled>` o `<Badge type="submit">` sin `interactive` son errores de compilación (ver nota de migración abajo); `<Badge interactive onClick={fn}>` compila. Esta garantía tiene un test de tipos dedicado (`src/components/Badge/Badge.types.test-d.tsx`, compilado por `tsc -b`, con casos `@ts-expect-error` para cada combinación inválida) — no es solo una afirmación de este README.
 
@@ -524,10 +574,12 @@ Nota: usa `className` para ajustar dimensiones y `rounded-*` según el patrón (
 
 ### Chip — Uso y Props
 
+**Desde 0.4.**
+
 - **Exports:** `Chip`.
 - **Props principales:**
   - `variant?: 'default' | 'secondary' | 'outline' | 'ghost'` — estilo visual base (ver `chipVariants.ts`).
-  - `size?: 'sm' | 'md' | 'lg'` (default `'sm'`) — `sm` = alto derivado del contenido (comportamiento histórico); `md` = 32px de alto; `lg` = 44px de alto, el tamaño que cumple el objetivo táctil de 44px (WCAG 2.5.5 / Apple HIG). El cuerpo interactivo (`Toggle`) y el botón de cierre cubren siempre el alto completo de la píldora y siguen su silueta redondeada — no solo el texto responde al toque, y un toque justo afuera de la curva visible no activa nada. En `md`/`lg` el área de respuesta llega hasta el borde exterior de la raíz (el propio borde de 1px también responde); en `sm` llega hasta el borde interior, preservando el aspecto histórico pixel a pixel.
+  - `size?: 'sm' | 'md' | 'lg'` (default `'sm'`) _(desde 0.5)_ — `sm` = alto derivado del contenido (comportamiento histórico); `md` = 32px de alto; `lg` = 44px de alto, el tamaño que cumple el objetivo táctil de 44px (WCAG 2.5.5 / Apple HIG). El cuerpo interactivo (`Toggle`) y el botón de cierre cubren siempre el alto completo de la píldora y siguen su silueta redondeada — no solo el texto responde al toque, y un toque justo afuera de la curva visible no activa nada. En `md`/`lg` el área de respuesta llega hasta el borde exterior de la raíz (el propio borde de 1px también responde); en `sm` llega hasta el borde interior, preservando el aspecto histórico pixel a pixel.
   - `pressed?: boolean` / `defaultPressed?: boolean` — toggle controlado / no controlado.
   - `onPressedChange?: (pressed: boolean) => void`.
   - `onRemove?: () => void` — si se pasa, agrega un botón de cierre (✕) independiente del cuerpo del chip.
@@ -574,6 +626,8 @@ Nota: el estado "on" del Toggle siempre gana sobre `variant` (`has-[[data-state=
 
 ### Image — Uso y Props
 
+**Desde 0.4.**
+
 - **Exports:** `Image`.
 - **Props principales:**
   - `fallback?: React.ReactNode` — nodo a mostrar si la imagen falla al cargar (patrón compositivo, igual que `AvatarFallback`).
@@ -581,7 +635,7 @@ Nota: el estado "on" del Toggle siempre gana sobre `variant` (`has-[[data-state=
   - `onLoad?` / `onError?` — se llaman **una sola vez por `src`** (ver abajo).
   - Acepta `React.ImgHTMLAttributes<HTMLImageElement>` (`src`, `alt`, `className`, etc.).
 
-**Comportamiento no obvio:** mientras carga, muestra un `Skeleton` cubriendo el contenedor. Si la carga falla y no se pasó `fallback`, **no renderiza nada** — no hornea un ícono de "imagen rota" por default; es una decisión explícita, no un olvido. El `<img>` se desmonta al fallar (si no, quedaría invisible pero seguiría en el DOM). Si cambia `src`, vuelve a pasar por el ciclo completo de carga en vez de conservar el estado de la imagen anterior. Sin `src`, muestra el `fallback` (o nada) y llama a `onError`. El resultado de la carga no se pierde aunque llegue antes de que React conecte sus manejadores (imagen en caché, o renderizado en servidor cuando la imagen terminó de cargar o falló antes de la hidratación): `onLoad`/`onError` se llaman igual, una sola vez por `src`. En ese caso el evento lo vuelve a disparar `Image` y `event.nativeEvent.isTrusted` es `false`. Requiere `'use client'` (a diferencia de `Avatar`, no hay una primitiva de Radix disponible para una imagen rectangular; el estado de carga/error solo se puede conocer vía `onLoad`/`onError` del `<img>` nativo). Pensada para usarse dentro de `AspectRatio` u otro contenedor con tamaño explícito — llena `h-full w-full` de su contenedor.
+**Comportamiento no obvio:** mientras carga, muestra un `Skeleton` cubriendo el contenedor. Si la carga falla y no se pasó `fallback`, **no renderiza nada** — no hornea un ícono de "imagen rota" por default; es una decisión explícita, no un olvido. El `<img>` se desmonta al fallar (si no, quedaría invisible pero seguiría en el DOM). Si cambia `src`, vuelve a pasar por el ciclo completo de carga en vez de conservar el estado de la imagen anterior. Sin `src`, muestra el `fallback` (o nada) y llama a `onError`. El resultado de la carga no se pierde aunque llegue antes de que React conecte sus manejadores (imagen en caché, o renderizado en servidor cuando la imagen terminó de cargar o falló antes de la hidratación): `onLoad`/`onError` se llaman igual, una sola vez por `src`. En ese caso el evento lo vuelve a disparar `Image` y `event.nativeEvent.isTrusted` es `false`. Es un client component (ver [Server Components](#server-components)): a diferencia de `Avatar`, no hay una primitiva de Radix disponible para una imagen rectangular, y el estado de carga/error solo se puede conocer vía `onLoad`/`onError` del `<img>` nativo. Pensada para usarse dentro de `AspectRatio` u otro contenedor con tamaño explícito — llena `h-full w-full` de su contenedor.
 
 Uso (ejemplos, extraídos de `Image.stories.tsx`):
 
@@ -739,7 +793,7 @@ Notas:
 - **Principales props y comportamiento:**
   - `Dialog` (root): acepta `open?: boolean` y `onOpenChange?: (open: boolean) => void` si necesitas controlarlo desde estado externo; de lo contrario funciona como no controlado.
   - `DialogTrigger`: normalmente se usa como trigger y admite `asChild` para renderizar un elemento diferente (ej. `Button` o `a`).
-  - `DialogContent`: props comunes: `className?: string`, `children?: React.ReactNode` y otros props de `@radix-ui/react-dialog` Content (e.g. `onInteractOutside`). Soporta clases de animación y `sm:max-w-...` para controlar anchura. `closeLabel?: string` (default `'Close'`) es el nombre accesible de la ✕; su anillo de foco aparece solo al enfocarla con el teclado.
+  - `DialogContent`: props comunes: `className?: string`, `children?: React.ReactNode` y otros props de `@radix-ui/react-dialog` Content (e.g. `onInteractOutside`). Soporta clases de animación y `sm:max-w-...` para controlar anchura. `closeLabel?: string` (default `'Close'`) _(desde 0.5)_ es el nombre accesible de la ✕; su anillo de foco aparece solo al enfocarla con el teclado.
   - `DialogOverlay`: `className?: string` para ajustar color/transparencia/efecto backdrop.
   - `DialogClose`: botón que cierra el diálogo; puede usarse con `asChild` para que un `Button` actúe como cierre.
   - `DialogHeader`, `DialogFooter`, `DialogTitle`, `DialogDescription`: wrappers semánticos con `className?: string` para composición y tipografía.
@@ -788,8 +842,8 @@ Notas:
 - **Exports:** `Sheet`, `SheetTrigger`, `SheetContent`, `SheetOverlay`, `SheetClose`, `SheetPortal`, `SheetHeader`, `SheetBody`, `SheetFooter`, `SheetTitle`, `SheetDescription`.
 - **Props y comportamiento clave:**
   - `Sheet` (root): acepta `open?: boolean` y `onOpenChange?: (open: boolean) => void` para controlarlo externamente, o funciona no-controlado por defecto.
-  - `SheetContent`: `side?: 'top' | 'right' | 'bottom' | 'left'` — controla desde qué lado aparece el sheet (por defecto `right`); `closeLabel?: string` (default `'Close'`) — nombre accesible de la ✕; `className?: string`; `children?: React.ReactNode`.
-  - `SheetHeader`, `SheetBody`, `SheetFooter`: la estructura recomendada del panel. `SheetBody` es la zona con scroll; header y footer quedan fijos. Los tres aceptan `className?: string` y `React.HTMLAttributes<HTMLDivElement>`.
+  - `SheetContent`: `side?: 'top' | 'right' | 'bottom' | 'left'` — controla desde qué lado aparece el sheet (por defecto `right`); `closeLabel?: string` (default `'Close'`) _(desde 0.5)_ — nombre accesible de la ✕; `className?: string`; `children?: React.ReactNode`.
+  - `SheetHeader`, `SheetBody`, `SheetFooter`: la estructura recomendada del panel. `SheetBody` _(desde 0.5)_ es la zona con scroll; header y footer quedan fijos. Los tres aceptan `className?: string` y `React.HTMLAttributes<HTMLDivElement>`.
   - `SheetTrigger`: `asChild?: boolean`, `className?: string` — se usa para disparar el sheet y puede renderizar un elemento existente (ej. `Button`) conservando estilos.
   - `SheetOverlay`: `className?: string` — fondo/backdrop (opacidad, blur) que se muestra detrás del contenido.
   - `SheetClose`: botón que cierra el sheet; admite `asChild` para usar un `Button` o enlace como cierre.
@@ -841,10 +895,12 @@ Notas:
 
 ### AspectRatio — Uso y Props
 
+**Desde 0.4.**
+
 - **Exports:** `AspectRatio`.
 - **Props principales:** `React.ComponentPropsWithoutRef<typeof AspectRatioPrimitive.Root>` (de `@radix-ui/react-aspect-ratio`) — principalmente `ratio?: number` (ej. `16 / 9`).
 
-Descripción: fuerza una relación de aspecto sobre su contenido usando CSS puro (el "padding-bottom trick" que resuelve la propia primitiva de Radix), sin hooks ni estado — no necesita `'use client'`. `AspectRatio` es un contenedor de composición, no una API todo-en-uno: se combina con otro contenido (por ejemplo `Image`), igual que `Popover`+`Calendar` se combinan para armar `DatePicker`.
+Descripción: fuerza una relación de aspecto sobre su contenido usando CSS puro (el "padding-bottom trick" que resuelve la propia primitiva de Radix), sin hooks ni estado (ver [Server Components](#server-components)). `AspectRatio` es un contenedor de composición, no una API todo-en-uno: se combina con otro contenido (por ejemplo `Image`), igual que `Popover`+`Calendar` se combinan para armar `DatePicker`.
 
 Uso (ejemplos, extraídos de `AspectRatio.stories.tsx`):
 
@@ -865,6 +921,8 @@ Uso (ejemplos, extraídos de `AspectRatio.stories.tsx`):
 ```
 
 ### Tabs — Uso y Props
+
+**Desde 0.4.**
 
 - **Exports:** `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent`.
 - **Props y comportamiento clave:**
@@ -892,7 +950,9 @@ Uso (ejemplo, extraído de `Tabs.stories.tsx`):
 
 ### ToggleGroup — Uso y Props
 
-- **Exports:** `ToggleGroup`, `ToggleGroupItem`. Client component; requiere el peer `@radix-ui/react-toggle-group`.
+**Desde 0.5.**
+
+- **Exports:** `ToggleGroup`, `ToggleGroupItem`. Requiere el peer `@radix-ui/react-toggle-group`.
 - **Props principales:**
   - `ToggleGroup`: `type: 'single' | 'multiple'` (requerido); `value`/`defaultValue`/`onValueChange` (`string` en modo único, `string[]` en múltiple); `size?: 'sm' | 'md' | 'lg'` (32 / 44 / 48px, default `'md'`); `orientation`, `disabled` y `loop` pasan directo a Radix.
   - `ToggleGroupItem`: `value: string` (requerido), `size?` (sobrescribe el del grupo), `disabled?`. Si solo muestra un ícono, necesita `aria-label`.
@@ -946,6 +1006,8 @@ Uso (ejemplo, extraído de `Popover.stories.tsx`):
 
 ### Tooltip — Uso y Props
 
+**Desde 0.4.**
+
 - **Exports:** `TooltipProvider`, `Tooltip`, `TooltipTrigger`, `TooltipContent`.
 - **Props principales:**
   - `TooltipProvider`: sin props propias — debe montarse **una sola vez** en un nivel alto del árbol (mismo rol que `<Toast />` en el root layout). Sin un `TooltipProvider` ancestro, `Tooltip` lanza un error (Radix no trae un contexto por defecto).
@@ -973,6 +1035,8 @@ Uso (ejemplo, extraído de `Tooltip.stories.tsx`):
 ```
 
 ### DropdownMenu — Uso y Props
+
+**Desde 0.4.**
 
 - **Exports:** `DropdownMenu`, `DropdownMenuTrigger`, `DropdownMenuGroup`, `DropdownMenuContent`, `DropdownMenuItem`, `DropdownMenuCheckboxItem`, `DropdownMenuRadioGroup`, `DropdownMenuRadioItem`, `DropdownMenuLabel`, `DropdownMenuSeparator`.
 - **Alcance recortado a propósito:** sin `Sub`/`SubTrigger`/`SubContent` (submenús anidados) ni `Shortcut`.
@@ -1069,9 +1133,9 @@ Nota: para accesibilidad, envuelve el `Checkbox` con un `label` o usa `aria-labe
   - `error?: string` — mensaje de error; activa la variante visual `error` y `aria-invalid`.
   - `helperText?: string` — texto de ayuda descriptivo (vinculado mediante `aria-describedby`).
   - `startIcon?: React.ReactNode`, `endIcon?: React.ReactNode` — iconos dentro del campo (decorativos: su contenedor lleva `aria-hidden="true"`).
-  - `clearable?: boolean` — muestra un botón para vaciar el campo mientras tenga valor. No se admite junto con `endIcon` (ocupa su lugar).
-  - `onClear?: () => void` — se llama después de vaciar el campo. Solo con `clearable`.
-  - `clearLabel?: string` (default `'Clear'`) — `aria-label` del botón de limpiar. Solo con `clearable`.
+  - `clearable?: boolean` _(desde 0.5)_ — muestra un botón para vaciar el campo mientras tenga valor. No se admite junto con `endIcon` (ocupa su lugar).
+  - `onClear?: () => void` _(desde 0.5)_ — se llama después de vaciar el campo. Solo con `clearable`.
+  - `clearLabel?: string` (default `'Clear'`) _(desde 0.5)_ — `aria-label` del botón de limpiar. Solo con `clearable`.
   - `variant?: 'default' | 'error'` — variantes visuales (definidas en `inputVariants.ts`).
   - `size?: 'sm' | 'md' | 'lg'` (default `'md'`) — alturas: `sm` = 32px, `md` = 44px, `lg` = 48px. Comparte escala con `Button` y el trigger de `Select` — ver la nota de alineación en la sección de `Button`.
   - `disabled?: boolean`, `className?: string` y el resto de `React.InputHTMLAttributes<HTMLInputElement>`.
@@ -1277,8 +1341,8 @@ Uso (ejemplo, extraído de `Calendar.stories.tsx`):
   - `date?: Date` — fecha seleccionada.
   - `onDateChange?: (date: Date | undefined) => void`.
   - `placeholder?: string` (default `'Pick a date'`).
-  - `dialogLabel?: string` (default `'Choose date'`) — nombre accesible del popover.
-  - `locale?: Locale` (de `date-fns`) — se aplica a la fecha del disparador y al calendario. Con un locale de `date-fns` las etiquetas de navegación del calendario quedan en inglés; con los locales que exporta el DS desde el subpath `/locale` (`import { es } from '@abelardo-salazar/core-ui-design-system/locale'`) también se traducen. Ese subpath reexporta los locales de DayPicker (los de `date-fns` con las etiquetas traducidas), es server-safe y solo empaqueta los locales que se importan. No importar desde `@daypicker/react`: es dependencia del DS, no de la app (con pnpm no se resuelve).
+  - `dialogLabel?: string` (default `'Choose date'`) _(desde 0.5)_ — nombre accesible del popover.
+  - `locale?: Locale` (de `date-fns`) _(desde 0.5)_ — se aplica a la fecha del disparador y al calendario. Con un locale de `date-fns` las etiquetas de navegación del calendario quedan en inglés; con los locales que exporta el DS desde el subpath `/locale` (`import { es } from '@abelardo-salazar/core-ui-design-system/locale'`) también se traducen. Ese subpath reexporta los locales de DayPicker (los de `date-fns` con las etiquetas traducidas), es server-safe y solo empaqueta los locales que se importan. No importar desde `@daypicker/react`: es dependencia del DS, no de la app (con pnpm no se resuelve).
   - `disabled?: boolean`.
   - `className?: string` — se aplica al `Button` trigger.
 
@@ -1294,6 +1358,8 @@ function ControlledDatePicker() {
 ```
 
 ### Locales — subpath `/locale`
+
+**Desde 0.5.**
 
 - **Import:** `@abelardo-salazar/core-ui-design-system/locale`.
 - **Exports:** los locales de DayPicker (`es`, `enUS`, `ptBR`, `fr`, etc.: los de `date-fns`, con meses y etiquetas de navegación del calendario traducidos) y sus tipos (`DayPickerLocale`, `DayPickerLocaleLabels`, y los tipos de locale de `date-fns`, como `Locale`).
@@ -1324,13 +1390,15 @@ export function BookingDate() {
 
 ### Combobox — Uso y Props
 
-- **Exports:** `Combobox`; tipos `ComboboxProps`, `ComboboxSingleProps`, `ComboboxMultipleProps`, `ComboboxLabelProps`, `ComboboxModeProps`, `ComboboxListVisibility`, `ComboboxOption`. Client component; requiere el peer `cmdk`.
+**Desde 0.5.**
+
+- **Exports:** `Combobox`; tipos `ComboboxProps`, `ComboboxSingleProps`, `ComboboxMultipleProps`, `ComboboxLabelProps`, `ComboboxModeProps`, `ComboboxListVisibility`, `ComboboxOption`. Requiere el peer `cmdk`.
 - **Props principales:**
   - `options: { value: string; label: string; disabled?: boolean }[]` (requerido).
   - `label: string` **o** `aria-label: string` — uno de los dos, no ambos (lo exigen los tipos). `label` dibuja la etiqueta visible, con el estilo de la de `Input`; `aria-label` nombra el campo sin etiqueta visible.
   - `multiple?: boolean` — sin `multiple`: `value?`/`defaultValue?: string` (`''` sin valor) y `onValueChange?: (value: string) => void`. Con `multiple`: `string[]` y `(value: string[]) => void`.
   - `mode?: 'popover' | 'inline'` (default `'popover'`).
-  - `listVisibility?: 'always' | 'focus' | 'query'` — solo con `mode="inline"` (con `'popover'` no compila). Cuándo se ve la lista; default `'always'`:
+  - `listVisibility?: 'always' | 'focus' | 'query'` _(desde 0.7)_ — solo con `mode="inline"` (con `'popover'` no compila). Cuándo se ve la lista; default `'always'`:
 
     | Valor      | La lista se ve                         | Al elegir (múltiple)                      | Escape                                              |
     | ---------- | -------------------------------------- | ----------------------------------------- | --------------------------------------------------- |
@@ -1396,12 +1464,14 @@ export function CountriesFilter() {
 
 ### QuantityStepper — Uso y Props
 
-- **Exports:** `QuantityStepper`; tipo `QuantityStepperProps`. Client component.
+**Desde 0.4.**
+
+- **Exports:** `QuantityStepper`; tipo `QuantityStepperProps`.
 - **Props principales:**
   - `value?: number`, `defaultValue?: number` (default: `min` si es finito, si no `0`), `onChange?: (value: number) => void` — controlado o no controlado. `onChange` recibe un número, no un evento.
   - `min?: number`, `max?: number` (sin límite por defecto), `step?: number` (default `1`).
   - `disabled?: boolean`.
-  - `decrementLabel?: string` (default `'Decrease quantity'`), `incrementLabel?: string` (default `'Increase quantity'`) — nombres accesibles de los botones − y +.
+  - `decrementLabel?: string` (default `'Decrease quantity'`), `incrementLabel?: string` (default `'Increase quantity'`) _(desde 0.5)_ — nombres accesibles de los botones − y +.
   - `aria-label?: string` (default `'Quantity'`) — nombre accesible del campo numérico.
   - `className?: string` — en el contenedor (`role="group"`); el resto de los atributos de `<input>` van al campo.
 
@@ -1568,6 +1638,8 @@ Uso (ejemplos, extraídos de `ProgressRing.stories.tsx`):
 
 ### Alert — Uso y Props
 
+**Desde 0.4.**
+
 - **Exports:** `Alert`, `AlertTitle`, `AlertDescription`.
 - **Props principales:**
   - `variant?: 'info' | 'success' | 'warning' | 'error'` (default `'info'`) — ver `alertVariants.ts`.
@@ -1614,7 +1686,9 @@ Un `Alert` `info`/`success` que se **monta** dinámicamente no se anuncia: los l
 
 ### EmptyState — Uso y Props
 
-- **Exports:** `EmptyState`, `EmptyStateIcon`, `EmptyStateTitle`, `EmptyStateDescription`, `EmptyStateActions`; tipos `EmptyStateProps`, `EmptyStateTitleProps`. Server-safe.
+**Desde 0.5.**
+
+- **Exports:** `EmptyState`, `EmptyStateIcon`, `EmptyStateTitle`, `EmptyStateDescription`, `EmptyStateActions`; tipos `EmptyStateProps`, `EmptyStateTitleProps`.
 - **Props principales:**
   - `EmptyState`: `size?: 'sm' | 'md'` (default `'md'`) — `sm` para tablas y tarjetas, `md` para una página; `className?: string` y `React.HTMLAttributes<HTMLDivElement>`.
   - `EmptyStateIcon`: el ícono (decorativo, `aria-hidden`), dentro de un círculo.
@@ -1665,7 +1739,9 @@ export function NoResults({ onReset }: { onReset: () => void }) {
 
 ### VisuallyHidden — Uso y Props
 
-- **Exports:** `VisuallyHidden`; tipo `VisuallyHiddenProps`. Server-safe.
+**Desde 0.5.**
+
+- **Exports:** `VisuallyHidden`; tipo `VisuallyHiddenProps`.
 - **Props principales:** `as?: React.ElementType` (default `'span'`); `className?: string` y `React.HTMLAttributes<HTMLElement>`.
 
 **Comportamiento no obvio:** renderiza un `span`, que no puede envolver contenido de bloque; para envolver un `SheetTitle` o `DialogTitle` que el diseño no muestra (Radix exige el título), usar `as="div"`.
@@ -1699,6 +1775,8 @@ export function MenuSheet() {
 
 ### announce() — Uso y opciones
 
+**Desde 0.5.**
+
 - **Exports:** `announce`; tipo `AnnounceOptions`.
 - **Firma:** `announce(message: string, options?: { politeness?: 'polite' | 'assertive' }): void` (default `'polite'`).
 
@@ -1730,6 +1808,8 @@ export function AddToCart({ onAdd }: { onAdd: () => void }) {
 | `Chart`     | Charts de Bar/Line/Area/Pie/Ring sobre recharts — **subpath `/charts`** | `ChartContainer`, `ChartTooltipContent`, `ChartLegendContent` + re-exports de recharts (`BarChart`, `LineChart`, `AreaChart`, `PieChart`, etc.), todo desde `@abelardo-salazar/core-ui-design-system/charts` |
 
 ### Table — Uso y Props
+
+**Desde 0.4.**
 
 - **Exports:** `Table`, `TableHeader`, `TableBody`, `TableFooter`, `TableRow`, `TableHead`, `TableCell`, `TableCaption`.
 
@@ -1771,14 +1851,16 @@ Nota: `TableCaption` y `TableFooter` son opcionales — una tabla mínima (sin c
 
 ### DataTable — Uso y Props
 
+**Desde 0.4.**
+
 - **Exports:** `DataTable`, `features` (el objeto de features de `@tanstack/react-table` v9, re-exportado desde el mismo módulo).
 - **Props principales:**
   - `columns: ColumnDef<typeof features, TData>[]` (requerido) — ver nota abajo, tienen que tiparse contra `typeof features`.
   - `data: TData[]` (requerido).
   - `searchPlaceholder?: string` (default `'Search...'`) — la caja de búsqueda global **siempre es visible**, no es opcional vía prop. También es su nombre accesible.
-  - `emptyState?: React.ReactNode` (default: `EmptyState` `sm` con el título `'No results.'`).
-  - `previousLabel?: string` (default `'Previous'`), `nextLabel?: string` (default `'Next'`).
-  - `pageLabel?: (page: number, total: number) => string` (default `` (page, total) => `Page ${page} of ${total}` ``) — `page` empieza en 1.
+  - `emptyState?: React.ReactNode` _(desde 0.5)_ (default: `EmptyState` `sm` con el título `'No results.'`).
+  - `previousLabel?: string` (default `'Previous'`), `nextLabel?: string` (default `'Next'`) _(desde 0.5)_.
+  - `pageLabel?: (page: number, total: number) => string` _(desde 0.5)_ (default `` (page, total) => `Page ${page} of ${total}` ``) — `page` empieza en 1.
   - `className?: string`.
 
 **Comportamiento no obvio:** construida sobre `@tanstack/react-table` v9. Las columnas deben tiparse contra `typeof features` (exportado por este mismo módulo, vía `createColumnHelper<typeof features, TData>()`) — es un requisito real de los generics de v9, no un detalle estilístico. `features` combina `rowSortingFeature` + `columnFilteringFeature` + `globalFilteringFeature` + `rowPaginationFeature`, pero **`columnFilteringFeature` está registrada únicamente porque el sistema de tipos de v9 la exige como prerequisito** de `globalFilteringFeature`/`filteredRowModel`/`filterFns` — `DataTable` no expone ningún filtro por columna, solo el filtro global (la caja de búsqueda). Alcance v1: sorting + filtro global + paginación; sin selección de filas, visibilidad de columnas, resize, agrupación/agregación ni pinning.
@@ -1812,6 +1894,8 @@ Notas:
 - El filtro global resetea la paginación a la primera página.
 
 ### Chart — Uso y Props
+
+**Desde 0.4.**
 
 > **Import desde el subpath `/charts`, no desde el barrel principal.** `Chart` arrastra
 > `recharts`, que llama `createContext()` a nivel de módulo — incluirlo en el barrel raíz
@@ -1997,25 +2081,30 @@ push nuevo a la misma rama, se cancela el run anterior. Pasos, en orden:
    del sistema vía apt, que el runner ya trae).
 3. `npm run lint` — ESLint.
 4. `npm run format:check` — Prettier.
-5. `npx tsc -b` — typecheck.
-6. `npm run build` — `verify-client-directives` (pre: `CLIENT_ENTRY_POINTS` sincronizado y
+5. `npm run verify:readme` — el README sigue al paquete: el badge y la línea de versión
+   coinciden con `package.json#version`; el primer encabezado del CHANGELOG es `[Unreleased]` o
+   el de esa versión, y la línea de versión menciona los cambios sin publicar solo si lo es
+   `[Unreleased]`; la tabla de [Server Components](#server-components) lista cada componente
+   exportado, con «No» si su archivo está en `CLIENT_ENTRY_POINTS` y «Sí» si no.
+6. `npx tsc -b` — typecheck.
+7. `npm run build` — `verify-client-directives` (pre: `CLIENT_ENTRY_POINTS` sincronizado y
    ningún componente server-safe que arme handlers propios) + `tsc -b` + `vite build` +
    `verify-client-directives --post-build` (post: `dist/index.js` sin `recharts`,
    `dist/locale.js` sin el barrel raíz ni `recharts`, y `sideEffects` con los módulos con efectos
    de las dependencias empaquetadas) + `verify-third-party-notices` (cada paquete de
    `dist/node_modules` aparece en `dist/THIRD-PARTY-NOTICES.txt`).
-7. `npm run verify:tailwind-consumer` — empaqueta con `npm pack`, arma sin red un consumidor
+8. `npm run verify:tailwind-consumer` — empaqueta con `npm pack`, arma sin red un consumidor
    con Tailwind v4 que importa `./tailwind.css` y lo compila con `@tailwindcss/cli`. Qué
    verifica y por qué: [ARCHITECTURE § Orden de utilidades entre dos compilaciones](./ARCHITECTURE.md#orden-de-utilidades-entre-dos-compilaciones).
-8. `npm run test` — Vitest en modo browser (Chromium headless), con las stories como tests, en
+9. `npm run test` — Vitest en modo browser (Chromium headless), con las stories como tests, en
    dos proyectos que corren uno después del otro:
    - `storybook`: todas las stories salvo las de tag `real-css`. No aplica las utilidades de
      Tailwind, así que sus aserciones van sobre clases y DOM.
    - `storybook-css`: solo las stories con tag `real-css`, las que necesitan el CSS aplicado
      (posición, z-index, `elementFromPoint`). Para sumar una, agregar `tags: ['real-css']`.
-9. Dependency review (solo en Pull Requests) — `actions/dependency-review-action` compara las
-   dependencias del PR contra `main` y falla si el PR introduce una vulnerabilidad `high` /
-   `critical`; `moderate` / `low` no bloquean.
+10. Dependency review (solo en Pull Requests) — `actions/dependency-review-action` compara las
+    dependencias del PR contra `main` y falla si el PR introduce una vulnerabilidad `high` /
+    `critical`; `moderate` / `low` no bloquean.
 
 Cualquier paso que falle marca el PR en rojo.
 

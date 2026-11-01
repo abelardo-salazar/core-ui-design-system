@@ -20,6 +20,7 @@
     "verify:barrel-rsc-safe": "node scripts/verify-client-directives.mjs --post-build",
     "verify:tailwind-consumer": "node scripts/verify-tailwind-consumer.mjs",
     "verify:third-party-notices": "node scripts/verify-third-party-notices.mjs",
+    "verify:readme": "node scripts/verify-readme.mjs",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

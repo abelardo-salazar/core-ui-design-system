@@ -11,11 +11,12 @@
 - ARCHITECTURE.md guarda las decisiones y su porqué; no duplicarlas aquí.
 - Las reglas de componentes están en .claude/rules/components.md y se cargan al trabajar en src/components/ y src/utils/.
 - Idioma: comentarios de código y salida de los scripts en inglés; README, ARCHITECTURE, CHANGELOG y texto visible de las stories en español neutro, sin voseo.
+- Todo componente o prop nuevo lleva su marca en el README en el mismo PR: "**Desde X.Y.**" al inicio de la sección "Uso y Props" de un componente nuevo, "_(desde X.Y)_" en una prop nueva. X.Y es la minor en la que se publicará: la de package.json si todavía no está publicada; si ya lo está, la siguiente.
 
 ## Flujo de trabajo (aplica a todas las tareas)
 
 - El prefijo de la rama es el tipo del título del PR, de la lista cerrada `feat/`, `fix/`, `docs/`, `chore/` (convención).
-- Excepción: las ramas `dependabot/` las crea Dependabot y no siguen la convención de prefijos. Antes de mergear un PR de Dependabot que toca `dependencies`, agregar en su rama la entrada del CHANGELOG y re-verificar el [criterio de peer o dependency](./ARCHITECTURE.md#peer-o-dependency).
+- Excepción: las ramas `dependabot/` las crea Dependabot y no siguen la convención de prefijos. Antes de mergear un PR de Dependabot que toca `dependencies`, agregar en su rama la entrada del CHANGELOG y re-verificar el [criterio de peer o dependency](./ARCHITECTURE.md#peer-o-dependency). Si actualiza un paquete que también está en `peerDependencies`, evaluar subir el piso del peer; subirlo cambia algo para el consumidor: título `fix:` y entrada en el CHANGELOG.
 - PR obligatorio con el check `verify`, también para admins; solo squash, con el título del PR como título del commit (lo fuerza GitHub). Nunca commits directos a main.
 - Mergear un PR solo con autorización explícita del usuario en la conversación, que nombre ese PR; nunca para destrabar otra tarea.
 - Título del PR en Conventional Commits (convención, sin verificación automática).

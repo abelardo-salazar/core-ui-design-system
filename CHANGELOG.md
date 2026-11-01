@@ -511,7 +511,7 @@ import a `@abelardo-salazar/core-ui-design-system/charts`.
 
 - Reescritura completa del `README.md`: contenido desactualizado corregido y componentes + `peerDependencies` faltantes documentados.
 
-## [0.3.15] - Sin publicar
+## [0.3.15] - No publicada (su contenido se incluyó en 0.4.0)
 
 ### Fixed
 
