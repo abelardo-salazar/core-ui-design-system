@@ -2011,10 +2011,16 @@ push nuevo a la misma rama, se cancela el run anterior. Pasos, en orden:
      Tailwind, así que sus aserciones van sobre clases y DOM.
    - `storybook-css`: solo las stories con tag `real-css`, las que necesitan el CSS aplicado
      (posición, z-index, `elementFromPoint`). Para sumar una, agregar `tags: ['real-css']`.
-9. `npm audit --audit-level=high` — falla solo ante vulnerabilidades `high` /
+9. Dependency review (solo en Pull Requests) — `actions/dependency-review-action` compara las
+   dependencias del PR contra `main` y falla si el PR introduce una vulnerabilidad `high` /
    `critical`; `moderate` / `low` no bloquean.
 
 Cualquier paso que falle marca el PR en rojo.
+
+Además, el workflow **`.github/workflows/audit.yml`** corre `npm audit --audit-level=high` sobre
+`main` cada semana (y a mano, desde la pestaña Actions). Detecta avisos nuevos contra
+dependencias que no cambiaron; no forma parte del check obligatorio, así que no bloquea PRs.
+Por qué está separado: [ARCHITECTURE § Detección de vulnerabilidades](./ARCHITECTURE.md#detección-de-vulnerabilidades).
 
 ---
 
