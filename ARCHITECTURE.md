@@ -119,3 +119,92 @@ Una versión sin publicar acumula todos los PRs en una sola entrada del CHANGELO
 
 - **Cuándo:** después de publicar, no antes. Un tag sin versión publicada apuntaría a algo que no existe en el registro.
 - **Versiones anteriores:** `v0.4.1` y `v0.4.2` existen como tags ligeros (no anotados), creados antes de esta convención, y se dejan así. Igual que `v0.4.3`, `v0.4.4` y `v0.5.0` (anotados, creados después de publicar), apuntan al commit de `main` con el mismo árbol que su `gitHead`, porque la historia se reescribió después de publicarlas. Las versiones anteriores a 0.4.1 no tienen tag.
+
+## Decisiones
+
+Cada decisión con su razón. Las listas concretas (qué paquete es peer, qué componente es cliente) viven en `package.json` y `scripts/client-entry-points.mjs`; aquí va el criterio.
+
+### Peer o dependency
+
+Un paquete va en `peerDependencies` si trae `'use client'` propio o si puede duplicar instancias: contextos de React, primitivas de Radix con estado, Sonner, TanStack Table, cmdk. Va en `dependencies` si no trae directiva ni estado compartido. El criterio se aplica a la versión que se empaqueta, la del lockfile en el momento del build, y se re-verifica cada vez que esa versión cambia.
+
+Razón: con `preserveModules`, Rollup pierde las directivas de los chunks que no son entry, así que un paquete cliente empaquetado en `dist/node_modules` llega al consumidor sin su `'use client'`. Y una instancia duplicada (la empaquetada más la del consumidor) rompe los contextos: el provider de una copia no lo ve el consumidor de la otra.
+
+`tailwindcss-animate` está en `dependencies` por otro motivo: ver [`src/tailwind.css`](#srctailwindcss-fuente-única-de-tokens-y-capas-base).
+
+### Solo ESM
+
+El paquete sale solo en ESM, sin UMD: `preserveModules` emite un archivo por módulo, incompatible con un bundle único.
+
+### Subpaths `./charts` y `./locale`
+
+Chart vive en `./charts`, no en el barrel raíz: un re-export puro se pliega al barrel raíz y arrastra recharts, cuyo `createContext` a nivel de módulo rompe en RSC. `./locale` son datos server-safe (locales de DayPicker); como entry propio, solo se empaqueta lo que el consumidor importa. El modo `--post-build` de `verify-client-directives.mjs` verifica los dos límites (ver [abajo](#componentes-server-y-client)).
+
+### Componentes server y client
+
+Un componente es server-safe por defecto. Si usa hooks, construye handlers propios o depende de un paquete cliente, declara `'use client'` y se registra en `scripts/client-entry-points.mjs`. Es la lista única que usan `vite.config.ts` (para reinyectar la directiva en el chunk de cada componente) y el verificador.
+
+La server-safety se re-verifica cuando cambian los internos de un componente, aunque su API no cambie. Precedente: Button pasó a cliente en 0.4.3 por el guard de `asChild`, que arma un handler propio.
+
+`scripts/verify-client-directives.mjs` corre antes y después de `vite build` (`npm run build`). Antes del build falla si:
+
+- un `.tsx` de `src/components/` tiene `'use client'` en su primera línea y no está en la lista;
+- una entrada de la lista ya no existe o su archivo perdió la directiva;
+- un componente sin directiva declara una función local y la usa como handler JSX (`onClick={handleX}`), por heurística estática.
+
+Con `--post-build` falla si:
+
+- `dist/index.js` alcanza recharts, directa o transitivamente;
+- `dist/locale.js` alcanza recharts o el barrel raíz.
+
+### Solo tokens semánticos
+
+Los componentes usan solo tokens semánticos para color. Son la superficie pública de theming (ver [Theming](#theming-tokens-y-css-cascade-layers)), y un color fijo no responde al override del consumidor. Precedente: `ring-ring` no tenía token detrás, y Checkbox y Switch quedaron sin foco visible hasta 0.4.4.
+
+### Objetivo táctil de 44px
+
+Todo control interactivo apunta a un objetivo táctil de 44px. Los tamaños compactos (`sm`) existen y se documentan como tales. Cuando el visual queda por debajo de 44px, la hit area se extiende con un `::after` que sigue la silueta del control (patrón de Chip).
+
+Button, Input y Select comparten escala para alinear en una misma fila: `sm` 32px, `md` 44px, `lg` 48px.
+
+### Íconos internos
+
+Los íconos internos usan `@radix-ui/react-icons`, por coherencia con la retícula de las primitivas Radix. Los consumidores pasan cualquier ícono por `startIcon`/`endIcon`. Costo aceptado: en la app del consumidor conviven dos familias de íconos.
+
+### Sonner para toasts
+
+Sonner, no Radix Toast: API más simple y estilizable con Tailwind.
+
+### TanStack Table v9 con `useTable`
+
+`useTable`, no `useLegacyTable`: el shim está deprecado e incluye todas las features.
+
+### `@daypicker/react` v10
+
+`@daypicker/react`, no `react-day-picker`: el paquete se renombró en v10 y el nombre viejo es solo un alias.
+
+### `useId` para `aria-describedby`
+
+Input y Textarea generan con `useId()` el id que enlaza `aria-describedby`, así la accesibilidad no depende de que el consumidor pase un `id`.
+
+### Tooltip y touch
+
+Tooltip no es apto para touch: Radix ignora los taps por diseño. Para contenido que tiene que llegar en touch, Popover. `pointer-coarse:hidden` en el contenido del Tooltip es una capa defensiva, no la solución.
+
+### Badge `interactive`
+
+`interactive` (el literal `true`) hace que Badge renderice un `button`: un `div` con hover, foco y `onClick` no es operable por teclado. Las sobrecargas de tipos lo hacen cumplir: `onClick` sin `interactive` no compila.
+
+### `shape="pill"` en Button
+
+La variante `shape` evita que cada consumidor arme el pill con un `className` ad hoc.
+
+### Distribución por GitHub Packages
+
+El paquete se distribuye por GitHub Packages. El `.npmrc` del consumidor (ver [README § 1](./README.md#-1-configuración-de-autenticación-requerido)) mapea el scope `@abelardo-salazar` a ese registro, así que npm no resuelve el paquete contra npmjs: eso protege contra dependency confusion. El repo es público.
+
+**En revisión:** la distribución para proyectos de terceros se evalúa en [#68](https://github.com/abelardo-salazar/core-ui-design-system/issues/68).
+
+### Fuera del DS
+
+Lo específico de un consumidor queda fuera del design system. Precedente: Kanban, que es un proyecto aparte.

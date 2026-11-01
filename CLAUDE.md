@@ -1,23 +1,26 @@
 # CLAUDE.md — core-ui-design-system
 
-## Constraints activos (auditoría de robustez)
+## Constraints
 
-- No modificar la API pública de componentes ya en producción sin justificar el breaking change
-- Todo componente nuevo o modificado requiere test antes de mergear
-- No agregar dependencias externas sin verificar antes en el propio repo si ya existe algo que cubra el caso
+- No modificar la API pública de componentes ya en producción sin justificar el breaking change.
+- No agregar dependencias externas sin verificar antes en el propio repo si ya existe algo que cubra el caso. Al agregar o actualizar un paquete de `dependencies`, comprobar en la versión del lockfile si trae `'use client'` o estado compartido y aplicar [el criterio de peer o dependency](./ARCHITECTURE.md#peer-o-dependency).
+- Si una tarea contradice una decisión de ARCHITECTURE.md, detenerse y avisar en vez de implementarla.
+
+## Documentación
+
+- ARCHITECTURE.md guarda las decisiones y su porqué; no duplicarlas aquí.
+- Las reglas de componentes están en .claude/rules/components.md y se cargan al trabajar en src/components/ y src/utils/.
+- Idioma: comentarios de código y salida de los scripts en inglés; README, ARCHITECTURE, CHANGELOG y texto visible de las stories en español neutro, sin voseo.
 
 ## Flujo de trabajo (aplica a todas las tareas)
 
-- Rama feat/ o fix/, PR, Squash & Merge. Nunca commits directos a main.
+- El prefijo de la rama es el tipo del título del PR, de la lista cerrada `feat/`, `fix/`, `docs/`, `chore/` (convención).
+- PR obligatorio con el check `verify`, también para admins; solo squash, con el título del PR como título del commit (lo fuerza GitHub). Nunca commits directos a main.
 - Mergear un PR solo con autorización explícita del usuario en la conversación, que nombre ese PR; nunca para destrabar otra tarea.
+- Título del PR en Conventional Commits (convención, sin verificación automática).
 - No publicar ni bumpear versión salvo que la tarea lo pida. Si la versión de package.json todavía no está publicada (`npm view <paquete> versions`), los cambios se agregan a su entrada del CHANGELOG; si ya lo está, a una entrada `[Unreleased]`.
-- El catálogo de componentes (DESIGN_SYSTEM.md) vive fuera del repo y no se toca desde aquí. ARCHITECTURE.md (notas de arquitectura del theming y convención de releases) sí vive en el repo y se mantiene aquí.
-- Todo componente nuevo o modificado lleva test (play functions). El proyecto `storybook` de vitest-browser no aplica utilidades de Tailwind: aserciones sobre clases y DOM. Una story que necesita el CSS aplicado (posición, z-index, elementFromPoint) lleva `tags: ['real-css']` y corre solo en el proyecto `storybook-css`, que sí lo aplica; antes de dar por buena una prueba así, verificar que falla sin el cambio. Lo demás (tamaños, animaciones), en Storybook con navegador real.
+- CHANGELOG: describir API, comportamiento y migración para el consumidor. Los detalles de implementación van en los comentarios del código. Los PR `docs:` y `chore:` no llevan entrada salvo que cambien algo para el consumidor.
 - Comparaciones A/B: en un clon o worktree con su propio npm ci. Nunca junctions ni symlinks al node_modules principal.
-- Un componente es server-safe salvo que use hooks o construya handlers propios; los componentes cliente se registran en scripts/client-entry-points.mjs.
-- Una variante nueva de cva debe desestructurarse y pasarse a la función de variantes en todas las ramas del componente; verificar que no llegue al DOM como atributo.
-- CHANGELOG: describir API, comportamiento y migración para el consumidor. Los detalles de implementación van en los comentarios del código.
-- Textos en español neutro, sin voseo (stories, docs, CHANGELOG).
 
 ## Estilo de respuesta (ahorro de créditos)
 
