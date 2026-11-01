@@ -279,6 +279,7 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
     - [🧾 Tipos y utilidades exportados](#-tipos-y-utilidades-exportados)
   - [💻 Desarrollo Local](#-desarrollo-local)
   - [🤖 Integración Continua (CI)](#-integración-continua-ci)
+  - [⚖️ Licencia](#️-licencia)
 
 ---
 
@@ -2001,7 +2002,8 @@ push nuevo a la misma rama, se cancela el run anterior. Pasos, en orden:
    ningún componente server-safe que arme handlers propios) + `tsc -b` + `vite build` +
    `verify-client-directives --post-build` (post: `dist/index.js` sin `recharts`,
    `dist/locale.js` sin el barrel raíz ni `recharts`, y `sideEffects` con los módulos con efectos
-   de las dependencias empaquetadas).
+   de las dependencias empaquetadas) + `verify-third-party-notices` (cada paquete de
+   `dist/node_modules` aparece en `dist/THIRD-PARTY-NOTICES.txt`).
 7. `npm run verify:tailwind-consumer` — empaqueta con `npm pack`, arma sin red un consumidor
    con Tailwind v4 que importa `./tailwind.css` y lo compila con `@tailwindcss/cli`. Qué
    verifica y por qué: [ARCHITECTURE § Orden de utilidades entre dos compilaciones](./ARCHITECTURE.md#orden-de-utilidades-entre-dos-compilaciones).
@@ -2022,6 +2024,15 @@ Además, el workflow **`.github/workflows/audit.yml`** corre `npm audit --audit-
 dependencias que no cambiaron; no forma parte del check obligatorio, así que no bloquea PRs.
 Por qué está separado: [ARCHITECTURE § Detección de vulnerabilidades](./ARCHITECTURE.md#detección-de-vulnerabilidades).
 
+## ⚖️ Licencia
+
+El design system se distribuye bajo la licencia [MIT](./LICENSE), que viaja dentro del paquete
+publicado.
+
+El paquete también redistribuye, en `dist/node_modules`, código de dependencias de terceros
+(recharts, d3, date-fns, entre otras). Sus licencias y avisos de copyright están en
+`dist/THIRD-PARTY-NOTICES.txt`, que el build genera y verifica. Por qué: [ARCHITECTURE § Licencia MIT y avisos de terceros](./ARCHITECTURE.md#licencia-mit-y-avisos-de-terceros).
+
 ---
 
-**Core UI Design System** © Abelardo Salazar / @abelardo-salazar 2026. Internal Use Only.
+**Core UI Design System** © 2026 Abelardo Jose Salazar Patiño. Licencia [MIT](./LICENSE).

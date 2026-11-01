@@ -209,6 +209,16 @@ El paquete se distribuye por GitHub Packages. El `.npmrc` del consumidor (ver [R
 
 Lo específico de un consumidor queda fuera del design system. Precedente: Kanban, que es un proyecto aparte.
 
+### Licencia MIT y avisos de terceros
+
+El DS se publica bajo MIT. Razones: es la licencia del ecosistema del que forma parte (React, Radix, Tailwind y casi todas sus dependencias), los equipos legales de los clientes la aceptan sin revisión, y el DS sigue siendo propiedad del autor aunque se use en proyectos de terceros. El `LICENSE` vive en la raíz del repo; npm lo incluye en el paquete aunque `files` solo liste `dist`.
+
+`preserveModules` copia en `dist/node_modules` el código de las dependencias empaquetadas, pero no sus archivos de licencia. MIT e ISC (y Apache-2.0) solo permiten redistribuir si el aviso de copyright y de permiso viaja con el código, así que el build genera `dist/THIRD-PARTY-NOTICES.txt` con el nombre, la versión, la licencia y el texto de los `LICENSE`/`NOTICE` de cada paquete.
+
+- **Generación:** el plugin `third-party-notices` de `vite.config.ts` toma los paquetes de los módulos del bundle. No necesita una devDependency: el build ya sabe qué archivo de `node_modules` empaquetó.
+- **Guardrail:** `scripts/verify-third-party-notices.mjs` corre en `npm run build`. Toma la lista de lo que hay en disco en `dist/node_modules`, no de `package.json`, y falla si un paquete no tiene entrada. Así, una dependencia transitiva nueva no se cuela sin aviso.
+- Un paquete sin archivo de licencia queda con la licencia, el autor y el repositorio que declara su `package.json`, y una nota que lo dice. El aviso no se inventa.
+
 ### Detección de vulnerabilidades
 
 La detección responde tres preguntas por separado, cada una con su mecanismo:

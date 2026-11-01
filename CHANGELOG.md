@@ -1,5 +1,20 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **Licencia MIT.** El paquete se publica bajo MIT: `LICENSE` en el paquete y
+  `"license": "MIT"` en `package.json`. Antes no declaraba licencia.
+
+### Fixed
+
+- **Avisos de licencia de las dependencias empaquetadas.** El paquete redistribuye en
+  `dist/node_modules` código de terceros (recharts, d3, date-fns, entre otros) sin sus avisos de
+  copyright, que sus licencias exigen. Ahora vienen en `dist/THIRD-PARTY-NOTICES.txt`, con el
+  nombre, la versión, la licencia y el texto de licencia de cada paquete. **Migración:** nada que
+  cambiar; quien audite licencias del paquete encuentra los avisos en ese archivo.
+
 ## [0.7.0] - 2026-10-16
 
 ### Added
