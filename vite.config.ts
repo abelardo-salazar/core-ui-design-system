@@ -5,6 +5,7 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import tailwindcss from '@tailwindcss/vite';
 import { CLIENT_ENTRY_POINTS as CLIENT_ENTRY_POINTS_RELATIVE } from './scripts/client-entry-points.mjs';
+import { NOTICES_FILE, packageRoot, renderNotices } from './scripts/third-party-notices.mjs';
 
 // Archivos fuente que declaran 'use client' porque usan hooks de React directamente
 // (Input, Textarea) o envuelven primitivas de Radix/Sonner marcadas 'use client'.
@@ -61,11 +62,38 @@ function copyTailwindSource(): Plugin {
   };
 }
 
+// Emits dist/THIRD-PARTY-NOTICES.txt with the license of every package whose modules end up in
+// the bundle (preserveModules copies them into dist/node_modules without their LICENSE).
+// Rendering lives in scripts/third-party-notices.mjs, shared with the guardrail
+// scripts/verify-third-party-notices.mjs.
+function thirdPartyNotices(): Plugin {
+  return {
+    name: 'third-party-notices',
+    apply: 'build',
+    generateBundle(_options, bundle) {
+      const packageDirs = new Set<string>();
+      for (const output of Object.values(bundle)) {
+        if (output.type !== 'chunk') continue;
+        for (const id of Object.keys(output.modules)) {
+          const dir = packageRoot(id);
+          if (dir) packageDirs.add(dir);
+        }
+      }
+      this.emitFile({
+        type: 'asset',
+        fileName: NOTICES_FILE,
+        source: renderNotices([...packageDirs]),
+      });
+    },
+  };
+}
+
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(), // Soporte Tailwind v4
     copyTailwindSource(),
+    thirdPartyNotices(),
     dts({
       insertTypesEntry: true,
       tsconfigPath: './tsconfig.app.json', // Asegúrate que este sea tu tsconfig correcto

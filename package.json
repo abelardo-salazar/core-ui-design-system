@@ -1,6 +1,7 @@
 {
   "name": "@abelardo-salazar/core-ui-design-system",
   "version": "0.7.0",
+  "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -14,10 +15,11 @@
   "scripts": {
     "dev": "vite",
     "test": "vitest run",
-    "build": "node scripts/verify-client-directives.mjs && tsc -b && vite build && node scripts/verify-client-directives.mjs --post-build",
+    "build": "node scripts/verify-client-directives.mjs && tsc -b && vite build && node scripts/verify-client-directives.mjs --post-build && node scripts/verify-third-party-notices.mjs",
     "verify:client-directives": "node scripts/verify-client-directives.mjs",
     "verify:barrel-rsc-safe": "node scripts/verify-client-directives.mjs --post-build",
     "verify:tailwind-consumer": "node scripts/verify-tailwind-consumer.mjs",
+    "verify:third-party-notices": "node scripts/verify-third-party-notices.mjs",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
