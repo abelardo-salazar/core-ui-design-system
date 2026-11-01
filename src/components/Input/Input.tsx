@@ -6,8 +6,8 @@ import { Cross2Icon } from '@radix-ui/react-icons';
 import { cn } from '../../utils/cn';
 import { inputVariants } from './inputVariants';
 
-/** Props comunes a ambas ramas. Exportada para quien necesite extender Input con una interface
- * (una interface no puede extender la unión `InputProps`). */
+/** Props shared by both branches. Exported for those who need to extend Input with an interface
+ * (an interface can't extend the `InputProps` union). */
 export interface InputBaseProps
   extends
     Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
@@ -26,41 +26,42 @@ export interface InputWithEndIconProps extends InputBaseProps {
 }
 
 export interface ClearableInputProps extends InputBaseProps {
-  /** Muestra un botón para vaciar el campo mientras tenga valor. */
+  /** Shows a button to clear the field while it has a value. */
   clearable: boolean;
-  /** Se llama después de vaciar el campo (y de disparar su onChange). */
+  /** Called after clearing the field (and after firing its onChange). */
   onClear?: () => void;
-  /** aria-label del botón de limpiar. Default: "Clear". */
+  /** aria-label of the clear button. Default: "Clear". */
   clearLabel?: string;
   endIcon?: never;
 }
 
-// Unión discriminada por `clearable`: el botón de limpiar ocupa el lugar de endIcon, así que no
-// conviven. Las props de la otra rama se declaran `?: never` en vez de omitirse para que el
-// error salga de la asignabilidad y no del chequeo de props sobrantes, que contra una unión se
-// relaja a "¿existe en ALGÚN miembro?" (el bug que obligó a Badge a usar sobrecargas).
-// `clearable: boolean` (no `true`) para que `clearable={dinámico}` compile sin endIcon.
+// Union discriminated by `clearable`: the clear button takes the place of endIcon, so they
+// don't coexist. The other branch's props are declared `?: never` instead of being omitted so
+// the error comes from assignability and not from the excess property check, which against a
+// union relaxes to "does it exist in ANY member?" (the bug that forced Badge to use overloads).
+// `clearable: boolean` (not `true`) so that `clearable={dynamic}` compiles without endIcon.
 /**
- * Props de `Input`: unión discriminada por `clearable`.
+ * `Input` props: union discriminated by `clearable`.
  *
- * `Omit<InputProps, K>` NO preserva la exclusión `clearable`/`endIcon`: `Omit` no reparte sobre
- * uniones, colapsa las dos ramas en un solo objeto y `{ clearable: true, endIcon }` vuelve a
- * compilar. Para derivar props, repartir el Omit por rama:
+ * `Omit<InputProps, K>` does NOT keep the `clearable`/`endIcon` exclusion: `Omit` doesn't
+ * distribute over unions, it collapses both branches into a single object and
+ * `{ clearable: true, endIcon }` compiles again. To derive props, distribute the Omit per
+ * branch:
  *
  * ```ts
  * type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
  * type MyProps = DistributiveOmit<InputProps, 'size'>;
  * ```
  *
- * o partir de `InputBaseProps`, que además sirve para `interface X extends ...` (una interface
- * no puede extender esta unión).
+ * or start from `InputBaseProps`, which also works for `interface X extends ...` (an interface
+ * can't extend this union).
  */
 export type InputProps = InputWithEndIconProps | ClearableInputProps;
 
-// Setter nativo de `value`: React instala un tracker sobre la instancia, así que `input.value = ''`
-// lo actualiza y el evento posterior se descarta como "sin cambio". Llamar al setter del
-// prototipo lo esquiva y el evento `input` burbujeante llega al onChange de React, igual en
-// modo controlado, no controlado y con `register` de react-hook-form.
+// Native `value` setter: React installs a tracker on the instance, so `input.value = ''`
+// updates it and the following event is discarded as "no change". Calling the prototype's
+// setter gets around it and the bubbling `input` event reaches React's onChange, the same in
+// controlled mode, uncontrolled mode and with react-hook-form's `register`.
 function clearNativeInput(input: HTMLInputElement) {
   Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set?.call(input, '');
   input.dispatchEvent(new Event('input', { bubbles: true }));
@@ -98,7 +99,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const hasError = !!error;
     const finalVariant = hasError ? 'error' : variant;
 
-    // Sin botón con disabled/readOnly: el campo no se puede editar, vaciarlo tampoco.
+    // No button with disabled/readOnly: the field can't be edited, so it can't be cleared either.
     const showClear = !!clearable && !disabled && !readOnly;
 
     const inputRef = React.useRef<HTMLInputElement | null>(null);
@@ -150,9 +151,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={setRefs}
             disabled={disabled}
             readOnly={readOnly}
-            // La visibilidad del botón sale de :placeholder-shown (sin estado propio, así reset()/
-            // setValue() de RHF, que cambian el valor sin eventos, no lo desincronizan), y esa
-            // pseudo-clase solo existe con un placeholder no vacío.
+            // The button's visibility comes from :placeholder-shown (no state of its own, so RHF's reset()/
+            // setValue(), which change the value without events, don't desync it), and that
+            // pseudo-class only exists with a non-empty placeholder.
             placeholder={showClear ? placeholder || ' ' : placeholder}
             // ARIA binding for screen readers
             aria-invalid={hasError}
@@ -162,14 +163,14 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               // Adjust padding if there are icons
               startIcon && 'pl-10!',
               endIcon && 'pr-10!',
-              // type="search" trae su propia ✕ en WebKit/Blink: se oculta para no duplicarla.
+              // type="search" brings its own ✕ in WebKit/Blink: it's hidden so it isn't duplicated.
               showClear && 'peer [&::-webkit-search-cancel-button]:appearance-none',
             )}
             {...props}
           />
 
-          {/* Sin manejo propio de Escape: Radix lo escucha en document en fase de captura, así
-              que dentro de un Dialog/Sheet cerraría el modal en vez de limpiar. */}
+          {/* No Escape handling of its own: Radix listens for it on document in the capture phase, so
+              inside a Dialog/Sheet it would close the modal instead of clearing. */}
           {showClear && (
             <button
               type="button"

@@ -14,10 +14,10 @@ const meta: Meta<typeof Tooltip> = {
 export default meta;
 type Story = StoryObj<typeof Tooltip>;
 
-// 1. Default: cerrado por defecto, aparece con delay al hacer hover, desaparece al sacar
-// el mouse. TooltipProvider es obligatorio: Tooltip (Root) no trae un contexto por defecto
-// y lanza si se monta sin un ancestro TooltipProvider (verificado en el código fuente de
-// @radix-ui/react-tooltip, createTooltipContext('TooltipProvider') sin defaultContext).
+// 1. Default: closed by default, appears with a delay on hover, disappears when the
+// mouse leaves. TooltipProvider is required: Tooltip (Root) has no default context
+// and throws if mounted without a TooltipProvider ancestor (verified in the source of
+// @radix-ui/react-tooltip, createTooltipContext('TooltipProvider') without defaultContext).
 export const Default: Story = {
   render: () => (
     <TooltipProvider>
@@ -35,11 +35,11 @@ export const Default: Story = {
     const canvas = within(canvasElement);
     const trigger = canvas.getByRole('button', { name: 'Hover me' });
 
-    // El content vive en un Portal fuera de canvasElement (mismo patrón que Popover/Select).
+    // The content lives in a Portal outside canvasElement (same pattern as Popover/Select).
     const body = within(document.body);
     await expect(body.queryByRole('tooltip')).not.toBeInTheDocument();
 
-    // El hover pasa por el delay por defecto de Radix (delayDuration = 700ms) antes de abrir.
+    // The hover goes through Radix's default delay (delayDuration = 700ms) before opening.
     await userEvent.hover(trigger);
     const tooltipPanel = await body.findByRole('tooltip', {}, { timeout: 2000 });
     await expect(tooltipPanel).toHaveTextContent('Saved to your library');
@@ -55,9 +55,9 @@ export const Default: Story = {
   },
 };
 
-// 2. KeyboardFocus: enfocar por teclado abre de inmediato, sin el delay del hover (verificado
-// en TooltipTrigger: onFocus llama a context.onOpen() directo, sin pasar por el timer de
-// onTriggerEnter que usa el hover). Perder el foco lo cierra.
+// 2. KeyboardFocus: focusing with the keyboard opens immediately, without the hover delay (verified
+// in TooltipTrigger: onFocus calls context.onOpen() directly, without going through the
+// onTriggerEnter timer the hover uses). Losing focus closes it.
 export const KeyboardFocus: Story = {
   render: () => (
     <TooltipProvider>
@@ -84,11 +84,11 @@ export const KeyboardFocus: Story = {
     await userEvent.tab();
     await expect(trigger).toHaveFocus();
 
-    // Sin esperar un delay largo: a diferencia de Default (hover), el foco abre de inmediato.
+    // No long delay to wait for: unlike Default (hover), focus opens immediately.
     const tooltipPanel = await body.findByRole('tooltip', {}, { timeout: 500 });
     await expect(tooltipPanel).toHaveTextContent('Saved to your library');
 
-    // Mueve el foco al siguiente elemento -> blur en el trigger -> se cierra.
+    // Moves focus to the next element -> blur on the trigger -> it closes.
     await userEvent.tab();
     await waitFor(() => expect(body.queryByRole('tooltip')).not.toBeInTheDocument(), {
       timeout: 2000,

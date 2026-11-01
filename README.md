@@ -13,7 +13,7 @@
 
 ## 🔒 1. Configuración de Autenticación (Requerido)
 
-Este paquete está alojado en el **GitHub Package Registry (Privado)**. Para instalarlo, debes configurar tu entorno local.
+Este paquete se publica en **GitHub Packages**. El paquete tiene licencia MIT, pero instalarlo desde GitHub Packages requiere un token, así que debes configurar tu entorno local.
 
 ### Paso A: Generar Token
 

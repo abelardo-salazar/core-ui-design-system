@@ -1,4 +1,4 @@
-// Declaración de tipos para client-entry-points.mjs (plain ESM: lo ejecuta directamente
-// scripts/verify-client-directives.mjs con `node`, sin pasar por tsc, así que el módulo en
-// sí se mantiene JS puro). Este .d.ts es solo para que vite.config.ts lo importe tipado.
+// Type declaration for client-entry-points.mjs (plain ESM: scripts/verify-client-directives.mjs
+// runs it directly with `node`, without tsc, so the module itself stays plain JS). This .d.ts
+// only exists so vite.config.ts can import it typed.
 export declare const CLIENT_ENTRY_POINTS: string[];

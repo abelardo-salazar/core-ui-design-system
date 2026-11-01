@@ -91,9 +91,9 @@ export const SettingsForm: StoryObj = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    // axe: button-name — el SelectTrigger (combobox) y el Switch no tenían nombre accesible;
-    // "Email Frequency"/"Marketing Emails" eran texto suelto sin htmlFor. El Checkbox de al
-    // lado ya usaba <label htmlFor> correctamente y por eso nunca apareció en el reporte.
+    // axe: button-name; the SelectTrigger (combobox) and the Switch had no accessible name;
+    // "Email Frequency"/"Marketing Emails" were loose text without htmlFor. The Checkbox next
+    // to them already used <label htmlFor> correctly, which is why it never showed up in the report.
     await expect(canvas.getByLabelText('Email Frequency')).toHaveAttribute('role', 'combobox');
     await expect(canvas.getByLabelText('Marketing Emails')).toHaveAttribute('role', 'switch');
     await expect(canvas.getByLabelText('Accept terms and conditions')).toHaveAttribute(
@@ -103,12 +103,12 @@ export const SettingsForm: StoryObj = {
   },
 };
 
-// Button, Input y el trigger de Select comparten la misma familia de alturas (sm=32px,
-// md=44px, lg=48px) — en una misma fila, usarlos con el mismo size los deja alineados por
-// arriba y por abajo. Acá los tres quedan en su size md (el default de los tres, sin pasarlo
-// explícito): es justo el caso que antes NO alineaba (Button md medía 40px, Input/Select
-// también 40px — alineaban por coincidencia, no por diseño — y un size="icon" de 44px, como
-// los botones de QuantityStepper, rompía esa alineación en 4px).
+// Button, Input and the Select trigger share the same height family (sm=32px,
+// md=44px, lg=48px): in the same row, using them with the same size aligns them at the
+// top and bottom. Here all three stay at their md size (the default of all three, without passing it
+// explicitly): exactly the case that did NOT align before (Button md measured 40px, Input/Select
+// also 40px, aligned by coincidence, not by design, and a 44px size="icon", like
+// QuantityStepper's buttons, broke that alignment by 4px).
 export const AlignedFormRow: StoryObj = {
   render: () => (
     <div className="flex items-center gap-2">
@@ -132,10 +132,10 @@ export const AlignedFormRow: StoryObj = {
     const trigger = canvas.getByRole('combobox');
     const button = canvas.getByRole('button', { name: 'Buscar' });
 
-    // El fixture headless de vitest-browser no aplica las utilidades de Tailwind ni hace
-    // layout real, así que esto solo puede verificar la clase, no el alto/alineación real en
-    // píxeles (eso se verificó a mano en Storybook con un navegador real, A/B contra main:
-    // los tres con el mismo top/bottom).
+    // vitest-browser's headless fixture doesn't apply Tailwind's utilities or do real
+    // layout, so this can only check the class, not the real height/alignment in
+    // pixels (that was checked by hand in Storybook with a real browser, A/B against main:
+    // all three with the same top/bottom).
     await expect(input.className.split(' ')).toContain('h-11');
     await expect(trigger.className.split(' ')).toContain('h-11');
     await expect(button.className.split(' ')).toContain('h-11');

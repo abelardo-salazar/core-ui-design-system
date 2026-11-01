@@ -21,9 +21,9 @@ import {
 } from './ChartPrimitives';
 import type { ChartConfig } from './chartConfig';
 
-// dataKeys sin tilde (escritorio/movil) a propósito: son identificadores usados también en
-// "var(--color-<dataKey>)" y en atributos DOM — el label con tilde ("Móvil") vive aparte,
-// solo en config.movil.label, que es lo único que se muestra en pantalla.
+// dataKeys without accents (escritorio/movil) on purpose: they are identifiers also used in
+// "var(--color-<dataKey>)" and in DOM attributes; the accented label ("Móvil") lives
+// separately, only in config.movil.label, which is the only thing shown on screen.
 const chartConfig: ChartConfig = {
   escritorio: { label: 'Escritorio', color: 'primary' },
   movil: { label: 'Móvil', color: 'secondary' },
@@ -38,24 +38,24 @@ const data = [
   { month: 'Jun', escritorio: 214, movil: 140 },
 ];
 
-// Tamaño fijo en px, vía style inline en vez de las clases h-72/aspect-video que usaría un
-// consumidor real. ResponsiveContainer necesita que su ancestro tenga una altura CSS real
-// (no 0) para medir algo con su ResizeObserver; el entorno de test de
-// @storybook/addon-vitest (Vitest browser mode) no carga las utilidades compiladas de
-// Tailwind en el documento de test (verificado: aspect-ratio computado quedaba en "auto" y
-// height en "0px" pese a las clases), así que las clases de Tailwind no alcanzan para darle
-// tamaño acá. El inline style no depende de ninguna hoja de estilo, así que es la única vía
-// determinística para este caso — no es representativo del uso real (ver Storybook con
-// navegador real, donde `className="aspect-video ..."` sí funciona).
+// Fixed size in px, through an inline style instead of the h-72/aspect-video classes a real
+// consumer would use. ResponsiveContainer needs its ancestor to have a real CSS height
+// (not 0) to measure anything with its ResizeObserver; the test environment of
+// @storybook/addon-vitest (Vitest browser mode) doesn't load Tailwind's compiled utilities
+// into the test document (verified: the computed aspect-ratio stayed "auto" and height
+// "0px" despite the classes), so Tailwind classes aren't enough to size it here. The inline
+// style doesn't depend on any stylesheet, so it's the only deterministic way for this case;
+// it isn't representative of real use (see Storybook with a real browser, where
+// `className="aspect-video ..."` does work).
 const testSize = { width: 600, height: 300 };
 
-// Simula un mousemove sobre el centro del área de trazado del chart. Recharts calcula el
-// punto activo a partir de mousemove/mouseover nativos capturados por RechartsWrapper, y
-// despacha la actualización de estado (Redux) vía requestAnimationFrame (throttle interno,
-// ver mouseEventsMiddleware.js) — por eso hace falta esperar un frame después del evento.
-// userEvent.hover() (verificado) no alcanza acá: solo garantiza pointerenter/mouseenter, no
-// un mousemove con clientX/clientY, que es lo que Recharts necesita para resolver el índice
-// activo — fireEvent con coordenadas explícitas sí lo dispara de forma confiable.
+// Simulates a mousemove over the center of the chart's plot area. Recharts computes the
+// active point from native mousemove/mouseover events captured by RechartsWrapper, and
+// dispatches the state update (Redux) through requestAnimationFrame (internal throttle,
+// see mouseEventsMiddleware.js), which is why we need to wait a frame after the event.
+// userEvent.hover() (verified) isn't enough here: it only guarantees pointerenter/mouseenter,
+// not a mousemove with clientX/clientY, which is what Recharts needs to resolve the active
+// index; fireEvent with explicit coordinates does fire it reliably.
 async function hoverChartCenter(svg: SVGSVGElement) {
   const rect = svg.getBoundingClientRect();
   const clientX = rect.left + rect.width / 2;
@@ -77,8 +77,8 @@ const meta: Meta<typeof ChartContainer> = {
 export default meta;
 type Story = StoryObj<typeof ChartContainer>;
 
-// 1. BarChart: confirma que ChartContainer inyecta --color-<dataKey> según config, y que
-// ChartTooltipContent aparece con la superficie y los tokens correctos al hacer hover.
+// 1. BarChart: confirms that ChartContainer injects --color-<dataKey> according to config, and
+// that ChartTooltipContent appears with the right surface and tokens on hover.
 export const BarChartExample: Story = {
   render: () => (
     <ChartContainer config={chartConfig} className="max-w-2xl" style={testSize}>
@@ -88,9 +88,9 @@ export const BarChartExample: Story = {
         <YAxis tickLine={false} axisLine={false} />
         <ChartTooltip content={<ChartTooltipContent config={chartConfig} />} />
         <ChartLegend content={<ChartLegendContent config={chartConfig} />} />
-        {/* isAnimationActive=false solo en esta demo de test: Recharts anima la entrada
-        (altura 0 -> real) por default; sin esto, el hover puede caer sobre un <path>
-        todavía sin área durante el primer frame. No aplica a un consumidor real. */}
+        {/* isAnimationActive=false only in this test demo: Recharts animates the entry
+        (height 0 -> real) by default; without it, the hover can land on a <path>
+        that has no area yet during the first frame. Doesn't apply to a real consumer. */}
         <Bar
           dataKey="escritorio"
           fill="var(--color-escritorio)"
@@ -104,31 +104,31 @@ export const BarChartExample: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    // ChartContainer es el primer div del render (el que envuelve ResponsiveContainer).
+    // ChartContainer is the first div of the render (the one wrapping ResponsiveContainer).
     const container = canvasElement.querySelector('div') as HTMLElement;
     await expect(container.style.getPropertyValue('--color-escritorio')).toBe(
       'var(--color-primary)',
     );
     await expect(container.style.getPropertyValue('--color-movil')).toBe('var(--color-secondary)');
 
-    // ResponsiveContainer mide su tamaño real vía ResizeObserver de forma asíncrona: en el
-    // primer render (antes de que dispare) renderiza un div de 0x0 sin el chart adentro
-    // todavía. Hay que esperar a que aparezca el <svg> antes de buscar leyenda/tooltip.
+    // ResponsiveContainer measures its real size through ResizeObserver asynchronously: on the
+    // first render (before it fires) it renders a 0x0 div with no chart inside
+    // yet. We have to wait for the <svg> to appear before looking for the legend/tooltip.
     await waitFor(() =>
       expect(canvasElement.querySelector('svg.recharts-surface')).toBeInTheDocument(),
     );
     const svg = canvasElement.querySelector('svg.recharts-surface') as SVGSVGElement;
 
-    // La leyenda usa ChartLegendContent: labels de config, no los dataKeys crudos.
+    // The legend uses ChartLegendContent: config labels, not the raw dataKeys.
     await expect(canvas.getByText('Escritorio')).toBeInTheDocument();
     await expect(canvas.getByText('Móvil')).toBeInTheDocument();
 
     await hoverChartCenter(svg);
 
-    // El tooltip por default de Recharts no aparece en el DOM hasta el primer mousemove.
-    // ChartTooltipContent reemplaza ese contenido, montado dentro de .recharts-tooltip-wrapper
-    // (el label de cada serie se repite en la leyenda, por eso se busca acotado a ese wrapper
-    // en vez de con getAllByText a secas — el orden de ambos en el DOM no está garantizado).
+    // Recharts' default tooltip doesn't appear in the DOM until the first mousemove.
+    // ChartTooltipContent replaces that content, mounted inside .recharts-tooltip-wrapper
+    // (each series label is repeated in the legend, which is why it's searched within that
+    // wrapper instead of with a bare getAllByText; the order of both in the DOM isn't guaranteed).
     await waitFor(() =>
       expect(
         canvasElement.querySelector('.recharts-tooltip-wrapper')?.getAttribute('style'),
@@ -142,7 +142,7 @@ export const BarChartExample: Story = {
   },
 };
 
-// 2. LineChart: mismo tipo de verificación que BarChart, sobre un tipo de chart distinto.
+// 2. LineChart: same kind of check as BarChart, on a different chart type.
 export const LineChartExample: Story = {
   render: () => (
     <ChartContainer config={chartConfig} className="max-w-2xl" style={testSize}>
@@ -195,8 +195,8 @@ export const LineChartExample: Story = {
   },
 };
 
-// 3. AreaChart: alcance v1 (Bar/Line/Area). Smoke test — confirma render y CSS vars; el
-// comportamiento de tooltip/leyenda ya está cubierto en detalle por los dos casos de arriba.
+// 3. AreaChart: v1 scope (Bar/Line/Area). Smoke test: confirms render and CSS vars; the
+// tooltip/legend behavior is already covered in detail by the two cases above.
 export const AreaChartExample: Story = {
   render: () => (
     <ChartContainer config={chartConfig} className="max-w-2xl" style={testSize}>
@@ -235,9 +235,9 @@ export const AreaChartExample: Story = {
   },
 };
 
-// Config y data compartidos por PieChartExample y RingChartExample: 4 categorías, cada una
-// con su propio token — a diferencia de Bar/Line/Area (una entrada de config por *serie*),
-// acá es una entrada por *porción*.
+// Config and data shared by PieChartExample and RingChartExample: 4 categories, each one
+// with its own token. Unlike Bar/Line/Area (one config entry per *series*),
+// here it's one entry per *slice*.
 const teamConfig: ChartConfig = {
   design: { label: 'Design', color: 'primary' },
   engineering: { label: 'Engineering', color: 'secondary' },
@@ -252,13 +252,13 @@ const teamData = [
   { team: 'sales', headcount: 17 },
 ];
 
-// Simula un mousemove sobre una porción de Pie. A diferencia de Bar/Line/Area (tooltip tipo
-// "axis", disparado por mousemove en cualquier punto del área de trazado — ver
-// hoverChartCenter), PieChart usa defaultTooltipEventType "item" (verificado en
-// PieChart.js): cada <path class="recharts-pie-sector"> tiene su propio onMouseEnter, y el
-// dispatch a Redux es síncrono (sin el throttle por rAF de mouseMoveAction), pero requiere
-// mouseover — mouseenter nativo no dispara el onMouseEnter sintético de React (que en
-// realidad escucha mouseover/mouseout y calcula el enter/leave él mismo).
+// Simulates a mousemove over a Pie slice. Unlike Bar/Line/Area ("axis" tooltip,
+// fired by a mousemove anywhere in the plot area, see hoverChartCenter), PieChart uses
+// defaultTooltipEventType "item" (verified in PieChart.js): each
+// <path class="recharts-pie-sector"> has its own onMouseEnter, and the Redux dispatch is
+// synchronous (without mouseMoveAction's rAF throttle), but it requires mouseover: a native
+// mouseenter doesn't fire React's synthetic onMouseEnter (which actually listens to
+// mouseover/mouseout and computes enter/leave itself).
 async function hoverFirstPieSector(canvasElement: HTMLElement) {
   await waitFor(() =>
     expect(canvasElement.querySelector('.recharts-pie-sector')).toBeInTheDocument(),
@@ -269,9 +269,9 @@ async function hoverFirstPieSector(canvasElement: HTMLElement) {
   await new Promise((resolve) => requestAnimationFrame(resolve));
 }
 
-// 4. Pie: config por porción (no por serie). Confirma que ChartTooltipContent/
-// ChartLegendContent resuelven cada porción por `name`/`value`, no por `dataKey` (el mismo
-// string para todas las porciones de un Pie — ver comentario en ambos componentes).
+// 4. Pie: config per slice (not per series). Confirms that ChartTooltipContent/
+// ChartLegendContent resolve each slice by `name`/`value`, not by `dataKey` (the same
+// string for all the slices of a Pie; see the comment in both components).
 export const PieChartExample: Story = {
   render: () => (
     <ChartContainer config={teamConfig} className="max-w-md" style={testSize}>
@@ -297,13 +297,13 @@ export const PieChartExample: Story = {
     await expect(container.style.getPropertyValue('--color-product')).toBe('var(--color-accent)');
     await expect(container.style.getPropertyValue('--color-sales')).toBe('var(--color-success)');
 
-    // La leyenda usa las labels de config ("Design"), no los ids crudos de la data ("design").
+    // The legend uses the config labels ("Design"), not the raw ids of the data ("design").
     await expect(canvas.getByText('Design')).toBeInTheDocument();
     await expect(canvas.getByText('Engineering')).toBeInTheDocument();
 
     await hoverFirstPieSector(canvasElement);
 
-    // teamData[0] es "design" -> primer <Cell>/sector en el DOM.
+    // teamData[0] is "design" -> first <Cell>/sector in the DOM.
     await waitFor(() =>
       expect(
         canvasElement.querySelector('.recharts-tooltip-wrapper')?.getAttribute('style'),
@@ -318,19 +318,19 @@ export const PieChartExample: Story = {
   },
 };
 
-// 5. Ring (donut): Pie con innerRadius/outerRadius + texto central con el total.
-// "Ring" no es un componente nuevo — es composición directa de piezas ya re-exportadas.
+// 5. Ring (donut): Pie with innerRadius/outerRadius + center text with the total.
+// "Ring" isn't a new component: it's a direct composition of pieces already re-exported.
 //
-// El texto central NO usa <Label position="center">: probado contra un Pie real, no
-// renderiza nada. Causa (Label.js, comentario propio de Recharts citando su issue #6030):
-// para position="center" específicamente, Label resuelve el viewBox contra el contexto
-// *cartesiano* en vez del *polar* ("quick fix" documentado como tal en su propio código) —
-// un PieChart sin ejes nunca provee ese contexto cartesiano, así que queda undefined y el
-// componente no renderiza nada. Es un bug/quirk real de recharts@3.10.1, no un error de uso.
-// El fix es más simple que el original: un <text x="50%" y="50%"> crudo como hijo de <Pie>
-// (Pie renderiza sus children tal cual, sin filtrarlos — ver Pie.js). Los porcentajes se
-// resuelven contra el viewport del propio <svg>, sin JS ni conocer el tamaño del contenedor
-// — sigue siendo 100% SVG inline, ningún div posicionado por encima del chart.
+// The center text does NOT use <Label position="center">: tested against a real Pie, it
+// renders nothing. Cause (Label.js, Recharts' own comment citing its issue #6030):
+// for position="center" specifically, Label resolves the viewBox against the *cartesian*
+// context instead of the *polar* one (a "quick fix" documented as such in its own code); a
+// PieChart without axes never provides that cartesian context, so it stays undefined and the
+// component renders nothing. It's a real bug/quirk of recharts@3.10.1, not a usage error.
+// The fix is simpler than the original: a raw <text x="50%" y="50%"> as a child of <Pie>
+// (Pie renders its children as they are, without filtering them; see Pie.js). The percentages
+// resolve against the viewport of the <svg> itself, with no JS and without knowing the
+// container size; it's still 100% inline SVG, no positioned div on top of the chart.
 export const RingChartExample: Story = {
   render: () => {
     const total = teamData.reduce((sum, item) => sum + item.headcount, 0);
@@ -366,8 +366,8 @@ export const RingChartExample: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    // El total (28+42+19+17=106) se ve como texto central sin overlay absoluto: es un <tspan>
-    // real dentro del <svg> del chart, no un <div> posicionado encima.
+    // The total (28+42+19+17=106) shows as center text without an absolute overlay: it's a real
+    // <tspan> inside the chart's <svg>, not a <div> positioned on top.
     await waitFor(() => expect(canvas.getByText('106')).toBeInTheDocument());
     const svg = canvasElement.querySelector('svg.recharts-surface');
     await expect(svg).toContainElement(canvas.getByText('106'));

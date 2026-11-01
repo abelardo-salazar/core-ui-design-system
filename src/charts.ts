@@ -1,16 +1,16 @@
 'use client';
-// Segundo entry point del paquete, expuesto como subpath `./charts` (ver package.json
-// `exports`). Existe para sacar `Chart` del barrel raíz (src/index.ts): `Chart` arrastra
-// recharts, y recharts (ResponsiveContainer.js) llama `createContext(...)` a nivel de módulo,
-// lo cual explota en el entorno react-server de Next.js. Al plegarse dentro de dist/index.js,
-// eso volvía inseguro para Server Components al paquete entero — no solo a quien usa Chart.
-// Ver CHANGELOG.md [0.4.1].
+// Second entry point of the package, exposed as the `./charts` subpath (see package.json
+// `exports`). It exists to take `Chart` out of the root barrel (src/index.ts): `Chart` pulls
+// in recharts, and recharts (ResponsiveContainer.js) calls `createContext(...)` at module
+// level, which blows up in the Next.js react-server environment. Once folded into
+// dist/index.js, that made the whole package unsafe for Server Components, not just whoever
+// uses Chart. See CHANGELOG.md [0.4.1].
 //
-// A diferencia del barrel raíz (que necesita el tratamiento granular de 'use client' por
-// componente, vía CLIENT_ENTRY_POINTS), este entry es client-only completo: TODO lo que
-// exporta es cliente. La directiva 'use client' de arriba la reinyecta vite.config.ts en el
-// chunk publicado (dist/charts.js) — Rollup no conserva directivas de módulo en el output.
+// Unlike the root barrel (which needs the per-component 'use client' treatment through
+// CLIENT_ENTRY_POINTS), this entry is fully client-only: EVERYTHING it exports is client.
+// vite.config.ts re-injects the 'use client' directive above into the published chunk
+// (dist/charts.js); Rollup doesn't keep module directives in the output.
 //
-// No importa './index.css': los consumidores ya importan la hoja de estilos una sola vez
-// (ver README, "Setup Inicial") y Chart usa los mismos tokens del DS que el resto.
+// It doesn't import './index.css': consumers already import the stylesheet once (see
+// README, "Setup Inicial") and Chart uses the same DS tokens as everything else.
 export * from './components/Chart';

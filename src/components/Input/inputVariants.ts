@@ -10,15 +10,15 @@ export const inputVariants = cva(
         default: 'border-base-300 focus-visible:ring-primary focus-visible:border-primary',
         error: 'border-error focus-visible:ring-error text-error-focus placeholder:text-error/50',
       },
-      // Sizes (height and padding). md = 44px: alinea con Button md y el trigger de Select
-      // (misma familia de controles de formulario) — sm (32px) y lg (48px) no cambian.
+      // Sizes (height and padding). md = 44px: lines up with Button md and the Select trigger
+      // (same family of form controls); sm (32px) and lg (48px) don't change.
       size: {
         sm: 'h-8 px-2 text-xs',
         md: 'h-11 px-3',
         lg: 'h-12 px-4 text-base',
       },
-      // Reserva a la derecha el ancho del botón de limpiar (cuadrado del alto del input), así
-      // que se deriva del tamaño en compoundVariants en vez de un pr fijo.
+      // Reserves on the right the width of the clear button (a square of the input's height), so
+      // it's derived from the size in compoundVariants instead of a fixed pr.
       clearable: {
         true: '',
         false: '',

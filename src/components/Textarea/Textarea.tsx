@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { type VariantProps } from 'class-variance-authority';
-import { cn } from '../../utils/cn'; // Asegúrate que la ruta a utils/cn sea correcta
+import { cn } from '../../utils/cn'; // Make sure the path to utils/cn is correct
 import { textareaVariants } from './textareaVariants';
 
 export interface TextareaProps

@@ -2,13 +2,13 @@ import * as React from 'react';
 import { cn } from '../../utils/cn';
 
 export interface VisuallyHiddenProps extends React.HTMLAttributes<HTMLElement> {
-  /** Elemento a renderizar. Por defecto `span`; usar `div` para envolver contenido de bloque. */
+  /** Element to render. `span` by default; use `div` to wrap block content. */
   as?: React.ElementType;
 }
 
 /**
- * Oculta su contenido a la vista pero lo deja disponible para los lectores de pantalla
- * (`sr-only`). Por ejemplo, para un `SheetTitle` o `DialogTitle` que el diseño no muestra.
+ * Hides its content from view but keeps it available to screen readers
+ * (`sr-only`). For example, for a `SheetTitle` or `DialogTitle` the design doesn't show.
  */
 const VisuallyHidden = React.forwardRef<HTMLElement, VisuallyHiddenProps>(
   ({ className, as: Component = 'span', ...props }, ref) => (

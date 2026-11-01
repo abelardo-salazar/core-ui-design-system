@@ -1,12 +1,12 @@
-// Test de TIPOS puro: nada de este archivo se renderiza ni se ejecuta — existe solo para que
-// `tsc -b` lo compile y falle si la garantía de tipos de Badge se rompe. El nombre `.test-d.tsx`
-// es deliberado: `tsconfig.app.json` excluye `*.stories.tsx` y `*.test.tsx` (confirmado
-// corriendo `tsc -b` con una sonda rota en cada uno: en `.stories.tsx` no se detecta, en este
-// archivo sí), así que esos dos patrones NO sirven para esto. `npm run lint`/`test`/`build`
-// no lo tocan — es pura responsabilidad de `tsc -b`.
+// Pure TYPE test: nothing in this file is rendered or run; it only exists so that
+// `tsc -b` compiles it and fails if Badge's type guarantee breaks. The `.test-d.tsx` name
+// is deliberate: `tsconfig.app.json` excludes `*.stories.tsx` and `*.test.tsx` (confirmed by
+// running `tsc -b` with a broken probe in each: in `.stories.tsx` it isn't caught, in this
+// file it is), so those two patterns DON'T work for this. `npm run lint`/`test`/`build`
+// don't touch it; it's purely `tsc -b`'s responsibility.
 import { Badge } from './Badge';
 
-// --- Casos válidos: deben compilar sin error -------------------------------------------
+// --- Valid cases: they must compile without errors -----------------------------------------
 
 const staticDefault = <Badge>Default</Badge>;
 const staticSized = (
@@ -24,8 +24,8 @@ const interactiveButtonProps = (
     Submit
   </Badge>
 );
-// Atributos legítimos de un <div> (no exclusivos de <button>): la unión no debe volverse tan
-// estricta que también los bloquee.
+// Legitimate attributes of a <div> (not exclusive to <button>): the union must not become so
+// strict that it blocks them too.
 const staticDivAttrs = (
   <Badge
     title="tooltip nativo"
@@ -39,42 +39,42 @@ const staticDivAttrs = (
   </Badge>
 );
 
-// --- Casos inválidos: cada uno debe fallar; si alguno deja de fallar, "Unused
-// '@ts-expect-error' directive" (TS2578) rompe la compilación acá mismo. -------------------
+// --- Invalid cases: each one must fail; if one stops failing, "Unused
+// '@ts-expect-error' directive" (TS2578) breaks the compilation right here. -----------------
 
-// onClick sin interactive: el bug original de #34 (reproducido contra main antes de este fix
-// con la MISMA línea — compilaba).
-// @ts-expect-error onClick requiere interactive: true
+// onClick without interactive: the original bug of #34 (reproduced against main before this
+// fix with the SAME line; it compiled).
+// @ts-expect-error onClick requires interactive: true
 const missingInteractive = <Badge onClick={() => {}}>x</Badge>;
 
-// interactive=false explícito + onClick: ya fallaba antes de este fix, sigue debiendo fallar.
-// El directive va pegado a la línea <Badge, no al `const (` de arriba: @ts-expect-error solo
-// suprime un error en la línea siguiente, y acá el error lo reporta TS sobre la apertura del
-// elemento JSX, no sobre la asignación.
+// Explicit interactive=false + onClick: it already failed before this fix, it must still fail.
+// The directive goes right on the <Badge line, not on the `const (` above: @ts-expect-error only
+// suppresses an error on the next line, and here TS reports the error on the opening of the
+// JSX element, not on the assignment.
 const explicitlyNotInteractive = (
-  // @ts-expect-error onClick no existe cuando interactive es false
+  // @ts-expect-error onClick doesn't exist when interactive is false
   <Badge interactive={false} onClick={() => {}}>
     x
   </Badge>
 );
 
-// size inválido, cualquiera sea la rama.
-// @ts-expect-error "xl" no es un size de Badge
+// Invalid size, whatever the branch.
+// @ts-expect-error "xl" is not a Badge size
 const invalidSize = <Badge size="xl">x</Badge>;
 
-// disabled es exclusivo de <button>: sin interactive, HTMLAttributes<HTMLDivElement> ni
-// siquiera lo declara (no hace falta un Omit para esto, nunca estuvo ahí) — pero antes de
-// este fix, el chequeo de propiedades sobrantes contra la unión completa lo dejaba pasar.
-// @ts-expect-error disabled requiere interactive: true
+// disabled is exclusive to <button>: without interactive, HTMLAttributes<HTMLDivElement> doesn't
+// even declare it (no Omit is needed for this, it was never there), but before
+// this fix, the excess property check against the whole union let it through.
+// @ts-expect-error disabled requires interactive: true
 const disabledWithoutInteractive = <Badge disabled>x</Badge>;
 
-// type también es exclusivo de <button> — a diferencia de disabled/onClick, acá ya fallaba
-// contra la unión sin sobrecargas (verificado): su tipo es un literal angosto
-// ('button'|'reset'|'submit'), no uno amplio como boolean/MouseEventHandler, así que el
-// chequeo de propiedades sobrantes de la unión ya tropezaba por motivos propios. Se deja igual:
-// sigue siendo una garantía real que vale la pena fijar con un test, más allá de por qué
-// funcionaba antes.
-// @ts-expect-error type requiere interactive: true
+// type is also exclusive to <button>; unlike disabled/onClick, here it already failed
+// against the union without overloads (verified): its type is a narrow literal
+// ('button'|'reset'|'submit'), not a wide one like boolean/MouseEventHandler, so the
+// union's excess property check already tripped for its own reasons. It stays anyway:
+// it's still a real guarantee worth pinning with a test, regardless of why
+// it worked before.
+// @ts-expect-error type requires interactive: true
 const typeWithoutInteractive = <Badge type="submit">x</Badge>;
 
 void staticDefault;

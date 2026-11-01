@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 
-// Misma escala que Input (32 / 44 / 48, con su mismo padding horizontal y tamaño de texto) para
-// que un Combobox quede alineado con Input y con el trigger de Select en un formulario.
+// Same scale as Input (32 / 44 / 48, with the same horizontal padding and text size) so a
+// Combobox lines up with Input and the Select trigger in a form.
 export const comboboxTriggerVariants = cva(
   [
     'flex w-full items-center justify-between gap-2 rounded-btn border border-base-300 bg-base-100 text-left',
@@ -20,10 +20,11 @@ export const comboboxTriggerVariants = cva(
   },
 );
 
-// Contenedor del modo múltiple: Chips + botón. min-h en vez de h para que los Chips bajen de
-// línea. El padding horizontal de Input se reparte entre el contenedor (izquierda, antes del
-// primer Chip) y el botón, así el placeholder queda donde el texto de un Input del mismo size.
-// El anillo de foco del botón se dibuja en el contenedor, que es lo que se ve como campo.
+// Container of the multiple mode: Chips + button. min-h instead of h so the Chips wrap to a
+// new line. Input's horizontal padding is split between the container (left, before the
+// first Chip) and the button, so the placeholder sits where the text of an Input of the same
+// size would. The button's focus ring is drawn on the container, which is what looks like
+// the field.
 export const comboboxFieldVariants = cva(
   [
     'flex w-full flex-wrap items-center rounded-btn border border-base-300 bg-base-100',

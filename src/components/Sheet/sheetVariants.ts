@@ -1,9 +1,9 @@
 import { cva } from 'class-variance-authority';
 
-// flex flex-col activa el gap-4 entre header, body y footer. overflow-y-auto es el respaldo
-// para quien no use SheetBody (la ✕ se desplaza con el contenido en ese caso).
-// Safe area: cada borde que toca el viewport usa max(1.5rem, env(safe-area-inset-*)); el
-// borde interior queda en el p-6 de la base. Solo surte efecto con viewportFit: 'cover'.
+// flex flex-col turns on the gap-4 between header, body and footer. overflow-y-auto is the
+// fallback for those who don't use SheetBody (the ✕ moves with the content in that case).
+// Safe area: each edge that touches the viewport uses max(1.5rem, env(safe-area-inset-*)); the
+// inner edge keeps the base p-6. It only takes effect with viewportFit: 'cover'.
 export const sheetVariants = cva(
   'fixed z-50 flex flex-col gap-4 overflow-y-auto bg-base-100 p-6 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500 data-[state=open]:animate-in data-[state=closed]:animate-out',
   {
@@ -23,15 +23,15 @@ export const sheetVariants = cva(
   },
 );
 
-// Posición de la ✕. right-0.5/top-0.5 (2px) + el p-3.5 del botón dejan el ícono a 16px del
-// borde con un área táctil de 44x44. En los bordes que tocan el viewport se suma el safe area
-// completo, para que toda el área táctil quede fuera de la zona insegura.
+// Position of the ✕. right-0.5/top-0.5 (2px) + the button's p-3.5 leave the icon 16px from the
+// edge with a 44x44 touch area. On the edges that touch the viewport the full safe area is
+// added, so the whole touch area stays outside the unsafe zone.
 const closeTop = 'top-[calc(0.125rem_+_env(safe-area-inset-top))]';
 const closeRight = 'right-[calc(0.125rem_+_env(safe-area-inset-right))]';
 
 export const sheetCloseVariants = cva(
-  // ring-inset sin separación: el anillo se dibuja dentro del área táctil, así que el
-  // overflow-y-auto del panel no lo recorta.
+  // ring-inset without offset: the ring is drawn inside the touch area, so the panel's
+  // overflow-y-auto doesn't clip it.
   'absolute rounded-sm p-3.5 opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary disabled:pointer-events-none data-[state=open]:bg-base-200 data-[state=open]:text-base-content/50',
   {
     variants: {

@@ -26,8 +26,8 @@ export const Default: Story = {
     await expect(badge.className.split(' ')).toContain('bg-primary');
     await expect(badge.className.split(' ')).toContain('text-primary-content');
 
-    // sm (default): px-2.5 py-0.5 text-xs — ver story Sizes para las cuatro escalas y las
-    // alturas reales medidas en navegador.
+    // sm (default): px-2.5 py-0.5 text-xs; see the Sizes story for the four scales and the
+    // real heights measured in the browser.
     await expect(badge.className.split(' ')).toContain('px-2.5');
     await expect(badge.className.split(' ')).toContain('py-0.5');
   },
@@ -61,8 +61,8 @@ export const Outline: Story = {
   },
 };
 
-// 4. Destructive — interactive: true para poder verificar el hover real (compoundVariants
-// solo agrega esas clases cuando interactive=true; sin esto el badge no tiene hover alguno).
+// 4. Destructive, interactive: true so the real hover can be checked (compoundVariants
+// only adds those classes when interactive=true; without it the badge has no hover at all).
 export const Destructive: Story = {
   args: {
     children: 'Destructive',
@@ -78,18 +78,18 @@ export const Destructive: Story = {
       getComputedStyle(document.documentElement).getPropertyValue('--error-content'),
     ).toBe('#000000');
 
-    // Hover: mismo token que Button destructive (ver Button.stories.tsx) — --error-focus
-    // (fondo) es oscuro mientras --error (fondo base) es claro, así que el texto necesita
-    // su propio -focus-content en hover, distinto del -content del estado base. Vive en
-    // compoundVariants ({variant: 'destructive', interactive: true}), no en la variante de
-    // color sola — un Badge no-interactivo nunca debe mostrar hover.
+    // Hover: same token as Button destructive (see Button.stories.tsx); --error-focus
+    // (background) is dark while --error (base background) is light, so the text needs
+    // its own -focus-content on hover, different from the base state's -content. It lives in
+    // compoundVariants ({variant: 'destructive', interactive: true}), not in the color variant
+    // alone: a non-interactive Badge must never show a hover.
     await expect(badge.className.split(' ')).toContain('hover:bg-error-focus');
     await expect(badge.className.split(' ')).toContain('hover:text-error-focus-content');
     await expect(
       getComputedStyle(document.documentElement).getPropertyValue('--error-focus-content'),
     ).toBe('#ffffff');
 
-    // Dark mode invierte cuál color necesita más contraste.
+    // Dark mode flips which color needs more contrast.
     document.documentElement.classList.add('dark');
     await expect(
       getComputedStyle(document.documentElement).getPropertyValue('--error-focus-content'),
@@ -98,11 +98,11 @@ export const Destructive: Story = {
   },
 };
 
-// 5. Sizes — escala propia de Badge (no la de Button): compacta, pensada para una etiqueta de
-// estado, no un control. El fixture de vitest-browser no aplica utilidades de Tailwind ni hace
-// layout real (no se puede medir alto/ancho acá), así que esto verifica las clases; las alturas
-// reales (sm ≈ 22px, md ≈ 26px, lg ≈ 30px, icon = 24px exactos) se verificaron a mano en
-// Storybook con un navegador real, con A/B contra el default anterior (32px, ver CHANGELOG).
+// 5. Sizes: Badge's own scale (not Button's): compact, meant for a status label, not a
+// control. The vitest-browser fixture doesn't apply Tailwind utilities or do real layout
+// (height/width can't be measured here), so this checks the classes; the real heights
+// (sm ≈ 22px, md ≈ 26px, lg ≈ 30px, icon = exactly 24px) were checked by hand in
+// Storybook with a real browser, with an A/B against the previous default (32px, see CHANGELOG).
 export const Sizes: Story = {
   render: () => (
     <div className="flex items-center gap-2">
@@ -130,16 +130,17 @@ export const Sizes: Story = {
     await expect(lg.className.split(' ')).toContain('py-1');
     await expect(lg.className.split(' ')).toContain('text-sm');
 
-    // icon: cuadrado (size-6 = 24px), sin padding horizontal de texto.
+    // icon: square (size-6 = 24px), no horizontal text padding.
     const icon = canvas.getByText('9');
     await expect(icon.className.split(' ')).toContain('size-6');
     await expect(icon.className.split(' ')).not.toContain('px-2.5');
   },
 };
 
-// 6. Interactive: renderiza un <button> real (no un <div> con onClick) — foco por teclado,
-// Enter/Space y disabled nativos del navegador, sin que Badge sintetice ningún handler propio
-// (por eso sigue siendo server-safe: solo reenvía props, ver scripts/verify-client-directives.mjs).
+// 6. Interactive: renders a real <button> (not a <div> with onClick); keyboard focus,
+// Enter/Space and disabled native to the browser, without Badge synthesizing any handler of
+// its own (that's why it stays server-safe: it only forwards props, see
+// scripts/verify-client-directives.mjs).
 export const Interactive: Story = {
   args: {
     children: 'Interactive',
@@ -156,13 +157,13 @@ export const Interactive: Story = {
     await expect(badge.className.split(' ')).toContain('focus-visible:ring-primary');
     await expect(badge.className.split(' ')).toContain('hover:bg-primary-focus');
 
-    // Tab lo enfoca (es un <button> real, a diferencia de un <div> con onClick — nunca
-    // alcanzable por teclado).
+    // Tab focuses it (it's a real <button>, unlike a <div> with onClick, which is never
+    // reachable by keyboard).
     await userEvent.tab();
     await expect(badge).toHaveFocus();
 
-    // Click, Enter y Space disparan onClick exactamente una vez cada uno — comportamiento
-    // nativo del elemento <button>, Badge no agrega ningún handler de teclado propio.
+    // Click, Enter and Space fire onClick exactly once each: native behavior of the
+    // <button> element; Badge adds no keyboard handler of its own.
     await userEvent.click(badge);
     await expect(args.onClick).toHaveBeenCalledTimes(1);
 
@@ -174,7 +175,7 @@ export const Interactive: Story = {
   },
 };
 
-// 7. Interactive + disabled: disabled nativo del <button> — el click no debe disparar onClick.
+// 7. Interactive + disabled: native disabled of the <button>; the click must not fire onClick.
 export const InteractiveDisabled: Story = {
   args: {
     children: 'Disabled',
@@ -195,9 +196,9 @@ export const InteractiveDisabled: Story = {
   },
 };
 
-// 8. No interactivo (default): sigue siendo un <div>, sin ninguna clase de hover/cursor/foco —
-// antes vivían incondicionalmente en la base de badgeVariants (CSS muerto: un <div> sin
-// tabIndex nunca dispara :focus-visible), ahora son exclusivas de interactive=true.
+// 8. Non-interactive (default): still a <div>, without any hover/cursor/focus class;
+// they used to live unconditionally in the badgeVariants base (dead CSS: a <div> without
+// tabIndex never fires :focus-visible), now they're exclusive to interactive=true.
 export const NonInteractive: Story = {
   args: {
     children: 'Static',

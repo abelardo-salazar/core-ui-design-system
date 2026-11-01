@@ -13,26 +13,27 @@ import {
 } from '@tanstack/react-table';
 
 // -----------------------------------------------------------------------------
-// Features fijas de DataTable v1
+// Fixed features of DataTable v1
 // -----------------------------------------------------------------------------
-// Sorting + global filter + paginación, nada más (sin selección de filas, visibilidad de
-// columnas, resize, agrupación/agregación ni pinning para v1).
+// Sorting + global filter + pagination, nothing else (no row selection, column
+// visibility, resize, grouping/aggregation or pinning for v1).
 //
-// columnFilteringFeature está registrada acá SOLO porque los tipos de v9 la exigen como
-// prerequisito de globalFilteringFeature/filteredRowModel/filterFns (ver
-// FeatureSlotPrereqs en @tanstack/table-core/dist/types/TableFeatures.d.ts —
+// columnFilteringFeature is registered here ONLY because the v9 types require it as a
+// prerequisite of globalFilteringFeature/filteredRowModel/filterFns (see
+// FeatureSlotPrereqs in @tanstack/table-core/dist/types/TableFeatures.d.ts:
 // "globalFilteringFeature: 'columnFilteringFeature'", "filteredRowModel:
-// 'columnFilteringFeature'"). DataTable no expone ningún input de filtro por columna ni
-// toca columnFilters — el único filtro con UI es el global.
+// 'columnFilteringFeature'"). DataTable exposes no per-column filter input and doesn't
+// touch columnFilters; the only filter with a UI is the global one.
 //
-// Imports individuales de sortFn_*/filterFn_* en vez de los registries sortFns/filterFns
-// completos (deprecados en v9 a favor de tree-shaking, ver JSDoc de esos exports).
-// filterFn_includesString NO se registra en el slot filterFns: el filtro global por
-// default ('auto') resuelve a filterFn_includesString importándola directo dentro del
-// propio @tanstack/table-core (table_getGlobalAutoFilterFn), sin pasar por un registry —
-// registrarla acá sería un import sin uso real. sortFns sí hace falta: column_getAutoSortFn
-// busca por nombre en el registro para las 3 formas que puede autodetectar (texto plano,
-// alfanumérico mixto, fechas); sin registrarlas cae a sortFn_basic con un warning en dev.
+// Individual imports of sortFn_*/filterFn_* instead of the full sortFns/filterFns
+// registries (deprecated in v9 in favor of tree-shaking, see the JSDoc of those exports).
+// filterFn_includesString is NOT registered in the filterFns slot: the default global filter
+// ('auto') resolves to filterFn_includesString by importing it directly inside
+// @tanstack/table-core itself (table_getGlobalAutoFilterFn), without going through a
+// registry; registering it here would be an import with no real use. sortFns is needed:
+// column_getAutoSortFn looks up by name in the registry for the 3 forms it can auto-detect
+// (plain text, mixed alphanumeric, dates); without registering them it falls back to
+// sortFn_basic with a warning in dev.
 export const features = tableFeatures({
   rowSortingFeature,
   columnFilteringFeature,

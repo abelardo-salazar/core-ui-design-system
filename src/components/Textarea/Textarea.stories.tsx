@@ -9,7 +9,7 @@ const meta: Meta<typeof Textarea> = {
   argTypes: {
     disabled: { control: 'boolean' },
   },
-  // Decorador para darle un ancho fijo al contenedor en Storybook
+  // Decorator to give the container a fixed width in Storybook
   decorators: [
     (Story) => (
       <div className="w-87.5">
@@ -31,12 +31,12 @@ export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const textarea = canvas.getByPlaceholderText('Tell us about yourself...');
-    // Misma superficie "en reposo" que Input, para consistencia visual entre ambos campos.
+    // Same "resting" surface as Input, for visual consistency between both fields.
     await expect(textarea.className.split(' ')).toContain('bg-base-100');
   },
 };
 
-// 2. Con Error
+// 2. With Error
 export const WithError: Story = {
   args: {
     label: 'Comment',
@@ -46,10 +46,10 @@ export const WithError: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const label = canvas.getByText('Comment');
-    // text-error (#ef4444) da 3.76:1 sobre blanco, insuficiente para AA (4.5:1).
-    // text-error-focus (--palette-red-dark) sí cumple. El fixture de vitest-browser no expone
-    // las variables --color-* derivadas por @theme vía getComputedStyle, así que se prueba
-    // contra el custom property crudo (--error-focus) más las clases que lo consumen.
+    // text-error (#ef4444) gives 3.76:1 on white, not enough for AA (4.5:1).
+    // text-error-focus (--palette-red-dark) does pass. The vitest-browser fixture doesn't expose
+    // the --color-* variables derived by @theme through getComputedStyle, so it's tested
+    // against the raw custom property (--error-focus) plus the classes that use it.
     await expect(label.className.split(' ')).toContain('text-error-focus');
     await expect(label.className.split(' ')).not.toContain('text-base-content');
     await expect(getComputedStyle(document.documentElement).getPropertyValue('--error-focus')).toBe(
@@ -62,7 +62,7 @@ export const WithError: Story = {
   },
 };
 
-// 3. Con Helper Text
+// 3. With Helper Text
 export const WithHelperText: Story = {
   args: {
     label: 'Description',
@@ -71,7 +71,7 @@ export const WithHelperText: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const helper = canvas.getByText('Máximo 500 caracteres.');
-    // /50 daba 3.09:1 sobre blanco, insuficiente. /65 sí cumple 4.5:1.
+    // /50 gave 3.09:1 on white, not enough. /65 does pass 4.5:1.
     await expect(helper.className.split(' ')).toContain('text-base-content/65');
   },
 };

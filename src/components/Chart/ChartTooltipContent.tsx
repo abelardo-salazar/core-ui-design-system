@@ -7,17 +7,17 @@ export interface ChartTooltipContentProps extends Pick<
   'active' | 'payload' | 'label'
 > {
   className?: string;
-  /** Mismo config pasado a ChartContainer — resuelve label y color por dataKey. */
+  /** Same config passed to ChartContainer; resolves label and color by dataKey. */
   config: ChartConfig;
   hideLabel?: boolean;
   /** @default 'dot' */
   indicator?: 'dot' | 'line';
 }
 
-// Se usa vía <Tooltip content={<ChartTooltipContent config={chartConfig} />} /> de Recharts:
-// Recharts clona este elemento e inyecta active/payload/label en cada render (ver
-// renderContent en su Tooltip.js — cloneElement, no un componente aparte que uno instancia).
-// No tiene 'use client': no usa hooks, es puramente presentacional.
+// Used through Recharts' <Tooltip content={<ChartTooltipContent config={chartConfig} />} />:
+// Recharts clones this element and injects active/payload/label on each render (see
+// renderContent in its Tooltip.js: cloneElement, not a separate component you instantiate).
+// No 'use client': it uses no hooks, it's purely presentational.
 function ChartTooltipContent({
   active,
   payload,
@@ -32,9 +32,9 @@ function ChartTooltipContent({
   }
 
   return (
-    // Misma superficie flotante que Popover/DropdownMenu: bg-base-100, rounded-box,
-    // border-base-300, shadow-md. El tooltip default de Recharts (contentStyle inline con
-    // #fff/#ccc hardcodeados) no usa ningún token del DS y no responde a modo oscuro.
+    // Same floating surface as Popover/DropdownMenu: bg-base-100, rounded-box,
+    // border-base-300, shadow-md. Recharts' default tooltip (inline contentStyle with
+    // hardcoded #fff/#ccc) uses no DS token and doesn't respond to dark mode.
     <div
       className={cn(
         'grid min-w-32 gap-1.5 rounded-box border border-base-300 bg-base-100 px-2.5 py-1.5 text-xs shadow-md',
@@ -46,15 +46,15 @@ function ChartTooltipContent({
       ) : null}
       <div className="grid gap-1">
         {payload.map((entry, index) => {
-          // entry.name antes que entry.dataKey a propósito: para series cartesianas
-          // (Bar/Line/Area) ambos suelen coincidir (Recharts hace name = dataKey si no se
-          // pasa un `name` explícito, ver getTooltipNameProp en ChartUtils.js), pero para Pie
-          // dataKey es el mismo string en TODAS las porciones (el campo que indica el valor,
-          // ej. "value") — ahí la única key que distingue cada porción es `name` (resuelto
-          // por Recharts vía nameKey). Usar dataKey primero colapsaría todas las porciones de
-          // un Pie a una sola key inexistente en `config` (verificado con un Pie real: el
-          // payload trae dataKey:"value" repetido en cada entry, name:"design"/"engineering"
-          // distinto por entry).
+          // entry.name before entry.dataKey on purpose: for cartesian series
+          // (Bar/Line/Area) both usually match (Recharts sets name = dataKey if no
+          // explicit `name` is passed, see getTooltipNameProp in ChartUtils.js), but for Pie
+          // dataKey is the same string in ALL the slices (the field holding the value,
+          // e.g. "value"); there the only key that tells each slice apart is `name` (resolved
+          // by Recharts through nameKey). Using dataKey first would collapse all the slices of
+          // a Pie into a single key that doesn't exist in `config` (verified with a real Pie: the
+          // payload has dataKey:"value" repeated in every entry, name:"design"/"engineering"
+          // different per entry).
           const key = String(entry.name ?? entry.dataKey ?? index);
           const itemConfig = config[key];
           const itemLabel = itemConfig?.label ?? entry.name ?? key;

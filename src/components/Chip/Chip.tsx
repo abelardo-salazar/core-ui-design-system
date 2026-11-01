@@ -13,58 +13,59 @@ export interface ChipProps
   extends
     Omit<React.HTMLAttributes<HTMLSpanElement>, 'onSelect'>,
     VariantProps<typeof chipVariants> {
-  /** Toggle controlado. Junto con onPressedChange, activa el modo interactivo del cuerpo (Radix Toggle real). */
+  /** Controlled toggle. Together with onPressedChange, turns on the interactive mode of the body (a real Radix Toggle). */
   pressed?: boolean;
   /** Toggle no controlado. */
   defaultPressed?: boolean;
   onPressedChange?: (pressed: boolean) => void;
-  /** Si se pasa, agrega un botón de cierre (X) independiente del cuerpo del chip. */
+  /** If passed, adds a close button (X) independent of the chip body. */
   onRemove?: () => void;
-  /** Label accesible del botón de cierre. */
+  /** Accessible label of the close button. */
   removeLabel?: string;
   disabled?: boolean;
 }
 
-// Padding horizontal del cuerpo (span estático o Toggle). "right" solo se aplica cuando NO hay
-// botón de cierre: si lo hay, la separación entre el texto y el botón la sigue dando el gap-1
-// de la raíz, sin cambios — si el cuerpo también tuviera su propio pr, se duplicaría ese espacio.
-// Escala propia de Chip (no la de Button), proporcional al font-size de cada tamaño.
+// Horizontal padding of the body (static span or Toggle). "right" only applies when there is NO
+// close button: if there is one, the gap-1 of the root still provides the space between the text
+// and the button, unchanged; if the body also had its own pr, that space would double.
+// Chip's own scale (not Button's), proportional to the font-size of each size.
 const BODY_PADDING: Record<ChipSize, { left: string; right: string; vertical?: string }> = {
   sm: { left: 'pl-2.5', right: 'pr-2.5', vertical: 'py-0.5' },
   md: { left: 'pl-3', right: 'pr-3' },
   lg: { left: 'pl-4', right: 'pr-4' },
 };
 
-// sm: sin cambios respecto al botón de cierre actual (p-1.5 ya da el 24x24 de la spec de
-// Material para el ícono de borrar de un Chip). md/lg: solo ancho explícito — el alto NO se
-// fija (a diferencia de versiones anteriores de este archivo): una altura explícita (h-8/h-11)
-// no responde a items-stretch, así que el botón no se centraba con el Toggle y desbordaba el
-// borde inferior de la raíz por ~1px. Sin altura propia, se estira igual que el Toggle/body y
-// queda centrado — mismo mecanismo ya probado, no uno nuevo.
+// sm: unchanged from the current close button (p-1.5 already gives Material's 24x24 spec for
+// a Chip's delete icon). md/lg: explicit width only; the height is NOT set (unlike earlier
+// versions of this file): an explicit height (h-8/h-11) doesn't respond to items-stretch, so
+// the button wasn't centered with the Toggle and overflowed the root's bottom border by ~1px.
+// Without its own height it stretches just like the Toggle/body and stays centered: the same
+// mechanism already proven, not a new one.
 const CLOSE_BUTTON_SIZE: Record<ChipSize, string> = {
   sm: 'p-1.5',
   md: 'w-8',
   lg: 'w-11',
 };
 
-// Extiende el área de respuesta del botón de cierre hasta el borde EXTERIOR de la raíz (nunca
-// más allá de su propia caja visual, así que el anillo de foco no cambia) siguiendo la curva de
-// la píldora: rounded-r-full redondea solo las dos esquinas derechas con el mismo radio que la
-// raíz (en vez de un rectángulo cuyas esquinas quedan fuera de la silueta visible — un toque ahí,
-// antes de este fix, sí disparaba onRemove). Sin extensión a la izquierda: el gap-1 con el
-// cuerpo sigue sin responder a propósito.
-// sm reconstruye el padding histórico que la raíz reintroduce (rootDeadZoneRestore) — ese caso
-// deliberadamente NO llega al borde en sí (ver comentario ahí: "el borde de 1px es inevitable y
-// está bien" era la regla acordada para sm). md/lg sí llegan al borde — son tamaños nuevos, sin
-// compromiso histórico, y la tarea pide explícitamente que el borde de 1px responda ahí.
+// Extends the close button's hit area to the OUTER edge of the root (never beyond its own
+// visual box, so the focus ring doesn't change), following the pill's curve: rounded-r-full
+// rounds only the two right corners with the same radius as the root (instead of a rectangle
+// whose corners fall outside the visible silhouette; before this fix, a tap there did trigger
+// onRemove). No extension to the left: the gap-1 next to the body still doesn't respond, on
+// purpose.
+// sm rebuilds the historical padding that the root re-introduces (rootDeadZoneRestore); that
+// case deliberately does NOT reach the border itself (see the comment there: "the 1px border
+// is unavoidable and fine" was the rule agreed for sm). md/lg do reach the border: they are new
+// sizes, with no historical commitment, and the task explicitly asks for the 1px border to
+// respond there.
 const CLOSE_BUTTON_HIT_AREA: Record<ChipSize, string> = {
   sm: "relative after:content-[''] after:absolute after:rounded-r-full after:-top-0.5 after:-right-2.5 after:-bottom-0.5 after:left-0",
   md: "relative after:content-[''] after:absolute after:rounded-r-full after:-top-px after:-right-px after:-bottom-px after:left-0",
   lg: "relative after:content-[''] after:absolute after:rounded-r-full after:-top-px after:-right-px after:-bottom-px after:left-0",
 };
 
-// El ícono crece junto con el botón (no hay spec explícita para esto; es una decisión propia,
-// proporcional al tamaño de texto de cada escalón).
+// The icon grows with the button (there is no explicit spec for this; it's our own decision,
+// proportional to the text size of each step).
 const CLOSE_ICON_SIZE: Record<ChipSize, string> = {
   sm: 'h-3 w-3',
   md: 'h-3.5 w-3.5',
@@ -88,46 +89,46 @@ const Chip = React.forwardRef<HTMLSpanElement, ChipProps>(
     },
     ref,
   ) => {
-    // VariantProps admite `null` (semántica de cva para "sin variante"), además de `undefined`
-    // — un default en la desestructuración no cubre `null`, así que se resuelve acá.
+    // VariantProps allows `null` (cva semantics for "no variant") besides `undefined`; a
+    // default in the destructuring doesn't cover `null`, so it's resolved here.
     const size = sizeProp ?? 'sm';
 
-    // El cuerpo solo se vuelve interactivo (Toggle real) si el consumidor participa del
-    // protocolo de pressed/defaultPressed/onPressedChange. Sin eso, es texto plano.
+    // The body only becomes interactive (a real Toggle) if the consumer takes part in the
+    // pressed/defaultPressed/onPressedChange protocol. Without it, it's plain text.
     const isToggle =
       pressed !== undefined || defaultPressed !== undefined || onPressedChange !== undefined;
 
     const { left, right, vertical } = BODY_PADDING[size];
-    // El padding vive acá (no en la raíz) para que el hit box real del Toggle/span llene la
-    // píldora: antes, la raíz (no interactiva) tenía el padding y el Toggle de adentro medía
-    // 0 — tocar el "aire" alrededor del texto no hacía nada.
+    // The padding lives here (not on the root) so the real hit box of the Toggle/span fills the
+    // pill: before, the root (not interactive) had the padding and the Toggle inside measured
+    // 0, so tapping the "air" around the text did nothing.
     const bodyPadding = cn(left, !onRemove && right, vertical);
 
-    // sm con botón de cierre es el único caso donde la raíz SÍ necesita padding propio: es la
-    // única forma de reconstruir el alto/ancho histórico (30px / borde+10+texto+gap-1+24+10+borde)
-    // sin volver a inflar el cuerpo (que ya tiene su propio padding, correcto, para el caso sin
-    // botón). pr-2.5 reintroduce los 10px a la derecha del botón; py-0.5 reintroduce los 2px
-    // arriba/abajo — ambos eran espacio "muerto" en el PR #30 (la raíz dejó de tenerlo, y nadie
-    // lo heredó). El borde de 1px en sí queda deliberadamente fuera del área de respuesta en sm
-    // (es inevitable y está bien, acordado al restaurar este aspecto) — ver CLOSE_BUTTON_HIT_AREA.
+    // sm with a close button is the only case where the root DOES need its own padding: it's the
+    // only way to rebuild the historical height/width (30px / border+10+text+gap-1+24+10+border)
+    // without inflating the body again (which already has its own padding, correctly, for the case
+    // without a button). pr-2.5 re-introduces the 10px to the right of the button; py-0.5
+    // re-introduces the 2px above/below; both were "dead" space in PR #30 (the root stopped having
+    // it, and nobody inherited it). The 1px border itself is deliberately left out of the hit area
+    // in sm (it's unavoidable and fine, agreed when restoring this look); see CLOSE_BUTTON_HIT_AREA.
     const rootDeadZoneRestore = size === 'sm' && onRemove && 'py-0.5 pr-2.5';
 
-    // Extiende el área de respuesta del Toggle hasta el borde EXTERIOR de la raíz, solo
-    // verticalmente (inset-x-0: nunca invade el gap-1 ni la zona del botón de cierre) y con
-    // radio — mismo criterio que CLOSE_BUTTON_HIT_AREA pero en el borde IZQUIERDO de la píldora,
-    // donde vive el Toggle (sin el radio, las esquinas del rectángulo quedarían fuera de la
-    // silueta visible, el mismo problema que tenía el botón de cierre sin rounded-r-full).
-    // sm con botón de cierre: cubre la franja que rootDeadZoneRestore agranda (py-0.5) y que el
-    // Toggle, al estirarse solo al alto de la fila (24px), no alcanzaba por sí solo — sin botón
-    // de cierre, el Toggle ya llega exactamente al borde interior (nada que corregir), y el
-    // borde en sí queda fuera a propósito, igual que en el ✕ de sm.
-    // md/lg: cubre el borde en sí (1px) — con o sin botón de cierre al lado, el Toggle es un
-    // control real que debe alcanzar el tamaño táctil completo por su cuenta. CON botón de
-    // cierre, el extremo derecho del Toggle linda con el gap-1 (interior de la píldora): ahí
-    // rounded-l-full es correcto, solo la esquina izquierda es exterior. SIN botón de cierre, el
-    // extremo derecho del Toggle ES el extremo derecho de la píldora — las dos esquinas son
-    // exteriores, así que necesita rounded-full completo (si no, esas esquinas quedan cuadradas
-    // y responden en el hueco entre la curva y la esquina, fuera de la silueta visible).
+    // Extends the Toggle's hit area to the OUTER edge of the root, only vertically (inset-x-0:
+    // it never invades the gap-1 or the close button area) and with a radius: same criterion as
+    // CLOSE_BUTTON_HIT_AREA but on the LEFT edge of the pill, where the Toggle lives (without the
+    // radius, the rectangle's corners would fall outside the visible silhouette, the same problem
+    // the close button had without rounded-r-full).
+    // sm with a close button: covers the strip that rootDeadZoneRestore enlarges (py-0.5) and that
+    // the Toggle, stretching only to the row height (24px), didn't reach on its own; without a
+    // close button, the Toggle already reaches exactly the inner edge (nothing to fix), and the
+    // border itself is left out on purpose, same as the sm ✕.
+    // md/lg: covers the border itself (1px); with or without a close button next to it, the
+    // Toggle is a real control that must reach the full touch size on its own. WITH a close
+    // button, the right end of the Toggle borders the gap-1 (inside the pill): there
+    // rounded-l-full is correct, only the left corner is outer. WITHOUT a close button, the right
+    // end of the Toggle IS the right end of the pill: both corners are outer, so it needs a full
+    // rounded-full (otherwise those corners stay square and respond in the gap between the curve
+    // and the corner, outside the visible silhouette).
     const toggleHitArea =
       size === 'sm'
         ? onRemove &&
@@ -157,9 +158,9 @@ const Chip = React.forwardRef<HTMLSpanElement, ChipProps>(
     );
 
     return (
-      // El contenedor raíz NUNCA es interactivo por sí mismo: si fuera un <button> o el propio
-      // Toggle, y además tuviera el botón de cierre adentro, resultaría en <button><button/></button>,
-      // HTML inválido. Por eso compone dos elementos interactivos independientes como hermanos.
+      // The root container is NEVER interactive by itself: if it were a <button> or the Toggle
+      // itself, and also had the close button inside, it would result in <button><button/></button>,
+      // invalid HTML. That's why it composes two independent interactive elements as siblings.
       <span
         ref={ref}
         className={cn(chipVariants({ variant, size }), rootDeadZoneRestore, className)}

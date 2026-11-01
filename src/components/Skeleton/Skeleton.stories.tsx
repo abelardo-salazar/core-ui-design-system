@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect } from 'storybook/test';
 import { Skeleton } from './Skeleton';
-// Asumimos que estos componentes ya existen de la Fase 1
+// We assume these components already exist from Phase 1
 import { Card, CardContent, CardFooter, CardHeader } from '../Card';
 
 const meta = {
@@ -16,7 +16,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// 1. Uso básico (Primitiva)
+// 1. Basic use (Primitive)
 export const Default: Story = {
   args: {
     className: 'w-[100px] h-[20px] rounded-full',
@@ -26,11 +26,11 @@ export const Default: Story = {
     await expect(skeleton).toBeInTheDocument();
     await expect(skeleton.className.split(' ')).toContain('bg-base-300');
 
-    // Regresión: dark:bg-slate-200 llegó a ser idéntico al light mode. bg-base-300 depende de
-    // --base-300, que sí cambia entre temas. El fixture de vitest-browser no expone estilos
-    // derivados de utilidades de Tailwind vía getComputedStyle (mismo issue documentado en el
-    // story Destructive de Button), así que la aserción va sobre el token crudo definido
-    // directamente en :root / .dark, que sí es visible.
+    // Regression: dark:bg-slate-200 ended up identical to light mode. bg-base-300 depends on
+    // --base-300, which does change between themes. The vitest-browser fixture doesn't expose styles
+    // derived from Tailwind utilities through getComputedStyle (same issue documented in
+    // Button's Destructive story), so the assertion is on the raw token defined
+    // directly on :root / .dark, which is visible.
     const lightValue = getComputedStyle(document.documentElement).getPropertyValue('--base-300');
     document.documentElement.classList.add('dark');
     const darkValue = getComputedStyle(document.documentElement).getPropertyValue('--base-300');
@@ -40,32 +40,32 @@ export const Default: Story = {
   },
 };
 
-// 2. Patrón de Tarjeta de Carga (Best Practice)
-// Usamos la estructura real de la Card para que el layout no salte cuando cargue la data.
+// 2. Loading Card Pattern (Best Practice)
+// We use the real Card structure so the layout doesn't jump when the data loads.
 export const LoadingCard: Story = {
   render: () => (
     <Card className="w-[350px]">
       <CardHeader className="gap-2">
-        {/* Simulamos un Título */}
+        {/* Simulated title */}
         <Skeleton className="h-6 w-1/2" />
-        {/* Simulamos una Descripción */}
+        {/* Simulated description */}
         <Skeleton className="h-4 w-4/5" />
       </CardHeader>
 
       <CardContent>
-        {/* Simulamos un bloque de contenido o imagen */}
+        {/* Simulated content or image block */}
         <Skeleton className="h-[150px] w-full rounded-md" />
       </CardContent>
 
       <CardFooter>
-        {/* Simulamos un botón */}
+        {/* Simulated button */}
         <Skeleton className="h-11 w-28" />
       </CardFooter>
     </Card>
   ),
 };
 
-// 3. Patrón de Lista de Carga
+// 3. Loading List Pattern
 export const AvatarList: Story = {
   render: () => (
     <div className="flex flex-col space-y-6">

@@ -29,7 +29,7 @@ const invoices = [
   { invoice: 'INV003', status: 'Unpaid', method: 'Bank Transfer', amount: '$350.00' },
 ];
 
-// 1. Tabla estática completa (los 8 subcomponentes compuestos juntos)
+// 1. Full static table (the 8 subcomponents composed together)
 export const Simple: Story = {
   render: () => (
     <Table>
@@ -63,7 +63,7 @@ export const Simple: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    // Estructura semántica: los 8 subcomponentes componen una tabla accesible.
+    // Semantic structure: the 8 subcomponents compose an accessible table.
     const table = canvas.getByRole('table');
     await expect(table).toBeInTheDocument();
 
@@ -84,26 +84,26 @@ export const Simple: Story = {
     await expect(canvas.getByText('Total')).toBeInTheDocument();
     await expect(canvas.getByText('$750.00')).toBeInTheDocument();
 
-    // Table: el <table> va envuelto en un contenedor con overflow-x-auto (scroll horizontal
-    // responsabilidad del primitivo).
+    // Table: the <table> is wrapped in a container with overflow-x-auto (horizontal scroll is
+    // the primitive's responsibility).
     const wrapper = table.parentElement;
     await expect(wrapper?.className).toContain('overflow-x-auto');
 
-    // TableHead vs TableCell: jerarquía visual distinta (encabezado con más peso y menos
-    // opacidad de color secundario que la celda de datos).
+    // TableHead vs TableCell: different visual hierarchy (header with more weight and lower
+    // secondary color opacity than the data cell).
     await expect(columnHeaders[0].className).toContain('font-medium');
     await expect(columnHeaders[0].className).toContain('text-base-content/65');
     const firstDataCell = canvas.getByText('INV001');
     await expect(firstDataCell.className).not.toContain('text-base-content/65');
 
-    // TableRow: hover sutil con el mismo token de highlight que SelectItem/DropdownMenuItem.
+    // TableRow: subtle hover with the same highlight token as SelectItem/DropdownMenuItem.
     const firstDataRow = firstDataCell.closest('tr');
     await expect(firstDataRow?.className).toContain('hover:bg-base-200');
 
-    // className se mergea (no reemplaza) — mismo comportamiento verificado en el test de Card.
-    // twMerge además resuelve el conflicto de utilidades: 'text-left' (base) cede ante
-    // 'text-right' (className del consumidor) por ser la misma categoría, tal como se
-    // espera de cn().
+    // className is merged (not replaced), same behavior checked in the Card test.
+    // twMerge also resolves the utility conflict: 'text-left' (base) yields to
+    // 'text-right' (consumer className) since they are the same category, as
+    // expected from cn().
     const amountHeader = columnHeaders[3];
     const amountHeaderClasses = amountHeader.className.split(' ');
     await expect(amountHeaderClasses).toEqual(
@@ -113,7 +113,7 @@ export const Simple: Story = {
   },
 };
 
-// 2. Tabla mínima sin caption ni footer — uso standalone sin DataTable
+// 2. Minimal table without caption or footer: standalone use without DataTable
 export const WithoutFooterOrCaption: Story = {
   render: () => (
     <Table>
@@ -133,9 +133,9 @@ export const WithoutFooterOrCaption: Story = {
   ),
 };
 
-// 3. responsive=false (default): no debe agregar ninguna clase del modo tarjeta. Los
-// roles explícitos (table/row/columnheader/cell) están siempre, sea responsive o no —
-// son el baseline defensivo de accesibilidad, no algo que dependa de la prop.
+// 3. responsive=false (default): it must not add any card mode class. The explicit
+// roles (table/row/columnheader/cell) are always there, responsive or not; they are
+// the defensive accessibility baseline, not something that depends on the prop.
 export const NotResponsiveByDefault: Story = {
   render: () => (
     <Table>
@@ -157,10 +157,10 @@ export const NotResponsiveByDefault: Story = {
     const canvas = within(canvasElement);
     const table = canvas.getByRole('table');
 
-    // Sin responsive, ninguna clase max-lg (modo tarjeta) debe estar presente.
+    // Without responsive, no max-lg class (card mode) must be present.
     await expect(table.className).not.toContain('max-lg:');
 
-    // Roles explícitos presentes de todas formas (baseline defensivo de accesibilidad).
+    // Explicit roles present anyway (defensive accessibility baseline).
     await expect(table.getAttribute('role')).toBe('table');
     const dataRow = canvas.getByText('Ada Lovelace').closest('tr');
     await expect(dataRow?.getAttribute('role')).toBe('row');
@@ -171,11 +171,11 @@ export const NotResponsiveByDefault: Story = {
   },
 };
 
-// 4. responsive=true: agrega las clases del modo tarjeta (colapso por debajo de `lg`) y
-// respeta el data-label pasado a mano en TableCell para quien usa los primitivos directo
-// sin DataTable. Verificación de clases en headless — el colapso visual real por debajo
-// de 1024px y la accesibilidad del thead oculto se verifican en una ventana de Storybook
-// real (mismo criterio que el resto de tareas de este DS).
+// 4. responsive=true: adds the card mode classes (collapse below `lg`) and keeps
+// the data-label passed by hand in TableCell for those using the primitives directly
+// without DataTable. Class check in headless; the real visual collapse below
+// 1024px and the accessibility of the hidden thead are checked in a real Storybook
+// window (same criterion as the rest of this DS's tasks).
 export const Responsive: Story = {
   render: () => (
     <Table responsive>
@@ -197,8 +197,8 @@ export const Responsive: Story = {
     const canvas = within(canvasElement);
     const table = canvas.getByRole('table');
 
-    // Clases clave del modo tarjeta: blockify de table/thead/tbody/tr/td, thead oculto
-    // vía sr-only (no display:none) y la etiqueta de columna vía ::before + attr().
+    // Key card mode classes: blockify of table/thead/tbody/tr/td, thead hidden
+    // through sr-only (not display:none) and the column label through ::before + attr().
     await expect(table.className).toContain('max-lg:block');
     await expect(table.className).toContain('max-lg:[&_thead]:sr-only');
     await expect(table.className).toContain('max-lg:[&_tbody]:block');
@@ -209,11 +209,11 @@ export const Responsive: Story = {
       'max-lg:[&_td[data-label]]:before:content-[attr(data-label)]',
     );
 
-    // El thead sigue en el árbol de accesibilidad (sr-only, no display:none): sus
-    // columnheaders siguen siendo queryables por rol.
+    // The thead stays in the accessibility tree (sr-only, not display:none): its
+    // columnheaders can still be queried by role.
     await expect(canvas.getAllByRole('columnheader')).toHaveLength(2);
 
-    // data-label pasado a mano por el consumidor queda en el DOM tal cual.
+    // data-label passed by hand by the consumer stays in the DOM as is.
     const cell = canvas.getByText('Ada Lovelace');
     await expect(cell.getAttribute('data-label')).toBe('Nombre');
   },

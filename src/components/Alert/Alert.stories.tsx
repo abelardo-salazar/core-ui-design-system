@@ -115,7 +115,7 @@ export const ErrorVariant: Story = {
   },
 };
 
-// 5. Custom icon (override) — reemplaza el default sin tocar variant/role
+// 5. Custom icon (override): replaces the default without touching variant/role
 export const CustomIcon: Story = {
   args: {
     variant: 'success',
@@ -131,13 +131,13 @@ export const CustomIcon: Story = {
     const canvas = within(canvasElement);
     const alert = canvas.getByRole('status');
 
-    // El ícono default (CheckCircledIcon) no debe estar presente cuando hay override.
+    // The default icon (CheckCircledIcon) must not be present when there's an override.
     await expect(alert.querySelector('svg.text-success')).not.toBeInTheDocument();
     await expect(canvas.getByTestId('custom-icon')).toBeInTheDocument();
   },
 };
 
-// 6. Icon hidden explicitly (icon={null}) — distingue "no pasé icon" de "no quiero icon"
+// 6. Icon hidden explicitly (icon={null}): tells "I didn't pass icon" apart from "I don't want an icon"
 export const NoIcon: Story = {
   args: {
     icon: null,

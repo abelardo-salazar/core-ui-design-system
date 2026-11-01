@@ -13,11 +13,11 @@ export interface DatePickerProps {
   placeholder?: string;
   className?: string;
   disabled?: boolean;
-  /** Nombre accesible del popover del calendario. @default 'Choose date' */
+  /** Accessible name of the calendar popover. @default 'Choose date' */
   dialogLabel?: string;
   /**
-   * Locale de date-fns para la fecha del disparador y para el Calendar (meses y días de la
-   * semana). Sin locale, todo queda en inglés.
+   * date-fns locale for the trigger date and for the Calendar (months and weekdays).
+   * Without a locale, everything stays in English.
    */
   locale?: Locale;
 }
@@ -48,11 +48,11 @@ function DatePicker({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start" aria-label={dialogLabel}>
-        {/* DayPickerLocale extiende el Locale de date-fns (solo agrega `labels?`): se asigna
-            sin cast. Las etiquetas de navegación salen de `labels`, que los locales de date-fns
-            no traen.
-            defaultMonth (no month): PopoverContent se monta en cada apertura, así que el
-            calendario abre en el mes de la fecha elegida y la navegación sigue siendo libre. */}
+        {/* DayPickerLocale extends date-fns' Locale (it only adds `labels?`): it's assigned
+            without a cast. The navigation labels come from `labels`, which the date-fns locales
+            don't have.
+            defaultMonth (not month): PopoverContent mounts on each opening, so the
+            calendar opens on the month of the chosen date and navigation stays free. */}
         <Calendar
           mode="single"
           selected={date}

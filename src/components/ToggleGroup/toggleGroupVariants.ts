@@ -1,15 +1,15 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 
-// Misma escala de alto que Button (32 / 44 / 48) para que un ToggleGroup y un Button del mismo
-// size queden alineados en una fila: el contenedor del grupo no tiene padding vertical, así que
-// el grupo mide lo mismo que sus ítems.
+// Same height scale as Button (32 / 44 / 48) so a ToggleGroup and a Button of the same
+// size line up in a row: the group container has no vertical padding, so
+// the group measures the same as its items.
 export const toggleGroupItemVariants = cva(
   [
     'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-btn font-medium text-base-content/70 transition-colors cursor-pointer',
     'hover:text-base-content',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
     'disabled:pointer-events-none disabled:opacity-50',
-    // Mismo estado activo que TabsTrigger.
+    // Same active state as TabsTrigger.
     'data-[state=on]:bg-primary data-[state=on]:text-primary-content',
     '[&_svg]:size-4 [&_svg]:shrink-0',
   ],

@@ -4,28 +4,29 @@ import { cn } from '../../utils/cn';
 // -----------------------------------------------------------------------------
 // Table Root
 // -----------------------------------------------------------------------------
-// El <table> va envuelto en un contenedor con overflow-x-auto: una tabla de datos real
-// puede tener más columnas de las que entran en el viewport, y ese scroll horizontal es
-// responsabilidad del primitivo, no de quien lo consume. El ref se forwardea al <table>
-// (no al div wrapper) porque quien usa el componente espera un HTMLTableElement.
+// The <table> is wrapped in a container with overflow-x-auto: a real data table
+// can have more columns than fit in the viewport, and that horizontal scroll is the
+// primitive's responsibility, not the consumer's. The ref is forwarded to the <table>
+// (not to the wrapper div) because whoever uses the component expects an HTMLTableElement.
 //
-// role="table" explícito: cambiar el display de las celdas (ver `responsive` más abajo)
-// puede hacer que algunos navegadores le quiten el rol implícito de tabla al elemento.
-// Se agrega siempre, no solo cuando responsive=true, como baseline defensivo.
+// Explicit role="table": changing the display of the cells (see `responsive` below)
+// can make some browsers drop the element's implicit table role.
+// It's always added, not only when responsive=true, as a defensive baseline.
 //
-// responsive (opt-in, default false): por debajo del breakpoint `lg` (1024px) cada
-// TableRow colapsa de fila de tabla a tarjeta de bloque, y cada TableCell antepone su
-// data-label vía ::before. Es puro CSS (variante `max-lg:` de Tailwind, sin JS de por
-// medio) aplicado acá, en el root, con selectores descendientes (mismo patrón que ya usan
-// TableHeader/TableBody con `[&_tr]:...`) — así TableRow/TableHead/TableCell no necesitan
-// saber si están en modo responsive, sin Context ni props repetidas en cada subcomponente.
+// responsive (opt-in, default false): below the `lg` breakpoint (1024px) each
+// TableRow collapses from a table row to a block card, and each TableCell prepends its
+// data-label through ::before. It's pure CSS (Tailwind's `max-lg:` variant, no JS
+// involved) applied here, on the root, with descendant selectors (same pattern that
+// TableHeader/TableBody already use with `[&_tr]:...`), so TableRow/TableHead/TableCell don't
+// need to know whether they're in responsive mode, with no Context or props repeated in each
+// subcomponent.
 //
-// thead/tbody/tfoot también se "blockifican" bajo `lg`: si el <table> pasa a block pero
-// sus hijos siguen en display:table-row-group sin un ancestro table, el navegador genera
-// una caja de tabla anónima alrededor (CSS2.1 §17.2.1) y el layout de tarjetas no se
-// comporta como bloque real. El <thead> además queda oculto vía sr-only (no display:none)
-// para que TableHeader siga en el árbol de accesibilidad — misma clase que ya usa el resto
-// del DS (ver removeLabel en Chip) para texto visualmente oculto pero accesible.
+// thead/tbody/tfoot are also "blockified" below `lg`: if the <table> becomes block but
+// its children stay display:table-row-group without a table ancestor, the browser generates
+// an anonymous table box around them (CSS2.1 §17.2.1) and the card layout doesn't
+// behave like a real block. The <thead> is also hidden through sr-only (not display:none)
+// so TableHeader stays in the accessibility tree; the same class the rest of the DS
+// uses (see removeLabel in Chip) for visually hidden but accessible text.
 const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement> & { responsive?: boolean }
@@ -70,16 +71,16 @@ Table.displayName = 'Table';
 // -----------------------------------------------------------------------------
 // Table Header (<thead>)
 // -----------------------------------------------------------------------------
-// role="rowgroup" explícito por el mismo motivo que Table/TableRow/TableHead/TableCell:
-// Table `responsive` cambia el display de este elemento bajo `lg`, lo que en algunos
-// navegadores puede quitarle el rol implícito de grupo de filas.
+// Explicit role="rowgroup" for the same reason as Table/TableRow/TableHead/TableCell:
+// Table `responsive` changes this element's display below `lg`, which in some
+// browsers can drop its implicit row group role.
 const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  // Redundante hoy, pero es la compensación deliberada para cuando Table responsive cambia
-  // el display de este thead (ver comentario arriba de Table): el lint no puede saber que
-  // ese cambio existe.
+  // Redundant today, but it's the deliberate compensation for when Table responsive changes
+  // this thead's display (see the comment above Table): the linter can't know that
+  // change exists.
   // eslint-disable-next-line jsx-a11y/no-redundant-roles
   <thead
     ref={ref}
@@ -97,7 +98,7 @@ const TableBody = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  // eslint-disable-next-line jsx-a11y/no-redundant-roles -- ver mismo motivo en TableHeader
+  // eslint-disable-next-line jsx-a11y/no-redundant-roles -- same reason as in TableHeader
   <tbody
     ref={ref}
     role="rowgroup"
@@ -114,7 +115,7 @@ const TableFooter = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  // eslint-disable-next-line jsx-a11y/no-redundant-roles -- ver mismo motivo en TableHeader.
+  // eslint-disable-next-line jsx-a11y/no-redundant-roles -- same reason as in TableHeader.
   <tfoot
     ref={ref}
     role="rowgroup"
@@ -130,12 +131,12 @@ TableFooter.displayName = 'TableFooter';
 // -----------------------------------------------------------------------------
 // Table Row (<tr>)
 // -----------------------------------------------------------------------------
-// hover:bg-base-200 — mismo token de highlight que SelectItem/DropdownMenuItem usan en
-// focus:bg-base-200, pero en variante hover: una fila de tabla no es un ítem navegable por
-// teclado por defecto, el problema acá es legibilidad de la fila bajo el mouse en tablas largas.
+// hover:bg-base-200: same highlight token that SelectItem/DropdownMenuItem use in
+// focus:bg-base-200, but as a hover variant: a table row isn't a keyboard-navigable item
+// by default; the issue here is the readability of the row under the mouse in long tables.
 //
-// role="row" explícito por el mismo motivo que el resto de los primitivos: Table
-// `responsive` cambia el display de este elemento bajo `lg`.
+// Explicit role="row" for the same reason as the rest of the primitives: Table
+// `responsive` changes this element's display below `lg`.
 const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTMLTableRowElement>>(
   ({ className, ...props }, ref) => (
     <tr
@@ -149,13 +150,13 @@ const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTML
 TableRow.displayName = 'TableRow';
 
 // -----------------------------------------------------------------------------
-// Table Head (<th>) — celda de encabezado
+// Table Head (<th>), header cell
 // -----------------------------------------------------------------------------
-// font-medium + text-base-content/65: mismo criterio de jerarquía de texto secundaria que
-// helperText/Label (Input.tsx) — más peso que la celda de datos, menos opacidad de color.
+// font-medium + text-base-content/65: same secondary text hierarchy criterion as
+// helperText/Label (Input.tsx): more weight than the data cell, lower color opacity.
 //
-// role="columnheader" explícito (el rol implícito real de un <th> dentro de una tabla, no
-// "cell") por el mismo motivo que el resto de los primitivos.
+// Explicit role="columnheader" (the real implicit role of a <th> inside a table, not
+// "cell") for the same reason as the rest of the primitives.
 const TableHead = React.forwardRef<
   HTMLTableCellElement,
   React.ThHTMLAttributes<HTMLTableCellElement>
@@ -170,20 +171,20 @@ const TableHead = React.forwardRef<
 TableHead.displayName = 'TableHead';
 
 // -----------------------------------------------------------------------------
-// Table Cell (<td>) — celda de datos
+// Table Cell (<td>), data cell
 // -----------------------------------------------------------------------------
-// role="cell" explícito por el mismo motivo que el resto de los primitivos.
+// Explicit role="cell" for the same reason as the rest of the primitives.
 //
-// data-label opcional: quien use los primitivos directo (sin DataTable) en un Table
-// responsive lo pasa a mano para que Table pinte la etiqueta de columna vía ::before por
-// debajo de `lg` (DataTable la autogenera a partir del header de cada columna).
+// Optional data-label: whoever uses the primitives directly (without DataTable) in a
+// responsive Table passes it by hand so Table draws the column label through ::before
+// below `lg` (DataTable generates it from each column's header).
 const TableCell = React.forwardRef<
   HTMLTableCellElement,
   React.TdHTMLAttributes<HTMLTableCellElement> & { 'data-label'?: string }
 >(({ className, ...props }, ref) => (
-  // El plugin trata <td> como "interactivo" por su mapeo a gridcell; acá es un rol de
-  // tabla simple ("cell"), y es la compensación deliberada para cuando Table responsive
-  // cambia el display de esta celda (ver comentario arriba de Table).
+  // The plugin treats <td> as "interactive" because of its mapping to gridcell; here it's a
+  // plain table role ("cell"), and it's the deliberate compensation for when Table responsive
+  // changes this cell's display (see the comment above Table).
   <td
     ref={ref}
     // eslint-disable-next-line jsx-a11y/no-interactive-element-to-noninteractive-role

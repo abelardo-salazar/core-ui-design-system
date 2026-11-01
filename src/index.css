@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
 @import 'tailwindcss';
-/* Hoja de estilos para consumidores sin Tailwind (./style.css): fuente + Tailwind + el DS.
-   Los tokens y las capas base viven en tailwind.css. */
+/* Stylesheet for consumers without Tailwind (./style.css): font + Tailwind + the DS.
+   The tokens and base layers live in tailwind.css. */
 @import './tailwind.css';

@@ -9,10 +9,10 @@ export interface ProgressRingProps
     VariantProps<typeof progressRingVariants> {
   value: number;
   max?: number;
-  /** Diámetro del anillo en px. */
+  /** Ring diameter in px. */
   size?: number;
   strokeWidth?: number;
-  /** Muestra el porcentaje centrado dentro del anillo. Opt-in: a tamaños pequeños el label no cabe. */
+  /** Shows the percentage centered inside the ring. Opt-in: at small sizes the label doesn't fit. */
   showValueLabel?: boolean;
 }
 

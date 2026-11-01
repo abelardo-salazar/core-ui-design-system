@@ -6,10 +6,10 @@ import { AspectRatio } from './AspectRatio';
 import { Image } from './Image';
 import { Chip } from './Chip';
 
-// Ejemplo compositivo (Examples/*), no un componente nuevo del DS: valida que Card,
-// AspectRatio, Image y Chip —las piezas nuevas de la sesión de Bienestar + Nutrición +
-// Recetario— se combinan sin fricción. Mismo tipo de story que FormDemo.stories.tsx
-// (composición suelta en src/components/, no una carpeta de componente propia).
+// Compositional example (Examples/*), not a new DS component: checks that Card,
+// AspectRatio, Image and Chip (the new pieces from the Wellness + Nutrition +
+// Recipe book session) combine without friction. Same kind of story as FormDemo.stories.tsx
+// (a loose composition in src/components/, not a component folder of its own).
 const meta: Meta = {
   title: 'Examples/RecipeCard',
   parameters: { layout: 'centered' },
@@ -17,8 +17,8 @@ const meta: Meta = {
 
 export default meta;
 
-// PNG 1x1 embebido — mismo criterio aplicado en el fix del flake de Image.stories.tsx:
-// sin dependencia de red externa en ningún story nuevo de acá en adelante.
+// Embedded 1x1 PNG; same criterion applied in the fix for Image.stories.tsx's flake:
+// no dependency on an external network in any new story from here on.
 const TINY_PNG =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
 
@@ -72,10 +72,10 @@ const RecipeCardDemo = () => {
   );
 };
 
-// Smoke test: la composición completa monta sin errores, Image carga dentro de
-// AspectRatio/Card sin romper el layout, y togglear un Chip no afecta al resto de las
-// piezas. No repite las aserciones exhaustivas que Card/AspectRatio/Image/Chip ya tienen
-// en sus propios archivos de stories.
+// Smoke test: the full composition mounts without errors, Image loads inside
+// AspectRatio/Card without breaking the layout, and toggling a Chip doesn't affect the rest of the
+// pieces. It doesn't repeat the exhaustive assertions that Card/AspectRatio/Image/Chip already have
+// in their own story files.
 export const RecipeCard: StoryObj = {
   render: () => <RecipeCardDemo />,
   play: async ({ canvasElement }) => {
@@ -85,7 +85,7 @@ export const RecipeCard: StoryObj = {
       canvas.getByRole('heading', { name: 'Bowl de quinoa con vegetales' }),
     ).toBeInTheDocument();
 
-    // Ciclo skeleton -> loaded de Image dentro de AspectRatio: mismo patrón de espera que
+    // Image's skeleton -> loaded cycle inside AspectRatio: same waiting pattern as
     // Image.stories.tsx LoadsSuccessfully.
     const img = canvas.getByAltText('Bowl de quinoa con vegetales');
     await waitFor(() => expect(img.complete && img.naturalWidth > 0).toBe(true));
@@ -95,7 +95,7 @@ export const RecipeCard: StoryObj = {
     await expect(vegetarianChip).toHaveAttribute('data-state', 'on');
     await expect(quickChip).toHaveAttribute('data-state', 'off');
 
-    // Interacción cruzada: togglear un Chip no rompe el layout de Card/AspectRatio/Image.
+    // Cross interaction: toggling a Chip doesn't break the Card/AspectRatio/Image layout.
     await userEvent.click(quickChip);
     await expect(quickChip).toHaveAttribute('data-state', 'on');
     await expect(vegetarianChip).toHaveAttribute('data-state', 'on');

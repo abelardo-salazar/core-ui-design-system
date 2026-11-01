@@ -14,7 +14,7 @@ const meta: Meta<typeof Input> = {
     },
     disabled: { control: 'boolean' },
   },
-  // Decorador para darle un ancho fijo al contenedor en Storybook
+  // Decorator to give the container a fixed width in Storybook
   decorators: [
     (Story) => (
       <div className="w-87.5">
@@ -37,12 +37,12 @@ export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const input = canvas.getByPlaceholderText('name@example.com');
-    // El campo debe usar la superficie "en reposo" del DS, no el tono de hover/estado.
+    // The field must use the DS "resting" surface, not the hover/state tone.
     await expect(input.className.split(' ')).toContain('bg-base-100');
   },
 };
 
-// 2. Con Error
+// 2. With Error
 export const WithError: Story = {
   args: {
     label: 'Username',
@@ -52,10 +52,10 @@ export const WithError: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const label = canvas.getByText('Username');
-    // text-error (#ef4444) da 3.76:1 sobre blanco, insuficiente para AA (4.5:1).
-    // text-error-focus (--palette-red-dark) sí cumple. El fixture de vitest-browser no expone
-    // las variables --color-* derivadas por @theme vía getComputedStyle, así que se prueba
-    // contra el custom property crudo (--error-focus) más las clases que lo consumen.
+    // text-error (#ef4444) gives 3.76:1 on white, not enough for AA (4.5:1).
+    // text-error-focus (--palette-red-dark) does pass. The vitest-browser fixture doesn't expose
+    // the --color-* variables derived by @theme through getComputedStyle, so it's tested
+    // against the raw custom property (--error-focus) plus the classes that use it.
     await expect(label.className.split(' ')).toContain('text-error-focus');
     await expect(label.className.split(' ')).not.toContain('text-base-content');
     await expect(getComputedStyle(document.documentElement).getPropertyValue('--error-focus')).toBe(
@@ -71,7 +71,7 @@ export const WithError: Story = {
   },
 };
 
-// 3. Con Helper Text
+// 3. With Helper Text
 export const WithHelperText: Story = {
   args: {
     label: 'Password',
@@ -81,17 +81,17 @@ export const WithHelperText: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const helper = canvas.getByText('Debe tener al menos 8 caracteres.');
-    // /50 daba 3.09:1 sobre blanco, insuficiente. /65 sí cumple 4.5:1.
+    // /50 gave 3.09:1 on white, not enough. /65 does pass 4.5:1.
     await expect(helper.className.split(' ')).toContain('text-base-content/65');
   },
 };
 
-// 4. Con Iconos
+// 4. With Icons
 export const WithIcons: Story = {
   args: {
     label: 'Search',
     placeholder: 'Search products...',
-    // Simulación de icono SVG
+    // Simulated SVG icon
     startIcon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -109,7 +109,7 @@ export const WithIcons: Story = {
     ),
   },
   play: async ({ canvasElement }) => {
-    // Los íconos son decorativos: su contenedor no se anuncia.
+    // The icons are decorative: their container isn't announced.
     const svg = canvasElement.querySelector('svg');
     await expect(svg?.parentElement).toHaveAttribute('aria-hidden', 'true');
   },
@@ -124,8 +124,8 @@ export const Disabled: Story = {
   },
 };
 
-// 6. Clearable (no controlado): el botón vacía el campo vía evento nativo, así que el onChange
-// del consumidor corre igual que si el usuario hubiera borrado a mano.
+// 6. Clearable (uncontrolled): the button clears the field through a native event, so the
+// consumer's onChange runs just as if the user had deleted by hand.
 export const Clearable: Story = {
   args: {
     label: 'Search',
@@ -140,15 +140,15 @@ export const Clearable: Story = {
     const input = canvas.getByLabelText('Search') as HTMLInputElement;
     const button = canvas.getByRole('button', { name: 'Clear' });
 
-    // Visibilidad solo por CSS: el input es el peer y el botón se oculta con :placeholder-shown.
-    // El fixture headless no aplica Tailwind; el ocultamiento real se verifica en Storybook.
+    // Visibility through CSS only: the input is the peer and the button hides with :placeholder-shown.
+    // The headless fixture doesn't apply Tailwind; the real hiding is checked in Storybook.
     await expect(input.className.split(' ')).toContain('peer');
     await expect(button.className.split(' ')).toContain('peer-placeholder-shown:hidden');
     await expect(button).toHaveAttribute('type', 'button');
-    // Padding derecho = ancho del botón (md = 44px), no el pr-10! de endIcon.
+    // Right padding = button width (md = 44px), not endIcon's pr-10!.
     await expect(input.className.split(' ')).toContain('pr-11');
     await expect(input.className.split(' ')).not.toContain('pr-10!');
-    // Las props propias no llegan al DOM.
+    // The component's own props don't reach the DOM.
     await expect(input).not.toHaveAttribute('clearable');
     await expect(input).not.toHaveAttribute('clearlabel');
 
@@ -178,7 +178,7 @@ function ControlledClearable({ onChange, onClear }: { onChange: () => void; onCl
   );
 }
 
-// 7. Clearable controlado: el estado del consumidor se vacía por su propio onChange.
+// 7. Controlled clearable: the consumer's state is cleared by its own onChange.
 export const ClearableControlled: Story = {
   args: { onChange: fn(), onClear: fn() },
   render: (args) => (
@@ -190,7 +190,7 @@ export const ClearableControlled: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     const input = canvas.getByLabelText('Search') as HTMLInputElement;
-    // Sin placeholder del consumidor se pone " " para que exista :placeholder-shown.
+    // Without a consumer placeholder, " " is set so :placeholder-shown exists.
     await expect(input).toHaveAttribute('placeholder', ' ');
     await expect(input.className.split(' ')).toContain('pr-8');
 
@@ -202,7 +202,7 @@ export const ClearableControlled: Story = {
   },
 };
 
-// 8. Clearable con type="search" en lg: se oculta la ✕ nativa para no duplicarla.
+// 8. Clearable with type="search" in lg: the native ✕ is hidden so it isn't duplicated.
 export const ClearableSearch: Story = {
   args: {
     label: 'Search',
@@ -220,7 +220,7 @@ export const ClearableSearch: Story = {
   },
 };
 
-// 9. Sin botón con disabled ni readOnly.
+// 9. No button with disabled or readOnly.
 export const ClearableDisabledReadOnly: Story = {
   render: () => (
     <div className="flex flex-col gap-4">

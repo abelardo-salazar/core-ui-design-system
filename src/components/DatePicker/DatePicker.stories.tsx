@@ -2,7 +2,7 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, userEvent, within } from 'storybook/test';
 import { es } from 'date-fns/locale';
-// Desde el subpath ./locale del DS (src/locale.ts), como lo importa el consumidor.
+// From the DS ./locale subpath (src/locale.ts), the way the consumer imports it.
 import { es as dayPickerEs } from '../../locale';
 import { DatePicker } from './DatePicker';
 
@@ -17,8 +17,8 @@ const meta: Meta<typeof DatePicker> = {
 export default meta;
 type Story = StoryObj<typeof DatePicker>;
 
-// DatePicker es controlado (sin estado interno): el consumidor maneja `date`/`onDateChange`,
-// igual que se haría en una app real.
+// DatePicker is controlled (no internal state): the consumer handles `date`/`onDateChange`,
+// as one would in a real app.
 function ControlledDatePicker() {
   const [date, setDate] = React.useState<Date | undefined>(undefined);
   return <DatePicker date={date} onDateChange={setDate} />;
@@ -38,8 +38,8 @@ export const Default: Story = {
 
     const content = await body.findByRole('dialog', { name: 'Choose date' });
 
-    // Elegimos un día visible dentro del mes actual (evitamos días "outside"
-    // para no depender de qué día es "hoy" al correr el test).
+    // We pick a visible day within the current month (we avoid "outside" days
+    // so we don't depend on which day is "today" when running the test).
     const dayButtons = within(content)
       .getAllByRole('button')
       .filter(
@@ -49,20 +49,20 @@ export const Default: Story = {
     const targetDay = dayButtons[Math.min(10, dayButtons.length - 1)];
     await userEvent.click(targetDay);
 
-    // Al seleccionar, el trigger debe reflejar la fecha formateada (ya no el placeholder).
+    // On selecting, the trigger must show the formatted date (no longer the placeholder).
     await expect(trigger).not.toHaveTextContent('Pick a date');
-    // Sin locale, date-fns formatea en inglés (PPP: "October 11th, 2026").
+    // Without a locale, date-fns formats in English (PPP: "October 11th, 2026").
     await expect(trigger).toHaveTextContent(/^[A-Z][a-z]+ \d{1,2}(st|nd|rd|th), \d{4}$/);
 
-    // El Popover no reimplementa su propio manejo de apertura/cierre: sigue abierto tras seleccionar.
+    // The Popover doesn't reimplement its own open/close handling: it stays open after selecting.
     await expect(body.getByRole('dialog')).toBeInTheDocument();
   },
 };
 
-// 2. Locale español de date-fns: la fecha del disparador, el mes y los días de la semana
-// salen en español; dialogLabel cambia el nombre accesible del popover. Las etiquetas de
-// navegación del calendario quedan en inglés: DayPicker las toma de `locale.labels`, que los
-// locales de date-fns no traen (ver la story siguiente).
+// 2. date-fns Spanish locale: the trigger date, the month and the weekdays
+// come out in Spanish; dialogLabel changes the popover's accessible name. The calendar's
+// navigation labels stay in English: DayPicker takes them from `locale.labels`, which the
+// date-fns locales don't have (see the next story).
 export const SpanishLocale: Story = {
   render: () => <DatePicker date={new Date(2026, 0, 15)} locale={es} dialogLabel="Elegir fecha" />,
   play: async ({ canvasElement }) => {
@@ -71,9 +71,9 @@ export const SpanishLocale: Story = {
 
     const content = await within(document.body).findByRole('dialog', { name: 'Elegir fecha' });
     const caption = within(content).getByRole('grid').getAttribute('aria-label');
-    // Abre en el mes de la fecha elegida, no en el actual.
+    // Opens on the month of the chosen date, not the current one.
     await expect(caption).toBe('enero 2026');
-    // DayPicker oculta la fila de días de la semana al árbol de accesibilidad: consulta al DOM.
+    // DayPicker hides the weekday row from the accessibility tree: query the DOM.
     const weekdays = Array.from(content.querySelectorAll('th'), (th) => th.textContent);
     await expect(weekdays).toEqual(['lu', 'ma', 'mi', 'ju', 'vi', 'sá', 'do']);
 
@@ -86,8 +86,8 @@ export const SpanishLocale: Story = {
   },
 };
 
-// 3. Locale español de DayPicker: es un Locale de date-fns con `labels` agregadas, así que
-// DatePicker lo acepta igual y también traduce las etiquetas de navegación.
+// 3. DayPicker Spanish locale: it's a date-fns Locale with `labels` added, so
+// DatePicker accepts it the same way and also translates the navigation labels.
 export const SpanishLocaleWithDayPickerLabels: Story = {
   render: () => <DatePicker date={new Date(2026, 0, 15)} locale={dayPickerEs} />,
   play: async ({ canvasElement }) => {

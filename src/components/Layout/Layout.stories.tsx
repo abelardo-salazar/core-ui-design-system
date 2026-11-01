@@ -20,9 +20,9 @@ export const PageExample: StoryObj = {
     <div className="min-h-screen bg-base-100 relative">
       {/* 2. Header Simulation */}
       <header className="border-b border-base-300 py-4">
-        {/* 1. Accessibility First. Posicionado absolute (ver SkipToContent.tsx), su lugar en
-            el DOM no afecta el layout visual; vive en el header para no quedar fuera de
-            cualquier landmark (axe: region). */}
+        {/* 1. Accessibility First. Positioned absolute (see SkipToContent.tsx), its place in
+            the DOM doesn't affect the visual layout; it lives in the header so it isn't left outside
+            any landmark (axe: region). */}
         <SkipToContent />
         <Container className="flex items-center justify-between">
           <Heading level="h4">My App</Heading>
@@ -52,7 +52,7 @@ export const PageExample: StoryObj = {
 
           <div className="grid md:grid-cols-3 gap-6">
             <div className="md:col-span-2 space-y-4">
-              {/* level mantiene el tamaño visual h3; as corrige el salto h1->h3 (axe: heading-order) */}
+              {/* level keeps the h3 visual size; as fixes the h1->h3 jump (axe: heading-order) */}
               <Heading level="h3" as="h2">
                 Main Area
               </Heading>
@@ -89,24 +89,24 @@ export const PageExample: StoryObj = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    // axe: heading-order — "Main Area"/"Sidebar" saltaban de h1 a h3 sin pasar por h2.
+    // axe: heading-order; "Main Area"/"Sidebar" jumped from h1 to h3 without going through h2.
     await expect(
       canvas.getByRole('heading', { level: 1, name: 'Dashboard Layout' }),
     ).toBeInTheDocument();
     const h2s = canvas.getAllByRole('heading', { level: 2 });
     await expect(h2s.map((h) => h.textContent)).toEqual(['Main Area', 'Sidebar']);
-    // level sigue siendo h3 visualmente (mismo tamaño de fuente que antes).
+    // level is still h3 visually (same font size as before).
     await expect(h2s[0].className).toContain('text-2xl');
 
-    // axe: region — el header y el skip-link quedaban fuera de cualquier landmark.
+    // axe: region; the header and the skip link were outside any landmark.
     const banner = canvas.getByRole('banner');
     await expect(within(banner).getByText('My App')).toBeInTheDocument();
     await expect(within(banner).getByRole('link', { name: 'Skip to content' })).toBeInTheDocument();
   },
 };
 
-// SkipToContent usa children si lo recibe; si no, "Skip to content". Sigue siendo
-// server-safe: no usa hooks ni handlers propios.
+// SkipToContent uses children if it gets them; otherwise, "Skip to content". It's still
+// server-safe: it uses no hooks or handlers of its own.
 export const SkipToContentCustomText: StoryObj = {
   render: () => (
     <div className="relative h-24">
@@ -122,12 +122,12 @@ export const SkipToContentCustomText: StoryObj = {
   },
 };
 
-// Regresión: SkipToContent usaba z-50, el mismo valor que una cabecera fija típica; con empate
-// gana el orden del DOM y la cabecera (posterior al enlace) lo tapaba al recibir el foco. Tag
-// real-css: corre en el proyecto de vitest con Tailwind aplicado (ver vitest.config.ts); sin
-// él, el enlace no tiene posición ni z-index y la prueba falla con cualquier valor. La cabecera
-// va con estilos inline: lo que se prueba es el enlace. elementFromPoint en el centro del
-// enlace debe devolver el propio enlace; waitFor espera a que termine la transición.
+// Regression: SkipToContent used z-50, the same value as a typical fixed header; on a tie
+// DOM order wins and the header (after the link) covered it when it got focus. Tag
+// real-css: runs in the vitest project with Tailwind applied (see vitest.config.ts); without
+// it, the link has no position or z-index and the test fails with any value. The header
+// uses inline styles: what's tested is the link. elementFromPoint at the center of the
+// link must return the link itself; waitFor waits for the transition to finish.
 export const SkipToContentAboveFixedHeader: StoryObj = {
   tags: ['real-css'],
   render: () => (
@@ -160,7 +160,7 @@ export const SkipToContentAboveFixedHeader: StoryObj = {
   },
 };
 
-// El className del consumidor sigue ganando sobre el z-index por defecto (tailwind-merge).
+// The consumer's className still wins over the default z-index (tailwind-merge).
 export const SkipToContentZIndexOverride: StoryObj = {
   render: () => (
     <div className="relative h-24">

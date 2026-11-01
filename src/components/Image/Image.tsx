@@ -6,61 +6,61 @@ import { Skeleton } from '../Skeleton';
 
 export interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   /**
-   * Nodo a mostrar si la imagen falla al cargar (patrón compositivo, igual que AvatarFallback).
-   * Si no se pasa y la carga falla, Image no renderiza nada — no hornea un ícono de "imagen
-   * rota" por default. Comportamiento explícito, decisión documentada aquí.
+   * Node to show if the image fails to load (compositional pattern, same as AvatarFallback).
+   * If it isn't passed and loading fails, Image renders nothing; it doesn't bake in a "broken
+   * image" icon by default. Explicit behavior, a decision documented here.
    */
   fallback?: React.ReactNode;
-  /** Clases para el contenedor que envuelve <img> y el estado de carga/error. */
+  /** Classes for the container that wraps <img> and the loading/error state. */
   containerClassName?: string;
   /**
-   * Se llama una sola vez por `src`, también cuando la imagen terminó de cargar antes de la
-   * hidratación o ya estaba en caché. En ese caso Image vuelve a disparar el evento sobre el
-   * `<img>`, así que `event.nativeEvent.isTrusted` es `false`.
+   * Called once per `src`, also when the image finished loading before
+   * hydration or was already cached. In that case Image fires the event again on the
+   * `<img>`, so `event.nativeEvent.isTrusted` is `false`.
    */
   onLoad?: React.ReactEventHandler<HTMLImageElement>;
-  /** Igual que `onLoad`: una sola vez por `src`. Una `Image` sin `src` también lo llama. */
+  /** Same as `onLoad`: once per `src`. An `Image` without `src` also calls it. */
   onError?: React.ReactEventHandler<HTMLImageElement>;
 }
 
 type ImageStatus = 'loading' | 'loaded' | 'error';
 
-// A diferencia de Avatar (circular, ya cubierto por @radix-ui/react-avatar), Image es
-// rectangular y no tiene primitiva de Radix disponible: el estado de carga/error solo se
-// puede conocer vía onLoad/onError del <img> nativo, así que requiere 'use client' con certeza.
-// Pensado para usarse dentro de <AspectRatio> u otro contenedor con tamaño explícito: Image
-// llena h-full w-full de su contenedor, igual que AvatarImage.
+// Unlike Avatar (circular, already covered by @radix-ui/react-avatar), Image is
+// rectangular and has no Radix primitive available: the loading/error state can only
+// be known through onLoad/onError of the native <img>, so it definitely requires 'use client'.
+// Meant to be used inside <AspectRatio> or another container with an explicit size: Image
+// fills h-full w-full of its container, same as AvatarImage.
 const Image = React.forwardRef<HTMLImageElement, ImageProps>(
   ({ className, containerClassName, fallback, onLoad, onError, src, alt, ...props }, ref) => {
     const [status, setStatus] = React.useState<ImageStatus>('loading');
     const [prevSrc, setPrevSrc] = React.useState(src);
 
-    // Si cambia el src, vuelve a pasar por el ciclo de carga en vez de conservar el estado
-    // de la imagen anterior. Se ajusta durante el render y no en un useEffect: un efecto de
-    // montaje que pone 'loading' puede correr después de un onError temprano (src en caché,
-    // máquina cargada) y pisarlo; el <img> ya no vuelve a emitir error y queda invisible para
-    // siempre.
+    // If src changes, it goes through the load cycle again instead of keeping the state
+    // of the previous image. It's adjusted during render and not in a useEffect: a mount
+    // effect that sets 'loading' can run after an early onError (cached src, busy
+    // machine) and override it; the <img> doesn't emit error again and stays invisible
+    // forever.
     if (src !== prevSrc) {
       setPrevSrc(src);
       setStatus('loading');
     }
 
-    // Con renderizado en servidor, el <img> del HTML puede terminar de cargar (o fallar) antes
-    // de que React se hidrate y conecte onLoad/onError: el evento se pierde y status quedaría
-    // en 'loading' para siempre (reproducido en Image.stories, LoadedBeforeHydration). Al
-    // montar y al cambiar src se lee el resultado directo del elemento (complete con
-    // naturalWidth > 0 es una carga, con 0 es un error) y se vuelve a disparar ese evento sobre
-    // el <img>: el manejador de React ya está conectado, así que el estado cambia por el flujo
-    // normal y el onLoad/onError del consumidor también se llama.
+    // With server rendering, the <img> in the HTML can finish loading (or fail) before
+    // React hydrates and attaches onLoad/onError: the event is lost and status would stay
+    // 'loading' forever (reproduced in Image.stories, LoadedBeforeHydration). On
+    // mount and when src changes, the result is read directly from the element (complete with
+    // naturalWidth > 0 is a load, with 0 is an error) and that event is fired again on
+    // the <img>: React's handler is already attached, so the state changes through the normal
+    // flow and the consumer's onLoad/onError is called too.
     //
-    // resolvedRef guarda el src cuyo resultado ya se entregó, y los manejadores ignoran un
-    // segundo evento para el mismo src. Hace falta en los dos sentidos: con la imagen en caché,
-    // complete ya es true en el efecto pero el load real llega después, en otra tarea (sin la
-    // guarda en el manejador, el consumidor recibiría dos onLoad). Se compara el src en vez de
-    // reiniciar un booleano: con StrictMode el efecto corre dos veces al montar y un reinicio
-    // volvería a disparar el evento.
+    // resolvedRef stores the src whose result was already delivered, and the handlers ignore a
+    // second event for the same src. It's needed both ways: with the image cached,
+    // complete is already true in the effect but the real load arrives later, in another task
+    // (without the guard in the handler, the consumer would get two onLoad). The src is compared
+    // instead of resetting a boolean: with StrictMode the effect runs twice on mount and a reset
+    // would fire the event again.
     const resolvedRef = React.useRef<{ src: typeof src } | null>(null);
-    // Se compara con null primero: sin src, resolvedRef.current?.src también sería undefined.
+    // Compare with null first: without src, resolvedRef.current?.src would also be undefined.
     const markResolved = () => {
       const resolved = resolvedRef.current;
       if (resolved !== null && resolved.src === src) return false;
@@ -89,9 +89,9 @@ const Image = React.forwardRef<HTMLImageElement, ImageProps>(
       <div className={cn('relative h-full w-full overflow-hidden', containerClassName)}>
         {status === 'loading' && <Skeleton className="absolute inset-0 h-full w-full" />}
         {status === 'error' && fallback}
-        {/* Se desmonta al fallar: sin esto, un <img> roto queda invisible pero sigue en el DOM,
-            lo cual no cumple "no renderiza nada" cuando no hay fallback. Vuelve a montarse solo
-            si el src cambia (el ajuste de prevSrc de arriba resetea status a 'loading'). */}
+        {/* Unmounted on failure: without this, a broken <img> stays invisible but remains in the DOM,
+            which doesn't meet "renders nothing" when there's no fallback. It mounts again only
+            if src changes (the prevSrc adjustment above resets status to 'loading'). */}
         {status !== 'error' && (
           <img
             ref={setImgRef}

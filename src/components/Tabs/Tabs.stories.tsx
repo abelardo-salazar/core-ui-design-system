@@ -12,7 +12,7 @@ const meta: Meta<typeof Tabs> = {
 export default meta;
 type Story = StoryObj<typeof Tabs>;
 
-// Caso de uso real: pasos de una receta, no una fila larga de tabs de dashboard.
+// Real use case: the steps of a recipe, not a long row of dashboard tabs.
 const TabsDemo = () => (
   <Tabs defaultValue="prep" className="w-80">
     <TabsList>
@@ -26,8 +26,8 @@ const TabsDemo = () => (
   </Tabs>
 );
 
-// 1. Default — cambio de tab por click: el trigger clickeado queda data-state="active"
-// y su TabsContent es el único visible.
+// 1. Default: changing tab by click; the clicked trigger becomes data-state="active"
+// and its TabsContent is the only one visible.
 export const Default: Story = {
   render: () => <TabsDemo />,
   play: async ({ canvasElement }) => {
@@ -52,9 +52,9 @@ export const Default: Story = {
   },
 };
 
-// 2. Navegación con flecha — activationMode por defecto de Radix Tabs es "automatic":
-// ArrowRight mueve el foco Y activa el tab en el mismo paso, sin Enter/Space adicional
-// (verificado en dist/index.mjs del paquete, no asumido por analogía con Select).
+// 2. Arrow navigation: Radix Tabs' default activationMode is "automatic":
+// ArrowRight moves focus AND activates the tab in the same step, with no extra Enter/Space
+// (verified in the package's dist/index.mjs, not assumed by analogy with Select).
 export const ArrowKeyNavigation: Story = {
   render: () => <TabsDemo />,
   play: async ({ canvasElement }) => {
@@ -68,7 +68,7 @@ export const ArrowKeyNavigation: Story = {
 
     await userEvent.keyboard('{ArrowRight}');
     await waitFor(() => expect(cookTrigger).toHaveFocus());
-    // Sin {Enter}: la activación ya ocurrió con la flecha.
+    // No {Enter}: the activation already happened with the arrow.
     await expect(cookTrigger).toHaveAttribute('data-state', 'active');
     await expect(canvas.getByText('Cocina a fuego medio durante 12 minutos.')).toBeVisible();
 

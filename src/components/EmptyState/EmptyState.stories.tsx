@@ -20,7 +20,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// size llega a la raíz como data-size, nunca como atributo size suelto.
+// size reaches the root as data-size, never as a loose size attribute.
 const expectRoot = async (title: HTMLElement, size: 'sm' | 'md') => {
   const root = title.closest('[data-size]')!;
   await expect(root).toHaveAttribute('data-size', size);
@@ -50,7 +50,7 @@ export const Page: Story = {
     await expect(title.tagName).toBe('P');
     await expectRoot(title, 'md');
 
-    // Ícono decorativo: aria-hidden en el contenedor, que también da el tamaño del SVG.
+    // Decorative icon: aria-hidden on the container, which also sets the SVG size.
     const icon = canvasElement.querySelector('svg')!.parentElement!;
     await expect(icon).toHaveAttribute('aria-hidden', 'true');
     await expect(icon).toHaveClass('[&_svg]:size-6');
@@ -96,8 +96,8 @@ export const Small: Story = {
 
     const icon = canvasElement.querySelector('svg')!.parentElement!;
     await expect(icon).toHaveAttribute('aria-hidden', 'true');
-    // El fixture headless no aplica Tailwind: se comprueba que el override sm existe; los
-    // tamaños reales se verificaron en Storybook con un navegador real.
+    // The headless fixture doesn't apply Tailwind: it checks that the sm override exists; the
+    // real sizes were checked in Storybook with a real browser.
     await expect(icon).toHaveClass('group-data-[size=sm]/empty-state:[&_svg]:size-5');
   },
 };
@@ -117,7 +117,7 @@ export const SmallTextOnly: Story = {
   },
 };
 
-// Cuando el estado vacío ocupa una sección o página, el consumidor elige el nivel.
+// When the empty state fills a section or page, the consumer picks the level.
 export const HeadingTitle: Story = {
   render: () => (
     <EmptyState>
@@ -137,9 +137,9 @@ export const HeadingTitle: Story = {
   },
 };
 
-// El className del consumidor gana sobre el padding de size: cva + twMerge resuelven el
-// conflicto. Con una variante por atributo (data-[size=sm]:py-6) el selector tendría más
-// especificidad y py-2 perdería.
+// The consumer's className wins over size's padding: cva + twMerge resolve the
+// conflict. With an attribute variant (data-[size=sm]:py-6) the selector would have more
+// specificity and py-2 would lose.
 export const SmallCustomPadding: Story = {
   render: () => (
     <EmptyState size="sm" className="py-2">

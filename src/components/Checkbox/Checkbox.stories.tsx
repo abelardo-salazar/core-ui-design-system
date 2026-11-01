@@ -27,12 +27,12 @@ export const Default: Story = {
   ),
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    // Radix Checkbox es un <button role="checkbox">: no hace falta lógica propia
-    // para Space, la hereda del elemento nativo.
+    // Radix Checkbox is a <button role="checkbox">: no logic of its own is needed
+    // for Space, it inherits it from the native element.
     const checkbox = canvas.getByRole('checkbox');
 
-    // --ring/--color-ring no existen en el sistema de tokens: ring-ring no resolvía a
-    // ningún color y el anillo de foco quedaba invisible al navegar por teclado.
+    // --ring/--color-ring don't exist in the token system: ring-ring didn't resolve to
+    // any color and the focus ring was invisible when navigating with the keyboard.
     await expect(checkbox.className.split(' ')).toContain('focus-visible:ring-primary');
     await expect(checkbox.className.split(' ')).not.toContain('focus-visible:ring-ring');
 
@@ -43,7 +43,7 @@ export const Default: Story = {
     await expect(checkbox).toHaveAttribute('aria-checked', 'true');
     await expect(args.onCheckedChange).toHaveBeenLastCalledWith(true);
 
-    // Teclado (Space) sobre el control ya enfocado por el click anterior: toggle a unchecked.
+    // Keyboard (Space) on the control already focused by the previous click: toggles to unchecked.
     await userEvent.keyboard(' ');
     await expect(checkbox).toHaveAttribute('aria-checked', 'false');
     await expect(args.onCheckedChange).toHaveBeenLastCalledWith(false);

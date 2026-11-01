@@ -1,13 +1,13 @@
 import { cva } from 'class-variance-authority';
 
-// El estado "on" (Toggle presionado) siempre gana sobre la variante de color de base —
-// mismo criterio que el resto del DS usa para "esto está activo" (ver data-[state=checked]
-// en Switch/Checkbox). Se aplica en la raíz vía has-[[data-state=on]] porque el data-state
-// vive en el Toggle (hijo), no en el contenedor.
-// La raíz NO lleva padding horizontal/vertical propio: lo lleva el cuerpo (span/Toggle) y el
-// botón de cierre, en Chip.tsx, porque son ellos los que necesitan que su hit box real llene
-// la píldora (ver comentario en Chip.tsx). items-stretch (en vez de items-center) es lo que
-// permite que esos hijos se estiren hasta el alto completo de la fila.
+// The "on" state (Toggle pressed) always wins over the base color variant; same criterion
+// the rest of the DS uses for "this is active" (see data-[state=checked] in
+// Switch/Checkbox). It's applied on the root via has-[[data-state=on]] because data-state
+// lives on the Toggle (child), not on the container.
+// The root has NO horizontal/vertical padding of its own: the body (span/Toggle) and the
+// close button have it, in Chip.tsx, because they are the ones that need their real hit box
+// to fill the pill (see the comment in Chip.tsx). items-stretch (instead of items-center) is
+// what lets those children stretch to the full height of the row.
 export const chipVariants = cva(
   'inline-flex items-stretch gap-1 rounded-full border font-semibold transition-colors has-[[data-state=on]]:border-transparent has-[[data-state=on]]:bg-primary has-[[data-state=on]]:text-primary-content',
   {
@@ -18,9 +18,9 @@ export const chipVariants = cva(
         outline: 'text-base-content border-base-content/20',
         ghost: 'border-transparent bg-base-200 text-base-content',
       },
-      // sm no fija alto: igual que el comportamiento histórico (anterior a esta escala), el alto
-      // lo determina el contenido/el botón de cierre. md/lg sí lo fijan porque lg es el tamaño
-      // táctil (44px) y necesita ser predecible independientemente del contenido.
+      // sm doesn't set a height: same as the historical behavior (before this scale), the height
+      // is set by the content/the close button. md/lg do set it because lg is the touch size
+      // (44px) and needs to be predictable regardless of the content.
       size: {
         sm: 'text-xs',
         md: 'text-sm h-8',

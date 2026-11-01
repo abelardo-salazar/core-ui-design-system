@@ -45,22 +45,22 @@ export const Default: Story = {
     const canvas = within(canvasElement);
     const button = canvas.getByRole('button', { name: 'Button UI' });
 
-    // md = 44px, alineado con Input md y el trigger de Select (misma familia de controles de
-    // formulario). Sin shape explícito: debe seguir resolviendo a rounded-btn (defaultVariants),
-    // no a rounded-full — los consumidores que llaman buttonVariants({...}) sin pasar shape
-    // (Calendar, SkipToContent, DatePicker) dependen de este default.
+    // md = 44px, aligned with Input md and the Select trigger (same family of form controls).
+    // No explicit shape: it must still resolve to rounded-btn (defaultVariants), not
+    // rounded-full; consumers that call buttonVariants({...}) without passing shape
+    // (Calendar, SkipToContent, DatePicker) rely on this default.
     await expect(button.className.split(' ')).toContain('h-11');
     await expect(button.className.split(' ')).toContain('rounded-btn');
     await expect(button.className.split(' ')).not.toContain('rounded-full');
 
-    // Caso nativo habilitado: el click debe disparar el onClick del consumidor
-    // tal cual se lo pasamos (la composición de handlers no debe romperse).
+    // Enabled native case: the click must fire the consumer's onClick
+    // exactly as we pass it (handler composition must not break).
     await userEvent.click(button);
     await expect(args.onClick).toHaveBeenCalledOnce();
   },
 };
 
-// 1b. Native disabled: el click no debe disparar el onClick del consumidor.
+// 1b. Native disabled: the click must not fire the consumer's onClick.
 export const Disabled: Story = {
   args: {
     children: 'Disabled button',
@@ -101,26 +101,26 @@ export const Destructive: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const button = canvas.getByRole('button', { name: 'Delete Account' });
-    // El fixture de vitest-browser no expone las variables --color-* derivadas por
-    // @theme vía getComputedStyle (ni siquiera para tokens preexistentes como
-    // --color-primary-content), así que la aserción de contraste va sobre el token crudo
-    // que sí se define directamente en :root, más la clase que lo consume.
+    // The vitest-browser fixture doesn't expose the --color-* variables derived by
+    // @theme through getComputedStyle (not even for pre-existing tokens such as
+    // --color-primary-content), so the contrast assertion is on the raw token
+    // defined directly on :root, plus the class that uses it.
     await expect(button.className.split(' ')).toContain('text-error-content');
     await expect(
       getComputedStyle(document.documentElement).getPropertyValue('--error-content'),
     ).toBe('#000000');
 
-    // Hover: --error-focus (fondo) es oscuro mientras --error (fondo base) es claro — al
-    // revés que en las demás variantes — así que el texto necesita SU PROPIO -focus-content,
-    // distinto del -content del estado base. Sin esto, texto negro sobre el hover oscuro cae
-    // a 3.25:1 (ver commit que introdujo --error-focus-content en index.css).
+    // Hover: --error-focus (background) is dark while --error (base background) is light,
+    // the opposite of the other variants, so the text needs ITS OWN -focus-content,
+    // different from the base state's -content. Without it, black text on the dark hover drops
+    // to 3.25:1 (see the commit that introduced --error-focus-content in index.css).
     await expect(button.className.split(' ')).toContain('hover:text-error-focus-content');
     await expect(
       getComputedStyle(document.documentElement).getPropertyValue('--error-focus-content'),
     ).toBe('#ffffff');
 
-    // Dark mode invierte cuál color necesita más contraste (--error-focus pasa a ser un rojo
-    // claro), así que --error-focus-content también se invierte: negro, no blanco.
+    // Dark mode flips which color needs more contrast (--error-focus becomes a light
+    // red), so --error-focus-content flips too: black, not white.
     document.documentElement.classList.add('dark');
     await expect(
       getComputedStyle(document.documentElement).getPropertyValue('--error-focus-content'),
@@ -145,13 +145,13 @@ export const WithIcons: Story = {
   },
 };
 
-// 4b. Touch target: size="icon" debe medir 44x44 reales (Apple HIG), sin que el ícono en sí
-// (forzado a size-4 por la clase base [&_svg]:size-4, independiente del size del botón) cambie.
-// El fixture de vitest-browser no aplica el CSS de utilidades de Tailwind (mismo issue
-// documentado en el story Destructive: getComputedStyle no expone lo que generan las
-// clases), así que la aserción va sobre las clases, no sobre getBoundingClientRect(); el
-// tamaño real en píxeles (44x44 botón, 16x16 ícono) se verificó a mano en Storybook con
-// devtools de un navegador real.
+// 4b. Touch target: size="icon" must measure a real 44x44 (Apple HIG), without the icon itself
+// (forced to size-4 by the base class [&_svg]:size-4, independent of the button size) changing.
+// The vitest-browser fixture doesn't apply Tailwind's utility CSS (same issue
+// documented in the Destructive story: getComputedStyle doesn't expose what the classes
+// generate), so the assertion is on the classes, not on getBoundingClientRect(); the
+// real pixel size (44x44 button, 16x16 icon) was checked by hand in Storybook with the
+// devtools of a real browser.
 export const Icon: Story = {
   args: {
     size: 'icon',
@@ -164,18 +164,18 @@ export const Icon: Story = {
 
     await expect(button.className.split(' ')).toContain('h-11');
     await expect(button.className.split(' ')).toContain('w-11');
-    // El ícono no lleva h-4/w-4 propio: depende de [&_svg]:size-4 en la clase base del
-    // botón, que es justamente lo que garantiza que el ícono no crece con el hit area.
+    // The icon has no h-4/w-4 of its own: it relies on [&_svg]:size-4 in the button's base
+    // class, which is precisely what guarantees the icon doesn't grow with the hit area.
     await expect(button.className.split(' ')).toContain('[&_svg]:size-4');
     await expect(button.querySelector('svg')).toBeInTheDocument();
   },
 };
 
-// 4c. shape="pill" — nativo. Riesgo conocido (ya pasó con Badge.size): si Button.tsx no
-// desestructurara `shape` y lo pasara a buttonVariants(), el valor se esparciría a ...props y
-// terminaría como un atributo HTML inválido `shape="pill"` en el DOM en vez de aplicar
-// rounded-full — por eso la aserción explícita de que NO existe ese atributo, no solo de que
-// la clase correcta está presente.
+// 4c. shape="pill", native. Known risk (it already happened with Badge.size): if Button.tsx
+// didn't destructure `shape` and pass it to buttonVariants(), the value would spread into
+// ...props and end up as an invalid HTML attribute `shape="pill"` in the DOM instead of
+// applying rounded-full; hence the explicit assertion that the attribute does NOT exist, not
+// just that the right class is present.
 export const PillShape: Story = {
   args: {
     shape: 'pill',
@@ -191,9 +191,9 @@ export const PillShape: Story = {
   },
 };
 
-// 4d. shape="pill" + asChild — mismo chequeo que PillShape, pero por la rama de Slot: `classes`
-// se computa una sola vez en Button.tsx y alimenta las dos ramas, pero esta story lo confirma
-// en vez de asumirlo a partir de leer el código.
+// 4d. shape="pill" + asChild: same check as PillShape, but through the Slot branch: `classes`
+// is computed once in Button.tsx and feeds both branches, but this story confirms it
+// instead of assuming it from reading the code.
 export const PillShapeAsChild: Story = {
   args: {
     shape: 'pill',
@@ -210,9 +210,9 @@ export const PillShapeAsChild: Story = {
   },
 };
 
-// 4e. shape="pill" + size="icon": un círculo de 44x44 (rounded-full sobre una caja cuadrada).
-// El anillo de foco sigue la forma sin ningún cambio de código (ver buttonVariants.ts) — eso
-// se confirma visualmente en Storybook con un navegador real, no acá.
+// 4e. shape="pill" + size="icon": a 44x44 circle (rounded-full on a square box).
+// The focus ring follows the shape without any code change (see buttonVariants.ts); that
+// is confirmed visually in Storybook with a real browser, not here.
 export const PillIcon: Story = {
   args: {
     shape: 'pill',
@@ -253,14 +253,14 @@ export const AsLink: Story = {
   },
 };
 
-// 5b. Polymorphism mínimo: asChild + <a href> SIN onClick/disabled/isLoading — el uso más
-// inocente posible. Es exactamente el shape que rompía `next build` en 0.4.2 y anteriores
-// ("Error: Event handlers cannot be passed to Client Component props", apuntando a
-// onClick: function onClick) porque handleClick se armaba igual dentro del branch asChild
-// y se colgaba de onClick={handleClick} sobre Slot sin que ninguna prop lo evitara. Este
-// story no puede reproducir la frontera RSC en sí (corre client-side vía vitest-browser) —
-// esa parte se verifica en un `next build` real (ver CHANGELOG.md [0.4.3]) — pero cubre que
-// agregar 'use client' no rompió el comportamiento normal de este caso.
+// 5b. Minimal polymorphism: asChild + <a href> WITHOUT onClick/disabled/isLoading, the most
+// innocent use possible. It's exactly the shape that broke `next build` in 0.4.2 and earlier
+// ("Error: Event handlers cannot be passed to Client Component props", pointing to
+// onClick: function onClick) because handleClick was built anyway inside the asChild branch
+// and attached as onClick={handleClick} to Slot without any prop preventing it. This
+// story can't reproduce the RSC boundary itself (it runs client-side through vitest-browser);
+// that part is checked in a real `next build` (see CHANGELOG.md [0.4.3]), but it covers that
+// adding 'use client' didn't break the normal behavior of this case.
 export const AsChildMinimal: Story = {
   args: {
     asChild: true,
@@ -273,18 +273,18 @@ export const AsChildMinimal: Story = {
     await expect(link).toHaveAttribute('href', '/');
     await expect(link).not.toHaveAttribute('aria-disabled', 'true');
 
-    // Sin handler propio, un click normal no debe tirar ni bloquear nada. Interceptamos la
-    // navegación real a nivel de test (no del Button — sus props siguen siendo exactamente
-    // asChild + children) porque en vitest-browser un href real navega la página del runner
-    // y tumba la conexión.
+    // Without its own handler, a normal click must not throw or block anything. We intercept the
+    // real navigation at the test level (not the Button's: its props are still exactly
+    // asChild + children) because in vitest-browser a real href navigates the runner's page
+    // and drops the connection.
     link.addEventListener('click', (event) => event.preventDefault());
     await userEvent.click(link);
   },
 };
 
-// 6. Polymorphism + isLoading: cubre los 3 fixes de la auditoría sobre asChild.
-// Usamos el mismo href real que AsLink: como el fix es justamente el preventDefault
-// antes de que el navegador navegue, el test nunca llega a abrir la URL.
+// 6. Polymorphism + isLoading: covers the 3 fixes from the audit on asChild.
+// We use the same real href as AsLink: since the fix is precisely the preventDefault
+// before the browser navigates, the test never gets to open the URL.
 export const AsLinkLoading: Story = {
   args: {
     asChild: true,
@@ -298,32 +298,32 @@ export const AsLinkLoading: Story = {
   },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    // aria-disabled no quita el role="link" del elemento en el árbol de accesibilidad.
+    // aria-disabled doesn't remove the element's role="link" in the accessibility tree.
     const link = canvas.getByRole('link', { name: 'Go to Google' });
 
     await expect(link).toHaveAttribute('aria-disabled', 'true');
     await expect(link.className.split(' ')).toContain('pointer-events-none');
 
-    // El fixture de vitest-browser no expone estilos derivados de utilidades de Tailwind vía
-    // getComputedStyle (mismo issue documentado en el story Destructive), así que la aserción
-    // queda en la clase; se verificó manualmente en Storybook con navegador real que opacity
-    // computa a 0.5 cuando aria-disabled="true".
+    // The vitest-browser fixture doesn't expose styles derived from Tailwind utilities through
+    // getComputedStyle (same issue documented in the Destructive story), so the assertion
+    // stays on the class; it was checked by hand in Storybook with a real browser that opacity
+    // computes to 0.5 when aria-disabled="true".
     await expect(link.className.split(' ')).toContain('aria-disabled:opacity-50');
 
-    // Fix de Slottable: el spinner no debe desaparecer cuando el child es un <a> (asChild).
+    // Slottable fix: the spinner must not disappear when the child is an <a> (asChild).
     await expect(link.querySelector('svg.animate-spin')).toBeInTheDocument();
 
-    // Fix de preventDefault: el click no debe disparar el onClick del consumidor
-    // ni navegar (pointer-events-none ya lo bloquea a nivel visual/click).
+    // preventDefault fix: the click must not fire the consumer's onClick
+    // or navigate (pointer-events-none already blocks it at the visual/click level).
     await userEvent.click(link);
     await expect(args.onClick).not.toHaveBeenCalled();
   },
 };
 
-// Separación del anillo de foco: por defecto toma el color de fondo del tema (base-100, regla
-// base de tailwind.css). Sobre otra superficie, un ring-offset-<color> explícito gana sobre esa
-// regla. El color real con foco de teclado en ambos temas se verificó en Storybook con un
-// navegador real.
+// Focus ring offset: by default it takes the theme background color (base-100, base rule
+// in tailwind.css). On another surface, an explicit ring-offset-<color> wins over that
+// rule. The real color with keyboard focus in both themes was checked in Storybook with a
+// real browser.
 export const FocusRingOnSurface: Story = {
   render: () => (
     <div className="flex items-center gap-4">
@@ -339,8 +339,8 @@ export const FocusRingOnSurface: Story = {
     const offsetColor = () =>
       getComputedStyle(button).getPropertyValue('--tw-ring-offset-color').trim();
 
-    // Modo oscuro (sin un contenedor .dark en el render: :root:has(.dark) oscurecería toda la
-    // story). Sin la regla base, el valor sería el initial-value de Tailwind (#fff).
+    // Dark mode (without a .dark container in the render: :root:has(.dark) would darken the whole
+    // story). Without the base rule, the value would be Tailwind's initial-value (#fff).
     document.documentElement.classList.add('dark');
     try {
       await expect(offsetColor()).toBe('#141414');

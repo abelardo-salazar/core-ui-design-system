@@ -1,9 +1,9 @@
-// Test de TIPOS puro, igual que Input.types.test-d.tsx: no se ejecuta, solo lo compila `tsc -b`.
+// Pure TYPE test, same as Input.types.test-d.tsx: it isn't run, only `tsc -b` compiles it.
 import { Combobox } from './Combobox';
 
 const options = [{ value: 'mx', label: 'México' }];
 
-// --- Casos válidos ---------------------------------------------------------------------
+// --- Valid cases -----------------------------------------------------------------------
 
 const withLabel = <Combobox label="País" options={options} />;
 const withAriaLabel = <Combobox aria-label="País" options={options} />;
@@ -16,27 +16,27 @@ const inlineFocusMultiple = (
   <Combobox label="Países" mode="inline" listVisibility="focus" multiple options={options} />
 );
 declare const dynamicMode: 'popover' | 'inline';
-// mode dinámico sin listVisibility sigue compilando.
+// Dynamic mode without listVisibility still compiles.
 const withDynamicMode = <Combobox aria-label="País" mode={dynamicMode} options={options} />;
 
-// --- Casos inválidos: si alguno deja de fallar, TS2578 rompe la compilación ------------
+// --- Invalid cases: if one stops failing, TS2578 breaks the compilation --------------------
 
 // @ts-expect-error hace falta label o aria-label
 const withoutLabel = <Combobox options={options} />;
 
-// @ts-expect-error label y aria-label no van juntos
+// @ts-expect-error label and aria-label don't go together
 const withBoth = <Combobox label="País" aria-label="País" options={options} />;
 
-// @ts-expect-error tampoco en modo múltiple
+// @ts-expect-error not in multiple mode either
 const multipleWithoutLabel = <Combobox multiple options={options} />;
 
 const popoverWithVisibility = (
-  // @ts-expect-error listVisibility solo existe con mode="inline"
+  // @ts-expect-error listVisibility only exists with mode="inline"
   <Combobox aria-label="País" listVisibility="query" options={options} />
 );
 
 const explicitPopoverWithVisibility = (
-  // @ts-expect-error tampoco con mode="popover" explícito
+  // @ts-expect-error not with an explicit mode="popover" either
   <Combobox aria-label="País" mode="popover" listVisibility="focus" options={options} />
 );
 

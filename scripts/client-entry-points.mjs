@@ -1,18 +1,17 @@
-// Única fuente de verdad para qué componentes declaran 'use client' en su primera línea.
+// Single source of truth for which components declare 'use client' on their first line.
 //
-// Rollup, incluso con output.preserveModules, no conserva directivas de módulo en chunks
-// no-entry (verificado en este repo: build con preserveModules:true + grep en dist/ dio 0
-// ocurrencias de "use client"). vite.config.ts usa esta lista para reinyectar la directiva
-// en el chunk exacto que le corresponde a cada archivo.
+// Rollup, even with output.preserveModules, does not keep module directives in non-entry
+// chunks (verified in this repo: a build with preserveModules:true + grep on dist/ gave 0
+// occurrences of "use client"). vite.config.ts uses this list to re-inject the directive
+// into the exact chunk that belongs to each file.
 //
-// scripts/verify-client-directives.mjs usa esta misma lista (no una copia) para confirmar
-// que todo componente con 'use client' en su fuente está registrado acá. Si en vez de
-// importar esta lista el script mantuviera su propia copia, podría desalinearse de la
-// lista real igual que pasó con vite.config.ts (ver PR de este fix) — por eso una sola lista
-// compartida, no dos.
+// scripts/verify-client-directives.mjs uses this same list (not a copy) to confirm that
+// every component with 'use client' in its source is registered here. If the script kept
+// its own copy instead of importing this list, it could drift from the real list just like
+// vite.config.ts did (see the PR of this fix), hence one shared list, not two.
 //
-// Rutas relativas a la raíz del repo. Al agregar un componente nuevo con 'use client' en su
-// fuente, agrega su ruta aquí; `npm run build` falla si se olvida.
+// Paths relative to the repo root. When adding a new component with 'use client' in its
+// source, add its path here; `npm run build` fails if you forget.
 export const CLIENT_ENTRY_POINTS = [
   'src/components/Input/Input.tsx',
   'src/components/Textarea/Textarea.tsx',

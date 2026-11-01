@@ -34,8 +34,8 @@ function ViewItems() {
   );
 }
 
-// 1. Modo único: radiogroup con ítems radio y aria-checked (no aria-pressed). size no llega al
-// DOM ni en el grupo ni en los ítems.
+// 1. Single mode: radiogroup with radio items and aria-checked (not aria-pressed). size doesn't reach the
+// DOM on the group or on the items.
 export const Single: Story = {
   render: () => (
     <ToggleGroup type="single" defaultValue="list" aria-label="Vista" size="md">
@@ -64,7 +64,7 @@ export const Single: Story = {
   },
 };
 
-// 2. Modo múltiple: toolbar con aria-pressed; puede quedar vacío.
+// 2. Multiple mode: toolbar with aria-pressed; it can end up empty.
 export const Multiple: Story = {
   args: { onValueChange: fn() },
   render: (args) => (
@@ -108,8 +108,8 @@ export const Multiple: Story = {
   },
 };
 
-// 3. Modo único no controlado: el clic sobre el ítem activo no lo desactiva y onValueChange no
-// recibe ''.
+// 3. Uncontrolled single mode: clicking the active item doesn't turn it off and onValueChange doesn't
+// get ''.
 export const SingleUncontrolledKeepsValue: Story = {
   args: { onValueChange: fn() },
   render: (args) => (
@@ -142,7 +142,7 @@ export const SingleUncontrolledKeepsValue: Story = {
   },
 };
 
-// 4. Modo único controlado: mismo comportamiento con value/onValueChange del consumidor.
+// 4. Controlled single mode: same behavior with the consumer's value/onValueChange.
 function ControlledSingle({ onValueChange }: { onValueChange: (value: string) => void }) {
   const [value, setValue] = React.useState('grid');
   return (
@@ -183,8 +183,8 @@ export const SingleControlledKeepsValue: Story = {
   },
 };
 
-// 5. Teclado: un solo punto de tabulación (entra en el ítem seleccionado); la flecha mueve el
-// foco sin cambiar el valor; Space y Enter seleccionan.
+// 5. Keyboard: a single tab stop (enters on the selected item); the arrow moves
+// focus without changing the value; Space and Enter select.
 export const Keyboard: Story = {
   args: { onValueChange: fn() },
   render: (args) => (
@@ -227,15 +227,15 @@ export const Keyboard: Story = {
     await expect(table).toHaveAttribute('aria-checked', 'true');
     await expect(args.onValueChange).toHaveBeenLastCalledWith('table');
 
-    // Un solo punto de tabulación: el siguiente Tab sale del grupo.
+    // A single tab stop: the next Tab leaves the group.
     await userEvent.tab();
     await expect(canvas.getByRole('button', { name: 'Después' })).toHaveFocus();
   },
 };
 
-// 6. Tamaños: el grupo pasa size a los ítems por contexto y un ítem puede sobrescribirlo. El
-// fixture headless no aplica Tailwind: la aserción va sobre las clases; las alturas reales
-// (32/44/48) y la alineación con Button se verificaron en Storybook con un navegador real.
+// 6. Sizes: the group passes size to the items through context and an item can override it. The
+// headless fixture doesn't apply Tailwind: the assertion is on the classes; the real heights
+// (32/44/48) and the alignment with Button were checked in Storybook with a real browser.
 const sizes: ToggleGroupSize[] = ['sm', 'md', 'lg'];
 
 export const Sizes: Story = {

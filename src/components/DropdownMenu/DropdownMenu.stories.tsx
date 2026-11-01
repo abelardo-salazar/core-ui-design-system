@@ -30,9 +30,9 @@ interface DemoProps {
   onValueChange?: (value: string) => void;
 }
 
-// DropdownMenuCheckboxItem/RadioItem son totalmente controlados en Radix (sin
-// defaultChecked/defaultValue), así que el demo necesita estado propio para que el
-// toggle/selección se vea reflejado — no alcanza con un mock suelto como en Switch/Checkbox.
+// DropdownMenuCheckboxItem/RadioItem are fully controlled in Radix (no
+// defaultChecked/defaultValue), so the demo needs its own state for the
+// toggle/selection to show; a loose mock like in Switch/Checkbox isn't enough.
 const DropdownMenuDemo = ({ onSelect, onCheckedChange, onValueChange }: DemoProps) => {
   const [notifications, setNotifications] = React.useState(false);
   const [theme, setTheme] = React.useState('light');
@@ -73,7 +73,7 @@ const DropdownMenuDemo = ({ onSelect, onCheckedChange, onValueChange }: DemoProp
   );
 };
 
-// 1. Default — abrir con click, seleccionar un Item cierra el menú, foco vuelve al trigger.
+// 1. Default: open with a click, selecting an Item closes the menu, focus returns to the trigger.
 export const Default: Story = {
   args: { onSelect: fn() },
   render: (args) => <DropdownMenuDemo {...args} />,
@@ -81,7 +81,7 @@ export const Default: Story = {
     const canvas = within(canvasElement);
     const trigger = canvas.getByRole('button', { name: 'Open menu' });
 
-    // El contenido vive en un Portal fuera de canvasElement (mismo patrón que Select).
+    // The content lives in a Portal outside canvasElement (same pattern as Select).
     const body = within(document.body);
     await expect(body.queryByRole('menu')).not.toBeInTheDocument();
 
@@ -92,13 +92,13 @@ export const Default: Story = {
     await userEvent.click(profileItem);
 
     await expect(args.onSelect).toHaveBeenCalledTimes(1);
-    // Seleccionar un Item cierra el menú por default en Radix (sin preventDefault en onSelect).
+    // Selecting an Item closes the menu by default in Radix (no preventDefault in onSelect).
     await waitFor(() => expect(body.queryByRole('menu')).not.toBeInTheDocument());
     await expect(trigger).toHaveFocus();
   },
 };
 
-// 2. KeyboardNavigation — abrir con teclado, navegar con flechas, cerrar con Escape.
+// 2. KeyboardNavigation: open with the keyboard, move with the arrows, close with Escape.
 export const KeyboardNavigation: Story = {
   render: () => <DropdownMenuDemo />,
   play: async ({ canvasElement }) => {
@@ -112,7 +112,7 @@ export const KeyboardNavigation: Story = {
     const menu = await body.findByRole('menu');
     const items = within(menu).getAllByRole('menuitem');
 
-    // Radix mueve el foco al primer item automáticamente al abrir.
+    // Radix moves focus to the first item automatically on opening.
     await waitFor(() => expect(items[0]).toHaveFocus());
 
     await userEvent.keyboard('{ArrowDown}');
@@ -120,15 +120,15 @@ export const KeyboardNavigation: Story = {
 
     await userEvent.keyboard('{Escape}');
     await waitFor(() => expect(body.queryByRole('menu')).not.toBeInTheDocument());
-    // El foco vuelve al trigger tras cerrar (onCloseAutoFocus por defecto de Radix,
-    // mismo patrón ya verificado en Dialog/Sheet).
+    // Focus returns to the trigger after closing (Radix's default onCloseAutoFocus,
+    // same pattern already checked in Dialog/Sheet).
     await expect(trigger).toHaveFocus();
   },
 };
 
-// 3. CheckboxToggle — toggle de CheckboxItem. Como no hay modo no controlado, se reabre el
-// menú para confirmar aria-checked en vez de leerlo en el instante del cierre (evita
-// flakiness por la animación de salida del Content).
+// 3. CheckboxToggle: toggling a CheckboxItem. Since there's no uncontrolled mode, the menu
+// is reopened to confirm aria-checked instead of reading it at the moment of closing (avoids
+// flakiness from the Content's exit animation).
 export const CheckboxToggle: Story = {
   args: { onCheckedChange: fn() },
   render: (args) => <DropdownMenuDemo {...args} />,
@@ -145,7 +145,7 @@ export const CheckboxToggle: Story = {
     await userEvent.click(checkboxItem);
 
     await expect(args.onCheckedChange).toHaveBeenLastCalledWith(true);
-    // Seleccionar un CheckboxItem también cierra el menú por default en Radix.
+    // Selecting a CheckboxItem also closes the menu by default in Radix.
     await waitFor(() => expect(body.queryByRole('menu')).not.toBeInTheDocument());
 
     await userEvent.click(trigger);
@@ -155,8 +155,8 @@ export const CheckboxToggle: Story = {
   },
 };
 
-// 4. RadioGroupSelection — selección dentro de RadioGroup, mismo criterio de reapertura
-// que CheckboxToggle.
+// 4. RadioGroupSelection: selection inside a RadioGroup, same reopening criterion
+// as CheckboxToggle.
 export const RadioGroupSelection: Story = {
   args: { onValueChange: fn() },
   render: (args) => <DropdownMenuDemo {...args} />,

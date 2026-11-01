@@ -6,7 +6,7 @@ import { features } from './dataTableFeatures';
 import { PersonIcon } from '@radix-ui/react-icons';
 import { Button } from '../Button';
 import {
-  // Alias: la story "EmptyState" de este archivo ya usa ese nombre.
+  // Alias: the "EmptyState" story in this file already uses that name.
   EmptyState as EmptyStateRoot,
   EmptyStateActions,
   EmptyStateDescription,
@@ -21,8 +21,8 @@ interface Person {
   role: string;
 }
 
-// 23 nombres en A-W, deliberadamente desordenados: alcanza para 3 páginas con el pageSize
-// default (10) y permite verificar el orden ascendente por nombre con una sola letra.
+// 23 names from A to W, deliberately unsorted: enough for 3 pages with the default
+// pageSize (10) and lets us check ascending order by name with a single letter.
 const names = [
   'Marta',
   'Bruno',
@@ -76,8 +76,8 @@ const meta: Meta<typeof DataTable> = {
 export default meta;
 type Story = StoryObj<typeof DataTable<Person>>;
 
-// 1. Render base: los 23 registros, caja de búsqueda siempre visible, paginación en la
-// primera página.
+// 1. Base render: the 23 records, search box always visible, pagination on the
+// first page.
 export const Default: Story = {
   render: () => <DataTable columns={columns} data={people} />,
   play: async ({ canvasElement }) => {
@@ -86,40 +86,40 @@ export const Default: Story = {
     await expect(canvas.getByRole('table')).toBeInTheDocument();
     await expect(canvas.getByPlaceholderText('Search...')).toBeInTheDocument();
     await expect(canvas.getAllByRole('columnheader')).toHaveLength(3);
-    // pageSize default de rowPaginationFeature es 10 -> 23 registros = 3 páginas.
+    // rowPaginationFeature's default pageSize is 10 -> 23 records = 3 pages.
     await expect(canvas.getByText('Page 1 of 3')).toBeInTheDocument();
   },
 };
 
-// 2. Ordenar por click en TableHead: alterna el sort de la columna correspondiente.
+// 2. Sort by clicking TableHead: toggles the sort of the matching column.
 export const SortByHeader: Story = {
   render: () => <DataTable columns={columns} data={people} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const rows = () => canvas.getAllByRole('row');
 
-    // Antes de ordenar: primera fila de datos es la primera del array sin ordenar (Marta).
+    // Before sorting: the first data row is the first one of the unsorted array (Marta).
     await expect(rows()[1]).toHaveTextContent('Marta');
 
     const nameHeader = canvas.getByRole('button', { name: /Nombre/i });
 
-    // Estado neutro (CaretSortIcon): el ícono no lleva text-primary.
+    // Neutral state (CaretSortIcon): the icon doesn't have text-primary.
     await expect(nameHeader.querySelector('svg')).not.toHaveClass('text-primary');
 
     await userEvent.click(nameHeader);
 
-    // sortFn_text (auto, registrado en features) compara en minúscula con < / > estándar:
-    // 'Ana' es la primera alfabéticamente entre los 23 nombres.
+    // sortFn_text (auto, registered in features) compares in lowercase with standard < / >:
+    // 'Ana' is first alphabetically among the 23 names.
     await expect(rows()[1]).toHaveTextContent('Ana');
 
-    // El ícono de sort cambia de CaretSortIcon (sin ordenar) a CaretUpIcon (ascendente) y
-    // pasa a usar text-primary para distinguir visualmente que la columna está ordenada.
+    // The sort icon changes from CaretSortIcon (unsorted) to CaretUpIcon (ascending) and
+    // starts using text-primary to show visually that the column is sorted.
     await expect(nameHeader.querySelector('svg')).toBeInTheDocument();
     await expect(nameHeader.querySelector('svg')).toHaveClass('text-primary');
   },
 };
 
-// 3. Caja de búsqueda (global filter): escribir filtra las filas visibles.
+// 3. Search box (global filter): typing filters the visible rows.
 export const GlobalFilter: Story = {
   render: () => <DataTable columns={columns} data={people} />,
   play: async ({ canvasElement }) => {
@@ -128,17 +128,17 @@ export const GlobalFilter: Story = {
 
     await userEvent.type(searchBox, 'Walter');
 
-    // Solo "Walter" matchea -> 1 fila de header (thead) + 1 fila de datos (tbody).
+    // Only "Walter" matches -> 1 header row (thead) + 1 data row (tbody).
     await expect(canvas.getAllByRole('row')).toHaveLength(2);
     await expect(canvas.getByText('Walter')).toBeInTheDocument();
     await expect(canvas.queryByText('Ana')).not.toBeInTheDocument();
 
-    // La búsqueda también resetea a la primera página (23 -> 1 resultado = 1 página).
+    // Searching also resets to the first page (23 -> 1 result = 1 page).
     await expect(canvas.getByText('Page 1 of 1')).toBeInTheDocument();
   },
 };
 
-// 4. Paginación: "Next"/"Previous" cambian las filas mostradas.
+// 4. Pagination: "Next"/"Previous" change the rows shown.
 export const Pagination: Story = {
   render: () => <DataTable columns={columns} data={people} />,
   play: async ({ canvasElement }) => {
@@ -146,42 +146,42 @@ export const Pagination: Story = {
     const previousButton = canvas.getByRole('button', { name: 'Previous' });
     const nextButton = canvas.getByRole('button', { name: 'Next' });
 
-    // Página 1: "Previous" deshabilitado, primera fila es "Marta" (orden original).
+    // Page 1: "Previous" disabled, the first row is "Marta" (original order).
     await expect(previousButton).toBeDisabled();
     await expect(canvas.getAllByRole('row')[1]).toHaveTextContent('Marta');
 
     await userEvent.click(nextButton);
 
-    // Página 2: el registro #11 sin ordenar es "Rosa" (índice 10 del array `names`,
-    // pageSize 10 -> la página 2 arranca en el índice 10).
+    // Page 2: unsorted record #11 is "Rosa" (index 10 of the `names` array,
+    // pageSize 10 -> page 2 starts at index 10).
     await expect(canvas.getByText('Page 2 of 3')).toBeInTheDocument();
     await expect(canvas.getAllByRole('row')[1]).toHaveTextContent('Rosa');
     await expect(previousButton).not.toBeDisabled();
 
     await userEvent.click(previousButton);
 
-    // Vuelve a la página 1 con las mismas filas que al inicio.
+    // Back to page 1 with the same rows as at the start.
     await expect(canvas.getByText('Page 1 of 3')).toBeInTheDocument();
     await expect(canvas.getAllByRole('row')[1]).toHaveTextContent('Marta');
   },
 };
 
-// 5. Modo responsive: DataTable activa Table `responsive` por su cuenta (el consumidor no
-// pasa nada) y autogenera el data-label de cada celda a partir del header de columna
-// (string) definido en `columns`. Verificación de clases en headless — el colapso visual
-// real por debajo de 1024px se verifica en una ventana de Storybook real.
+// 5. Responsive mode: DataTable turns on Table `responsive` by itself (the consumer
+// passes nothing) and generates each cell's data-label from the column header
+// (string) defined in `columns`. Class check in headless; the real visual collapse
+// below 1024px is checked in a real Storybook window.
 export const ResponsiveCollapse: Story = {
   render: () => <DataTable columns={columns} data={people} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const table = canvas.getByRole('table');
 
-    // Table interno recibe responsive=true sin que el consumidor de DataTable pase nada.
+    // The inner Table gets responsive=true without the DataTable consumer passing anything.
     await expect(table.className).toContain('max-lg:block');
     await expect(table.className).toContain('max-lg:[&_thead]:sr-only');
 
-    // data-label autogenerado a partir del header ('Nombre', 'Email', 'Rol' — strings
-    // definidos en `columns` de esta story) para cada celda de la primera fila de datos.
+    // data-label generated from the header ('Nombre', 'Email', 'Rol', strings
+    // defined in this story's `columns`) for each cell of the first data row.
     const firstDataRow = canvas.getByText('Marta').closest('tr');
     const cellsInRow = firstDataRow ? within(firstDataRow).getAllByRole('cell') : [];
     await expect(cellsInRow[0].getAttribute('data-label')).toBe('Nombre');
@@ -190,7 +190,7 @@ export const ResponsiveCollapse: Story = {
   },
 };
 
-// 6. Estado vacío: el filtro sin resultados muestra una única fila con colSpan = columnas.
+// 6. Empty state: the filter with no results shows a single row with colSpan = columns.
 export const EmptyState: Story = {
   render: () => <DataTable columns={columns} data={people} />,
   play: async ({ canvasElement }) => {
@@ -199,7 +199,7 @@ export const EmptyState: Story = {
 
     await userEvent.type(searchBox, 'zzzzz');
 
-    // Por defecto: EmptyState sm con el título de siempre.
+    // Default: EmptyState sm with the usual title.
     const title = canvas.getByText('No results.');
     await expect(title.tagName).toBe('P');
     const root = title.closest('[data-size]');
@@ -207,15 +207,15 @@ export const EmptyState: Story = {
 
     const emptyCell = title.closest('td')!;
     await expect(emptyCell.getAttribute('colspan')).toBe('3');
-    // Sin data-label: en modo tarjeta (bajo lg) no cuelga ninguna etiqueta de columna.
+    // No data-label: in card mode (below lg) no column label is attached.
     await expect(emptyCell).not.toHaveAttribute('data-label');
 
-    // Una sola fila de datos (la del estado vacío) además de la fila de header.
+    // A single data row (the empty state one) besides the header row.
     await expect(canvas.getAllByRole('row')).toHaveLength(2);
   },
 };
 
-// 7. Estado vacío propio: emptyState reemplaza al default dentro de la misma celda.
+// 7. Custom empty state: emptyState replaces the default inside the same cell.
 export const CustomEmptyState: Story = {
   render: () => (
     <DataTable
@@ -248,8 +248,8 @@ export const CustomEmptyState: Story = {
   },
 };
 
-// 8. Textos propios: searchPlaceholder, previousLabel, nextLabel y pageLabel reemplazan a los
-// valores por defecto en inglés. pageLabel recibe la página actual (desde 1) y el total.
+// 8. Custom texts: searchPlaceholder, previousLabel, nextLabel and pageLabel replace the
+// English defaults. pageLabel gets the current page (from 1) and the total.
 export const CustomLabels: Story = {
   render: () => (
     <DataTable

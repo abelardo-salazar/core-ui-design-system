@@ -7,24 +7,24 @@ import tailwindcss from '@tailwindcss/vite';
 import { CLIENT_ENTRY_POINTS as CLIENT_ENTRY_POINTS_RELATIVE } from './scripts/client-entry-points.mjs';
 import { NOTICES_FILE, packageRoot, renderNotices } from './scripts/third-party-notices.mjs';
 
-// Archivos fuente que declaran 'use client' porque usan hooks de React directamente
-// (Input, Textarea) o envuelven primitivas de Radix/Sonner marcadas 'use client'.
-// Rollup, incluso con output.preserveModules, no conserva directivas de módulos
-// no-entry (verificado en este repo: build con preserveModules:true + grep en dist/
-// dio 0 ocurrencias de "use client", ver commit de esta migración). Este plugin
-// reinyecta la directiva en el chunk exacto que le corresponde a cada archivo.
+// Source files that declare 'use client' because they use React hooks directly
+// (Input, Textarea) or wrap Radix/Sonner primitives marked 'use client'.
+// Rollup, even with output.preserveModules, does not keep the directives of non-entry
+// modules (verified in this repo: a build with preserveModules:true + grep on dist/
+// gave 0 occurrences of "use client", see the commit of this migration). This plugin
+// re-injects the directive into the exact chunk that belongs to each file.
 //
-// La lista en sí vive en scripts/client-entry-points.mjs (única fuente de verdad,
-// compartida con scripts/verify-client-directives.mjs) — no la dupliques acá.
+// The list itself lives in scripts/client-entry-points.mjs (single source of truth,
+// shared with scripts/verify-client-directives.mjs); don't duplicate it here.
 const CLIENT_ENTRY_POINTS = CLIENT_ENTRY_POINTS_RELATIVE.map((p) =>
   resolve(__dirname, p).replace(/\\/g, '/'),
 );
 
-// El entry `./charts` (src/charts.ts → dist/charts.js) es client-only completo: no necesita
-// el tratamiento granular por componente de CLIENT_ENTRY_POINTS, lleva 'use client' en toda
-// su cabecera. Se maneja aparte de esa lista a propósito — CLIENT_ENTRY_POINTS es
-// específicamente "componentes .tsx bajo src/components/" y scripts/verify-client-directives.mjs
-// la valida con esa semántica.
+// The `./charts` entry (src/charts.ts → dist/charts.js) is fully client-only: it doesn't need
+// the per-component treatment of CLIENT_ENTRY_POINTS, it carries 'use client' at the top of
+// the whole file. It is handled apart from that list on purpose: CLIENT_ENTRY_POINTS is
+// specifically ".tsx components under src/components/", and scripts/verify-client-directives.mjs
+// checks it with that meaning.
 const CHARTS_ENTRY = resolve(__dirname, 'src/charts.ts').replace(/\\/g, '/');
 
 function preserveUseClientDirective(): Plugin {
@@ -45,9 +45,9 @@ function preserveUseClientDirective(): Plugin {
   };
 }
 
-// Publica src/tailwind.css sin compilar como dist/tailwind.css (exports["./tailwind.css"])
-// para consumidores con Tailwind v4, que la compilan con su propio Tailwind. Copia literal:
-// sus @source y @plugin se resuelven relativos al archivo, ya dentro de dist/.
+// Publishes src/tailwind.css uncompiled as dist/tailwind.css (exports["./tailwind.css"])
+// for consumers with Tailwind v4, who compile it with their own Tailwind. Verbatim copy:
+// its @source and @plugin resolve relative to the file, already inside dist/.
 function copyTailwindSource(): Plugin {
   const source = resolve(__dirname, 'src/tailwind.css');
   return {
@@ -96,36 +96,36 @@ export default defineConfig({
     thirdPartyNotices(),
     dts({
       insertTypesEntry: true,
-      tsconfigPath: './tsconfig.app.json', // Asegúrate que este sea tu tsconfig correcto
-      // Por defecto, dts() toma include/exclude de tsconfig.app.json — que excluye
-      // *.stories.tsx/*.test.tsx, así que ninguno termina en dist/. *.test-d.tsx (test de
-      // tipos puro, ver Badge.types.test-d.tsx) usa ese nombre justamente para que tsc -b SÍ
-      // lo compile — por eso necesita su propia exclusión acá, explícita: pasar `exclude` lo
-      // reemplaza entero en vez de sumarlo al de tsconfig, así que hay que repetir los otros
-      // dos patrones para no perderlos.
+      tsconfigPath: './tsconfig.app.json', // Make sure this is the right tsconfig
+      // By default, dts() takes include/exclude from tsconfig.app.json, which excludes
+      // *.stories.tsx/*.test.tsx, so none of them ends up in dist/. *.test-d.tsx (a pure type
+      // test, see Badge.types.test-d.tsx) uses that name precisely so that tsc -b DOES compile
+      // it, which is why it needs its own explicit exclusion here: passing `exclude` replaces
+      // the tsconfig one entirely instead of adding to it, so the other two patterns have to be
+      // repeated to keep them.
       exclude: ['src/**/*.stories.tsx', 'src/**/*.test.tsx', 'src/**/*.test-d.tsx'],
     }),
   ],
   build: {
     lib: {
-      // Tres entry points: el barrel raíz (`.`), `./charts` (Chart aislado para no
-      // arrastrar recharts al barrel — ver src/charts.ts) y `./locale` (locales de DayPicker,
-      // datos puros, server-safe — ver src/locale.ts). Con preserveModules cada uno sale como
-      // dist/<name>.js (name = ruta relativa a preserveModulesRoot: 'src').
+      // Three entry points: the root barrel (`.`), `./charts` (Chart isolated so it doesn't
+      // pull recharts into the barrel, see src/charts.ts) and `./locale` (DayPicker locales,
+      // pure data, server-safe, see src/locale.ts). With preserveModules each one comes out as
+      // dist/<name>.js (name = path relative to preserveModulesRoot: 'src').
       entry: {
         index: resolve(__dirname, 'src/index.ts'),
         charts: resolve(__dirname, 'src/charts.ts'),
         locale: resolve(__dirname, 'src/locale.ts'),
       },
       name: 'CoreUI',
-      formats: ['es'], // Solo ESM: preserveModules requiere un archivo por módulo,
-      // incompatible con un bundle único UMD. Ver decisión registrada en la migración.
+      formats: ['es'], // ESM only: preserveModules requires one file per module,
+      // incompatible with a single UMD bundle. See the decision recorded in the migration.
     },
     rollupOptions: {
-      // ⚠️ CRÍTICO: Externalizar dependencias que no queremos empaquetar.
-      // Los paquetes de Radix/Sonner ahora son peerDependencies: el consumidor
-      // los resuelve desde su propio node_modules, donde ya traen su propia
-      // directiva 'use client' intacta.
+      // ⚠️ CRITICAL: externalize the dependencies we don't want to bundle.
+      // The Radix/Sonner packages are now peerDependencies: the consumer
+      // resolves them from its own node_modules, where they keep their own
+      // 'use client' directive intact.
       external: [
         'react',
         'react-dom',

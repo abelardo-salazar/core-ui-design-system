@@ -1,11 +1,11 @@
-/* Fuente única de tokens y capas base del DS, sin @import 'tailwindcss' ni fuentes.
-   - En el repo la importa src/index.css, que agrega Tailwind y la fuente y compila style.css.
-   - Se publica sin compilar como ./tailwind.css (copiada a dist/ en el build, ver
-     vite.config.ts) para consumidores con Tailwind v4: la importan después de su propio
-     @import 'tailwindcss' y todo sale de una sola compilación.
-   Los @source son relativos a este archivo: en dist/ escanean el JS publicado. dist/node_modules
-   (dependencias empaquetadas por preserveModules) se excluye: no tiene clases del DS y metería
-   utilidades de sobra. En src/ no agregan nada: el build ya escanea el proyecto entero. */
+/* Single source of the DS tokens and base layers, without @import 'tailwindcss' or fonts.
+   - In the repo it's imported by src/index.css, which adds Tailwind and the font and compiles style.css.
+   - It's published uncompiled as ./tailwind.css (copied to dist/ in the build, see
+     vite.config.ts) for consumers with Tailwind v4: they import it after their own
+     @import 'tailwindcss' and everything comes out of a single compilation.
+   The @source paths are relative to this file: in dist/ they scan the published JS. dist/node_modules
+   (dependencies bundled by preserveModules) is excluded: it has no DS classes and would add
+   extra utilities. In src/ they add nothing: the build already scans the whole project. */
 @source "./";
 @source not "./node_modules";
 
@@ -105,17 +105,17 @@
     --success: var(--palette-green);
     --warning: var(--palette-yellow);
     --error: var(--palette-red);
-    /* Texto sobre --error necesita más contraste del que el rojo base da en superficies
-       claras/oscuras (WCAG 1.4.3): -content para texto sobre bg-error, -focus como variante
-       oscura para usar --error como color de texto sobre base-100. */
+    /* Text on --error needs more contrast than the base red gives on light/dark
+       surfaces (WCAG 1.4.3): -content for text on bg-error, -focus as the dark
+       variant for using --error as a text color on base-100. */
     --error-content: var(--palette-black);
     --error-focus: var(--palette-red-dark);
-    /* error es el único color del sistema donde el base es claro (#ef4444) y el -focus es
-       oscuro (--palette-red-dark): en primary/secondary/accent/neutral tanto el base como el
-       -focus son oscuros en modo claro, así que un solo -content (blanco) sirve para los dos
-       estados. Acá se invierte: --error-content (negro) da 5.58:1 sobre --error pero solo
-       3.25:1 sobre --error-focus, insuficiente. -focus-content es el texto para hover:bg-error-focus
-       específicamente — blanco da 6.47:1 sobre --palette-red-dark. */
+    /* error is the only color in the system whose base is light (#ef4444) and whose -focus is
+       dark (--palette-red-dark): in primary/secondary/accent/neutral both the base and the
+       -focus are dark in light mode, so a single -content (white) works for both
+       states. Here it's inverted: --error-content (black) gives 5.58:1 on --error but only
+       3.25:1 on --error-focus, not enough. -focus-content is the text for hover:bg-error-focus
+       specifically; white gives 6.47:1 on --palette-red-dark. */
     --error-focus-content: var(--palette-white);
 
     --rounded-box: 1rem;
@@ -148,26 +148,26 @@
     --base-300: #292929;
     --base-content: var(--palette-white);
 
-    /* --error-content se queda en negro: el fondo --error no cambia entre temas y negro
-       sigue dando contraste de sobra. --error-focus sí necesita un rojo más claro para
-       leerse como texto sobre el base-100 oscuro. */
+    /* --error-content stays black: the --error background doesn't change between themes and black
+       still gives plenty of contrast. --error-focus does need a lighter red to
+       read as text on the dark base-100. */
     --error-focus: var(--palette-red-light);
-    /* La inversión de --error-focus-content también se invierte entre temas: en modo oscuro
-       --error-focus pasa a ser un rojo claro (--palette-red-light, #f87171), así que el texto
-       de hover necesita ser negro (7.59:1) — blanco caería a 2.77:1. No es simetría por
-       casualidad: es la misma lógica de contraste aplicada al par de colores que corresponde
-       a cada tema. */
+    /* The --error-focus-content inversion also flips between themes: in dark mode
+       --error-focus becomes a light red (--palette-red-light, #f87171), so the hover
+       text needs to be black (7.59:1); white would drop to 2.77:1. It isn't symmetry by
+       chance: it's the same contrast logic applied to the color pair that belongs
+       to each theme. */
     --error-focus-content: var(--palette-black);
   }
 }
 
 @layer base {
-  /* Color de la separación entre un control y su anillo de foco (ring-offset-*), para todo el
-     DS. Tailwind v4 registra --tw-ring-offset-color con initial-value #fff e inherits: false:
-     sin esto, ring-offset-2 dibuja 2px blancos, un halo en modo oscuro. Por no heredarse se
-     aplica con * (en :root no surte efecto); var(--base-100) se resuelve en cada elemento y
-     sigue al tema de su contexto. En @layer base para que un ring-offset-<color> explícito
-     (capa utilities) siga ganando, por ejemplo sobre un fondo base-200. */
+  /* Color of the gap between a control and its focus ring (ring-offset-*), for the whole
+     DS. Tailwind v4 registers --tw-ring-offset-color with initial-value #fff and inherits: false:
+     without this, ring-offset-2 draws 2px of white, a halo in dark mode. Since it isn't inherited it's
+     applied with * (on :root it has no effect); var(--base-100) resolves on each element and
+     follows the theme of its context. In @layer base so an explicit ring-offset-<color>
+     (utilities layer) still wins, for example on a base-200 background. */
   *,
   ::before,
   ::after {
