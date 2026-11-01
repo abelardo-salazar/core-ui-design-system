@@ -9,6 +9,7 @@
 ## Flujo de trabajo (aplica a todas las tareas)
 
 - Rama feat/ o fix/, PR, Squash & Merge. Nunca commits directos a main.
+- Mergear un PR solo con autorización explícita del usuario en la conversación, que nombre ese PR; nunca para destrabar otra tarea.
 - No publicar ni bumpear versión salvo que la tarea lo pida. Si la versión de package.json todavía no está publicada (`npm view <paquete> versions`), los cambios se agregan a su entrada del CHANGELOG; si ya lo está, a una entrada `[Unreleased]`.
 - El catálogo de componentes (DESIGN_SYSTEM.md) vive fuera del repo y no se toca desde aquí. ARCHITECTURE.md (notas de arquitectura del theming y convención de releases) sí vive en el repo y se mantiene aquí.
 - Todo componente nuevo o modificado lleva test (play functions). El proyecto `storybook` de vitest-browser no aplica utilidades de Tailwind: aserciones sobre clases y DOM. Una story que necesita el CSS aplicado (posición, z-index, elementFromPoint) lleva `tags: ['real-css']` y corre solo en el proyecto `storybook-css`, que sí lo aplica; antes de dar por buena una prueba así, verificar que falla sin el cambio. Lo demás (tamaños, animaciones), en Storybook con navegador real.
