@@ -61,6 +61,10 @@ jobs:
       - name: Format
         run: npm run format:check
 
+      # Version badge and line, first CHANGELOG heading and the Server Components table.
+      - name: Verify README
+        run: npm run verify:readme
+
       - name: Typecheck
         run: npx tsc -b
 
