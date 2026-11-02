@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+### Added
+
+- **`./fonts.css`: la fuente Ubuntu autoalojada.** Nuevo export con las reglas `@font-face` de
+  Ubuntu (pesos 300, 400, 500 y 700, normal e itálica) y sus archivos woff2 dentro del paquete,
+  sin peticiones a terceros. Para proyectos con Tailwind que importan `./tailwind.css` y quieren
+  Ubuntu sin `next/font`: se importa después de `./tailwind.css`. Funciona con `@tailwindcss/vite`
+  y `@tailwindcss/postcss`; con `@tailwindcss/cli` las rutas de los archivos quedan rotas. Ver
+  README § Setup Inicial.
+
+### Changed
+
+- **`style.css` ya no hace peticiones a Google Fonts.** Incluye Ubuntu autoalojada, con las mismas
+  variantes que cargaba antes, así que el aspecto no cambia. Antes cada visita mandaba su IP a
+  Google. **Migración:** nada que cambiar. Si tu CSP permitía `fonts.googleapis.com` y
+  `fonts.gstatic.com` solo por este paquete, puedes quitarlos.
+
 ### Fixed
 
 - **El paquete incluía archivos del proyecto de ejemplo de Vite y Storybook**: `dist/App.d.ts`,

@@ -87,5 +87,10 @@ jobs:
       - name: Verify Tailwind consumer
         run: npm run verify:tailwind-consumer
 
+      # Every font url() of the published fonts.css and style.css points to a file of the
+      # tarball, neither mentions Google Fonts, and a Tailwind consumer resolves them.
+      - name: Verify fonts
+        run: npm run verify:fonts
+
       - name: Test
         run: npm run test

@@ -1,13 +1,14 @@
-// Third-party notices for the packages that preserveModules copies into dist/node_modules.
+// Third-party notices for the packages that preserveModules copies into dist/node_modules and for
+// the font packages whose files the build copies into dist/fonts/ (see scripts/fonts.mjs).
 //
-// MIT, ISC and Apache-2.0 only allow redistribution if the copyright and permission notice
-// travel with the code. Bundled files are copied without their LICENSE, so the build emits
+// MIT, ISC, Apache-2.0 and the Ubuntu Font Licence only allow redistribution if the copyright and
+// licence notice travel with the files. Bundled files are copied without their LICENSE, so the build emits
 // dist/THIRD-PARTY-NOTICES.txt with each package's name, version, declared license and the
 // verbatim contents of its LICENSE/LICENCE/COPYING/NOTICE files.
 //
 // Used by the `third-party-notices` plugin in vite.config.ts (generation, from the bundle's
-// module ids) and by scripts/verify-third-party-notices.mjs (guardrail, from the files
-// actually on disk in dist/node_modules). Both share packageRoot() so they agree on what a
+// module ids and src/fonts.css) and by scripts/verify-third-party-notices.mjs (guardrail, from the
+// files actually on disk in dist/node_modules and dist/fonts). Both share packageRoot() so they agree on what a
 // package is, but they take the package list from different sources.
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -86,8 +87,9 @@ export function renderNotices(packageDirs) {
   const header = [
     'Third-party notices',
     '',
-    'This package redistributes, under dist/node_modules, code from the third-party packages',
-    'listed below. Each entry reproduces the license and copyright notice of that package.',
+    'This package redistributes, under dist/node_modules, code from third-party packages and,',
+    'under dist/fonts, font files from third-party packages. They are listed below. Each entry',
+    'reproduces the license and copyright notice of that package.',
   ].join('\n');
 
   return [header, ...packages.map(renderPackage), RULE, ''].join('\n\n');

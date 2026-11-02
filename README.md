@@ -85,10 +85,20 @@ Para proyectos con Tailwind v4 (4.1 o posterior; `tailwindcss` es peer opcional 
 - Las utilidades de los tokens quedan disponibles para tu código, con opacidad incluida: `bg-primary/5`, `text-base-content/65`, `border-error/40`.
 - **No la combines con `style.css`**: `style.css` ya viene compilado, y junto a tu Tailwind quedan dos compilaciones en las mismas capas. Algunas utilidades responsive de los componentes dejan de aplicarse (por ejemplo, el `md:px-8` de `Container`). El porqué está en [ARCHITECTURE § Orden de utilidades entre dos compilaciones](./ARCHITECTURE.md#orden-de-utilidades-entre-dos-compilaciones).
 
-**La fuente la cargas tú.** `./tailwind.css` no importa Google Fonts: así eliges cómo cargarla, por ejemplo autoalojada con `next/font`, sin una petición a un tercero que bloquee el renderizado. El token `--font-sans` vale `'Ubuntu', ui-sans-serif, system-ui, sans-serif`:
+**La fuente se importa aparte.** `./tailwind.css` no trae la fuente: eliges cómo cargarla. El token `--font-sans` vale `'Ubuntu', ui-sans-serif, system-ui, sans-serif`. Usa una sola de estas opciones:
 
-- Con un `@import` de Google Fonts o un `@font-face` propio, basta con que la familia se llame `Ubuntu`. El `@import url(...)` va antes de `@import 'tailwindcss'`.
-- Con `next/font`, exponla en `--font-sans` con la opción `variable`. Así `--font-sans` apunta a la familia que declara `next/font`, sin depender de su nombre, y suma la fuente de respaldo con métricas ajustadas que genera (`Ubuntu Fallback`), que evita saltos de layout mientras carga. Verificado con Next 15.5:
+- **`./fonts.css`** _(desde 0.8)_: Ubuntu autoalojada, con los archivos de fuente dentro del paquete y sin peticiones a terceros. Trae las mismas variantes que `style.css` (pesos 300, 400, 500 y 700, normal e itálica), y el navegador solo descarga las que usa tu página. Impórtala junto a los demás `@import`, al principio de la hoja (un `@import` después de otras reglas se ignora), después de `./tailwind.css`:
+
+  ```css
+  @import 'tailwindcss';
+  @import '@abelardo-salazar/core-ui-design-system/tailwind.css';
+  @import '@abelardo-salazar/core-ui-design-system/fonts.css';
+  ```
+
+  Las rutas de los archivos son relativas a `fonts.css`. `@tailwindcss/vite` y `@tailwindcss/postcss` (el de Next) las reescriben al incluir el archivo. `@tailwindcss/cli` no las reescribe: si compilas con el CLI, usa `next/font` o un `@font-face` propio.
+
+- Con un `@font-face` propio, basta con que la familia se llame `Ubuntu`.
+- Con `next/font`, sin importar `./fonts.css`, exponla en `--font-sans` con la opción `variable`. Así `--font-sans` apunta a la familia que declara `next/font`, sin depender de su nombre, y suma la fuente de respaldo con métricas ajustadas que genera (`Ubuntu Fallback`), que evita saltos de layout mientras carga. Verificado con Next 15.5:
 
 ```tsx
 // app/layout.tsx
@@ -111,7 +121,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 ### Sin Tailwind
 
-Importa `style.css`, ya compilado y con la fuente Ubuntu de Google Fonts incluida, en el punto de entrada de tu aplicación (ej. `main.tsx`, `App.tsx` o `layout.tsx`):
+Importa `style.css`, ya compilado y con la fuente Ubuntu incluida, en el punto de entrada de tu aplicación (ej. `main.tsx`, `App.tsx` o `layout.tsx`):
 
 ```tsx
 // main.tsx
@@ -214,6 +224,18 @@ Estos son los tokens semánticos soportados como superficie pública de theming,
 | `--error-focus-content` | `#ffffff`       | `#000000`                    |
 
 > `--info`, `--success` y `--warning` **no** tienen variantes `-focus`/`-content` en el sistema actual — solo `--error` las tiene completas (por el contraste de texto que necesita, ver comentarios en `src/tailwind.css`). No agregues `--info-focus`, `--success-content`, etc. asumiendo simetría: no existen y no tienen efecto salvo que también se definan.
+
+#### Fuente: `--font-sans`
+
+`--font-sans` es la familia de todo el DS (la declara `html` y la hereda todo el texto). Su valor por defecto es `'Ubuntu', ui-sans-serif, system-ui, sans-serif`, igual en los dos temas. Se sobrescribe como los colores, con CSS sin capa (ver la sección siguiente):
+
+```css
+:root {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+```
+
+Cargar la otra fuente queda a tu cargo. Con `style.css` o `./fonts.css`, los `@font-face` de Ubuntu siguen declarados, pero el navegador solo descarga un archivo de fuente cuando algún texto usa esa familia: si ningún texto usa Ubuntu, sus archivos no se descargan.
 
 ### Patrón sancionado: override sin capa (`@layer`)
 
@@ -2096,11 +2118,16 @@ push nuevo a la misma rama, se cancela el run anterior. Pasos, en orden:
    `verify-client-directives --post-build` (post: `dist/index.js` sin `recharts`,
    `dist/locale.js` sin el barrel raíz ni `recharts`, y `sideEffects` con los módulos con efectos
    de las dependencias empaquetadas) + `verify-third-party-notices` (cada paquete de
-   `dist/node_modules` aparece en `dist/THIRD-PARTY-NOTICES.txt`).
+   `dist/node_modules`, y el de cada archivo de `dist/fonts`, aparece en
+   `dist/THIRD-PARTY-NOTICES.txt`).
 9. `npm run verify:tailwind-consumer` — empaqueta con `npm pack`, arma sin red un consumidor
    con Tailwind v4 que importa `./tailwind.css` y lo compila con `@tailwindcss/cli`. Qué
    verifica y por qué: [ARCHITECTURE § Orden de utilidades entre dos compilaciones](./ARCHITECTURE.md#orden-de-utilidades-entre-dos-compilaciones).
-10. `npm run test` — Vitest en modo browser (Chromium headless), con las stories como tests, en
+10. `npm run verify:fonts` — sobre el mismo tarball: cada `url()` de fuente de `fonts.css` y
+    `style.css` apunta a un archivo del paquete, ninguno menciona Google Fonts, y un consumidor
+    con Tailwind que importa `./tailwind.css` y `./fonts.css` compila con las rutas resueltas.
+    Por qué: [ARCHITECTURE § Fuente autoalojada](./ARCHITECTURE.md#fuente-autoalojada).
+11. `npm run test` — Vitest en modo browser (Chromium headless), con las stories como tests, en
     dos proyectos que corren uno después del otro:
 
 - `storybook`: todas las stories salvo las de tag `real-css`. No aplica las utilidades de
