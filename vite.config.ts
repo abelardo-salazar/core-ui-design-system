@@ -6,6 +6,7 @@ import { resolve } from 'path';
 import tailwindcss from '@tailwindcss/vite';
 import { CLIENT_ENTRY_POINTS as CLIENT_ENTRY_POINTS_RELATIVE } from './scripts/client-entry-points.mjs';
 import { NOTICES_FILE, packageRoot, renderNotices } from './scripts/third-party-notices.mjs';
+import { FONTS_DIR, fontSourceFiles, renderPublishedFonts } from './scripts/fonts.mjs';
 
 // Source files that declare 'use client' because they use React hooks directly
 // (Input, Textarea) or wrap Radix/Sonner primitives marked 'use client'.
@@ -62,10 +63,27 @@ function copyTailwindSource(): Plugin {
   };
 }
 
+// Publishes src/fonts.css as dist/fonts.css (exports["./fonts.css"]) with its url()s rewritten
+// to ./fonts/<file>: the same woff2 files that style.css uses, which Vite writes to dist/fonts/
+// because style.css references them (see assetFileNames below), so nothing is duplicated.
+function publishFonts(): Plugin {
+  return {
+    name: 'publish-fonts',
+    apply: 'build',
+    generateBundle() {
+      this.emitFile({
+        type: 'asset',
+        fileName: 'fonts.css',
+        source: renderPublishedFonts(__dirname),
+      });
+    },
+  };
+}
+
 // Emits dist/THIRD-PARTY-NOTICES.txt with the license of every package whose modules end up in
-// the bundle (preserveModules copies them into dist/node_modules without their LICENSE).
-// Rendering lives in scripts/third-party-notices.mjs, shared with the guardrail
-// scripts/verify-third-party-notices.mjs.
+// the bundle (preserveModules copies them into dist/node_modules without their LICENSE) and of
+// the font packages whose files end up in dist/fonts/. Rendering lives in
+// scripts/third-party-notices.mjs, shared with the guardrail scripts/verify-third-party-notices.mjs.
 function thirdPartyNotices(): Plugin {
   return {
     name: 'third-party-notices',
@@ -78,6 +96,10 @@ function thirdPartyNotices(): Plugin {
           const dir = packageRoot(id);
           if (dir) packageDirs.add(dir);
         }
+      }
+      for (const file of fontSourceFiles(__dirname)) {
+        const dir = packageRoot(file);
+        if (dir) packageDirs.add(dir);
       }
       this.emitFile({
         type: 'asset',
@@ -93,6 +115,7 @@ export default defineConfig({
     react(),
     tailwindcss(), // Soporte Tailwind v4
     copyTailwindSource(),
+    publishFonts(),
     thirdPartyNotices(),
     dts({
       insertTypesEntry: true,
@@ -106,6 +129,12 @@ export default defineConfig({
       exclude: ['src/**/*.stories.tsx', 'src/**/*.test.tsx', 'src/**/*.test-d.tsx'],
     }),
   ],
+  // Relative asset URLs: style.css points to its fonts as ./fonts/<file>, not /fonts/<file>
+  // (the consumer serves the package from its own bundle, never from the site root).
+  // Library mode inlines every asset as a data URI and ignores assetsInlineLimit; the url()s of
+  // src/fonts.css carry ?no-inline so the fonts are emitted as files: style.css and
+  // dist/fonts.css point to the same ones, and the browser only downloads the subsets it needs.
+  base: './',
   build: {
     lib: {
       // Three entry points: the root barrel (`.`), `./charts` (Chart isolated so it doesn't
@@ -151,6 +180,11 @@ export default defineConfig({
         preserveModules: true,
         preserveModulesRoot: 'src',
         entryFileNames: '[name].js',
+        // Fonts without a hash in dist/fonts/, where dist/fonts.css expects them.
+        assetFileNames: (asset) =>
+          asset.names.some((name) => /\.woff2?$/.test(name))
+            ? `${FONTS_DIR}/[name][extname]`
+            : '[name][extname]',
         exports: 'named',
       },
     },

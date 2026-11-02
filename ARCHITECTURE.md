@@ -52,7 +52,7 @@ Qué hoja importar según el proyecto está en [README § Setup Inicial](./READM
 
 No contiene `@import 'tailwindcss'` ni la fuente. La importan dos lugares:
 
-- **`src/index.css`**: fuente de Google Fonts + `@import 'tailwindcss'` + `@import './tailwind.css'`. De ahí salen `style.css` (`vite build`) y los estilos de Storybook (`.storybook/preview.ts`).
+- **`src/index.css`**: `@import 'tailwindcss'` + `@import './fonts.css'` (Ubuntu autoalojada, ver [Fuente autoalojada](#fuente-autoalojada)) + `@import './tailwind.css'`. De ahí salen `style.css` (`vite build`) y los estilos de Storybook (`.storybook/preview.ts`).
 - **El paquete publicado**: el plugin `copyTailwindSource` de `vite.config.ts` copia el archivo sin compilar a `dist/tailwind.css` (`exports["./tailwind.css"]`), y lo compila el Tailwind del consumidor.
 
 **Los `@source`** son relativos al propio archivo, así que en `dist/` escanean el JS publicado. Hacen falta porque la detección automática de Tailwind ignora `node_modules`: sin ellos, el consumidor no generaría las clases que solo existen en el JS del paquete (por ejemplo `sm:text-left`, de `SheetHeader`).
@@ -95,7 +95,7 @@ Falla si:
 - el CSS pesa más que `style.css`, la señal de que se escaneó `dist/node_modules`;
 - un `@plugin` no está en `dependencies`.
 
-**Por qué `./tailwind.css` no trae la fuente**: así el consumidor elige cómo cargarla (con `next/font` se autoaloja) y la guardia no depende de la red.
+**Por qué `./tailwind.css` no trae la fuente**: así el consumidor elige cómo cargarla (`./fonts.css`, `next/font` o la suya) y la guardia no depende de la red.
 
 ## Versiones y tags
 
@@ -208,6 +208,32 @@ El paquete se distribuye por GitHub Packages. El `.npmrc` del consumidor (ver [R
 
 Lo específico de un consumidor queda fuera del design system. Precedente: Kanban, que es un proyecto aparte.
 
+### Fuente autoalojada
+
+`style.css` incluye Ubuntu autoalojada: los archivos woff2 viajan en el paquete (`dist/fonts/`) y las reglas `@font-face` los cargan con rutas relativas. Las mismas reglas se publican solas como `./fonts.css`.
+
+**Por qué:** antes `style.css` importaba Ubuntu de Google Fonts. Cada visita a un sitio del consumidor mandaba su IP a Google sin que el consumidor lo supiera, un riesgo de GDPR, y obligaba a abrir `fonts.googleapis.com` y `fonts.gstatic.com` en su CSP.
+
+**Por qué un archivo aparte:** `./tailwind.css` sigue sin fuente, para que quien la carga con `next/font` no reciba `@font-face` que no usa. Quien sí quiere Ubuntu desde el paquete importa `./fonts.css`. `style.css` lo incluye en línea en vez de importarlo, así no suma una petición. Las dos hojas apuntan a los mismos archivos de `dist/fonts/`: no hay copias.
+
+**Por qué las mismas ocho variantes:** pesos 300, 400, 500 y 700, normal e itálica, cada una partida en sus seis subconjuntos por `unicode-range`, con `font-display: swap`, como las servía Google. Los componentes del DS solo usan 400, 500 y 700, pero un consumidor puede usar el peso 300 o la itálica en su propio código, y con menos variantes vería un cambio de aspecto. Ubuntu no tiene 600: `font-semibold` se resuelve con 700, como hasta ahora. El navegador solo descarga los archivos de las variantes y subconjuntos que usa la página, así que el costo de traerlas todas es el tamaño del paquete (unos 1,25 MB de woff2), no lo que descarga cada visita. Solo woff2, sin el respaldo woff: es lo que Google sirve a los navegadores actuales.
+
+**De dónde salen:** de `@fontsource/ubuntu`, en `devDependencies`. El build copia sus archivos dentro de `dist/`, así que el consumidor no necesita instalarlo, y no trae `'use client'` ni estado ([peer o dependency](#peer-o-dependency) no aplica). `src/fonts.css` se generó desde su CSS. Sus `unicode-range` coinciden con los de Google salvo el final de latin-ext (`U+20C0` en vez de `U+20C4`), cuatro símbolos de moneda recientes que Ubuntu no tiene.
+
+**Cómo se empaqueta:** las `url()` de `src/fonts.css` apuntan a `node_modules/@fontsource/ubuntu/files/`, para que Vite y Storybook las resuelvan en desarrollo, y llevan `?no-inline`: en modo librería Vite incrusta todo asset como data URI e ignora `assetsInlineLimit`. `assetFileNames` los deja en `dist/fonts/` sin hash, `base: './'` hace relativas las rutas de `style.css`, y el plugin `publishFonts` emite `dist/fonts.css` con las rutas reescritas a `./fonts/` (`scripts/fonts.mjs`).
+
+**Rutas en el consumidor con Tailwind:** al incluir `./fonts.css` con `@import`, `@tailwindcss/vite` y `@tailwindcss/postcss` reescriben sus rutas relativas a la hoja que lo importa. `@tailwindcss/cli` no lo hace, y las rutas quedan rotas; el README lo avisa.
+
+**La guardia** (`scripts/verify-fonts.mjs`, paso `verify:fonts` del CI), sobre el tarball de `npm pack` y el mismo consumidor sin red que `verify:tailwind-consumer` (`scripts/packed-consumer.mjs`), falla si:
+
+- una `url()` de fuente de `fonts.css` o de `style.css` publicados no apunta a un archivo del paquete;
+- alguno de los dos menciona `googleapis` o `gstatic`;
+- un consumidor que importa `./tailwind.css` y `./fonts.css`, compilado con `@tailwindcss/node` y la reescritura de rutas que usan `@tailwindcss/vite` y `@tailwindcss/postcss`, no compila o deja una ruta que no llega a un archivo del paquete.
+
+Una ruta rota no da error en el navegador: cae en silencio a la fuente de respaldo. Por eso se verifica en el paquete y no en el navegador.
+
+**Licencia:** Ubuntu Font Licence 1.0. Permite redistribuir los archivos si viaja la licencia, que va en `dist/THIRD-PARTY-NOTICES.txt` (ver la sección siguiente).
+
 ### Licencia MIT y avisos de terceros
 
 El DS se publica bajo MIT. Razones: es la licencia del ecosistema del que forma parte (React, Radix, Tailwind y casi todas sus dependencias), los equipos legales de los clientes la aceptan sin revisión, y el DS sigue siendo propiedad del autor aunque se use en proyectos de terceros. El `LICENSE` vive en la raíz del repo; npm lo incluye en el paquete aunque `files` solo liste `dist`.
@@ -215,7 +241,8 @@ El DS se publica bajo MIT. Razones: es la licencia del ecosistema del que forma 
 `preserveModules` copia en `dist/node_modules` el código de las dependencias empaquetadas, pero no sus archivos de licencia. MIT e ISC (y Apache-2.0) solo permiten redistribuir si el aviso de copyright y de permiso viaja con el código, así que el build genera `dist/THIRD-PARTY-NOTICES.txt` con el nombre, la versión, la licencia y el texto de los `LICENSE`/`NOTICE` de cada paquete.
 
 - **Generación:** el plugin `third-party-notices` de `vite.config.ts` toma los paquetes de los módulos del bundle. No necesita una devDependency: el build ya sabe qué archivo de `node_modules` empaquetó.
-- **Guardrail:** `scripts/verify-third-party-notices.mjs` corre en `npm run build`. Toma la lista de lo que hay en disco en `dist/node_modules`, no de `package.json`, y falla si un paquete no tiene entrada. Así, una dependencia transitiva nueva no se cuela sin aviso.
+- **Fuentes:** los archivos de `dist/fonts/` no vienen de módulos del bundle sino de `src/fonts.css`. El plugin suma el paquete al que apuntan sus `url()` (hoy `@fontsource/ubuntu`, Ubuntu Font Licence 1.0).
+- **Guardrail:** `scripts/verify-third-party-notices.mjs` corre en `npm run build`. Toma la lista de lo que hay en disco en `dist/node_modules` y `dist/fonts`, no de `package.json`, y falla si un paquete no tiene entrada. Cada archivo de `dist/fonts` se rastrea por su nombre hasta la `url()` de `src/fonts.css` que lo trae, y de ahí a su paquete. Así, una dependencia transitiva nueva o un archivo de fuente sin origen no se cuelan sin aviso.
 - Un paquete sin archivo de licencia queda con la licencia, el autor y el repositorio que declara su `package.json`, y una nota que lo dice. El aviso no se inventa.
 
 ### Detección de vulnerabilidades
