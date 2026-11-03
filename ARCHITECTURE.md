@@ -133,6 +133,12 @@ Razón: con `preserveModules`, Rollup pierde las directivas de los chunks que no
 
 `tailwindcss-animate` está en `dependencies` por otro motivo: ver [`src/tailwind.css`](#srctailwindcss-fuente-única-de-tokens-y-capas-base).
 
+### Separator y AspectRatio propios
+
+`Separator` y `AspectRatio` son implementación propia, con la misma API, los mismos tipos y el mismo DOM que las primitivas de Radix que reemplazaron (`@radix-ui/react-separator` y `@radix-ui/react-aspect-ratio`). Eso incluye `asChild` y el atributo `data-radix-aspect-ratio-wrapper`. Las stories de los dos componentes fijan ese DOM; se escribieron contra Radix 1.1.15 antes del reemplazo.
+
+**Por qué:** desde 1.2.0 esas primitivas traen `'use client'`. Por el [criterio de peer o dependency](#peer-o-dependency) habrían pasado a peers, y los dos componentes habrían dejado de ser server-safe. Son un `div` con atributos (y un `div` exterior con `padding-bottom`, en AspectRatio), sin hooks ni estado. Mantenerlos propios los deja server-safe por construcción. `asChild` usa `Slot` de `@radix-ui/react-slot`, que sigue en `dependencies` porque no trae directiva.
+
 ### Solo ESM
 
 El paquete sale solo en ESM, sin UMD: `preserveModules` emite un archivo por módulo, incompatible con un bundle único.

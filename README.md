@@ -691,8 +691,9 @@ Uso (ejemplos, extraídos de `Image.stories.tsx`):
 
 - **`Separator`**
   - **Exports:** `Separator`.
-  - **Props principales:** `orientation?: 'horizontal' | 'vertical'` (por defecto `horizontal`); `decorative?: boolean`; `className?: string`.
-  - **Descripción:** componente ligero de separación visual que usa `@radix-ui/react-separator` y variantes (`horizontal` / `vertical`) para establecer dimensiones (`h-[1px] w-full` o `h-full w-[1px]`).
+  - **Props principales:** `orientation?: 'horizontal' | 'vertical'` (por defecto `horizontal`); `decorative?: boolean` (por defecto `true`); `asChild?: boolean`; `className?: string`; acepta `React.HTMLAttributes<HTMLDivElement>`.
+  - **Descripción:** componente ligero de separación visual, con variantes (`horizontal` / `vertical`) que fijan sus dimensiones (`h-[1px] w-full` o `h-full w-[1px]`). Con `decorative` (por defecto) lleva `role="none"` y queda fuera del árbol de accesibilidad; con `decorative={false}` lleva `role="separator"` y, si es vertical, `aria-orientation="vertical"`. `data-orientation` refleja la orientación en los dos casos.
+  - **`asChild`:** renderiza el único hijo en lugar del `div` y le pasa `role`, `data-orientation`, las clases y la `ref`. Sirve, por ejemplo, para usar un `<hr>` o un `<li>` dentro de una lista.
   - **Uso:**
 
 ```tsx
@@ -899,9 +900,10 @@ Notas:
 **Desde 0.4.**
 
 - **Exports:** `AspectRatio`.
-- **Props principales:** `React.ComponentPropsWithoutRef<typeof AspectRatioPrimitive.Root>` (de `@radix-ui/react-aspect-ratio`) — principalmente `ratio?: number` (ej. `16 / 9`).
+- **Props principales:** `ratio?: number` (ej. `16 / 9`, por defecto `1`); `asChild?: boolean`; acepta `React.HTMLAttributes<HTMLDivElement>`.
+- **`asChild`:** renderiza el único hijo en lugar del `div` interior y le pasa las props, la `ref` y los estilos de posición. Sirve, por ejemplo, para que un `<img>` o un `<video>` llene el recuadro sin un `div` de más.
 
-Descripción: fuerza una relación de aspecto sobre su contenido usando CSS puro (el "padding-bottom trick" que resuelve la propia primitiva de Radix), sin hooks ni estado (ver [Server Components](#server-components)). `AspectRatio` es un contenedor de composición, no una API todo-en-uno: se combina con otro contenido (por ejemplo `Image`), igual que `Popover`+`Calendar` se combinan para armar `DatePicker`.
+Descripción: fuerza una relación de aspecto sobre su contenido usando CSS puro (el "padding-bottom trick"), sin hooks ni estado (ver [Server Components](#server-components)). Renderiza dos `div`: uno exterior con `data-radix-aspect-ratio-wrapper` que fija la proporción, y uno interior en posición absoluta que la llena y recibe las props (`className`, `style`, `ref`, etc.). `AspectRatio` es un contenedor de composición, no una API todo-en-uno: se combina con otro contenido (por ejemplo `Image`), igual que `Popover`+`Calendar` se combinan para armar `DatePicker`.
 
 Uso (ejemplos, extraídos de `AspectRatio.stories.tsx`):
 
