@@ -5,7 +5,7 @@
 ![TypeScript](https://img.shields.io/badge/typescript-5.9+-3178C6.svg)
 ![Registry](https://img.shields.io/badge/registry-npm-CB3837.svg)
 
-**Última versión publicada:** `0.9.1`.
+**Última versión publicada:** `0.9.1`. `main` tiene cambios sin publicar: ver [CHANGELOG § Unreleased](./CHANGELOG.md#unreleased).
 
 **Core UI** es la biblioteca de componentes oficial para nuestros productos digitales. Construida sobre **React 19**, **Radix UI** y **Tailwind CSS v4**, ofrece componentes accesibles (A11y), ligeros y listos para producción.
 
@@ -1329,7 +1329,7 @@ Nota: para accesibilidad, envuelve el `Switch` en un `label` o provee `aria-labe
 - **Exports:** `Calendar`.
 - **Props principales:** `CalendarProps = DayPickerProps` (tipo re-exportado de `@daypicker/react`) — soporta todos los props reales de `DayPicker`: `mode: 'single' | 'multiple' | 'range'`, `selected`, `onSelect`, `showOutsideDays?: boolean` (default `true`), etc.
 
-**Comportamiento no obvio:** `Calendar` es un wrapper de estilos sobre `@daypicker/react`, no una calendarización propia del DS. Reemplaza los componentes internos `Chevron`, `PreviousMonthButton`, `NextMonthButton` y `DayButton` de DayPicker por versiones que usan `buttonVariants` del DS (mismos estilos que `Button`). El estilo visual de cada día sale de los `modifiers` que provee DayPicker, no de una prop propia: `today` (borde + texto `primary` si no está seleccionado), `outside` (opacidad reducida), `disabled` (`pointer-events-none`), `range_middle` (fondo `primary/10`), `selected`/`range_start`/`range_end` (fondo `primary` sólido).
+**Comportamiento no obvio:** `Calendar` es un wrapper de estilos sobre `@daypicker/react`, no una calendarización propia del DS. Por defecto usa versiones propias de `Chevron`, `PreviousMonthButton`, `NextMonthButton` y `DayButton`, con `buttonVariants` del DS (mismos estilos que `Button`). La prop `components` se mezcla con ellas clave por clave, igual que `classNames`: lo que pases gana y el resto sigue siendo del DS. Por ejemplo, con un `DayButton` propio, las flechas conservan su estilo y su área táctil. El estilo visual de cada día sale de los `modifiers` que provee DayPicker, no de una prop propia: `today` (borde + texto `primary` si no está seleccionado), `outside` (opacidad reducida), `disabled` (`pointer-events-none`), `range_middle` (fondo `primary/10`), `selected`/`range_start`/`range_end` (fondo `primary` sólido).
 
 **Área táctil:** las flechas de navegación miden 28x28px, pero responden en 44x44px gracias a un `::after`, sin cambiar su aspecto ni su foco. Los días son una excepción: quedan en 36px sin extensión, porque son una grilla contigua en la que un área mayor pisaría el día vecino, y 44px no cabe en 320px de ancho. `DatePicker` hereda ambas cosas. La extensión de las flechas cabe en el `p-3` de la raíz: si reduces ese padding con `className`, evita un `overflow` en un ancestro que la recorte.
 

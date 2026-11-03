@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- **`Calendar` mezcla la prop `components` con los componentes del DS.** Antes, pasar `components`
+  reemplazaba todos: con solo un `DayButton` propio se perdían las flechas y el `Chevron` del DS, y
+  con ellas el área táctil de 44px. Ahora lo que pases gana clave por clave y el resto sigue siendo
+  del DS. **Migración:** si pasabas `components` parcial y contabas con los componentes por defecto
+  de DayPicker en las demás claves, pásalos explícitamente.
+
 ## [0.9.1] - 2026-11-03
 
 ### Fixed
