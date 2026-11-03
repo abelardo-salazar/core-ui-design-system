@@ -11,7 +11,7 @@
     "./dist/node_modules/d3-format/src/defaultLocale.js",
     "./dist/node_modules/d3-time-format/src/defaultLocale.js"
   ],
-  "description": "Sistema de diseño privado",
+  "description": "Sistema de diseño de componentes React accesibles, con Radix UI y Tailwind CSS v4",
   "scripts": {
     "test": "vitest run",
     "build": "node scripts/verify-client-directives.mjs && tsc -b && vite build && node scripts/verify-client-directives.mjs --post-build && node scripts/verify-third-party-notices.mjs",
