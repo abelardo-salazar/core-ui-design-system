@@ -1503,7 +1503,9 @@ export function BookingDate() {
 
 - **Exports:** `Combobox`; tipos `ComboboxProps`, `ComboboxSingleProps`, `ComboboxMultipleProps`, `ComboboxLabelProps`, `ComboboxModeProps`, `ComboboxListVisibility`, `ComboboxOption`. Requiere el peer `cmdk`.
 - **Props principales:**
-  - `options: { value: string; label: string; disabled?: boolean }[]` (requerido).
+  - `options: ComboboxOption[]` (requerido). Cada opción lleva `value: string`, `label: string` y `disabled?: boolean`, además de:
+    - `description?: string` _(desde 0.10)_ — segunda línea bajo el `label`; sobre todo, explica por qué una opción está deshabilitada. Forma parte del nombre accesible de la opción y, en una opción deshabilitada, no se atenúa. El filtro no la busca, y el valor elegido y el `Chip` muestran solo el `label`.
+    - `group?: string` _(desde 0.10)_ — encabezado del grupo. Cada grupo aparece donde está su primera opción, con todas las suyas aunque no sean contiguas en `options`. Las opciones sin `group` van fuera de grupos, en su lugar. Un grupo sin resultados del filtro desaparece.
   - `label: string` **o** `aria-label: string` — uno de los dos, no ambos (lo exigen los tipos). `label` dibuja la etiqueta visible, con el estilo de la de `Input`; `aria-label` nombra el campo sin etiqueta visible.
   - `multiple?: boolean` — sin `multiple`: `value?`/`defaultValue?: string` (`''` sin valor) y `onValueChange?: (value: string) => void`. Con `multiple`: `string[]` y `(value: string[]) => void`.
   - `mode?: 'popover' | 'inline'` (default `'popover'`).

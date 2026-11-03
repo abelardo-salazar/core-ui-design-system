@@ -9,6 +9,9 @@ import { Chip } from '../Chip';
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from '../Popover';
 import {
   comboboxFieldVariants,
+  comboboxGroupClass,
+  comboboxItemDescriptionVariants,
+  comboboxItemDimmedClass,
   comboboxItemVariants,
   comboboxMultipleTriggerVariants,
   comboboxSearchVariants,
@@ -20,6 +23,13 @@ export interface ComboboxOption {
   value: string;
   label: string;
   disabled?: boolean;
+  /**
+   * Second line under the label; above all, why the option is disabled. It's part of the
+   * option's accessible name. The filter doesn't search it.
+   */
+  description?: string;
+  /** Heading of the group this option belongs to. Without it, the option goes outside groups. */
+  group?: string;
 }
 
 /** When the list is visible in `mode="inline"`. */
@@ -107,6 +117,24 @@ const normalize = (text: string) =>
   text.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase();
 
 const defaultRemoveLabel = (label: string) => `Remove ${label}`;
+
+// Each group goes where its first option appears, with all of its options; an option without
+// a group keeps its own place.
+const groupOptions = (options: ComboboxOption[]) => {
+  const entries: { group?: string; options: ComboboxOption[] }[] = [];
+  const groups = new Map<string, ComboboxOption[]>();
+  for (const option of options) {
+    const members = option.group ? groups.get(option.group) : undefined;
+    if (members) {
+      members.push(option);
+      continue;
+    }
+    const entry = { group: option.group || undefined, options: [option] };
+    if (entry.group) groups.set(entry.group, entry.options);
+    entries.push(entry);
+  }
+  return entries;
+};
 
 interface ComboboxImplProps extends ComboboxBaseProps {
   mode?: 'popover' | 'inline';
@@ -245,6 +273,45 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
       </Chip>
     ));
 
+    const renderItem = (option: ComboboxOption) => {
+      const isSelected = selected.includes(option.value);
+      const described = Boolean(option.description);
+      return (
+        <Command.Item
+          key={option.value}
+          value={option.value}
+          disabled={disabled || option.disabled}
+          onSelect={() => handleSelect(option.value)}
+          // cmdk uses aria-selected for the highlighted item (and writes it after the
+          // props): the chosen state goes in aria-checked, which ARIA 1.2 allows on option.
+          aria-checked={isSelected}
+          className={comboboxItemVariants({ size, described })}
+        >
+          <CheckIcon
+            aria-hidden
+            className={cn(
+              'h-4 w-4 shrink-0',
+              !isSelected && 'invisible',
+              described && comboboxItemDimmedClass,
+            )}
+          />
+          {described ? (
+            // Inside the option's content, not aria-describedby: the highlighted option is exposed
+            // through aria-activedescendant, where descriptions are read less reliably than the
+            // name. The space keeps the two texts apart in the name computed from the content.
+            <span className="flex min-w-0 flex-col gap-0.5">
+              <span className={comboboxItemDimmedClass}>{option.label}</span>{' '}
+              <span className={comboboxItemDescriptionVariants({ size })}>
+                {option.description}
+              </span>
+            </span>
+          ) : (
+            option.label
+          )}
+        </Command.Item>
+      );
+    };
+
     const command = (
       <Command
         shouldFilter={false}
@@ -296,27 +363,19 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
               {emptyLabel}
             </Command.Empty>
           )}
-          {(listVisible ? filtered : []).map((option) => {
-            const isSelected = selected.includes(option.value);
-            return (
-              <Command.Item
-                key={option.value}
-                value={option.value}
-                disabled={disabled || option.disabled}
-                onSelect={() => handleSelect(option.value)}
-                // cmdk uses aria-selected for the highlighted item (and writes it after the
-                // props): the chosen state goes in aria-checked, which ARIA 1.2 allows on option.
-                aria-checked={isSelected}
-                className={comboboxItemVariants({ size })}
+          {groupOptions(listVisible ? filtered : []).map((entry) =>
+            entry.group ? (
+              <Command.Group
+                key={`group:${entry.group}`}
+                heading={entry.group}
+                className={comboboxGroupClass}
               >
-                <CheckIcon
-                  aria-hidden
-                  className={cn('h-4 w-4 shrink-0', !isSelected && 'invisible')}
-                />
-                {option.label}
-              </Command.Item>
-            );
-          })}
+                {entry.options.map(renderItem)}
+              </Command.Group>
+            ) : (
+              entry.options.map(renderItem)
+            ),
+          )}
         </Command.List>
       </Command>
     );

@@ -40,6 +40,28 @@ const explicitPopoverWithVisibility = (
   <Combobox aria-label="País" mode="popover" listVisibility="focus" options={options} />
 );
 
+// --- description and group: optional strings, in every mode --------------------------------
+
+const describedOptions = [
+  { value: 'a', label: 'A', description: 'Por qué', group: 'Grupo', disabled: true },
+  { value: 'b', label: 'B' },
+];
+const described = [
+  <Combobox key="a" label="L" options={describedOptions} />,
+  <Combobox key="b" label="L" mode="inline" listVisibility="query" options={describedOptions} />,
+  <Combobox key="c" label="L" multiple options={describedOptions} />,
+];
+const invalidDescribed = [
+  // @ts-expect-error description is a string
+  <Combobox key="d" label="L" options={[{ value: 'a', label: 'A', description: 1 }]} />,
+  // @ts-expect-error group is a string
+  <Combobox key="e" label="L" options={[{ value: 'a', label: 'A', group: 1 }]} />,
+  // @ts-expect-error there is no groups prop: the group goes on each option
+  <Combobox key="f" label="L" options={[]} groups={[]} />,
+];
+
+void described;
+void invalidDescribed;
 void withLabel;
 void withAriaLabel;
 void multipleWithLabel;

@@ -782,3 +782,144 @@ export const ChipSizes: Story = {
     }
   },
 };
+
+const shipping: ComboboxOption[] = [
+  { value: 'store', label: 'Retiro en tienda' },
+  { value: 'standard', label: 'Estándar', group: 'A domicilio', description: 'De 3 a 5 días' },
+  {
+    value: 'express',
+    label: 'Exprés',
+    group: 'A domicilio',
+    description: 'No disponible en tu zona',
+    disabled: true,
+  },
+  { value: 'locker', label: 'Casillero', group: 'Puntos de retiro' },
+  { value: 'gift', label: 'Tarjeta de regalo' },
+  { value: 'same-day', label: 'En el día', group: 'A domicilio' },
+];
+
+const optionNames = (root: HTMLElement) =>
+  within(root)
+    .getAllByRole('option')
+    .map((option) => option.textContent);
+
+// Shared by both modes: structure, names, order and filter over the same options. Each group goes
+// where its first option appears, with all of its options, even if they aren't contiguous.
+const expectGroupsAndDescriptions = async (listbox: HTMLElement, input: HTMLElement) => {
+  await expect(optionNames(listbox)).toEqual([
+    'Retiro en tienda',
+    'Estándar De 3 a 5 días',
+    'Exprés No disponible en tu zona',
+    'En el día',
+    'Casillero',
+    'Tarjeta de regalo',
+  ]);
+
+  const home = within(listbox).getByRole('group', { name: 'A domicilio' });
+  await expect(within(home).getAllByRole('option')).toHaveLength(3);
+  const store = within(listbox).getByRole('option', { name: 'Retiro en tienda' });
+  await expect(store.closest('[role="group"]')).toBeNull();
+
+  // The description is in the accessible name, also when the option is disabled. Only the label
+  // and the check are dimmed there, so the reason stays legible.
+  const express = within(listbox).getByRole('option', {
+    name: 'Exprés No disponible en tu zona',
+  });
+  await expect(express).toHaveAttribute('aria-disabled', 'true');
+  await expect(express.className).not.toContain('data-[disabled=true]:opacity-50');
+  const description = within(express).getByText('No disponible en tu zona');
+  await expect(description.className).not.toContain('opacity');
+  await expect(within(express).getByText('Exprés').className).toContain(
+    'in-data-[disabled=true]:opacity-50',
+  );
+  // Without a description, the whole option is dimmed, as before.
+  await expect(store.className).toContain('data-[disabled=true]:opacity-50');
+
+  // The filter only looks at the label; a group left without options disappears.
+  await userEvent.type(input, 'zona');
+  await expect(within(listbox).queryAllByRole('option')).toHaveLength(0);
+  await userEvent.clear(input);
+  await userEvent.type(input, 'casillero');
+  await expect(optionNames(listbox)).toEqual(['Casillero']);
+  await expect(within(listbox).queryByRole('group', { name: 'A domicilio' })).toBeNull();
+  await expect(within(listbox).getByRole('group', { name: 'Puntos de retiro' })).toBeVisible();
+  await userEvent.clear(input);
+};
+
+// 19. description and group, popover. The trigger shows only the label of the choice. Arrow keys
+// cross group boundaries and skip the disabled option.
+export const DescriptionAndGroups: Story = {
+  render: () => (
+    <Field>
+      <Combobox label="Envío" options={shipping} />
+    </Field>
+  ),
+  play: async ({ canvasElement }) => {
+    const trigger = within(canvasElement).getByRole('button', { name: /Envío/ });
+    await userEvent.click(trigger);
+    const listbox = await body().findByRole('listbox', { name: 'Envío' });
+    const input = body().getByRole('combobox', { name: 'Envío' });
+    await expectGroupsAndDescriptions(listbox, input);
+
+    const highlighted = () => listbox.querySelector('[aria-selected="true"]')?.textContent;
+    await waitFor(() => expect(highlighted()).toBe('Retiro en tienda'));
+    await userEvent.keyboard('{ArrowDown}');
+    await expect(highlighted()).toBe('Estándar De 3 a 5 días');
+    await userEvent.keyboard('{ArrowDown}');
+    await expect(highlighted()).toBe('En el día');
+
+    await userEvent.keyboard('{ArrowUp}');
+    await userEvent.keyboard('{Enter}');
+    await waitFor(() => expect(trigger).toHaveAccessibleName('Envío Estándar'));
+  },
+};
+
+// 20. description and group, inline: same behavior. With multiple, the Chip shows only the label.
+export const DescriptionAndGroupsInline: Story = {
+  render: () => (
+    <Field>
+      <Combobox label="Envío" mode="inline" multiple options={shipping} />
+    </Field>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const listbox = canvas.getByRole('listbox', { name: 'Envío' });
+    await expectGroupsAndDescriptions(listbox, canvas.getByRole('combobox', { name: 'Envío' }));
+
+    await userEvent.click(within(listbox).getByRole('option', { name: /^Estándar/ }));
+    const remove = canvas.getByRole('button', { name: 'Remove Estándar' });
+    await expect(remove.parentElement).not.toHaveTextContent('De 3 a 5 días');
+  },
+};
+
+// 21. With listVisibility, groups follow the list: no options or groups while it's hidden.
+export const GroupsWithListVisibility: Story = {
+  render: () => (
+    <div className="flex w-72 flex-col gap-4">
+      <Combobox aria-label="Con foco" mode="inline" listVisibility="focus" options={shipping} />
+      <Combobox aria-label="Con texto" mode="inline" listVisibility="query" options={shipping} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    const focusInput = canvas.getByRole('combobox', { name: 'Con foco' });
+    const queryInput = canvas.getByRole('combobox', { name: 'Con texto' });
+    await expect(canvas.queryAllByRole('group')).toHaveLength(0);
+    await expect(canvas.queryAllByRole('option')).toHaveLength(0);
+
+    await userEvent.click(focusInput);
+    await expect(canvas.getByRole('group', { name: 'A domicilio' })).toBeVisible();
+    await expect(canvas.getByRole('option', { name: 'Estándar De 3 a 5 días' })).toBeVisible();
+    await userEvent.keyboard('{Escape}');
+    await expect(canvas.queryAllByRole('group')).toHaveLength(0);
+
+    await userEvent.click(queryInput);
+    await expect(canvas.queryAllByRole('group')).toHaveLength(0);
+    await userEvent.type(queryInput, 'exp');
+    await expect(canvas.getByRole('group', { name: 'A domicilio' })).toBeVisible();
+    await expect(
+      canvas.getByRole('option', { name: 'Exprés No disponible en tu zona' }),
+    ).toBeVisible();
+  },
+};
