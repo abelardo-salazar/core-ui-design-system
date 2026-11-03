@@ -151,6 +151,7 @@ Importar desde el barrel principal es seguro en un Server Component; el subpath 
 | `Container`                                                                                                                                                                                                                        | Sí               |
 | `Separator`                                                                                                                                                                                                                        | Sí               |
 | `SkipToContent`                                                                                                                                                                                                                    | Sí               |
+| `NavigationBar`, `NavigationBarItem`                                                                                                                                                                                               | Sí               |
 | `Popover`, `PopoverTrigger`, `PopoverAnchor`, `PopoverContent`                                                                                                                                                                     | No               |
 | `Progress`                                                                                                                                                                                                                         | No               |
 | `ProgressRing`                                                                                                                                                                                                                     | Sí               |
@@ -295,6 +296,7 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
     - [Sheet — Uso y Props](#sheet--uso-y-props)
     - [AspectRatio — Uso y Props](#aspectratio--uso-y-props)
     - [Tabs — Uso y Props](#tabs--uso-y-props)
+    - [NavigationBar — Uso y Props](#navigationbar--uso-y-props)
     - [ToggleGroup — Uso y Props](#togglegroup--uso-y-props)
     - [🔲 Overlays](#-overlays)
     - [Popover — Uso y Props](#popover--uso-y-props)
@@ -663,15 +665,16 @@ Uso (ejemplos, extraídos de `Image.stories.tsx`):
 
 ### 🧬 Moléculas (Estructura)
 
-| Componente        | Descripción                     | API & Composición                                                                                                                          |
-| ----------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`Card`**        | Contenedor de información.      | **Subcomponentes:** `<CardHeader>`, `<CardTitle>`, `<CardDescription>`, `<CardContent>`, `<CardFooter>`                                    |
-| **`Dialog`**      | Modal accesible.                | `open`: boolean; `onOpenChange`: (open: boolean) => void; **Subcomponentes:** `<DialogTrigger>`, `<DialogContent>`                         |
-| **`Sheet`**       | Panel lateral (Drawer).         | `side`: "top" \| "right" \| "bottom" \| "left"; `closeLabel`; **Subcomponentes:** `<SheetHeader>`, `<SheetBody>` (scroll), `<SheetFooter>` |
-| **`Container`**   | Wrapper de layout.              | `size`: 'sm' \| 'md' \| 'lg' \| 'xl' \| 'full' — controla `max-width` (ver sección `Layout` para el detalle).                              |
-| **`AspectRatio`** | Fuerza una relación de aspecto. | `ratio`: number (ej. `16 / 9`). Se compone con otro contenido (`Image`, etc.), no es una API todo-en-uno.                                  |
-| **`Tabs`**        | Navegación por pestañas.        | `defaultValue`/`value`/`onValueChange` en el root; **Subcomponentes:** `<TabsList>`, `<TabsTrigger>`, `<TabsContent>`                      |
-| **`ToggleGroup`** | Opciones que cambian un valor.  | `type`: 'single' \| 'multiple'; `size`: 'sm' \| 'md' \| 'lg'; **Subcomponentes:** `<ToggleGroupItem>`                                      |
+| Componente          | Descripción                           | API & Composición                                                                                                                          |
+| ------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`Card`**          | Contenedor de información.            | **Subcomponentes:** `<CardHeader>`, `<CardTitle>`, `<CardDescription>`, `<CardContent>`, `<CardFooter>`                                    |
+| **`Dialog`**        | Modal accesible.                      | `open`: boolean; `onOpenChange`: (open: boolean) => void; **Subcomponentes:** `<DialogTrigger>`, `<DialogContent>`                         |
+| **`Sheet`**         | Panel lateral (Drawer).               | `side`: "top" \| "right" \| "bottom" \| "left"; `closeLabel`; **Subcomponentes:** `<SheetHeader>`, `<SheetBody>` (scroll), `<SheetFooter>` |
+| **`Container`**     | Wrapper de layout.                    | `size`: 'sm' \| 'md' \| 'lg' \| 'xl' \| 'full' — controla `max-width` (ver sección `Layout` para el detalle).                              |
+| **`AspectRatio`**   | Fuerza una relación de aspecto.       | `ratio`: number (ej. `16 / 9`). Se compone con otro contenido (`Image`, etc.), no es una API todo-en-uno.                                  |
+| **`Tabs`**          | Navegación por pestañas.              | `defaultValue`/`value`/`onValueChange` en el root; **Subcomponentes:** `<TabsList>`, `<TabsTrigger>`, `<TabsContent>`                      |
+| **`NavigationBar`** | Navegación principal entre secciones. | `aria-label` (obligatorio); **Subcomponentes:** `<NavigationBarItem>` (`icon`, `active`, `asChild`, `badge`, `badgeLabel`)                 |
+| **`ToggleGroup`**   | Opciones que cambian un valor.        | `type`: 'single' \| 'multiple'; `size`: 'sm' \| 'md' \| 'lg'; **Subcomponentes:** `<ToggleGroupItem>`                                      |
 
 ### Layout — Uso y Props
 
@@ -949,6 +952,107 @@ Uso (ejemplo, extraído de `Tabs.stories.tsx`):
   <TabsContent value="cook">Cocina a fuego medio durante 12 minutos.</TabsContent>
   <TabsContent value="serve">Emplata y decora con hierbas frescas.</TabsContent>
 </Tabs>
+```
+
+### NavigationBar — Uso y Props
+
+**Desde 0.10.**
+
+- **Exports:** `NavigationBar`, `NavigationBarItem`; tipos `NavigationBarProps`, `NavigationBarItemProps`.
+- **Props principales:**
+  - `NavigationBar`: `aria-label: string` (obligatorio por tipos), `className?: string` y `React.HTMLAttributes<HTMLElement>`. Renderiza un `<nav>` con una lista de ítems. No tiene orientación vertical.
+  - `NavigationBarItem`:
+    - `icon: React.ReactNode` (obligatorio) — decorativo: el texto visible nombra al ítem.
+    - `active?: boolean` — sección actual: pone `aria-current="page"` y la píldora detrás del ícono, para que el indicador no dependa solo del color.
+    - `asChild?: boolean` — mete el ícono, el badge y las props del ítem dentro del único hijo, como el `Link` de tu router. Sin `asChild`, renderiza un `<a>` y acepta `href`.
+    - `badge?: number` — contador. Con `0` o `undefined` no se muestra.
+    - `badgeLabel?: (count: number) => string` — obligatorio por tipos si hay `badge`. Su texto entra en el nombre accesible ("Mensajes 3 sin leer"); el número visible queda oculto para los lectores de pantalla.
+    - `className?: string` y `React.AnchorHTMLAttributes<HTMLAnchorElement>`.
+
+**Comportamiento no obvio:**
+
+- **Cuándo usarla:** para la navegación principal entre secciones, con un enlace por sección. `Tabs` sirve para cambiar paneles dentro de una vista y no maneja `aria-current`.
+- **Posición:** el componente no se posiciona solo: el `fixed` va por `className`, y el contenido debe reservar el espacio. Sí aplica `padding-bottom` con `env(safe-area-inset-bottom)`. Para que esa variable tenga valor en iOS, el viewport de tu app necesita `viewport-fit=cover`.
+- **Tamaño:** cada ítem mide al menos 56px de alto, y la barra, 64px más el safe area. Si una etiqueta ocupa dos líneas, la barra crece. Para que un toast no la tape, ver el ejemplo de `offset` en [Toast](#toast--uso-y-props).
+- **Cantidad de ítems:** está pensada para 3 a 5, pero el componente no lo valida. Con 5 ítems a 320px de ancho, cada uno mide 64px: usa etiquetas cortas, porque una palabra más larga se parte.
+- **Server Components:** es server-safe, sin hooks ni handlers propios. Saber cuál es la sección activa sí suele requerir un hook del router, como en los ejemplos: ese componente tuyo necesita `'use client'`.
+- **React Router:** usa `Link`, no `NavLink`: el `className` en forma de función de `NavLink` no se puede mezclar con `asChild`, y la píldora depende de `active`.
+
+Layout completo, con la barra fija y el contenido sin quedar debajo de ella:
+
+```tsx
+import { HomeIcon, EnvelopeClosedIcon, PersonIcon } from '@radix-ui/react-icons';
+import { NavigationBar, NavigationBarItem } from '@abelardo-salazar/core-ui-design-system';
+
+function AppLayout({ children, unread }: { children: React.ReactNode; unread: number }) {
+  return (
+    <>
+      {/* 4rem es el alto de la barra */}
+      <main className="pb-[calc(4rem+env(safe-area-inset-bottom))]">{children}</main>
+      <NavigationBar aria-label="Principal" className="fixed inset-x-0 bottom-0">
+        <NavigationBarItem href="/" active icon={<HomeIcon />}>
+          Inicio
+        </NavigationBarItem>
+        <NavigationBarItem
+          href="/mensajes"
+          icon={<EnvelopeClosedIcon />}
+          badge={unread}
+          badgeLabel={(n) => `${n} sin leer`}
+        >
+          Mensajes
+        </NavigationBarItem>
+        <NavigationBarItem href="/perfil" icon={<PersonIcon />}>
+          Perfil
+        </NavigationBarItem>
+      </NavigationBar>
+    </>
+  );
+}
+```
+
+Con `Link` de Next:
+
+```tsx
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+function AppNavigationBar() {
+  const pathname = usePathname();
+
+  return (
+    <NavigationBar aria-label="Principal" className="fixed inset-x-0 bottom-0">
+      <NavigationBarItem asChild active={pathname === '/'} icon={<HomeIcon />}>
+        <Link href="/">Inicio</Link>
+      </NavigationBarItem>
+      <NavigationBarItem asChild active={pathname === '/perfil'} icon={<PersonIcon />}>
+        <Link href="/perfil">Perfil</Link>
+      </NavigationBarItem>
+    </NavigationBar>
+  );
+}
+```
+
+Con `Link` de React Router:
+
+```tsx
+import { Link, useLocation } from 'react-router';
+
+function AppNavigationBar() {
+  const { pathname } = useLocation();
+
+  return (
+    <NavigationBar aria-label="Principal" className="fixed inset-x-0 bottom-0">
+      <NavigationBarItem asChild active={pathname === '/'} icon={<HomeIcon />}>
+        <Link to="/">Inicio</Link>
+      </NavigationBarItem>
+      <NavigationBarItem asChild active={pathname === '/perfil'} icon={<PersonIcon />}>
+        <Link to="/perfil">Perfil</Link>
+      </NavigationBarItem>
+    </NavigationBar>
+  );
+}
 ```
 
 ### ToggleGroup — Uso y Props
@@ -2046,13 +2150,14 @@ Además de los componentes, cada entry point exporta los tipos de sus props y al
 
 **`@abelardo-salazar/core-ui-design-system`**
 
-| Grupo                  | Exports                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| :--------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Tipos de props         | `AlertProps`, `AspectRatioProps`, `BadgeProps`, `ButtonProps`, `CalendarProps`, `CheckboxProps`, `ChipProps`, `ContainerProps`, `DataTableProps`, `DatePickerProps`, `HeadingProps`, `ImageProps`, `ProgressProps`, `ProgressRingProps`, `SwitchProps`, `TextProps`, `TextareaProps`                                                                                                                                                              |
-| Tipos de props (0.5.0) | `ComboboxProps`, `ComboboxSingleProps`, `ComboboxMultipleProps`, `ComboboxLabelProps`, `ComboboxOption`, `EmptyStateProps`, `EmptyStateTitleProps`, `InputProps`, `InputBaseProps`, `InputWithEndIconProps`, `ClearableInputProps`, `QuantityStepperProps`, `SheetContentProps`, `SkipToContentProps`, `ToggleGroupProps`, `ToggleGroupSingleProps`, `ToggleGroupMultipleProps`, `ToggleGroupItemProps`, `VisuallyHiddenProps`, `AnnounceOptions` |
-| Tipos de props (0.7.0) | `ComboboxModeProps`, `ComboboxListVisibility`                                                                                                                                                                                                                                                                                                                                                                                                     |
-| Variantes (`cva`)      | `buttonVariants`, `badgeVariants`, `inputVariants`, `alertVariants`, `alertIconVariants` — devuelven las clases de cada variante, para dar el mismo aspecto a un elemento propio (por ejemplo, un `Link` con `buttonVariants({ variant: 'outline' })`)                                                                                                                                                                                            |
-| Utilidades             | `cn(...inputs)` — combina clases con `clsx` y resuelve conflictos de Tailwind con `tailwind-merge` (la última gana); `toast` (ver [Toast](#toast--uso-y-props)); `features` (ver [DataTable](#datatable--uso-y-props)); `announce` (ver [announce()](#announce--uso-y-opciones))                                                                                                                                                                  |
+| Grupo                   | Exports                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| :---------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Tipos de props          | `AlertProps`, `AspectRatioProps`, `BadgeProps`, `ButtonProps`, `CalendarProps`, `CheckboxProps`, `ChipProps`, `ContainerProps`, `DataTableProps`, `DatePickerProps`, `HeadingProps`, `ImageProps`, `ProgressProps`, `ProgressRingProps`, `SwitchProps`, `TextProps`, `TextareaProps`                                                                                                                                                              |
+| Tipos de props (0.5.0)  | `ComboboxProps`, `ComboboxSingleProps`, `ComboboxMultipleProps`, `ComboboxLabelProps`, `ComboboxOption`, `EmptyStateProps`, `EmptyStateTitleProps`, `InputProps`, `InputBaseProps`, `InputWithEndIconProps`, `ClearableInputProps`, `QuantityStepperProps`, `SheetContentProps`, `SkipToContentProps`, `ToggleGroupProps`, `ToggleGroupSingleProps`, `ToggleGroupMultipleProps`, `ToggleGroupItemProps`, `VisuallyHiddenProps`, `AnnounceOptions` |
+| Tipos de props (0.7.0)  | `ComboboxModeProps`, `ComboboxListVisibility`                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Tipos de props (0.10.0) | `NavigationBarProps`, `NavigationBarItemProps`                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Variantes (`cva`)       | `buttonVariants`, `badgeVariants`, `inputVariants`, `alertVariants`, `alertIconVariants` — devuelven las clases de cada variante, para dar el mismo aspecto a un elemento propio (por ejemplo, un `Link` con `buttonVariants({ variant: 'outline' })`)                                                                                                                                                                                            |
+| Utilidades              | `cn(...inputs)` — combina clases con `clsx` y resuelve conflictos de Tailwind con `tailwind-merge` (la última gana); `toast` (ver [Toast](#toast--uso-y-props)); `features` (ver [DataTable](#datatable--uso-y-props)); `announce` (ver [announce()](#announce--uso-y-opciones))                                                                                                                                                                  |
 
 **`@abelardo-salazar/core-ui-design-system/charts`**: además de los componentes de [Chart](#chart--uso-y-props), `ChartConfig`, `ChartColorToken` y `CHART_COLOR_TOKENS` (los tokens de color válidos en `config`), los tipos `ChartContainerProps`, `ChartTooltipProps`, `ChartTooltipContentProps`, `ChartLegendProps`, `ChartLegendContentProps`, y los tipos de props de los re-exports de recharts: `AreaProps`, `BarProps`, `CartesianGridProps`, `CellProps`, `LabelProps`, `LineProps`, `PieProps`, `ResponsiveContainerProps`, `XAxisProps`, `YAxisProps`.
 

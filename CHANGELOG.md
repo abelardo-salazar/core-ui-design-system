@@ -8,6 +8,12 @@
   `variant`: `assertive` → `role="alert"`, `polite` → `role="status"`, `off` → sin `role`. Usa
   `assertive` para el resultado de una acción recién hecha y `off` para los avisos persistentes,
   que con el default se anunciarían cada vez que se monta la vista. Sin `live`, el DOM no cambia.
+- **`NavigationBar` y `NavigationBarItem`: navegación principal entre secciones.** `NavigationBar`
+  renderiza un `<nav>` con `aria-label` obligatorio por tipos. Cada ítem mide al menos 56px, siempre
+  muestra su texto y acepta `asChild` para usar el `Link` de tu router. El ítem `active` lleva
+  `aria-current="page"` y una píldora detrás del ícono. El `badge` numérico exige `badgeLabel`, cuyo
+  texto entra en el nombre accesible. Es server-safe. No se posiciona solo: el `fixed` va por
+  `className`, y el componente ya aplica el padding de `env(safe-area-inset-bottom)`.
 
 ## [0.9.2] - 2026-11-03
 
