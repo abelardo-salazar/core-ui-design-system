@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- **Paginación de `DataTable` y flechas de `Calendar` con área táctil de 44px.** Los botones de
+  paginación extienden su área en vertical y las flechas de `Calendar`, también dentro de
+  `DatePicker`, en las dos direcciones. El aspecto no cambia. Los días de `Calendar` siguen en
+  36px: son una excepción documentada por ser una grilla contigua.
+
 ## [0.9.0] - 2026-11-02
 
 ### Changed

@@ -172,6 +172,10 @@ Los componentes usan solo tokens semánticos para color. Son la superficie públ
 
 Todo control interactivo apunta a un objetivo táctil de 44px. Los tamaños compactos (`sm`) existen y se documentan como tales. Cuando el visual queda por debajo de 44px, la hit area se extiende con un `::after` que sigue la silueta del control (patrón de Chip).
 
+La extensión se aplica en el componente que conoce su entorno (paginación de DataTable, flechas de Calendar), no en `Button` `sm` en general: un `::after` global superpondría las hit areas de botones `sm` vecinos en las barras de los consumidores.
+
+Excepción: las grillas contiguas no extienden su hit area, porque un `::after` pisaría la celda vecina. Caso: los días de Calendar, que quedan en 36px. 44px no cabe en 320px de ancho (7 × 44 + padding = 332px) y 40px cambiaría el aspecto sin llegar a 44.
+
 Button, Input y Select comparten escala para alinear en una misma fila: `sm` 32px, `md` 44px, `lg` 48px.
 
 ### Íconos internos

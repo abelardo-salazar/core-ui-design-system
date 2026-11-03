@@ -34,12 +34,19 @@ function CalendarChevron({ orientation, className }: ChevronProps) {
   }
 }
 
+// Extends the arrows' hit area to 44x44 without touching their 28x28 look. An absolute ::after
+// is placed from the padding box (26x26, inside the 1px border), hence 9px per side, not 8. The
+// resulting 8px beyond the visual edge stays within the root's p-3 and the month's gap-y-4.
+const NAV_BUTTON_HIT_AREA =
+  "relative after:content-[''] after:absolute after:rounded-btn after:-inset-[9px]";
+
 function CalendarPreviousButton({ className, children, ...props }: PreviousMonthButtonProps) {
   return (
     <button
       className={cn(
         buttonVariants({ variant: 'outline' }),
         'h-7 w-7 p-0 text-base-content/60 hover:text-base-content',
+        NAV_BUTTON_HIT_AREA,
         className,
       )}
       {...props}
@@ -55,6 +62,7 @@ function CalendarNextButton({ className, children, ...props }: NextMonthButtonPr
       className={cn(
         buttonVariants({ variant: 'outline' }),
         'h-7 w-7 p-0 text-base-content/60 hover:text-base-content',
+        NAV_BUTTON_HIT_AREA,
         className,
       )}
       {...props}
@@ -64,6 +72,8 @@ function CalendarNextButton({ className, children, ...props }: NextMonthButtonPr
   );
 }
 
+// Days stay at 36px with no ::after, on purpose: the grid is contiguous, so an extension would
+// land on the neighboring day. See ARCHITECTURE.md, "Objetivo táctil de 44px".
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- `day` must be destructured out so it isn't spread onto the DOM button
 function CalendarDayButton({ day, modifiers, className, ...props }: DayButtonProps) {
   return (

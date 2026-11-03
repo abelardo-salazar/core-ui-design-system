@@ -166,6 +166,26 @@ export const Pagination: Story = {
   },
 };
 
+// 4b. Touch target: the pagination buttons extend their hit area to 44px in height with an
+// ::after and stay sm (32px). This project doesn't apply Tailwind, so the assertions are on classes.
+export const PaginationTouchTarget: Story = {
+  render: () => <DataTable columns={columns} data={people} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    for (const name of ['Previous', 'Next']) {
+      const classes = canvas.getByRole('button', { name }).className.split(' ');
+      await expect(classes).toContain('relative');
+      await expect(classes).toContain("after:content-['']");
+      await expect(classes).toContain('after:absolute');
+      await expect(classes).toContain('after:rounded-btn');
+      await expect(classes).toContain('after:-inset-x-px');
+      await expect(classes).toContain('after:-inset-y-[7px]');
+      await expect(classes).toContain('h-8');
+    }
+  },
+};
+
 // 5. Responsive mode: DataTable turns on Table `responsive` by itself (the consumer
 // passes nothing) and generates each cell's data-label from the column header
 // (string) defined in `columns`. Class check in headless; the real visual collapse
