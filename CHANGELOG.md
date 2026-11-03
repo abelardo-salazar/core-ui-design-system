@@ -1,10 +1,10 @@
 # Changelog
 
-## [Unreleased]
+## [0.9.0] - 2026-11-02
 
 ### Changed
 
-- **El paquete se publica en el registro público de npm.** Desde esta versión se instala sin
+- **El paquete se publica en el registro público de npm.** Desde 0.9.0 se instala sin
   token ni configuración de `.npmrc`. GitHub Packages queda congelado: las versiones hasta 0.8.0
   siguen allí, pero las nuevas salen solo en npm. **Migración:**
   1. Quita del `.npmrc` de tu proyecto las dos líneas de `@abelardo-salazar`
