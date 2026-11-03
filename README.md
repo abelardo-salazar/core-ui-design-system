@@ -1517,9 +1517,10 @@ El sistema de Toast utiliza **Sonner**.
 **Configuración Global:**
 Props aceptadas por `<Toaster />`:
 
-- `position`: "top-left" | "top-right" | "bottom-left" | "bottom-right"
+- `position`: "top-left" | "top-right" | "bottom-left" | "bottom-right" | "top-center" | "bottom-center"
 - `richColors`: boolean (Colores más vibrantes)
 - `closeButton`: boolean
+- `offset`, `mobileOffset`: distancia a los bordes de la ventana (ver [Toast — Uso y Props](#toast--uso-y-props))
 
 **Métodos de Disparo:**
 
@@ -1537,9 +1538,11 @@ toast.warning('Ten cuidado');
 
 - **Exports:** `Toast` (Toaster) y `toast` (helper para disparar toasts).
 - **Props principales (Toaster / Sonner):**
-  - `position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'` — posición del contenedor.
+  - `position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'top-center' | 'bottom-center'` (default `'bottom-right'`) — posición del contenedor.
   - `richColors?: boolean` — colores más vibrantes.
   - `closeButton?: boolean` — mostrar botón de cierre en cada toast.
+  - `offset?: string | number | { top?, right?, bottom?, left? }` (default `24px`) — distancia a los bordes de la ventana en anchos mayores a 600px. Un número son píxeles y un string, cualquier longitud CSS. El valor suelto se aplica a los cuatro lados; en el objeto, cada lado omitido conserva su default.
+  - `mobileOffset?: string | number | { top?, right?, bottom?, left? }` (default `16px`) — igual que `offset`, para anchos de hasta 600px. No hereda de `offset`: si solo pasas `offset`, en móvil sigue el default.
   - Acepta `React.ComponentProps<typeof import('sonner').Toaster>` (props del `Toaster` de Sonner).
 
 Descripción: envoltorio ligero sobre `sonner` que provee un `Toaster` con tema y clases por defecto y el helper `toast` para disparar notificaciones. El componente `Toast` debe renderizarse una sola vez (por ejemplo en el `App` o en el layout global) para que los toasts se muestren correctamente.
@@ -1574,7 +1577,12 @@ toast('Evento creado', {
     onClick: () => console.log('Undo'),
   },
 });
+
+// 4. App con barra inferior fija de 64px: el toast queda 16px por encima de ella
+<Toast offset={{ bottom: 80 }} mobileOffset={{ bottom: 80 }} />;
 ```
+
+En el ejemplo 4 hacen falta las dos props: solo con `offset`, el toast tapa la barra en anchos de hasta 600px. Usa la forma de objeto: con un valor suelto, `mobileOffset={80}` también se aplica a los lados y deja el toast en 215px de ancho en una pantalla de 375px, en lugar de 343px.
 
 Consejos:
 
