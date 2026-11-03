@@ -19,6 +19,12 @@
   accesible y, en una opción deshabilitada, no se atenúa. `group` agrupa las opciones bajo un
   encabezado, en el orden en que aparece cada grupo; las opciones sin `group` van fuera de grupos. El
   filtro sigue buscando solo por `label`.
+- **`SwitchField` y `CheckboxField`: `Switch` y `Checkbox` en una fila completa táctil.** La fila es
+  un `<label>` de al menos 48px, con `label` obligatorio y `description` opcional en una segunda
+  línea, enlazada con `aria-describedby`. `SwitchField` lleva el control a la derecha y
+  `CheckboxField` a la izquierda. Aceptan los props del control que envuelven, que conserva su rol;
+  `id` y `ref` van al control y `className` a la fila. Con `disabled`, la `description` no se atenúa:
+  es el lugar para el motivo.
 
 ## [0.9.2] - 2026-11-03
 

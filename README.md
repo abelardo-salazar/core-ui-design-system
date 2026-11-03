@@ -139,6 +139,7 @@ Importar desde el barrel principal es seguro en un Server Component; el subpath 
 | `Card`, `CardHeader`, `CardFooter`, `CardTitle`, `CardDescription`, `CardContent`                                                                                                                                                  | Sí               |
 | Todo el subpath `/charts` (`ChartContainer`, `ChartTooltipContent`, `ChartLegendContent` y los re-exports de recharts)                                                                                                             | No               |
 | `Checkbox`                                                                                                                                                                                                                         | No               |
+| `CheckboxField`                                                                                                                                                                                                                    | No               |
 | `Chip`                                                                                                                                                                                                                             | No               |
 | `Combobox`                                                                                                                                                                                                                         | No               |
 | `DataTable`                                                                                                                                                                                                                        | No               |
@@ -160,6 +161,7 @@ Importar desde el barrel principal es seguro en un Server Component; el subpath 
 | `Sheet`, `SheetPortal`, `SheetOverlay`, `SheetTrigger`, `SheetClose`, `SheetContent`, `SheetHeader`, `SheetBody`, `SheetFooter`, `SheetTitle`, `SheetDescription`                                                                  | No               |
 | `Skeleton`                                                                                                                                                                                                                         | Sí               |
 | `Switch`                                                                                                                                                                                                                           | No               |
+| `SwitchField`                                                                                                                                                                                                                      | No               |
 | `Table`, `TableHeader`, `TableBody`, `TableFooter`, `TableRow`, `TableHead`, `TableCell`, `TableCaption`                                                                                                                           | Sí               |
 | `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent`                                                                                                                                                                                   | No               |
 | `Textarea`                                                                                                                                                                                                                         | No               |
@@ -304,10 +306,12 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
     - [DropdownMenu — Uso y Props](#dropdownmenu--uso-y-props)
     - [📝 Formularios (Forms)](#-formularios-forms)
     - [Checkbox — Uso y Props](#checkbox--uso-y-props)
+    - [CheckboxField — Uso y Props](#checkboxfield--uso-y-props)
     - [Input — Uso y Props](#input--uso-y-props)
     - [Textarea — Uso y Props](#textarea--uso-y-props)
     - [Select — Uso y Props](#select--uso-y-props)
     - [Switch — Uso y Props](#switch--uso-y-props)
+    - [SwitchField — Uso y Props](#switchfield--uso-y-props)
     - [Calendar — Uso y Props](#calendar--uso-y-props)
     - [DatePicker — Uso y Props](#datepicker--uso-y-props)
     - [Locales — subpath `/locale`](#locales--subpath-locale)
@@ -1187,7 +1191,9 @@ Uso (ejemplo simplificado, extraído de `DropdownMenu.stories.tsx`):
 | `Textarea`        | Texto multilinea                       | Standard HTML props, `variant?`, `error?`, `className?`                                                                                                      |
 | `Select`          | Dropdown avanzado                      | `value?`, `defaultValue?`, `onValueChange?`, `placeholder?`, `className?`                                                                                    |
 | `Switch`          | Toggle binario                         | `checked?`, `defaultChecked?`, `onCheckedChange?`, `disabled?`, `className?`                                                                                 |
+| `SwitchField`     | Switch en una fila completa táctil     | `label`, `description?` y los props de `Switch`                                                                                                              |
 | `Checkbox`        | Casilla de selección                   | `checked?`, `defaultChecked?`, `onCheckedChange?`, `disabled?`, `className?`                                                                                 |
+| `CheckboxField`   | Casilla en una fila completa táctil    | `label`, `description?` y los props de `Checkbox`                                                                                                            |
 | `Calendar`        | Grilla de calendario                   | `mode`, `selected`, `onSelect`, `showOutsideDays?` (todos los props de `DayPicker`)                                                                          |
 | `Combobox`        | Selección con buscador (cmdk)          | `options`, `label` o `aria-label`, `multiple?`, `value?`, `defaultValue?`, `onValueChange?`, `mode?`, `size?`, `disabled?`                                   |
 | `QuantityStepper` | Campo numérico con botones − / +       | `value?`, `defaultValue?`, `onChange?`, `min?`, `max?`, `step?`, `decrementLabel?`, `incrementLabel?`                                                        |
@@ -1230,6 +1236,30 @@ const [checked, setChecked] = useState(false);
 ```
 
 Nota: para accesibilidad, envuelve el `Checkbox` con un `label` o usa `aria-label` cuando no haya texto visible.
+
+### CheckboxField — Uso y Props
+
+**Desde 0.10.**
+
+- **Exports:** `CheckboxField`.
+- **Props principales:**
+  - `label: React.ReactNode` — obligatorio; da el nombre accesible del control.
+  - `description?: React.ReactNode` — segunda línea, enlazada con `aria-describedby`.
+  - Acepta los props de `Checkbox` (`checked`, `onCheckedChange`, `disabled`, `name`…), salvo `children` y `asChild`. Van al control, igual que `id` y `ref`.
+  - `className?: string` — se aplica a la fila, no al control.
+
+Casilla a la izquierda y texto a la derecha, en una fila de al menos 48px que responde completa al toque. El control sigue siendo un `checkbox` real. Con `disabled` se atenúa el `label`, pero no la `description`: es el lugar para explicar el motivo.
+
+```tsx
+<CheckboxField
+  label="Acepto los términos"
+  description="Puedes retirar tu consentimiento cuando quieras"
+  checked={accepted}
+  onCheckedChange={setAccepted}
+/>
+
+<CheckboxField label="Envío gratis" description="Disponible en compras desde $50" disabled />
+```
 
 ### Input — Uso y Props
 
@@ -1427,6 +1457,30 @@ const [on, setOn] = useState(false);
 ```
 
 Nota: para accesibilidad, envuelve el `Switch` en un `label` o provee `aria-label` cuando no haya texto visible. Usa `onCheckedChange` para integrar con formularios controlados.
+
+### SwitchField — Uso y Props
+
+**Desde 0.10.**
+
+- **Exports:** `SwitchField`.
+- **Props principales:**
+  - `label: React.ReactNode` — obligatorio; da el nombre accesible del control.
+  - `description?: React.ReactNode` — segunda línea, enlazada con `aria-describedby`.
+  - Acepta los props de `Switch` (`checked`, `onCheckedChange`, `disabled`, `name`…), salvo `children` y `asChild`. Van al control, igual que `id` y `ref`.
+  - `className?: string` — se aplica a la fila, no al control.
+
+Texto a la izquierda y control a la derecha, en una fila de al menos 48px que responde completa al toque. El control sigue siendo un `switch` real. Con `disabled` se atenúa el `label`, pero no la `description`: es el lugar para explicar el motivo.
+
+```tsx
+<SwitchField
+  label="Notificaciones"
+  description="Avisos de pedidos y entregas"
+  checked={enabled}
+  onCheckedChange={setEnabled}
+/>
+
+<SwitchField label="Modo oscuro" description="No disponible en tu plan" disabled />
+```
 
 ### Calendar — Uso y Props
 
@@ -2157,7 +2211,7 @@ Además de los componentes, cada entry point exporta los tipos de sus props y al
 | Tipos de props          | `AlertProps`, `AspectRatioProps`, `BadgeProps`, `ButtonProps`, `CalendarProps`, `CheckboxProps`, `ChipProps`, `ContainerProps`, `DataTableProps`, `DatePickerProps`, `HeadingProps`, `ImageProps`, `ProgressProps`, `ProgressRingProps`, `SwitchProps`, `TextProps`, `TextareaProps`                                                                                                                                                              |
 | Tipos de props (0.5.0)  | `ComboboxProps`, `ComboboxSingleProps`, `ComboboxMultipleProps`, `ComboboxLabelProps`, `ComboboxOption`, `EmptyStateProps`, `EmptyStateTitleProps`, `InputProps`, `InputBaseProps`, `InputWithEndIconProps`, `ClearableInputProps`, `QuantityStepperProps`, `SheetContentProps`, `SkipToContentProps`, `ToggleGroupProps`, `ToggleGroupSingleProps`, `ToggleGroupMultipleProps`, `ToggleGroupItemProps`, `VisuallyHiddenProps`, `AnnounceOptions` |
 | Tipos de props (0.7.0)  | `ComboboxModeProps`, `ComboboxListVisibility`                                                                                                                                                                                                                                                                                                                                                                                                     |
-| Tipos de props (0.10.0) | `NavigationBarProps`, `NavigationBarItemProps`                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Tipos de props (0.10.0) | `NavigationBarProps`, `NavigationBarItemProps`, `SwitchFieldProps`, `CheckboxFieldProps`                                                                                                                                                                                                                                                                                                                                                          |
 | Variantes (`cva`)       | `buttonVariants`, `badgeVariants`, `inputVariants`, `alertVariants`, `alertIconVariants` — devuelven las clases de cada variante, para dar el mismo aspecto a un elemento propio (por ejemplo, un `Link` con `buttonVariants({ variant: 'outline' })`)                                                                                                                                                                                            |
 | Utilidades              | `cn(...inputs)` — combina clases con `clsx` y resuelve conflictos de Tailwind con `tailwind-merge` (la última gana); `toast` (ver [Toast](#toast--uso-y-props)); `features` (ver [DataTable](#datatable--uso-y-props)); `announce` (ver [announce()](#announce--uso-y-opciones))                                                                                                                                                                  |
 
