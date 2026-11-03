@@ -14,6 +14,11 @@
   `aria-current="page"` y una píldora detrás del ícono. El `badge` numérico exige `badgeLabel`, cuyo
   texto entra en el nombre accesible. Es server-safe. No se posiciona solo: el `fixed` va por
   `className`, y el componente ya aplica el padding de `env(safe-area-inset-bottom)`.
+- **`Combobox`: `description` y `group` en `ComboboxOption`.** `description` es una segunda línea
+  bajo el `label`, sobre todo para explicar por qué una opción está deshabilitada; entra en el nombre
+  accesible y, en una opción deshabilitada, no se atenúa. `group` agrupa las opciones bajo un
+  encabezado, en el orden en que aparece cada grupo; las opciones sin `group` van fuera de grupos. El
+  filtro sigue buscando solo por `label`.
 
 ## [0.9.2] - 2026-11-03
 

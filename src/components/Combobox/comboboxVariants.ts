@@ -75,7 +75,7 @@ export const comboboxItemVariants = cva(
   [
     'flex cursor-default select-none items-center gap-2 rounded-sm px-2 outline-none',
     'data-[selected=true]:bg-base-200',
-    'data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50',
+    'data-[disabled=true]:pointer-events-none',
   ],
   {
     variants: {
@@ -84,9 +84,33 @@ export const comboboxItemVariants = cva(
         md: 'py-2 text-sm',
         lg: 'py-3 text-base',
       },
+      // A description usually explains why the option is disabled, so it must stay legible:
+      // an opacity on the item can't be undone by a child. With a description, only the label
+      // and the check are dimmed (comboboxItemDimmedClass).
+      described: {
+        false: 'data-[disabled=true]:opacity-50',
+        true: '',
+      },
     },
-    defaultVariants: { size: 'md' },
+    defaultVariants: { size: 'md', described: false },
   },
 );
+
+export const comboboxItemDimmedClass = 'in-data-[disabled=true]:opacity-50';
+
+export const comboboxItemDescriptionVariants = cva('text-base-content/70', {
+  variants: {
+    size: {
+      sm: 'text-xs',
+      md: 'text-xs',
+      lg: 'text-sm',
+    },
+  },
+  defaultVariants: { size: 'md' },
+});
+
+// cmdk only offers the heading through this attribute: the group has no slot for its class.
+export const comboboxGroupClass =
+  'not-first:mt-1 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-base-content/70';
 
 export type ComboboxSize = NonNullable<VariantProps<typeof comboboxTriggerVariants>['size']>;
