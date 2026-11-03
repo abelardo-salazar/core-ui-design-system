@@ -155,3 +155,94 @@ export const NoIcon: Story = {
     await expect(alert.querySelector('svg')).not.toBeInTheDocument();
   },
 };
+
+const liveContent = (
+  <>
+    <AlertTitle>Aviso</AlertTitle>
+    <AlertDescription>Contenido del aviso.</AlertDescription>
+  </>
+);
+
+// 7. Without `live`, the DOM stays exactly as before the prop existed: the role comes from the
+// variant, the root has only `role` and `class`, and the structure is icon + content.
+export const DefaultDomUnchanged: Story = {
+  render: () => (
+    <div className="w-96 space-y-2">
+      <Alert>{liveContent}</Alert>
+      <Alert variant="info">{liveContent}</Alert>
+      <Alert variant="success">{liveContent}</Alert>
+      <Alert variant="warning">{liveContent}</Alert>
+      <Alert variant="error">{liveContent}</Alert>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const roots = Array.from(canvasElement.querySelectorAll('.w-96 > *'));
+    await expect(roots.map((root) => root.getAttribute('role'))).toEqual([
+      'status',
+      'status',
+      'status',
+      'alert',
+      'alert',
+    ]);
+
+    for (const root of roots) {
+      await expect(root.getAttributeNames().sort()).toEqual(['class', 'role']);
+      await expect(root.children).toHaveLength(2);
+      await expect(root.children[0].tagName.toLowerCase()).toBe('svg');
+      await expect(root.children[1]).toHaveClass('flex-1', 'space-y-1');
+    }
+  },
+};
+
+// 8. `live` overrides the variant's role: assertive -> alert, polite -> status. It doesn't touch
+// the look (the variant's classes stay) and never reaches the DOM as an attribute.
+export const LiveOverridesRole: Story = {
+  render: () => (
+    <div className="w-96 space-y-2">
+      <Alert variant="info" live="assertive" data-testid="assertive">
+        {liveContent}
+      </Alert>
+      <Alert variant="error" live="polite" data-testid="polite">
+        {liveContent}
+      </Alert>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    const assertive = canvas.getByTestId('assertive');
+    await expect(assertive).toHaveAttribute('role', 'alert');
+    await expect(assertive).toHaveClass('bg-info/10');
+    await expect(assertive).not.toHaveAttribute('live');
+
+    const polite = canvas.getByTestId('polite');
+    await expect(polite).toHaveAttribute('role', 'status');
+    await expect(polite).toHaveClass('bg-error/10');
+    await expect(polite).not.toHaveAttribute('live');
+  },
+};
+
+// 9. live="off": no role at all, for a persistent notice that shouldn't be announced every time
+// the view mounts. Not role="region": it would add a landmark per notice.
+export const LiveOff: Story = {
+  render: () => (
+    <div className="w-96">
+      <Alert variant="warning" live="off" data-testid="off">
+        {liveContent}
+      </Alert>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const alert = canvas.getByTestId('off');
+
+    await expect(alert).not.toHaveAttribute('role');
+    await expect(alert).not.toHaveAttribute('live');
+    await expect(alert).not.toHaveAttribute('aria-live');
+    await expect(canvas.queryByRole('alert')).not.toBeInTheDocument();
+    await expect(canvas.queryByRole('status')).not.toBeInTheDocument();
+    await expect(canvas.queryByRole('region')).not.toBeInTheDocument();
+    await expect(alert).toHaveClass('bg-warning/10');
+    await expect(alert.querySelector('svg.text-warning')).toBeInTheDocument();
+  },
+};
