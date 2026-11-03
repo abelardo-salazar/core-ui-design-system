@@ -3,42 +3,23 @@
 ![Version](https://img.shields.io/badge/version-0.8.0-blue.svg)
 ![React](https://img.shields.io/badge/react-19.0.0+-61DAFB.svg)
 ![TypeScript](https://img.shields.io/badge/typescript-5.9+-3178C6.svg)
-![Registry](https://img.shields.io/badge/registry-GitHub%20Packages-181717.svg)
+![Registry](https://img.shields.io/badge/registry-npm-CB3837.svg)
 
-**Última versión publicada:** `0.8.0`.
+**Última versión publicada:** `0.8.0`. `main` tiene cambios sin publicar: ver [CHANGELOG § Unreleased](./CHANGELOG.md#unreleased).
 
 **Core UI** es la biblioteca de componentes oficial para nuestros productos digitales. Construida sobre **React 19**, **Radix UI** y **Tailwind CSS v4**, ofrece componentes accesibles (A11y), ligeros y listos para producción.
 
 ---
 
-## 🔒 1. Configuración de Autenticación (Requerido)
+## 📦 1. Instalación
 
-Este paquete se publica en **GitHub Packages**. El paquete tiene licencia MIT, pero instalarlo desde GitHub Packages requiere un token, así que debes configurar tu entorno local.
-
-### Paso A: Generar Token
-
-Necesitas un **GitHub Personal Access Token (Classic)** con permisos de `read:packages`.
-
-### Paso B: Configurar Proyecto
-
-Crea un archivo `.npmrc` en la raíz de tu proyecto (junto al `package.json`) y agrega las siguientes líneas:
-
-```ini
-@abelardo-salazar:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=TU_GITHUB_TOKEN_AQUI
-```
-
-> ⚠️ **IMPORTANTE:** Asegúrate de agregar `.npmrc` a tu `.gitignore` para no exponer tu token.
-
----
-
-## 📦 2. Instalación
-
-Una vez configurado el `.npmrc`, instala la librería como cualquier dependencia:
+El paquete se publica en el registro público de npm desde la versión 0.9.0. Se instala sin token ni configuración de `.npmrc`:
 
 ```bash
 npm install @abelardo-salazar/core-ui-design-system
 ```
+
+> **GitHub Packages queda congelado.** Las versiones hasta la 0.8.0 siguen allí, pero no recibe versiones nuevas: desde 0.9.0 el paquete sale solo en npm. Si tu `.npmrc` mapea `@abelardo-salazar` a `npm.pkg.github.com`, quita esas dos líneas antes de instalar 0.9.0 o posterior; los pasos están en el [CHANGELOG](./CHANGELOG.md).
 
 ### Peer Dependencies
 
@@ -67,7 +48,7 @@ npm install react@^19.0.0 react-dom@^19.0.0 \
 
 ---
 
-## ⚙️ 3. Setup Inicial
+## ⚙️ 2. Setup Inicial
 
 Hay dos hojas de estilos, según si tu proyecto usa Tailwind. Se importa **una sola**, una sola vez.
 
@@ -189,7 +170,7 @@ Importar desde el barrel principal es seguro en un Server Component; el subpath 
 
 ---
 
-## 🎨 4. Theming (Custom Properties)
+## 🎨 3. Theming (Custom Properties)
 
 El sistema de colores y radios se define en tokens semánticos (CSS Custom Properties) que viven dentro de Tailwind v4 en `@layer base { :root {...} }` (tema claro) y `:root:has(.dark), .dark {...}` (tema oscuro). Cualquier componente de color (`bg-primary`, `text-primary-content`, etc.) apunta a estos tokens indirectamente vía `var(...)`, así que **sobreescribir el token cambia el color en todos los componentes que lo usan**, sin tocar el paquete.
 
@@ -286,22 +267,19 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
 ## 📚 Contenido
 
 - [Core UI Design System](#core-ui-design-system)
-  - [🔒 1. Configuración de Autenticación (Requerido)](#-1-configuración-de-autenticación-requerido)
-    - [Paso A: Generar Token](#paso-a-generar-token)
-    - [Paso B: Configurar Proyecto](#paso-b-configurar-proyecto)
-  - [📦 2. Instalación](#-2-instalación)
+  - [📦 1. Instalación](#-1-instalación)
     - [Peer Dependencies](#peer-dependencies)
-  - [⚙️ 3. Setup Inicial](#️-3-setup-inicial)
+  - [⚙️ 2. Setup Inicial](#️-2-setup-inicial)
     - [Con Tailwind v4](#con-tailwind-v4)
     - [Sin Tailwind](#sin-tailwind)
     - [Server Components](#server-components)
-  - [🎨 4. Theming (Custom Properties)](#-4-theming-custom-properties)
+  - [🎨 3. Theming (Custom Properties)](#-3-theming-custom-properties)
     - [Tokens overrideables](#tokens-overrideables)
     - [Patrón sancionado: override sin capa (`@layer`)](#patrón-sancionado-override-sin-capa-layer)
     - [⚠️ Qué NO hacer: override dentro de tu propio `@layer base`](#️-qué-no-hacer-override-dentro-de-tu-propio-layer-base)
     - [`--palette-*` es interno, no es la API de theming](#--palette--es-interno-no-es-la-api-de-theming)
   - [📚 Contenido](#-contenido)
-  - [🧩 5. Documentación de API](#-5-documentación-de-api)
+  - [🧩 4. Documentación de API](#-4-documentación-de-api)
     - [🧱 Átomos (Fundamentos)](#-átomos-fundamentos)
     - [Button — Uso y Props](#button--uso-y-props)
     - [Avatar — Uso y Props](#avatar--uso-y-props)
@@ -354,7 +332,7 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
 
 ---
 
-## 🧩 5. Documentación de API
+## 🧩 4. Documentación de API
 
 Cada sección indica desde qué versión existe el componente (**Desde 0.4.**), y cada prop agregada después lleva _(desde X.Y)_. Las marcas son por minor. Sin marca: desde 0.3.0, la primera versión publicada (o un 0.3.x posterior). Si un componente se puede usar en un Server Component está en [Server Components](#server-components).
 
@@ -2157,9 +2135,7 @@ El paquete se publica empujando un tag; nadie corre `npm publish` a mano. Por qu
    git push origin vX.Y.Z
    ```
 
-4. **`.github/workflows/release.yml`** publica. Antes de instalar nada, falla si el tag no es `v` + `package.json#version`, si su commit no está en `main` o si esa versión ya está en GitHub Packages. Después corre los mismos pasos que `verify` (salvo el dependency review) y publica con `GITHUB_TOKEN` (permisos `contents: read` y `packages: write`).
-
-Si el paso de publicación falla con un 403, el repositorio no tiene acceso de Actions al paquete: en la configuración del paquete en GitHub, en **Manage Actions access**, agregar este repositorio con rol **Write**.
+4. **`.github/workflows/release.yml`** publica. Antes de instalar nada, falla si el tag no es `v` + `package.json#version`, si su commit no está en `main` o si esa versión ya está en npm (un E404 de `npm view` cuenta como "no publicada": el paquete todavía no existe en npm). Después corre los mismos pasos que `verify` (salvo el dependency review) y publica en el registro público de npm con el secret `NPM_TOKEN` del repositorio, un token granular de npm con permiso de escritura sobre el paquete. El workflow solo pide el permiso `contents: read` de `GITHUB_TOKEN`.
 
 ## ⚖️ Licencia
 

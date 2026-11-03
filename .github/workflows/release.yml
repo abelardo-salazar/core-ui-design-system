@@ -1,6 +1,6 @@
 name: Release
 
-# Publishes the package to GitHub Packages when a vX.Y.Z tag is pushed. The tag defines what
+# Publishes the package to the public npm registry when a vX.Y.Z tag is pushed. The tag defines what
 # gets published: the tagged commit must be on main and its package.json must have version
 # X.Y.Z. Release flow: ARCHITECTURE.md § Versiones y tags.
 on:
@@ -9,7 +9,6 @@ on:
 
 permissions:
   contents: read
-  packages: write
 
 # Never cancel a release half-way; a second push of the same tag waits for the first run.
 concurrency:
@@ -43,24 +42,35 @@ jobs:
           echo "Tag $GITHUB_REF_NAME matches package.json and $commit is on main."
 
       # Node 22 LTS, same as ci.yml. registry-url writes an .npmrc that authenticates
-      # npm view and npm publish against GitHub Packages with NODE_AUTH_TOKEN.
+      # npm view and npm publish against npmjs with NODE_AUTH_TOKEN.
       - name: Setup Node
         uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: 'npm'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@abelardo-salazar'
+          registry-url: 'https://registry.npmjs.org'
 
-      # Fails before the long steps if the version is already in the registry. A failing
-      # npm view (auth, network) also fails the job: publishing is never attempted blind.
+      # Fails before the long steps if the version is already in the registry. E404 means the
+      # package doesn't exist on npm yet (first publish), so no version is published. Any other
+      # npm view failure (auth, network) fails the job: publishing is never attempted blind.
       - name: Check version is not published
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           name="$(node -p "require('./package.json').name")"
           version="$(node -p "require('./package.json').version")"
-          published="$(npm view "$name" versions --json)"
+          err="$RUNNER_TEMP/npm-view.err"
+          if ! published="$(npm view "$name" versions --json 2> "$err")"; then
+            # With --json, npm writes the error code to stdout as JSON and to stderr as a log line.
+            if printf '%s\n' "$published" | cat - "$err" | grep -qw 'E404'; then
+              echo "$name is not on the registry yet, so $version is not published."
+              exit 0
+            fi
+            printf '%s\n' "$published"
+            cat "$err"
+            echo "::error::npm view $name failed; not publishing blind."
+            exit 1
+          fi
           if node -e 'const v = [].concat(JSON.parse(process.argv[1])); process.exit(v.includes(process.argv[2]) ? 0 : 1)' "$published" "$version"; then
             echo "::error::$name@$version is already published. Bump the version in a release PR and tag the new version."
             exit 1
@@ -107,9 +117,10 @@ jobs:
       - name: Test
         run: npm run test
 
-      # Publishes the dist/ built and tested above. publishConfig.registry in package.json
-      # points to GitHub Packages; the registry also rejects a version that already exists.
+      # Publishes the dist/ built and tested above. publishConfig in package.json sets the npmjs
+      # registry and public access (a scoped package is private by default); the registry also
+      # rejects a version that already exists.
       - name: Publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish
