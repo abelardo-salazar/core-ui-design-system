@@ -129,6 +129,8 @@ Un paquete va en `peerDependencies` si trae `'use client'` propio o si puede dup
 
 Razón: con `preserveModules`, Rollup pierde las directivas de los chunks que no son entry, así que un paquete cliente empaquetado en `dist/node_modules` llega al consumidor sin su `'use client'`. Y una instancia duplicada (la empaquetada más la del consumidor) rompe los contextos: el provider de una copia no lo ve el consumidor de la otra.
 
+**El build hace cumplir la parte de la directiva.** `verify-client-directives --post-build` recorre los módulos empaquetados en `dist/node_modules`, ubica cada uno en su original del `node_modules` del repo y falla si alguno empieza con `'use client'`. El mensaje nombra el paquete, su versión y el archivo. Mira el original porque en `dist` la directiva ya no está. También falla si un módulo no tiene original reconocible, para no quedar ciego ante un cambio de layout. La parte del estado compartido no se puede detectar así y se sigue revisando a mano.
+
 `tailwindcss-animate` está en `dependencies` por otro motivo: ver [`src/tailwind.css`](#srctailwindcss-fuente-única-de-tokens-y-capas-base).
 
 ### Solo ESM

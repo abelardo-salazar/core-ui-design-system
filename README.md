@@ -2094,8 +2094,9 @@ push nuevo a la misma rama, se cancela el run anterior. Pasos, en orden:
 8. `npm run build` — `verify-client-directives` (pre: `CLIENT_ENTRY_POINTS` sincronizado y
    ningún componente server-safe que arme handlers propios) + `tsc -b` + `vite build` +
    `verify-client-directives --post-build` (post: `dist/index.js` sin `recharts`,
-   `dist/locale.js` sin el barrel raíz ni `recharts`, y `sideEffects` con los módulos con efectos
-   de las dependencias empaquetadas) + `verify-third-party-notices` (cada paquete de
+   `dist/locale.js` sin el barrel raíz ni `recharts`, `sideEffects` con los módulos con efectos
+   de las dependencias empaquetadas, y ningún módulo de `dist/node_modules` cuyo original empiece
+   con `'use client'`) + `verify-third-party-notices` (cada paquete de
    `dist/node_modules`, y el de cada archivo de `dist/fonts`, aparece en
    `dist/THIRD-PARTY-NOTICES.txt`).
 9. `npm run verify:tailwind-consumer` — empaqueta con `npm pack`, arma sin red un consumidor
