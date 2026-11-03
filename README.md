@@ -5,7 +5,7 @@
 ![TypeScript](https://img.shields.io/badge/typescript-5.9+-3178C6.svg)
 ![Registry](https://img.shields.io/badge/registry-npm-CB3837.svg)
 
-**Última versión publicada:** `0.9.2`.
+**Última versión publicada:** `0.9.2`. `main` tiene cambios sin publicar: ver [CHANGELOG § Unreleased](./CHANGELOG.md#unreleased).
 
 **Core UI** es la biblioteca de componentes oficial para nuestros productos digitales. Construida sobre **React 19**, **Radix UI** y **Tailwind CSS v4**, ofrece componentes accesibles (A11y), ligeros y listos para producción.
 
@@ -1510,7 +1510,7 @@ export function CartQuantity() {
 | `Progress`     | Barra de progreso lineal                 | `value`, `max?`, `variant?: 'primary'\|'success'\|'warning'\|'error'`, `className?`                                                |
 | `ProgressRing` | Progreso circular (anillo SVG)           | `value`, `max?`, `variant?`, `size?`, `strokeWidth?`, `showValueLabel?`                                                            |
 | `EmptyState`   | Estado vacío (sin datos, sin resultados) | `size?: 'sm'\|'md'`; **Subcomponentes:** `<EmptyStateIcon>`, `<EmptyStateTitle>`, `<EmptyStateDescription>`, `<EmptyStateActions>` |
-| `Alert`        | Aviso inline persistente (no-modal)      | `variant?: 'info'\|'success'\|'warning'\|'error'`, `icon?`; **Subcomponentes:** `<AlertTitle>`, `<AlertDescription>`               |
+| `Alert`        | Aviso inline persistente (no-modal)      | `variant?: 'info'\|'success'\|'warning'\|'error'`, `icon?`, `live?`; **Subcomponentes:** `<AlertTitle>`, `<AlertDescription>`      |
 
 El sistema de Toast utiliza **Sonner**.
 
@@ -1657,9 +1657,10 @@ Uso (ejemplos, extraídos de `ProgressRing.stories.tsx`):
 - **Props principales:**
   - `variant?: 'info' | 'success' | 'warning' | 'error'` (default `'info'`) — ver `alertVariants.ts`.
   - `icon?: React.ReactNode` — reemplaza el ícono default de la variante (patrón compositivo, igual que `fallback` en `Image`).
+  - `live?: 'assertive' | 'polite' | 'off'` _(desde 0.10)_ — cómo se anuncia: `assertive` → `role="alert"`, `polite` → `role="status"`, `off` → sin `role`. Si no se pasa, sale de `variant`.
   - `className?: string` y `React.HTMLAttributes<HTMLDivElement>`.
 
-**Comportamiento no obvio (accesibilidad):** el `role` del `Alert` se **deriva automáticamente de `variant`**, sin ninguna prop de override. `info`/`success` son "así está el estado" → `role="status"` (cortés: espera a que el lector de pantalla termine de leer lo que esté leyendo). `warning`/`error` son "algo salió mal" → `role="alert"` (asertivo: interrumpe al lector de pantalla). También el ícono se resuelve por variante — `InfoCircledIcon`/`CheckCircledIcon`/`ExclamationTriangleIcon`/`CrossCircledIcon` respectivamente — a menos que se pase `icon` explícitamente: si `icon` es `undefined` se usa el default; si se pasa **cualquier** valor, incluidos `null` o `false`, se usa tal cual, lo que permite ocultar el ícono explícitamente sin una prop separada. `AlertTitle` se renderiza como un `<div>`, no un `<h*>`, a propósito — un `Alert` puede aparecer en cualquier punto del árbol (inyectado por un formulario, un toast, etc.) sin que el componente pueda saber qué nivel de heading le corresponde ahí.
+**Comportamiento no obvio (accesibilidad):** por defecto, el `role` del `Alert` se **deriva de `variant`**. `info`/`success` son "así está el estado" → `role="status"` (cortés: espera a que el lector de pantalla termine de leer lo que esté leyendo). `warning`/`error` son "algo salió mal" → `role="alert"` (asertivo: interrumpe al lector de pantalla). La prop `live` reemplaza ese default sin cambiar el aspecto. **Regla:** usa `assertive` para el resultado de una acción recién hecha y `off` para los avisos persistentes, como un `warning` que se monta en cada visita a una vista y, con el default, se anunciaría cada vez. `off` no usa `role="region"`, para no sobrecargar la página de landmarks. También el ícono se resuelve por variante — `InfoCircledIcon`/`CheckCircledIcon`/`ExclamationTriangleIcon`/`CrossCircledIcon` respectivamente — a menos que se pase `icon` explícitamente: si `icon` es `undefined` se usa el default; si se pasa **cualquier** valor, incluidos `null` o `false`, se usa tal cual, lo que permite ocultar el ícono explícitamente sin una prop separada. `AlertTitle` se renderiza como un `<div>`, no un `<h*>`, a propósito — un `Alert` puede aparecer en cualquier punto del árbol (inyectado por un formulario, un toast, etc.) sin que el componente pueda saber qué nivel de heading le corresponde ahí.
 
 Uso (ejemplos, extraídos de `Alert.stories.tsx`):
 
@@ -1693,9 +1694,15 @@ Uso (ejemplos, extraídos de `Alert.stories.tsx`):
   <AlertTitle>No icon</AlertTitle>
   <AlertDescription>This alert explicitly opts out of any icon.</AlertDescription>
 </Alert>
+
+// 6. Aviso persistente: no se anuncia cada vez que se monta la vista
+<Alert variant="warning" live="off">
+  <AlertTitle>Aviso</AlertTitle>
+  <AlertDescription>Contenido del aviso.</AlertDescription>
+</Alert>
 ```
 
-Un `Alert` `info`/`success` que se **monta** dinámicamente no se anuncia: los lectores de pantalla solo anuncian cambios dentro de una región viva que ya existía. Para avisar el resultado de una acción, usar [`announce()`](#announce--uso-y-opciones) o dejar el `Alert` montado y cambiar su contenido. `alertVariants` y `alertIconVariants` (las clases de la raíz y del ícono por `variant`) también se exportan.
+Un `Alert` con `role="status"` (`info`/`success` sin `live`, o `live="polite"`) que se **monta** dinámicamente no se anuncia: los lectores de pantalla solo anuncian cambios dentro de una región viva que ya existía. Para avisar el resultado de una acción, usar `live="assertive"`, [`announce()`](#announce--uso-y-opciones) o dejar el `Alert` montado y cambiar su contenido. `alertVariants` y `alertIconVariants` (las clases de la raíz y del ícono por `variant`) también se exportan.
 
 ### EmptyState — Uso y Props
 

@@ -13,14 +13,21 @@ type AlertVariant = NonNullable<VariantProps<typeof alertVariants>['variant']>;
 
 // error/warning mean "something went wrong" → assertive (interrupts the screen reader).
 // info/success mean "this is the state" → polite (waits for whatever is being read to
-// finish). Derived from the variant, not a prop: there's no override, no concrete reason
-// to need it came up during the implementation.
+// finish). This is the default when `live` isn't passed; `live` overrides it (ROLE_BY_LIVE).
 const ROLE_BY_VARIANT: Record<AlertVariant, 'alert' | 'status'> = {
   info: 'status',
   success: 'status',
   warning: 'alert',
   error: 'alert',
 };
+
+// off has no role: role="region" would add one landmark per notice, and a persistent notice
+// shouldn't overload the page's landmark navigation.
+const ROLE_BY_LIVE = {
+  assertive: 'alert',
+  polite: 'status',
+  off: undefined,
+} as const;
 
 const DEFAULT_ICON_BY_VARIANT: Record<
   AlertVariant,
@@ -41,22 +48,29 @@ export interface AlertProps
    * the icon explicitly without a separate prop.
    */
   icon?: React.ReactNode;
+  /**
+   * Overrides how the alert is announced: `assertive` -> `role="alert"`, `polite` ->
+   * `role="status"`, `off` -> no role. Use `assertive` for the result of an action just taken and
+   * `off` for persistent notices. If it isn't passed, the role comes from `variant`.
+   */
+  live?: keyof typeof ROLE_BY_LIVE;
 }
 
 // -----------------------------------------------------------------------------
 // Alert Root
 // -----------------------------------------------------------------------------
 /**
- * Inline message. `error`/`warning` use `role="alert"`; `info`/`success`, `role="status"`.
+ * Inline message. By default, `error`/`warning` use `role="alert"` and `info`/`success`,
+ * `role="status"`; `live` overrides it.
  *
- * Limitation: an `info`/`success` that mounts dynamically isn't announced, because
- * readers only read the changes of a `status` region that was already in the DOM. To
- * announce it, use `announce()` or keep the `Alert` mounted and change its content.
+ * Limitation: a `role="status"` that mounts dynamically isn't announced, because readers only
+ * read the changes of a `status` region that was already in the DOM. To announce it, use
+ * `live="assertive"`, `announce()` or keep the `Alert` mounted and change its content.
  */
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
-  ({ className, variant, icon, children, ...props }, ref) => {
+  ({ className, variant, icon, live, children, ...props }, ref) => {
     const resolvedVariant = variant ?? 'info';
-    const role = ROLE_BY_VARIANT[resolvedVariant];
+    const role = live ? ROLE_BY_LIVE[live] : ROLE_BY_VARIANT[resolvedVariant];
     const DefaultIcon = DEFAULT_ICON_BY_VARIANT[resolvedVariant];
 
     const resolvedIcon =

@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **`Alert`: prop `live?: 'assertive' | 'polite' | 'off'`.** Reemplaza el `role` que sale de
+  `variant`: `assertive` → `role="alert"`, `polite` → `role="status"`, `off` → sin `role`. Usa
+  `assertive` para el resultado de una acción recién hecha y `off` para los avisos persistentes,
+  que con el default se anunciarían cada vez que se monta la vista. Sin `live`, el DOM no cambia.
+
 ## [0.9.2] - 2026-11-03
 
 ### Fixed
