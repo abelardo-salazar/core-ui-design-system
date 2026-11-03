@@ -57,6 +57,14 @@ const defaultEmptyState = (
 
 const defaultPageLabel = (page: number, total: number) => `Page ${page} of ${total}`;
 
+// Extends the height of the sm pagination buttons' hit area to 44px without touching their 32px
+// look. An absolute ::after is placed from the padding box (inside the 1px border), hence 7px per
+// side, not 6, and -inset-x-px to match the visible width. Vertical only: the gap-2 between both
+// buttons stays dead. Local on purpose, not in Button sm: a global ::after would overlap
+// neighboring sm buttons in the consumers' toolbars.
+const PAGINATION_HIT_AREA =
+  "relative after:content-[''] after:absolute after:rounded-btn after:-inset-x-px after:-inset-y-[7px]";
+
 function DataTable<TData extends RowData>({
   columns,
   data,
@@ -165,6 +173,7 @@ function DataTable<TData extends RowData>({
           <Button
             variant="outline"
             size="sm"
+            className={PAGINATION_HIT_AREA}
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
@@ -173,6 +182,7 @@ function DataTable<TData extends RowData>({
           <Button
             variant="outline"
             size="sm"
+            className={PAGINATION_HIT_AREA}
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >

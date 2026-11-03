@@ -5,7 +5,7 @@
 ![TypeScript](https://img.shields.io/badge/typescript-5.9+-3178C6.svg)
 ![Registry](https://img.shields.io/badge/registry-npm-CB3837.svg)
 
-**Última versión publicada:** `0.9.0`.
+**Última versión publicada:** `0.9.0`. `main` tiene cambios sin publicar: ver [CHANGELOG § Unreleased](./CHANGELOG.md#unreleased).
 
 **Core UI** es la biblioteca de componentes oficial para nuestros productos digitales. Construida sobre **React 19**, **Radix UI** y **Tailwind CSS v4**, ofrece componentes accesibles (A11y), ligeros y listos para producción.
 
@@ -1331,6 +1331,8 @@ Nota: para accesibilidad, envuelve el `Switch` en un `label` o provee `aria-labe
 
 **Comportamiento no obvio:** `Calendar` es un wrapper de estilos sobre `@daypicker/react`, no una calendarización propia del DS. Reemplaza los componentes internos `Chevron`, `PreviousMonthButton`, `NextMonthButton` y `DayButton` de DayPicker por versiones que usan `buttonVariants` del DS (mismos estilos que `Button`). El estilo visual de cada día sale de los `modifiers` que provee DayPicker, no de una prop propia: `today` (borde + texto `primary` si no está seleccionado), `outside` (opacidad reducida), `disabled` (`pointer-events-none`), `range_middle` (fondo `primary/10`), `selected`/`range_start`/`range_end` (fondo `primary` sólido).
 
+**Área táctil:** las flechas de navegación miden 28x28px, pero responden en 44x44px gracias a un `::after`, sin cambiar su aspecto ni su foco. Los días son una excepción: quedan en 36px sin extensión, porque son una grilla contigua en la que un área mayor pisaría el día vecino, y 44px no cabe en 320px de ancho. `DatePicker` hereda ambas cosas. La extensión de las flechas cabe en el `p-3` de la raíz: si reduces ese padding con `className`, evita un `overflow` en un ancestro que la recorte.
+
 Uso (ejemplo, extraído de `Calendar.stories.tsx`):
 
 ```tsx
@@ -1895,6 +1897,7 @@ Notas:
 
 - Hacer click en un `TableHead` ordenable alterna el sort de esa columna (ícono `CaretUpIcon`/`CaretDownIcon`/`CaretSortIcon`, con `text-primary` cuando la columna está efectivamente ordenada).
 - El filtro global resetea la paginación a la primera página.
+- Área táctil: los botones de paginación se ven en 32px (`sm`), pero responden en 44px de alto gracias a un `::after`, sin cambiar su aspecto ni su foco. Esa área sobresale 6px por debajo de la raíz de `DataTable`: deja al menos ese espacio antes del siguiente control y evita un `overflow` que la recorte justo en el borde inferior.
 
 ### Chart — Uso y Props
 

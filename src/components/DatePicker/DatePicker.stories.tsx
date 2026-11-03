@@ -103,3 +103,20 @@ export const SpanishLocaleWithDayPickerLabels: Story = {
     ).toBeInTheDocument();
   },
 };
+
+// 4. Touch target: the popover's arrows inherit Calendar's 44x44 hit area. PopoverContent must
+// not clip the ::after, which only overflows the arrow, not the popover (see Calendar).
+export const InheritsCalendarTouchTargets: Story = {
+  render: () => <ControlledDatePicker />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Pick a date' }));
+
+    const content = await within(document.body).findByRole('dialog', { name: 'Choose date' });
+    await expect(content.className).not.toContain('overflow-');
+    for (const name of ['Go to the Previous Month', 'Go to the Next Month']) {
+      const arrow = within(content).getByRole('button', { name });
+      await expect(arrow.className.split(' ')).toContain('after:-inset-[9px]');
+    }
+  },
+};
