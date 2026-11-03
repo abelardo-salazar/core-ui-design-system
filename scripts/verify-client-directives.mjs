@@ -19,7 +19,9 @@
 // environment; dist/index.js is the only file a real consumer imports, so it must stay 100%
 // free of recharts. Chart now lives in the ./charts subpath (dist/charts.js), which is fully
 // client-only and may bring recharts. See CHANGELOG.md [0.4.1]. It also checks dist/locale.js
-// (./locale subpath): it can reach neither the barrel nor recharts.
+// (./locale subpath): it can reach neither the barrel nor recharts. And it fails if a module
+// bundled in dist/node_modules comes from a file that starts with 'use client' in node_modules
+// (the bundled copy loses the directive; see ARCHITECTURE.md § Peer o dependency).
 //
 // Extra check in the default mode (static heuristic, see below): detects a component without
 // 'use client' that declares a function locally and uses it as a JSX handler
@@ -160,10 +162,8 @@ if (process.argv.includes('--post-build')) {
         const pkgRel = `${rel}/${pkg}`;
         const manifest = join(ROOT, pkgRel, 'package.json');
         if (existsSync(manifest)) {
-          result.push({
-            pkgRel,
-            sideEffects: JSON.parse(readFileSync(manifest, 'utf8')).sideEffects,
-          });
+          const { name, version, sideEffects } = JSON.parse(readFileSync(manifest, 'utf8'));
+          result.push({ pkgRel, name, version, sideEffects });
         }
         result.push(...bundledPackages(`${pkgRel}/node_modules`));
       }
@@ -171,9 +171,10 @@ if (process.argv.includes('--post-build')) {
     return result;
   }
 
+  const packages = bundledPackages();
   const missingDecl = [];
   const unmappable = [];
-  for (const { pkgRel, sideEffects } of bundledPackages()) {
+  for (const { pkgRel, sideEffects } of packages) {
     if (!Array.isArray(sideEffects)) continue;
     for (const pattern of sideEffects.filter((p) => !isCss(p))) {
       if (/[*?{[]/.test(pattern)) {
@@ -196,6 +197,87 @@ if (process.argv.includes('--post-build')) {
     failed = true;
   } else {
     console.log('✓ `sideEffects` includes the side-effect modules of the bundled dependencies.');
+  }
+
+  // No bundled module may come from a 'use client' file. Rollup drops the directive of
+  // non-entry modules (see vite.config.ts), so dist/ can't show it: each module is mapped back
+  // to its original in the repo's node_modules/ and that file is read. A client package belongs
+  // in peerDependencies (ARCHITECTURE.md § Peer o dependency).
+  const DIRECTIVE_PROLOGUE_RE = /^(?:\s+|\/\/[^\n]*|\/\*[\s\S]*?\*\/|#![^\n]*)*/;
+  const DIRECTIVE_RE = /^(['"])([^'"\n]*)\1\s*;?/;
+  function hasUseClient(absPath) {
+    let code = readFileSync(absPath, 'utf8');
+    // Walk the directive prologue: string-literal statements before any other code.
+    for (;;) {
+      code = code.replace(DIRECTIVE_PROLOGUE_RE, '');
+      const m = code.match(DIRECTIVE_RE);
+      if (!m) return false;
+      if (m[2] === 'use client') return true;
+      code = code.slice(m[0].length);
+    }
+  }
+
+  // Bundled files of a package, without its nested node_modules/ (listed as their own packages).
+  function bundledFiles(dir) {
+    const files = [];
+    for (const name of readdirSync(dir)) {
+      const abs = join(dir, name);
+      if (statSync(abs).isDirectory()) {
+        if (name !== 'node_modules') files.push(...bundledFiles(abs));
+      } else if (name.endsWith('.js')) {
+        files.push(abs);
+      }
+    }
+    return files;
+  }
+
+  // Rollup writes every module as .js (index.mjs → index.js) and suffixes name clashes with a
+  // number (index.mjs → index.js, index.js → index2.js). All candidates are checked; .mjs first, since the ESM build is the one bundled.
+  const SOURCE_EXTS = ['.mjs', '.js', '.cjs', '.jsx'];
+  function originalsOf(distFile, pkgRel) {
+    const rel = toPosix(relative(join(ROOT, 'dist', pkgRel), distFile)).replace(/\.js$/, '');
+    for (const stem of new Set([rel, rel.replace(/\d+$/, '')])) {
+      const found = SOURCE_EXTS.map((ext) => join(ROOT, pkgRel, stem + ext)).filter(existsSync);
+      if (found.length > 0) return found;
+    }
+    return [];
+  }
+
+  const clientModules = [];
+  const unmapped = [];
+  let inspectedModules = 0;
+  for (const { pkgRel, name, version } of packages) {
+    for (const distFile of bundledFiles(join(ROOT, 'dist', pkgRel))) {
+      inspectedModules++;
+      const originals = originalsOf(distFile, pkgRel);
+      if (originals.length === 0) {
+        unmapped.push(toPosix(relative(ROOT, distFile)));
+        continue;
+      }
+      const client = originals.find(hasUseClient);
+      if (client)
+        clientModules.push({ pkg: `${name}@${version}`, file: toPosix(relative(ROOT, client)) });
+    }
+  }
+
+  if (clientModules.length > 0 || unmapped.length > 0) {
+    console.error("✗ dist/node_modules bundles modules that may be 'use client':\n");
+    for (const { pkg, file } of clientModules) {
+      console.error(`    ${pkg}: ${file} starts with 'use client'`);
+    }
+    for (const file of unmapped) {
+      console.error(`    no original found in node_modules/ for ${file} (check by hand)`);
+    }
+    console.error(
+      '\n  The bundled copy loses the directive and reaches the consumer as server code.\n' +
+        '  Move the package to peerDependencies, pin a version without the directive, or replace\n' +
+        '  it: see the "peer or dependency" criterion in ARCHITECTURE.md § Peer o dependency.',
+    );
+    failed = true;
+  } else {
+    console.log(
+      `✓ No bundled dependency module comes from a 'use client' file (${inspectedModules} modules in ${packages.length} packages).`,
+    );
   }
 
   process.exit(failed ? 1 : 0);
