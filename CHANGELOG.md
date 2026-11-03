@@ -1,5 +1,24 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- **El paquete se publica en el registro público de npm.** Desde esta versión se instala sin
+  token ni configuración de `.npmrc`. GitHub Packages queda congelado: las versiones hasta 0.8.0
+  siguen allí, pero las nuevas salen solo en npm. **Migración:**
+  1. Quita del `.npmrc` de tu proyecto las dos líneas de `@abelardo-salazar`
+     (`@abelardo-salazar:registry=https://npm.pkg.github.com` y
+     `//npm.pkg.github.com/:_authToken=...`) antes de instalar la versión nueva. Si las dejas,
+     npm sigue buscando el paquete en GitHub Packages y no encuentra la versión nueva.
+  2. Instala la versión nueva con `npm install @abelardo-salazar/core-ui-design-system@latest`.
+     El `package-lock.json` se regenera con la entrada del paquete apuntando a
+     `registry.npmjs.org`; commitea ese cambio. Si tu CI tenía un token de GitHub Packages solo
+     para este paquete, ya no hace falta.
+
+  Para seguir en 0.8.0 o una anterior no hay nada que cambiar: siguen en GitHub Packages, con el
+  mismo `.npmrc` y token.
+
 ## [0.8.0] - 2026-11-01
 
 ### Added

@@ -17,7 +17,7 @@ El orden real de capas en `style.css` compilado (Tailwind v4) es el siguiente; c
 components < properties < theme < base < utilities
 ```
 
-Los tokens semánticos viven en `base`. Las utilidades de color (`bg-primary`, `text-primary-content`, etc.) se generan en `@theme` apuntando a estos tokens vía `var(...)` (ver el bloque `@theme` de `src/tailwind.css`), y a su vez cada token semántico apunta a un token `--palette-*` (`--primary: var(--palette-navy)`). Esa indirección es implementación interna: **`--palette-*` no es la superficie pública de override** — ver [README § Theming](./README.md#-4-theming-custom-properties) para la lista de tokens que sí lo son.
+Los tokens semánticos viven en `base`. Las utilidades de color (`bg-primary`, `text-primary-content`, etc.) se generan en `@theme` apuntando a estos tokens vía `var(...)` (ver el bloque `@theme` de `src/tailwind.css`), y a su vez cada token semántico apunta a un token `--palette-*` (`--primary: var(--palette-navy)`). Esa indirección es implementación interna: **`--palette-*` no es la superficie pública de override** — ver [README § Theming](./README.md#-3-theming-custom-properties) para la lista de tokens que sí lo son.
 
 ### Por qué el override recomendado es "CSS sin capa"
 
@@ -34,11 +34,11 @@ Esto se verificó empíricamente (no solo por lectura de la spec) con Chromium r
 
 Los cuatro resultados coincidieron exactamente con lo que predice la teoría de CSS Cascade Layers (ninguna sorpresa que documentar como excepción). El riesgo del segundo/tercer escenario es real y concreto: si un consumidor que también usa Tailwind pone su override dentro de su propio `@layer base` (siguiendo la convención de customización de tema de Tailwind), la capa `base` termina compartida por nombre entre ambas hojas, y el desempate pasa a ser el orden normal de cascada (última declaración en el documento gana) — ya no aplica la prioridad especial de "sin capa". Un reorden de imports, o un bump de dependencia que cambia cuándo se inyecta su CSS, puede invertir silenciosamente cuál de las dos gana.
 
-Por eso el override sin capa es el único patrón que se documenta como soportado — ver el bloque copy-paste y la lista completa de tokens en [README § Theming](./README.md#-4-theming-custom-properties).
+Por eso el override sin capa es el único patrón que se documenta como soportado — ver el bloque copy-paste y la lista completa de tokens en [README § Theming](./README.md#-3-theming-custom-properties).
 
 ## Hojas de estilos: `style.css` y `tailwind.css`
 
-Qué hoja importar según el proyecto está en [README § Setup Inicial](./README.md#️-3-setup-inicial). Aquí va el porqué.
+Qué hoja importar según el proyecto está en [README § Setup Inicial](./README.md#️-2-setup-inicial). Aquí va el porqué.
 
 ### `src/tailwind.css`: fuente única de tokens y capas base
 
@@ -111,13 +111,13 @@ Se publica empujando un tag. El flujo:
 2. **Merge** del PR a `main`.
 3. **Tag anotado** `vX.Y.Z` sobre el commit del merge: `git tag -a vX.Y.Z -m "vX.Y.Z" <commit>`.
 4. **Push del tag:** `git push origin vX.Y.Z`.
-5. **El workflow `release.yml` publica.** Falla sin publicar si el tag no es `v` + `package.json#version`, si su commit no está en `main` o si esa versión ya está en el registro. Si no falla, corre la misma verificación que `ci.yml` y publica en GitHub Packages con `GITHUB_TOKEN`.
+5. **El workflow `release.yml` publica.** Falla sin publicar si el tag no es `v` + `package.json#version`, si su commit no está en `main` o si esa versión ya está en el registro. Si no falla, corre la misma verificación que `ci.yml` y publica en el registro público de npm con el secret `NPM_TOKEN` (token granular de npm). Para el chequeo de versión, un E404 de `npm view` cuenta como "no publicada" (el paquete todavía no existe en npm); cualquier otro error falla el job. Por qué npm: [Registro: npm público](#registro-npm-público).
 
 Razón: el tag define lo que se publica. Antes se publicaba a mano con `npm publish` desde una máquina local y el tag se ponía después, reconstruyendo qué commit se había publicado. Ahora el paquete sale del commit con tag, verificado en CI, y no hay nada que reconstruir.
 
 Un tag que falló no se mueve para reintentar: se corrige en un PR, se sube la versión si el error ya estaba en el commit con tag y se empuja un tag nuevo. Si la falla fue externa (el registro, la red), se vuelve a correr el workflow.
 
-**Nota histórica:** antes de este flujo, los tags se ubicaban con el `gitHead` del paquete publicado (`npm view …@X.Y.Z gitHead`). GitHub Packages no lo expone (devuelve vacío), así que los tags anteriores se ubicaron por la hora de publicación que registra el registro. Está verificado para 0.6.0 y 0.7.0. `v0.4.1` y `v0.4.2` son tags ligeros (no anotados), creados antes de la convención de tags anotados, y se dejan así. Las versiones anteriores a 0.4.1 no tienen tag.
+**Nota histórica:** antes de este flujo, los tags se ubicaban con el `gitHead` del paquete publicado (`npm view …@X.Y.Z gitHead`). GitHub Packages no lo expone (devuelve vacío), así que los tags anteriores se ubicaron por la hora de publicación que registra el registro. Esto aplica a las versiones hasta 0.8.0, que están en GitHub Packages; npm sí guarda `gitHead`, pero desde este flujo el tag ya identifica el commit publicado. Está verificado para 0.6.0 y 0.7.0. `v0.4.1` y `v0.4.2` son tags ligeros (no anotados), creados antes de la convención de tags anotados, y se dejan así. Las versiones anteriores a 0.4.1 no tienen tag.
 
 ## Decisiones
 
@@ -198,11 +198,13 @@ Tooltip no es apto para touch: Radix ignora los taps por diseño. Para contenido
 
 La variante `shape` evita que cada consumidor arme el pill con un `className` ad hoc.
 
-### Distribución por GitHub Packages
+### Registro: npm público
 
-El paquete se distribuye por GitHub Packages. El `.npmrc` del consumidor (ver [README § 1](./README.md#-1-configuración-de-autenticación-requerido)) mapea el scope `@abelardo-salazar` a ese registro, así que npm no resuelve el paquete contra npmjs: eso protege contra dependency confusion. El repo es público.
+Desde 0.9.0 el paquete se publica en el registro público de npm, bajo el scope `@abelardo-salazar`, que es del mantenedor en npmjs.com. GitHub Packages queda congelado: las versiones hasta 0.8.0 siguen ahí y no hay publicación dual. `publishConfig` declara el registro y `access: public`, porque un paquete con scope se publica privado por defecto. Decidido en [#68](https://github.com/abelardo-salazar/core-ui-design-system/issues/68).
 
-**En revisión:** la distribución para proyectos de terceros se evalúa en [#68](https://github.com/abelardo-salazar/core-ui-design-system/issues/68).
+**Por qué:** GitHub Packages exige un token para instalar incluso un paquete público, así que cada consumidor tenía que crear un PAT y mantener un `.npmrc` con él. En npm se instala sin configuración. Además, npm permite pasar a trusted publishing (OIDC, sin token guardado en el repo) y publicar con provenance; eso queda para un cambio posterior. Mientras tanto, la publicación usa un token granular en el secret `NPM_TOKEN`.
+
+**Dependency confusion:** antes el `.npmrc` del consumidor mapeaba el scope a GitHub Packages para que npm no lo resolviera contra npmjs. Ahora el paquete vive en npmjs y el scope pertenece al mantenedor, así que nadie más puede publicar bajo él.
 
 ### Fuera del DS
 
