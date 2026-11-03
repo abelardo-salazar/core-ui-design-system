@@ -9,6 +9,7 @@ export * from './components/Button';
 export * from './components/Calendar';
 export * from './components/Card';
 export * from './components/Checkbox';
+export * from './components/CheckboxField';
 // `Chart` is NOT exported from the root barrel: it pulls in recharts, which calls
 // createContext() at module level and breaks the whole barrel in Server Components
 // (react-server). It lives in its own subpath, fully client-only:
@@ -32,6 +33,7 @@ export * from './components/Select';
 export * from './components/Sheet';
 export * from './components/Skeleton';
 export * from './components/Switch';
+export * from './components/SwitchField';
 export * from './components/Table';
 export * from './components/NavigationBar';
 export * from './components/Tabs';

@@ -37,4 +37,7 @@ export const CLIENT_ENTRY_POINTS = [
   'src/components/Chart/ChartContainer.tsx',
   'src/components/QuantityStepper/QuantityStepper.tsx',
   'src/components/Button/Button.tsx',
+  'src/components/SelectionField/SelectionField.tsx',
+  'src/components/SwitchField/SwitchField.tsx',
+  'src/components/CheckboxField/CheckboxField.tsx',
 ];
