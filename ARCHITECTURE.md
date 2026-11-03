@@ -174,6 +174,8 @@ Todo control interactivo apunta a un objetivo táctil de 44px. Los tamaños comp
 
 La extensión se aplica en el componente que conoce su entorno (paginación de DataTable, flechas de Calendar), no en `Button` `sm` en general: un `::after` global superpondría las hit areas de botones `sm` vecinos en las barras de los consumidores.
 
+`Toggle` `sm` sí la lleva siempre, aunque no conoce su entorno: suele ir suelto, y las barras compactas tienen `ToggleGroup`. Costo aceptado: dos `Toggle` `sm` de menos de 44px de ancho a menos de 12px de separación se pisan, y el README pide esa separación. Para acotarlo, el `::after` crece desde el centro solo hasta 44px, así que un `Toggle` más ancho no se extiende hacia los lados.
+
 Excepción: las grillas contiguas no extienden su hit area, porque un `::after` pisaría la celda vecina. Caso: los días de Calendar, que quedan en 36px. 44px no cabe en 320px de ancho (7 × 44 + padding = 332px) y 40px cambiaría el aspecto sin llegar a 44.
 
 Button, Input y Select comparten escala para alinear en una misma fila: `sm` 32px, `md` 44px, `lg` 48px.

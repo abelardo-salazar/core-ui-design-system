@@ -25,6 +25,11 @@
   `CheckboxField` a la izquierda. Aceptan los props del control que envuelven, que conserva su rol;
   `id` y `ref` van al control y `className` a la fila. Con `disabled`, la `description` no se atenúa:
   es el lugar para el motivo.
+- **`Toggle`: botón con `aria-pressed`.** Acepta `pressed`, `defaultPressed` y `onPressedChange`, con
+  `size` `sm`/`md`/`lg` (32/44/48px) y `icon` opcional. Sin `children`, `icon` y `aria-label` son
+  obligatorios por tipos. `size="sm"` responde en 44px sin cambiar su aspecto; si mide menos de 44px
+  de ancho, deja al menos 12px de separación con sus vecinos. Requiere el peer
+  `@radix-ui/react-toggle`, que ya era necesario.
 
 ## [0.9.2] - 2026-11-03
 

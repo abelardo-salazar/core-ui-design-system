@@ -39,6 +39,7 @@ export * from './components/NavigationBar';
 export * from './components/Tabs';
 export * from './components/Textarea';
 export * from './components/Toast';
+export * from './components/Toggle';
 export * from './components/ToggleGroup';
 export * from './components/Tooltip';
 export * from './components/Typography'; // Heading, Text
