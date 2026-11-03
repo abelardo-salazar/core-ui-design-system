@@ -7,8 +7,11 @@ on:
   push:
     tags: ['v*.*.*']
 
+# id-token: write lets npm request a GitHub OIDC token for trusted publishing (no npm token
+# is stored in the repo) and sign the provenance attestation.
 permissions:
   contents: read
+  id-token: write
 
 # Never cancel a release half-way; a second push of the same tag waits for the first run.
 concurrency:
@@ -41,21 +44,20 @@ jobs:
           fi
           echo "Tag $GITHUB_REF_NAME matches package.json and $commit is on main."
 
-      # Node 22 LTS, same as ci.yml. registry-url writes an .npmrc that authenticates
-      # npm view and npm publish against npmjs with NODE_AUTH_TOKEN.
+      # Node 22 LTS, same as ci.yml. No registry-url: setup-node would write an .npmrc with a
+      # placeholder auth token. The default registry is npmjs, npm view runs anonymously (the
+      # package is public) and npm publish authenticates through OIDC.
       - name: Setup Node
         uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: 'npm'
-          registry-url: 'https://registry.npmjs.org'
 
-      # Fails before the long steps if the version is already in the registry. E404 means the
-      # package doesn't exist on npm yet (first publish), so no version is published. Any other
-      # npm view failure (auth, network) fails the job: publishing is never attempted blind.
+      # Fails before the long steps if the version is already in the registry. Anonymous: the
+      # package is public. E404 means the package doesn't exist on npm, so no version is
+      # published. Any other npm view failure (network, registry) fails the job: publishing is
+      # never attempted blind.
       - name: Check version is not published
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           name="$(node -p "require('./package.json').name")"
           version="$(node -p "require('./package.json').version")"
@@ -117,10 +119,18 @@ jobs:
       - name: Test
         run: npm run test
 
-      # Publishes the dist/ built and tested above. publishConfig in package.json sets the npmjs
-      # registry and public access (a scoped package is private by default); the registry also
-      # rejects a version that already exists.
+      # Trusted publishing needs npm >= 11.5.1; Node 22 ships npm 10. Upgraded only here, so the
+      # verification above runs with the same npm as ci.yml.
+      - name: Upgrade npm for trusted publishing
+        run: |
+          npm install -g npm@^11.5.1
+          npm --version
+
+      # Publishes the dist/ built and tested above, with no token: npm exchanges the GitHub OIDC
+      # token for a short-lived publish credential, which npmjs only grants to the trusted
+      # publisher configured for this package (this repo and release.yml). --provenance attaches
+      # a signed attestation that links the tarball to this commit and workflow run.
+      # publishConfig in package.json sets the npmjs registry and public access; the registry
+      # also rejects a version that already exists.
       - name: Publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish
+        run: npm publish --provenance

@@ -2135,7 +2135,7 @@ El paquete se publica empujando un tag; nadie corre `npm publish` a mano. Por qu
    git push origin vX.Y.Z
    ```
 
-4. **`.github/workflows/release.yml`** publica. Antes de instalar nada, falla si el tag no es `v` + `package.json#version`, si su commit no está en `main` o si esa versión ya está en npm (un E404 de `npm view` cuenta como "no publicada": el paquete todavía no existe en npm). Después corre los mismos pasos que `verify` (salvo el dependency review) y publica en el registro público de npm con el secret `NPM_TOKEN` del repositorio, un token granular de npm con permiso de escritura sobre el paquete. El workflow solo pide el permiso `contents: read` de `GITHUB_TOKEN`.
+4. **`.github/workflows/release.yml`** publica. Antes de instalar nada, falla si el tag no es `v` + `package.json#version`, si su commit no está en `main` o si esa versión ya está en npm (un E404 de `npm view` cuenta como "no publicada": el paquete todavía no existe en npm). Después corre los mismos pasos que `verify` (salvo el dependency review) y publica en el registro público de npm con trusted publishing (OIDC) y provenance, sin ningún token guardado en el repositorio. El paquete tiene configurado en npmjs.com como trusted publisher este repositorio y el workflow `release.yml`, sin environment; si se renombra el repo o el workflow, hay que actualizarlo allí. El workflow pide los permisos `contents: read` e `id-token: write`.
 
 ## ⚖️ Licencia
 
