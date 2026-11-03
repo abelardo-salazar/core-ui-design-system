@@ -94,7 +94,13 @@ function CalendarDayButton({ day, modifiers, className, ...props }: DayButtonPro
   );
 }
 
-function Calendar({ className, classNames, showOutsideDays = true, ...props }: CalendarProps) {
+function Calendar({
+  className,
+  classNames,
+  components,
+  showOutsideDays = true,
+  ...props
+}: CalendarProps) {
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
@@ -115,6 +121,7 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
         PreviousMonthButton: CalendarPreviousButton,
         NextMonthButton: CalendarNextButton,
         DayButton: CalendarDayButton,
+        ...components,
       }}
       {...props}
     />

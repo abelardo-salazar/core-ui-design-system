@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import type { DayButtonProps } from '@daypicker/react';
 import { expect, userEvent, within } from 'storybook/test';
 import { Calendar } from './Calendar';
 
@@ -67,5 +68,32 @@ export const TouchTargets: Story = {
     await expect(day?.className.split(' ')).toContain('h-9');
     await expect(day?.className.split(' ')).toContain('w-9');
     await expect(day?.className).not.toContain('after:');
+  },
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- `day` and `modifiers` must be destructured out so they aren't spread onto the DOM button
+function CustomDayButton({ day, modifiers, ...props }: DayButtonProps) {
+  return <button data-testid="custom-day" {...props} />;
+}
+
+// 3. Custom components: the consumer's `components` are merged key by key with the DS's, the
+// same criterion as classNames. Passing only DayButton replaces the days and keeps the DS's
+// arrows, with their 44px hit area, and its Chevron.
+export const CustomComponentsMerge: Story = {
+  args: {
+    mode: 'single',
+    components: { DayButton: CustomDayButton },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    await expect(canvas.getAllByTestId('custom-day').length).toBeGreaterThan(0);
+
+    for (const name of ['Go to the Previous Month', 'Go to the Next Month']) {
+      const arrow = canvas.getByRole('button', { name });
+      await expect(arrow.className.split(' ')).toContain('after:-inset-[9px]');
+      // CalendarChevron: DayPicker's default Chevron has no h-4 class.
+      await expect(arrow.querySelector('svg')).toHaveClass('h-4', 'w-4');
+    }
   },
 };
