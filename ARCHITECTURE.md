@@ -111,7 +111,7 @@ Se publica empujando un tag. El flujo:
 2. **Merge** del PR a `main`.
 3. **Tag anotado** `vX.Y.Z` sobre el commit del merge: `git tag -a vX.Y.Z -m "vX.Y.Z" <commit>`.
 4. **Push del tag:** `git push origin vX.Y.Z`.
-5. **El workflow `release.yml` publica.** Falla sin publicar si el tag no es `v` + `package.json#version`, si su commit no está en `main` o si esa versión ya está en el registro. Si no falla, corre la misma verificación que `ci.yml` y publica en el registro público de npm con el secret `NPM_TOKEN` (token granular de npm). Para el chequeo de versión, un E404 de `npm view` cuenta como "no publicada" (el paquete todavía no existe en npm); cualquier otro error falla el job. Por qué npm: [Registro: npm público](#registro-npm-público).
+5. **El workflow `release.yml` publica.** Falla sin publicar si el tag no es `v` + `package.json#version`, si su commit no está en `main` o si esa versión ya está en el registro. Si no falla, corre la misma verificación que `ci.yml` y publica en el registro público de npm con trusted publishing (OIDC) y provenance: no hay token de npm en el repo, y npmjs solo acepta la publicación desde `release.yml` de este repositorio. El chequeo de versión corre sin autenticación porque el paquete es público. Para ese chequeo de versión, un E404 de `npm view` cuenta como "no publicada" (el paquete todavía no existe en npm); cualquier otro error falla el job. Por qué npm: [Registro: npm público](#registro-npm-público).
 
 Razón: el tag define lo que se publica. Antes se publicaba a mano con `npm publish` desde una máquina local y el tag se ponía después, reconstruyendo qué commit se había publicado. Ahora el paquete sale del commit con tag, verificado en CI, y no hay nada que reconstruir.
 
@@ -202,7 +202,7 @@ La variante `shape` evita que cada consumidor arme el pill con un `className` ad
 
 Desde 0.9.0 el paquete se publica en el registro público de npm, bajo el scope `@abelardo-salazar`, que es del mantenedor en npmjs.com. GitHub Packages queda congelado: las versiones hasta 0.8.0 siguen ahí y no hay publicación dual. `publishConfig` declara el registro y `access: public`, porque un paquete con scope se publica privado por defecto. Decidido en [#68](https://github.com/abelardo-salazar/core-ui-design-system/issues/68).
 
-**Por qué:** GitHub Packages exige un token para instalar incluso un paquete público, así que cada consumidor tenía que crear un PAT y mantener un `.npmrc` con él. En npm se instala sin configuración. Además, npm permite pasar a trusted publishing (OIDC, sin token guardado en el repo) y publicar con provenance; eso queda para un cambio posterior. Mientras tanto, la publicación usa un token granular en el secret `NPM_TOKEN`.
+**Por qué:** GitHub Packages exige un token para instalar incluso un paquete público, así que cada consumidor tenía que crear un PAT y mantener un `.npmrc` con él. En npm se instala sin configuración. Además, npm admite trusted publishing (OIDC): no hay un token de larga duración que guardar, rotar o que se pueda filtrar. También publica con provenance, una atestación firmada que liga cada versión con su commit y su corrida del workflow. La 0.9.0 salió con un token granular temporal; desde la siguiente versión se publica así.
 
 **Dependency confusion:** antes el `.npmrc` del consumidor mapeaba el scope a GitHub Packages para que npm no lo resolviera contra npmjs. Ahora el paquete vive en npmjs y el scope pertenece al mantenedor, así que nadie más puede publicar bajo él.
 
