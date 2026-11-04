@@ -32,12 +32,13 @@ jobs:
         with:
           fail-on-severity: high
 
-      # Node 22 LTS: the repo doesn't declare engines; it's the intersection of the ranges
-      # of the installed deps (vitest 4 excludes Node 23, vite 7 requires >=22.12).
+      # Node from .nvmrc, the same for local development (devEngines warns on another version).
+      # 22 LTS is the intersection of the ranges of the installed deps (vitest 4 excludes Node 23,
+      # vite 7 requires >=22.12). No engines: it would restrict the package's consumers.
       - name: Setup Node
         uses: actions/setup-node@v5
         with:
-          node-version: '22'
+          node-version-file: .nvmrc
           cache: 'npm'
 
       - name: Install dependencies
