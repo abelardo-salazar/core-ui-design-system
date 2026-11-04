@@ -35,6 +35,11 @@
   dibuja contenido bajo el número y recibe la fecha y los `modifiers`. Ese contenido no entra en el
   nombre accesible del día: su equivalente textual va en `labels.labelDayButton`, de DayPicker. Con
   un `DayButton` propio, `renderDayContent` no se aplica.
+- **`FileInput`: selector de archivos.** Un `input` nativo, oculto de forma accesible, con un botón
+  que muestra el nombre de lo elegido. Acepta `accept`, `multiple`, `onFilesChange(files)`, `label`,
+  `error`, `variant` y `size`, con textos en `chooseLabel` y `changeLabel`. Como el usuario puede elegir
+  "todos los archivos", vuelve a validar contra `accept`, por extensión y MIME, y entrega lo que no
+  pasa en `onReject(files)`. No lee los archivos ni incluye una zona para soltarlos.
 
 ### Fixed
 

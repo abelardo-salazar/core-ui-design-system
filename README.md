@@ -147,6 +147,7 @@ Importar desde el barrel principal es seguro en un Server Component; el subpath 
 | `Dialog`, `DialogPortal`, `DialogOverlay`, `DialogTrigger`, `DialogClose`, `DialogContent`, `DialogHeader`, `DialogFooter`, `DialogTitle`, `DialogDescription`                                                                     | No               |
 | `DropdownMenu`, `DropdownMenuTrigger`, `DropdownMenuGroup`, `DropdownMenuContent`, `DropdownMenuItem`, `DropdownMenuCheckboxItem`, `DropdownMenuRadioGroup`, `DropdownMenuRadioItem`, `DropdownMenuLabel`, `DropdownMenuSeparator` | No               |
 | `EmptyState`, `EmptyStateIcon`, `EmptyStateTitle`, `EmptyStateDescription`, `EmptyStateActions`                                                                                                                                    | Sí               |
+| `FileInput`                                                                                                                                                                                                                        | No               |
 | `Image`                                                                                                                                                                                                                            | No               |
 | `Input`                                                                                                                                                                                                                            | No               |
 | `Container`                                                                                                                                                                                                                        | Sí               |
@@ -310,6 +311,7 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
     - [Checkbox — Uso y Props](#checkbox--uso-y-props)
     - [CheckboxField — Uso y Props](#checkboxfield--uso-y-props)
     - [Input — Uso y Props](#input--uso-y-props)
+    - [FileInput — Uso y Props](#fileinput--uso-y-props)
     - [Textarea — Uso y Props](#textarea--uso-y-props)
     - [Select — Uso y Props](#select--uso-y-props)
     - [Switch — Uso y Props](#switch--uso-y-props)
@@ -1243,6 +1245,7 @@ Uso (ejemplo simplificado, extraído de `DropdownMenu.stories.tsx`):
 | Componente        | Descripción                            | Props clave                                                                                                                                                  |
 | :---------------- | :------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Input`           | Campo de texto                         | `type`, `label?`, `error?`, `helperText?`, `startIcon?`, `endIcon?`, `clearable?`, `onClear?`, `clearLabel?`, `variant?`, `size?`, `disabled?`, `className?` |
+| `FileInput`       | Selector de archivos                   | `accept?`, `multiple?`, `onFilesChange?`, `onReject?`, `label?`, `error?`, `variant?`, `size?`, `chooseLabel?`, `changeLabel?`                               |
 | `Textarea`        | Texto multilinea                       | Standard HTML props, `variant?`, `error?`, `className?`                                                                                                      |
 | `Select`          | Dropdown avanzado                      | `value?`, `defaultValue?`, `onValueChange?`, `placeholder?`, `className?`                                                                                    |
 | `Switch`          | Toggle binario                         | `checked?`, `defaultChecked?`, `onCheckedChange?`, `disabled?`, `className?`                                                                                 |
@@ -1390,6 +1393,47 @@ export function SearchField() {
   );
 }
 ```
+
+### FileInput — Uso y Props
+
+**Desde 0.10.**
+
+- **Exports:** `FileInput`; tipo `FileInputProps`.
+- **Props principales:**
+  - `accept?: string`, `multiple?: boolean` — los atributos nativos.
+  - `onFilesChange?: (files: File[]) => void` — los archivos elegidos que pasan `accept`.
+  - `onReject?: (files: File[]) => void` — los que no lo pasan.
+  - `label?: string` — nombre visible del campo, asociado al `input`. Si no lo usas, el nombre accesible es solo el texto del botón.
+  - `error?: string` — mensaje de error, con el mismo aspecto y los mismos atributos ARIA que en `Input`.
+  - `variant?` (default `'outline'`) — las variantes de `Button`.
+  - `size?: 'sm' | 'md' | 'lg'` (default `'md'`) — 32 / 44 / 48px, la escala de `Button`. `sm` es un tamaño compacto y no llega a los 44px de objetivo táctil.
+  - `chooseLabel?: string` (default `'Choose file'`, o `'Choose files'` con `multiple`) y `changeLabel?: string` (default `'Change file'`, o `'Change files'` con `multiple`) — textos del botón.
+  - `className?: string` — se aplica al botón. El resto de los atributos de `<input>`, como `name`, `required` o `onChange`, y el `ref`, van al `input`.
+
+Es un `input` nativo, oculto de forma accesible, con un `<label>` que se ve como un botón y muestra al lado el nombre de lo elegido. Foco, teclado, `required` y envío de formularios son los del navegador. No lee los archivos.
+
+**Validación:** `accept` solo filtra el diálogo, y el usuario puede elegir "todos los archivos", así que `FileInput` lo vuelve a comprobar por extensión (`.pdf`) o MIME (`image/*`, `application/json`). Si el navegador no conoce el tipo de un archivo, este solo pasa por extensión. El componente no muestra ningún mensaje por su cuenta: usa `onReject` para pasarle un `error`. Si algunos archivos son válidos, se conservan esos. Si no lo es ninguno, se mantiene la selección anterior y `onFilesChange` no se llama. El `input` nativo solo conserva los archivos mostrados, también al enviar el formulario.
+
+**Vaciar el campo:** el `reset` del formulario lo vacía. Fuera de un formulario, cambia su `key`, porque el valor de un `input` de archivos no se puede controlar.
+
+```tsx
+const [error, setError] = useState<string>();
+
+<FileInput
+  label="Contrato"
+  accept=".pdf"
+  error={error}
+  chooseLabel="Elegir archivo"
+  changeLabel="Cambiar archivo"
+  onFilesChange={(files) => {
+    setError(undefined);
+    setContrato(files[0]);
+  }}
+  onReject={() => setError('Sube un PDF.')}
+/>;
+```
+
+No incluye una zona para soltar archivos.
 
 ### Textarea — Uso y Props
 
@@ -2292,7 +2336,7 @@ Además de los componentes, cada entry point exporta los tipos de sus props y al
 | Tipos de props          | `AlertProps`, `AspectRatioProps`, `BadgeProps`, `ButtonProps`, `CalendarProps`, `CheckboxProps`, `ChipProps`, `ContainerProps`, `DataTableProps`, `DatePickerProps`, `HeadingProps`, `ImageProps`, `ProgressProps`, `ProgressRingProps`, `SwitchProps`, `TextProps`, `TextareaProps`                                                                                                                                                              |
 | Tipos de props (0.5.0)  | `ComboboxProps`, `ComboboxSingleProps`, `ComboboxMultipleProps`, `ComboboxLabelProps`, `ComboboxOption`, `EmptyStateProps`, `EmptyStateTitleProps`, `InputProps`, `InputBaseProps`, `InputWithEndIconProps`, `ClearableInputProps`, `QuantityStepperProps`, `SheetContentProps`, `SkipToContentProps`, `ToggleGroupProps`, `ToggleGroupSingleProps`, `ToggleGroupMultipleProps`, `ToggleGroupItemProps`, `VisuallyHiddenProps`, `AnnounceOptions` |
 | Tipos de props (0.7.0)  | `ComboboxModeProps`, `ComboboxListVisibility`                                                                                                                                                                                                                                                                                                                                                                                                     |
-| Tipos de props (0.10.0) | `NavigationBarProps`, `NavigationBarItemProps`, `SwitchFieldProps`, `CheckboxFieldProps`, `ToggleProps`                                                                                                                                                                                                                                                                                                                                           |
+| Tipos de props (0.10.0) | `NavigationBarProps`, `NavigationBarItemProps`, `SwitchFieldProps`, `CheckboxFieldProps`, `ToggleProps`, `FileInputProps`                                                                                                                                                                                                                                                                                                                         |
 | Variantes (`cva`)       | `buttonVariants`, `badgeVariants`, `inputVariants`, `alertVariants`, `alertIconVariants` — devuelven las clases de cada variante, para dar el mismo aspecto a un elemento propio (por ejemplo, un `Link` con `buttonVariants({ variant: 'outline' })`)                                                                                                                                                                                            |
 | Utilidades              | `cn(...inputs)` — combina clases con `clsx` y resuelve conflictos de Tailwind con `tailwind-merge` (la última gana); `toast` (ver [Toast](#toast--uso-y-props)); `features` (ver [DataTable](#datatable--uso-y-props)); `announce` (ver [announce()](#announce--uso-y-opciones))                                                                                                                                                                  |
 
