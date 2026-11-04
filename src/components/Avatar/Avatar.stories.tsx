@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { expect, fn, waitFor, within } from 'storybook/test';
 import { Avatar, AvatarImage, AvatarFallback } from './Avatar';
 import { Badge } from '../Badge';
+import { rootTokenIn } from '../../../.storybook/rootTheme';
 
 const meta: Meta<typeof Avatar> = {
   title: 'Components/DataDisplay',
@@ -91,24 +92,16 @@ export const Badges: Story = {
     // Same error-content token as Button destructive (see Button.stories.tsx for why
     // we check the raw custom property instead of getComputedStyle().color here).
     await expect(destructiveBadge.className.split(' ')).toContain('text-error-content');
-    await expect(
-      getComputedStyle(document.documentElement).getPropertyValue('--error-content'),
-    ).toBe('#000000');
+    await expect(rootTokenIn('light', '--error-content')).toBe('#000000');
 
     // Hover: same case as Button destructive; --error-focus (background) is dark while
     // --error (base background) is light, so the text needs its own -focus-content.
     await expect(destructiveBadge.className.split(' ')).toContain('hover:text-error-focus-content');
-    await expect(
-      getComputedStyle(document.documentElement).getPropertyValue('--error-focus-content'),
-    ).toBe('#ffffff');
+    await expect(rootTokenIn('light', '--error-focus-content')).toBe('#ffffff');
 
     // Dark mode flips which color needs more contrast (--error-focus becomes a light
     // red), so --error-focus-content flips too: black, not white.
-    document.documentElement.classList.add('dark');
-    await expect(
-      getComputedStyle(document.documentElement).getPropertyValue('--error-focus-content'),
-    ).toBe('#000000');
-    document.documentElement.classList.remove('dark');
+    await expect(rootTokenIn('dark', '--error-focus-content')).toBe('#000000');
   },
 };
 

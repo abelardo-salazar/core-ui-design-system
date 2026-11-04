@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, within } from 'storybook/test';
 import { Textarea } from './Textarea';
+import { rootTokenIn } from '../../../.storybook/rootTheme';
 
 const meta: Meta<typeof Textarea> = {
   title: 'Components/Textarea',
@@ -52,9 +53,7 @@ export const WithError: Story = {
     // against the raw custom property (--error-focus) plus the classes that use it.
     await expect(label.className.split(' ')).toContain('text-error-focus');
     await expect(label.className.split(' ')).not.toContain('text-base-content');
-    await expect(getComputedStyle(document.documentElement).getPropertyValue('--error-focus')).toBe(
-      '#b91c1c',
-    );
+    await expect(rootTokenIn('light', '--error-focus')).toBe('#b91c1c');
 
     const errorMessage = canvas.getByText('El comentario debe tener al menos 20 caracteres.');
     await expect(errorMessage.className.split(' ')).toContain('text-error-focus');

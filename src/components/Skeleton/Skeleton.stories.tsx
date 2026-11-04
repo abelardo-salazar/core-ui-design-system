@@ -3,6 +3,7 @@ import { expect } from 'storybook/test';
 import { Skeleton } from './Skeleton';
 // We assume these components already exist from Phase 1
 import { Card, CardContent, CardFooter, CardHeader } from '../Card';
+import { rootTokenIn } from '../../../.storybook/rootTheme';
 
 const meta = {
   title: 'Components/Feedback/Skeleton',
@@ -31,10 +32,8 @@ export const Default: Story = {
     // derived from Tailwind utilities through getComputedStyle (same issue documented in
     // Button's Destructive story), so the assertion is on the raw token defined
     // directly on :root / .dark, which is visible.
-    const lightValue = getComputedStyle(document.documentElement).getPropertyValue('--base-300');
-    document.documentElement.classList.add('dark');
-    const darkValue = getComputedStyle(document.documentElement).getPropertyValue('--base-300');
-    document.documentElement.classList.remove('dark');
+    const lightValue = rootTokenIn('light', '--base-300');
+    const darkValue = rootTokenIn('dark', '--base-300');
 
     await expect(darkValue.trim()).not.toBe(lightValue.trim());
   },
