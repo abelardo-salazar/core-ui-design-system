@@ -96,7 +96,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Same verification as the verify job in ci.yml; keep both in sync.
+      # Same verification as the verify job in ci.yml; keep both in sync. Two exceptions: dependency
+      # review, which only runs on pull requests, and the Storybook build, because a docs failure
+      # must not block publishing the package.
       - name: Get Playwright version
         id: playwright
         run: echo "version=$(node -p "require('playwright/package.json').version")" >> "$GITHUB_OUTPUT"
@@ -129,6 +131,9 @@ jobs:
 
       - name: Verify Tailwind consumer
         run: npm run verify:tailwind-consumer
+
+      - name: Verify fonts
+        run: npm run verify:fonts
 
       - name: Test
         run: npm run test

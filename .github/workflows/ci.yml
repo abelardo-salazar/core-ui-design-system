@@ -94,3 +94,7 @@ jobs:
 
       - name: Test
         run: npm run test
+
+      # Only here, not in release.yml: a docs failure must not block publishing the package.
+      - name: Build Storybook
+        run: npm run build-storybook

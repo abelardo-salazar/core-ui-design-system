@@ -2415,10 +2415,13 @@ push nuevo a la misma rama, se cancela el run anterior. Pasos, en orden:
 11. `npm run test` — Vitest en modo browser (Chromium headless), con las stories como tests, en
     dos proyectos que corren uno después del otro:
 
-- `storybook`: todas las stories salvo las de tag `real-css`. No aplica las utilidades de
-  Tailwind, así que sus aserciones van sobre clases y DOM.
-- `storybook-css`: solo las stories con tag `real-css`, las que necesitan el CSS aplicado
-  (posición, z-index, `elementFromPoint`). Para sumar una, agregar `tags: ['real-css']`.
+    - `storybook`: todas las stories salvo las de tag `real-css`. No aplica las utilidades de
+      Tailwind, así que sus aserciones van sobre clases y DOM.
+    - `storybook-css`: solo las stories con tag `real-css`, las que necesitan el CSS aplicado
+      (posición, z-index, `elementFromPoint`). Para sumar una, agregar `tags: ['real-css']`.
+
+12. `npm run build-storybook` — la documentación compila. No corre en `release.yml`: una falla de
+    la documentación no debe bloquear la publicación del paquete.
 
 Cualquier paso que falle marca el PR en rojo.
 
@@ -2442,7 +2445,7 @@ El paquete se publica empujando un tag; nadie corre `npm publish` a mano. Por qu
    git push origin vX.Y.Z
    ```
 
-4. **`.github/workflows/release.yml`** publica. Antes de instalar nada, falla si el tag no es `v` + `package.json#version`, si su commit no está en `main` o si esa versión ya está en npm (un E404 de `npm view` cuenta como "no publicada": el paquete todavía no existe en npm). Después corre los mismos pasos que `verify` (salvo el dependency review) y publica en el registro público de npm con trusted publishing (OIDC) y provenance, sin ningún token guardado en el repositorio. El paquete tiene configurado en npmjs.com como trusted publisher este repositorio y el workflow `release.yml`, sin environment; si se renombra el repo o el workflow, hay que actualizarlo allí. El workflow pide los permisos `contents: read` e `id-token: write`.
+4. **`.github/workflows/release.yml`** publica. Antes de instalar nada, falla si el tag no es `v` + `package.json#version`, si su commit no está en `main` o si esa versión ya está en npm (un E404 de `npm view` cuenta como "no publicada": el paquete todavía no existe en npm). Después corre los mismos pasos que `verify`, salvo el dependency review y el build de Storybook, y publica en el registro público de npm con trusted publishing (OIDC) y provenance, sin ningún token guardado en el repositorio. El paquete tiene configurado en npmjs.com como trusted publisher este repositorio y el workflow `release.yml`, sin environment; si se renombra el repo o el workflow, hay que actualizarlo allí. El workflow pide los permisos `contents: read` e `id-token: write`.
 
 ## ⚖️ Licencia
 
