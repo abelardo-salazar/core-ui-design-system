@@ -101,7 +101,7 @@ Falla si:
 
 ### Versionado
 
-Una versión sin publicar acumula todos los PRs en una sola entrada del CHANGELOG, sin bumps intermedios. Antes de publicar, la entrada se reescribe con el **delta neto** contra la última versión publicada: solo lo que cambia para quien actualiza desde ella. No se narran regresiones que aparecieron y se arreglaron dentro de la misma versión; "Fixed" lista solo bugs que existían en la versión publicada anterior, y los cambios incompatibles van en "Changed" con su migración. En 0.x: minor para funcionalidad o cambios visuales, patch para fixes.
+Los cambios sin publicar se acumulan en una sola entrada `[Unreleased]` del CHANGELOG, sin bumps intermedios. El PR de release reescribe esa entrada con el **delta neto** contra la última versión publicada: solo lo que cambia para quien actualiza desde ella. No se narran regresiones que aparecieron y se arreglaron dentro de la misma versión; "Fixed" lista solo bugs que existían en la versión publicada anterior, y los cambios incompatibles van en "Changed" con su migración. En 0.x: minor para funcionalidad o cambios visuales, patch para fixes.
 
 ### Tags
 

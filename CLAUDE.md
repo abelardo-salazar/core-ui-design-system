@@ -11,7 +11,7 @@
 - ARCHITECTURE.md guarda las decisiones y su porqué; no duplicarlas aquí.
 - Las reglas de componentes están en .claude/rules/components.md y se cargan al trabajar en src/components/ y src/utils/.
 - Idioma: comentarios de código y salida de los scripts en inglés; README, ARCHITECTURE, CHANGELOG y texto visible de las stories en español neutro, sin voseo.
-- Todo componente o prop nuevo lleva su marca en el README en el mismo PR: "**Desde X.Y.**" al inicio de la sección "Uso y Props" de un componente nuevo, "_(desde X.Y)_" en una prop nueva. X.Y es la minor en la que se publicará: la de package.json si todavía no está publicada; si ya lo está, la siguiente.
+- Todo componente o prop nuevo lleva su marca en el README en el mismo PR: "**Desde X.Y.**" al inicio de la sección "Uso y Props" de un componente nuevo, "_(desde X.Y)_" en una prop nueva. X.Y es la minor en la que se publicará: la siguiente a la de package.json.
 
 ## Flujo de trabajo (aplica a todas las tareas)
 
@@ -21,7 +21,7 @@
 - Mergear un PR solo con autorización explícita del usuario en la conversación, que nombre ese PR; nunca para destrabar otra tarea.
 - Crear o empujar un tag `v*` solo con autorización explícita del usuario en la conversación, que nombre esa versión: empujar el tag publica el paquete ([flujo de release](./ARCHITECTURE.md#tags)).
 - Título del PR en Conventional Commits (convención, sin verificación automática).
-- No publicar ni bumpear versión salvo que la tarea lo pida. Si la versión de package.json todavía no está publicada (`npm view <paquete> versions`), los cambios se agregan a su entrada del CHANGELOG; si ya lo está, a una entrada `[Unreleased]`.
+- No publicar ni bumpear versión salvo que la tarea lo pida. Los cambios van siempre a una entrada `[Unreleased]` del CHANGELOG. Entre el merge del PR de release y su tag no entra nada a main; si algo entra, se rehace el PR de release ([flujo de release](./ARCHITECTURE.md#tags)).
 - CHANGELOG: describir API, comportamiento y migración para el consumidor. Los detalles de implementación van en los comentarios del código. Los PR `docs:` y `chore:` no llevan entrada salvo que cambien algo para el consumidor.
 - Comparaciones A/B: en un clon o worktree con su propio npm ci. Nunca junctions ni symlinks al node_modules principal.
 
