@@ -1,8 +1,8 @@
 name: Storybook
 
 # Publishes Storybook to GitHub Pages. The site documents only the published API: a vX.Y.Z tag
-# builds that tag, and a manual run builds main only if main has no unreleased API.
-# Why: ARCHITECTURE.md § Documentación publicada.
+# builds that tag once npm has it, and a manual run builds main only if main has no unreleased API
+# and its version is on npm. Why: ARCHITECTURE.md § Documentación publicada.
 on:
   push:
     tags: ['v*.*.*']
@@ -17,16 +17,55 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
+  # Apart from build: it can wait longer than the build takes, and it installs nothing. npm view runs
+  # anonymously (the package is public). Any failure of npm view counts as "not published": if the
+  # condition can't be checked, nothing is published.
+  check:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v5
 
-      # Same reading of the first version heading as scripts/verify-readme.mjs. No heading fails
-      # too: if the condition can't be checked, nothing is published.
-      - name: Check main has no unreleased API
+      # release.yml runs on the same tag and may still be publishing, so this waits for it. It asks
+      # the registry, not the other workflow: the registry is what defines published, and gitHead
+      # ties the version to this commit. The wait outlasts the timeout of release.yml (30 minutes).
+      - name: Wait for this tag on npm
+        if: github.event_name == 'push'
+        env:
+          WAIT_SECONDS: 2400
+          POLL_SECONDS: 30
+        run: |
+          name="$(node -p "require('./package.json').name")"
+          version="$(node -p "require('./package.json').version")"
+          commit="$(git rev-parse HEAD)"
+          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $version."
+            exit 1
+          fi
+          deadline=$((SECONDS + WAIT_SECONDS))
+          while :; do
+            published="$(npm view "$name@$version" gitHead --prefer-online 2>/dev/null || true)"
+            if [ "$published" = "$commit" ]; then
+              echo "$name@$version is published from $commit."
+              exit 0
+            fi
+            if [ -n "$published" ]; then
+              echo "::error::$name@$version is published from $published, not from $commit."
+              exit 1
+            fi
+            if [ "$SECONDS" -ge "$deadline" ]; then
+              echo "::error::$name@$version did not reach npm from $commit in ${WAIT_SECONDS}s. Check the Release run; nothing was deployed."
+              exit 1
+            fi
+            echo "$name@$version is not on npm yet; checking again in ${POLL_SECONDS}s."
+            sleep "$POLL_SECONDS"
+          done
+
+      # Same reading of the first version heading as scripts/verify-readme.mjs. Once a release PR is
+      # merged the CHANGELOG already opens with its version, so the heading alone isn't enough until
+      # that version is on npm. gitHead isn't compared: main moves on after the tag.
+      - name: Check main has no unpublished API
         if: github.event_name == 'workflow_dispatch'
         run: |
           if [ "$GITHUB_REF" != "refs/heads/main" ]; then
@@ -44,7 +83,22 @@ jobs:
               exit 1
               ;;
           esac
-          echo "CHANGELOG.md opens with: $heading"
+          name="$(node -p "require('./package.json').name")"
+          version="$(node -p "require('./package.json').version")"
+          published="$(npm view "$name@$version" version --prefer-online 2>/dev/null || true)"
+          if [ "$published" != "$version" ]; then
+            echo "::error::$name@$version is not on npm: main has unpublished API. Publish that version, whose tag deploys the site."
+            exit 1
+          fi
+          echo "CHANGELOG.md opens with: $heading; $name@$version is on npm."
+
+  build:
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
 
       # Node 22 LTS, same as ci.yml.
       - name: Setup Node
