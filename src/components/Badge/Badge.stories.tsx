@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, fn, userEvent, within } from 'storybook/test';
 import { Badge } from './Badge';
+import { rootTokenIn } from '../../../.storybook/rootTheme';
 
 const meta: Meta<typeof Badge> = {
   title: 'Components/Badge',
@@ -74,9 +75,7 @@ export const Destructive: Story = {
     const badge = canvas.getByText('Destructive');
 
     await expect(badge.className.split(' ')).toContain('text-error-content');
-    await expect(
-      getComputedStyle(document.documentElement).getPropertyValue('--error-content'),
-    ).toBe('#000000');
+    await expect(rootTokenIn('light', '--error-content')).toBe('#000000');
 
     // Hover: same token as Button destructive (see Button.stories.tsx); --error-focus
     // (background) is dark while --error (base background) is light, so the text needs
@@ -85,16 +84,10 @@ export const Destructive: Story = {
     // alone: a non-interactive Badge must never show a hover.
     await expect(badge.className.split(' ')).toContain('hover:bg-error-focus');
     await expect(badge.className.split(' ')).toContain('hover:text-error-focus-content');
-    await expect(
-      getComputedStyle(document.documentElement).getPropertyValue('--error-focus-content'),
-    ).toBe('#ffffff');
+    await expect(rootTokenIn('light', '--error-focus-content')).toBe('#ffffff');
 
     // Dark mode flips which color needs more contrast.
-    document.documentElement.classList.add('dark');
-    await expect(
-      getComputedStyle(document.documentElement).getPropertyValue('--error-focus-content'),
-    ).toBe('#000000');
-    document.documentElement.classList.remove('dark');
+    await expect(rootTokenIn('dark', '--error-focus-content')).toBe('#000000');
   },
 };
 

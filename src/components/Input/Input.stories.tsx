@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
 import { expect, fn, userEvent, within } from 'storybook/test';
 import { Input } from './Input';
+import { rootTokenIn } from '../../../.storybook/rootTheme';
 
 const meta: Meta<typeof Input> = {
   title: 'Components/Input',
@@ -58,9 +59,7 @@ export const WithError: Story = {
     // against the raw custom property (--error-focus) plus the classes that use it.
     await expect(label.className.split(' ')).toContain('text-error-focus');
     await expect(label.className.split(' ')).not.toContain('text-base-content');
-    await expect(getComputedStyle(document.documentElement).getPropertyValue('--error-focus')).toBe(
-      '#b91c1c',
-    );
+    await expect(rootTokenIn('light', '--error-focus')).toBe('#b91c1c');
 
     const errorMessage = canvas.getByText('Este nombre de usuario ya está en uso.');
     await expect(errorMessage.className.split(' ')).toContain('text-error-focus');

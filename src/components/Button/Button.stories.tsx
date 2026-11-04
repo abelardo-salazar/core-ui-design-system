@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { expect, fn, userEvent, within } from 'storybook/test';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { Button } from './Button';
+import { readInTheme, rootTokenIn } from '../../../.storybook/rootTheme';
 
 // Main story configuration
 const meta: Meta<typeof Button> = {
@@ -106,26 +107,18 @@ export const Destructive: Story = {
     // --color-primary-content), so the contrast assertion is on the raw token
     // defined directly on :root, plus the class that uses it.
     await expect(button.className.split(' ')).toContain('text-error-content');
-    await expect(
-      getComputedStyle(document.documentElement).getPropertyValue('--error-content'),
-    ).toBe('#000000');
+    await expect(rootTokenIn('light', '--error-content')).toBe('#000000');
 
     // Hover: --error-focus (background) is dark while --error (base background) is light,
     // the opposite of the other variants, so the text needs ITS OWN -focus-content,
     // different from the base state's -content. Without it, black text on the dark hover drops
     // to 3.25:1 (see the commit that introduced --error-focus-content in index.css).
     await expect(button.className.split(' ')).toContain('hover:text-error-focus-content');
-    await expect(
-      getComputedStyle(document.documentElement).getPropertyValue('--error-focus-content'),
-    ).toBe('#ffffff');
+    await expect(rootTokenIn('light', '--error-focus-content')).toBe('#ffffff');
 
     // Dark mode flips which color needs more contrast (--error-focus becomes a light
     // red), so --error-focus-content flips too: black, not white.
-    document.documentElement.classList.add('dark');
-    await expect(
-      getComputedStyle(document.documentElement).getPropertyValue('--error-focus-content'),
-    ).toBe('#000000');
-    document.documentElement.classList.remove('dark');
+    await expect(rootTokenIn('dark', '--error-focus-content')).toBe('#000000');
   },
 };
 
@@ -341,13 +334,8 @@ export const FocusRingOnSurface: Story = {
 
     // Dark mode (without a .dark container in the render: :root:has(.dark) would darken the whole
     // story). Without the base rule, the value would be Tailwind's initial-value (#fff).
-    document.documentElement.classList.add('dark');
-    try {
-      await expect(offsetColor()).toBe('#141414');
-    } finally {
-      document.documentElement.classList.remove('dark');
-    }
-    await expect(offsetColor()).toBe('#ffffff');
+    await expect(readInTheme('dark', offsetColor)).toBe('#141414');
+    await expect(readInTheme('light', offsetColor)).toBe('#ffffff');
 
     await expect(canvas.getByRole('button', { name: 'Sobre base-200' })).toHaveClass(
       'focus-visible:ring-offset-base-200',
