@@ -58,13 +58,13 @@ jobs:
           fi
           echo "$commit changes the version from $parent_version to $version."
 
-      # Node 22 LTS, same as ci.yml. No registry-url: setup-node would write an .npmrc with a
+      # Node from .nvmrc, same as ci.yml. No registry-url: setup-node would write an .npmrc with a
       # placeholder auth token. The default registry is npmjs, npm view runs anonymously (the
       # package is public) and npm publish authenticates through OIDC.
       - name: Setup Node
         uses: actions/setup-node@v5
         with:
-          node-version: '22'
+          node-version-file: .nvmrc
           cache: 'npm'
 
       # Fails before the long steps if the version is already in the registry. Anonymous: the
