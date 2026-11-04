@@ -41,6 +41,10 @@
 - **`Calendar` y `DatePicker`: las flechas del teclado mueven el foco entre los días.** Antes, el
   foco se quedaba en el día inicial al pulsarlas. Si pasas un `DayButton` propio en `components`, tu
   botón debe enfocarse cuando `modifiers.focused` sea verdadero.
+- **`TabsList` se desplaza en horizontal cuando no entra.** Antes, 5 pestañas de texto desbordaban su
+  contenedor en un teléfono. Ahora la lista no pasa del ancho disponible y se desplaza sin barra
+  visible, con la pestaña activa siempre a la vista al cambiar de valor. Cuando entra, no cambia
+  nada.
 
 ## [0.9.2] - 2026-11-03
 
