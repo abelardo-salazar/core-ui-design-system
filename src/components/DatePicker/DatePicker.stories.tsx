@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { es } from 'date-fns/locale';
 // From the DS ./locale subpath (src/locale.ts), the way the consumer imports it.
 import { es as dayPickerEs } from '../../locale';
@@ -118,5 +118,23 @@ export const InheritsCalendarTouchTargets: Story = {
       const arrow = within(content).getByRole('button', { name });
       await expect(arrow.className.split(' ')).toContain('after:-inset-[9px]');
     }
+  },
+};
+
+// 5. Keyboard: inside the popover, the arrow keys move the focus between days.
+export const KeyboardNavigation: Story = {
+  render: () => <DatePicker date={new Date(2026, 0, 15)} />,
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('button'));
+
+    const content = await within(document.body).findByRole('dialog', { name: 'Choose date' });
+    within(content)
+      .getByRole('button', { name: /January 15th, 2026, selected/ })
+      .focus();
+    await userEvent.keyboard('{ArrowRight}');
+    await waitFor(() =>
+      expect(within(content).getByRole('button', { name: /January 16th, 2026/ })).toHaveFocus(),
+    );
+    await userEvent.keyboard('{Escape}');
   },
 };
