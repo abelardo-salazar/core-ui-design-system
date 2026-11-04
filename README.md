@@ -166,6 +166,7 @@ Importar desde el barrel principal es seguro en un Server Component; el subpath 
 | `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent`                                                                                                                                                                                   | No               |
 | `Textarea`                                                                                                                                                                                                                         | No               |
 | `Toast`                                                                                                                                                                                                                            | No               |
+| `Toggle`                                                                                                                                                                                                                           | No               |
 | `ToggleGroup`, `ToggleGroupItem`                                                                                                                                                                                                   | No               |
 | `TooltipProvider`, `Tooltip`, `TooltipTrigger`, `TooltipContent`                                                                                                                                                                   | No               |
 | `Heading`, `Text`                                                                                                                                                                                                                  | Sí               |
@@ -299,6 +300,7 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
     - [AspectRatio — Uso y Props](#aspectratio--uso-y-props)
     - [Tabs — Uso y Props](#tabs--uso-y-props)
     - [NavigationBar — Uso y Props](#navigationbar--uso-y-props)
+    - [Toggle — Uso y Props](#toggle--uso-y-props)
     - [ToggleGroup — Uso y Props](#togglegroup--uso-y-props)
     - [🔲 Overlays](#-overlays)
     - [Popover — Uso y Props](#popover--uso-y-props)
@@ -678,6 +680,7 @@ Uso (ejemplos, extraídos de `Image.stories.tsx`):
 | **`AspectRatio`**   | Fuerza una relación de aspecto.       | `ratio`: number (ej. `16 / 9`). Se compone con otro contenido (`Image`, etc.), no es una API todo-en-uno.                                  |
 | **`Tabs`**          | Navegación por pestañas.              | `defaultValue`/`value`/`onValueChange` en el root; **Subcomponentes:** `<TabsList>`, `<TabsTrigger>`, `<TabsContent>`                      |
 | **`NavigationBar`** | Navegación principal entre secciones. | `aria-label` (obligatorio); **Subcomponentes:** `<NavigationBarItem>` (`icon`, `active`, `asChild`, `badge`, `badgeLabel`)                 |
+| **`Toggle`**        | Botón que queda encendido o apagado.  | `pressed`/`defaultPressed`/`onPressedChange`; `size`: 'sm'                                                                                 | 'md' | 'lg'; `icon`; `aria-label` (obligatorio sin `children`) |
 | **`ToggleGroup`**   | Opciones que cambian un valor.        | `type`: 'single' \| 'multiple'; `size`: 'sm' \| 'md' \| 'lg'; **Subcomponentes:** `<ToggleGroupItem>`                                      |
 
 ### Layout — Uso y Props
@@ -1057,6 +1060,45 @@ function AppNavigationBar() {
     </NavigationBar>
   );
 }
+```
+
+### Toggle — Uso y Props
+
+**Desde 0.10.**
+
+- **Exports:** `Toggle`. Requiere el peer `@radix-ui/react-toggle`.
+- **Props principales:**
+  - `pressed?: boolean` / `defaultPressed?: boolean` — estado controlado / no controlado.
+  - `onPressedChange?: (pressed: boolean) => void`.
+  - `size?: 'sm' | 'md' | 'lg'` (default `'md'`) — 32 / 44 / 48px, la escala de `Button`.
+  - `icon?: React.ReactNode` — ícono decorativo, oculto para tecnologías de asistencia.
+  - `children` — el texto. Sin `children`, `icon` y `aria-label` son obligatorios por tipos, y el botón queda cuadrado.
+  - `disabled?: boolean`, `className?: string` y los demás atributos de `<button>`.
+
+Renderiza un `<button>` con `aria-pressed`: borde sin presionar y `primary` presionado, el mismo criterio de `Chip`. Pasa el ícono por `icon`, no por `children`: como `children`, los tipos no pueden exigirte el `aria-label`.
+
+**Área táctil:** `size="sm"` responde en 44px con un `::after`, sin cambiar su aspecto ni su foco. Un `Toggle` `sm` de menos de 44px de ancho se pisa con un vecino a menos de 12px, así que deja al menos esa separación; para una barra más compacta, usa `ToggleGroup`.
+
+**Cuándo usar cada uno:**
+
+| Componente    | Úsalo para                                                                                                                        |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `Toggle`      | Un ajuste independiente que se enciende o se apaga: negrita, favorito, silenciar.                                                 |
+| `Chip`        | Una etiqueta compacta, como un filtro seleccionable o un valor que también se puede quitar.                                       |
+| `ToggleGroup` | Varias opciones relacionadas, con selección única o múltiple. Forman una sola parada de tabulación y se recorren con las flechas. |
+
+```tsx
+// 1. Con texto
+<Toggle defaultPressed>Negrita</Toggle>
+
+// 2. Controlado, con ícono y texto
+const [favorite, setFavorite] = useState(false);
+<Toggle icon={<StarIcon />} pressed={favorite} onPressedChange={setFavorite}>
+  Favorito
+</Toggle>
+
+// 3. Solo ícono: aria-label obligatorio
+<Toggle size="sm" icon={<FontBoldIcon />} aria-label="Negrita" />
 ```
 
 ### ToggleGroup — Uso y Props
@@ -2211,7 +2253,7 @@ Además de los componentes, cada entry point exporta los tipos de sus props y al
 | Tipos de props          | `AlertProps`, `AspectRatioProps`, `BadgeProps`, `ButtonProps`, `CalendarProps`, `CheckboxProps`, `ChipProps`, `ContainerProps`, `DataTableProps`, `DatePickerProps`, `HeadingProps`, `ImageProps`, `ProgressProps`, `ProgressRingProps`, `SwitchProps`, `TextProps`, `TextareaProps`                                                                                                                                                              |
 | Tipos de props (0.5.0)  | `ComboboxProps`, `ComboboxSingleProps`, `ComboboxMultipleProps`, `ComboboxLabelProps`, `ComboboxOption`, `EmptyStateProps`, `EmptyStateTitleProps`, `InputProps`, `InputBaseProps`, `InputWithEndIconProps`, `ClearableInputProps`, `QuantityStepperProps`, `SheetContentProps`, `SkipToContentProps`, `ToggleGroupProps`, `ToggleGroupSingleProps`, `ToggleGroupMultipleProps`, `ToggleGroupItemProps`, `VisuallyHiddenProps`, `AnnounceOptions` |
 | Tipos de props (0.7.0)  | `ComboboxModeProps`, `ComboboxListVisibility`                                                                                                                                                                                                                                                                                                                                                                                                     |
-| Tipos de props (0.10.0) | `NavigationBarProps`, `NavigationBarItemProps`, `SwitchFieldProps`, `CheckboxFieldProps`                                                                                                                                                                                                                                                                                                                                                          |
+| Tipos de props (0.10.0) | `NavigationBarProps`, `NavigationBarItemProps`, `SwitchFieldProps`, `CheckboxFieldProps`, `ToggleProps`                                                                                                                                                                                                                                                                                                                                           |
 | Variantes (`cva`)       | `buttonVariants`, `badgeVariants`, `inputVariants`, `alertVariants`, `alertIconVariants` — devuelven las clases de cada variante, para dar el mismo aspecto a un elemento propio (por ejemplo, un `Link` con `buttonVariants({ variant: 'outline' })`)                                                                                                                                                                                            |
 | Utilidades              | `cn(...inputs)` — combina clases con `clsx` y resuelve conflictos de Tailwind con `tailwind-merge` (la última gana); `toast` (ver [Toast](#toast--uso-y-props)); `features` (ver [DataTable](#datatable--uso-y-props)); `announce` (ver [announce()](#announce--uso-y-opciones))                                                                                                                                                                  |
 
