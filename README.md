@@ -940,7 +940,7 @@ Uso (ejemplos, extraídos de `AspectRatio.stories.tsx`):
 - **Exports:** `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent`.
 - **Props y comportamiento clave:**
   - `Tabs` (root): `defaultValue?: string`, `value?: string`, `onValueChange?: (value: string) => void` — controlado o no controlado.
-  - `TabsList`: `className?: string` — contenedor tipo píldora (`bg-base-200`, `rounded-box`).
+  - `TabsList`: `className?: string` — contenedor tipo píldora (`bg-base-200`, `rounded-box`), con desplazamiento horizontal si no entra.
   - `TabsTrigger`: `value: string` (requerido), `disabled?: boolean`, `className?: string`.
   - `TabsContent`: `value: string` (requerido), `className?: string` — sin Portal, vive en el flujo normal del documento (a diferencia de `DropdownMenuContent`/`TooltipContent`).
 
@@ -959,6 +959,19 @@ Uso (ejemplo, extraído de `Tabs.stories.tsx`):
   <TabsContent value="cook">Cocina a fuego medio durante 12 minutos.</TabsContent>
   <TabsContent value="serve">Emplata y decora con hierbas frescas.</TabsContent>
 </Tabs>
+```
+
+**Cuando no entra:** `TabsList` no pasa del ancho de su contenedor y se desplaza en horizontal, sin barra visible, con la pestaña activa siempre a la vista al cambiar de valor. Cuando entra, se ajusta a sus pestañas como siempre. El contenedor debe limitar su ancho: dentro de un flex, agrégale `min-w-0`.
+
+**Con un contador:** usa `Badge` con `size="icon"`. Su número entra en el nombre accesible, en este caso "Mensajes 3". El `{' '}` separa las palabras en ese nombre, y sin él podrían quedar pegadas.
+
+```tsx
+<TabsTrigger value="inbox" className="gap-2">
+  Mensajes{' '}
+  <Badge size="icon" variant="secondary">
+    3
+  </Badge>
+</TabsTrigger>
 ```
 
 ### NavigationBar — Uso y Props

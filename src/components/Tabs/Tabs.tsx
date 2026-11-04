@@ -17,18 +17,60 @@ const Tabs = TabsPrimitive.Root;
 // -----------------------------------------------------------------------------
 // List: segment/pill; bg-base-200 holding the triggers, same radius
 // token as DropdownMenuContent (rounded-box). Meant for small groups (2-5
-// options), not for a long row of dashboard tabs.
+// options), not for a long row of dashboard tabs. Even so, 5 text tabs don't fit in a phone: it
+// scrolls sideways, with no visible scrollbar.
 // -----------------------------------------------------------------------------
+
+// The list's p-1: exactly what the focus ring needs (ring-2 + ring-offset-2), and what keeps it
+// from being clipped by the overflow. scroll-px-1 does the same when the browser scrolls on focus.
+const TRIGGER_INSET = 4;
+
+// Scrolls only the list. scrollIntoView, even with 'nearest', also scrolls the page when the list
+// is off screen, as with a controlled value that changes from elsewhere.
+function revealTrigger(list: HTMLElement, trigger: Element) {
+  const listRect = list.getBoundingClientRect();
+  const triggerRect = trigger.getBoundingClientRect();
+  if (triggerRect.left - TRIGGER_INSET < listRect.left) {
+    list.scrollLeft -= listRect.left - triggerRect.left + TRIGGER_INSET;
+  } else if (triggerRect.right + TRIGGER_INSET > listRect.right) {
+    list.scrollLeft += triggerRect.right + TRIGGER_INSET - listRect.right;
+  }
+}
+
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.List
-    ref={ref}
-    className={cn('inline-flex items-center gap-1 rounded-box bg-base-200 p-1', className)}
-    {...props}
-  />
-));
+>(({ className, ...props }, ref) => {
+  const listRef = React.useRef<HTMLDivElement>(null);
+  React.useImperativeHandle(ref, () => listRef.current as HTMLDivElement);
+
+  // Radix doesn't expose the value outside its context, and Tabs can be controlled or not: the
+  // data-state of the triggers is the only signal that covers every case.
+  React.useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    const revealActive = () => {
+      const active = list.querySelector('[role="tab"][data-state="active"]');
+      if (active) revealTrigger(list, active);
+    };
+    revealActive();
+    const observer = new MutationObserver(revealActive);
+    observer.observe(list, { subtree: true, attributes: true, attributeFilter: ['data-state'] });
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <TabsPrimitive.List
+      ref={listRef}
+      className={cn(
+        'inline-flex max-w-full items-center gap-1 overflow-x-auto overflow-y-hidden rounded-box bg-base-200 p-1 scroll-px-1',
+        '[scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+        className,
+      )}
+      {...props}
+    />
+  );
+});
 TabsList.displayName = TabsPrimitive.List.displayName;
 
 // -----------------------------------------------------------------------------
