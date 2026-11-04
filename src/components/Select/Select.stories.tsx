@@ -23,14 +23,14 @@ type Story = StoryObj<typeof Select>;
 const SelectDemo = () => (
   <Select>
     <SelectTrigger className="w-[180px]">
-      <SelectValue placeholder="Select a fruit" />
+      <SelectValue placeholder="Elige una fruta" />
     </SelectTrigger>
     <SelectContent>
       <SelectGroup>
-        <SelectLabel>Fruits</SelectLabel>
-        <SelectItem value="apple">Apple</SelectItem>
+        <SelectLabel>Frutas</SelectLabel>
+        <SelectItem value="apple">Manzana</SelectItem>
         <SelectItem value="banana">Banana</SelectItem>
-        <SelectItem value="blueberry">Blueberry</SelectItem>
+        <SelectItem value="blueberry">Arándano</SelectItem>
       </SelectGroup>
     </SelectContent>
   </Select>

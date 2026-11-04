@@ -23,17 +23,17 @@ export const Default: Story = {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="outline">Hover me</Button>
+          <Button variant="outline">Pasa el cursor aquí</Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Saved to your library</p>
+          <p>Guardado en tu biblioteca</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const trigger = canvas.getByRole('button', { name: 'Hover me' });
+    const trigger = canvas.getByRole('button', { name: 'Pasa el cursor aquí' });
 
     // The content lives in a Portal outside canvasElement (same pattern as Popover/Select).
     const body = within(document.body);
@@ -42,7 +42,7 @@ export const Default: Story = {
     // The hover goes through Radix's default delay (delayDuration = 700ms) before opening.
     await userEvent.hover(trigger);
     const tooltipPanel = await body.findByRole('tooltip', {}, { timeout: 2000 });
-    await expect(tooltipPanel).toHaveTextContent('Saved to your library');
+    await expect(tooltipPanel).toHaveTextContent('Guardado en tu biblioteca');
 
     // Defensive CSS layer: the content is hidden on coarse-pointer (touch) devices via
     // the `pointer: coarse` media feature, independent of whether anything tried to open it.
@@ -64,19 +64,19 @@ export const KeyboardFocus: Story = {
       <div className="flex items-center gap-4">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="outline">Hover me</Button>
+            <Button variant="outline">Pasa el cursor aquí</Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Saved to your library</p>
+            <p>Guardado en tu biblioteca</p>
           </TooltipContent>
         </Tooltip>
-        <Button variant="ghost">Next</Button>
+        <Button variant="ghost">Siguiente</Button>
       </div>
     </TooltipProvider>
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const trigger = canvas.getByRole('button', { name: 'Hover me' });
+    const trigger = canvas.getByRole('button', { name: 'Pasa el cursor aquí' });
 
     const body = within(document.body);
     await expect(body.queryByRole('tooltip')).not.toBeInTheDocument();
@@ -86,7 +86,7 @@ export const KeyboardFocus: Story = {
 
     // No long delay to wait for: unlike Default (hover), focus opens immediately.
     const tooltipPanel = await body.findByRole('tooltip', {}, { timeout: 500 });
-    await expect(tooltipPanel).toHaveTextContent('Saved to your library');
+    await expect(tooltipPanel).toHaveTextContent('Guardado en tu biblioteca');
 
     // Moves focus to the next element -> blur on the trigger -> it closes.
     await userEvent.tab();

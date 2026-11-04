@@ -239,10 +239,10 @@ export const AreaChartExample: Story = {
 // with its own token. Unlike Bar/Line/Area (one config entry per *series*),
 // here it's one entry per *slice*.
 const teamConfig: ChartConfig = {
-  design: { label: 'Design', color: 'primary' },
-  engineering: { label: 'Engineering', color: 'secondary' },
-  product: { label: 'Product', color: 'accent' },
-  sales: { label: 'Sales', color: 'success' },
+  design: { label: 'Diseño', color: 'primary' },
+  engineering: { label: 'Ingeniería', color: 'secondary' },
+  product: { label: 'Producto', color: 'accent' },
+  sales: { label: 'Ventas', color: 'success' },
 };
 
 const teamData = [
@@ -298,8 +298,8 @@ export const PieChartExample: Story = {
     await expect(container.style.getPropertyValue('--color-sales')).toBe('var(--color-success)');
 
     // The legend uses the config labels ("Design"), not the raw ids of the data ("design").
-    await expect(canvas.getByText('Design')).toBeInTheDocument();
-    await expect(canvas.getByText('Engineering')).toBeInTheDocument();
+    await expect(canvas.getByText('Diseño')).toBeInTheDocument();
+    await expect(canvas.getByText('Ingeniería')).toBeInTheDocument();
 
     await hoverFirstPieSector(canvasElement);
 
@@ -311,7 +311,7 @@ export const PieChartExample: Story = {
     );
     const tooltipWrapper = canvasElement.querySelector('.recharts-tooltip-wrapper') as HTMLElement;
     const withinTooltip = within(tooltipWrapper);
-    await expect(withinTooltip.getByText('Design')).toBeInTheDocument();
+    await expect(withinTooltip.getByText('Diseño')).toBeInTheDocument();
     await expect(withinTooltip.getByText('28')).toBeInTheDocument();
     const swatch = tooltipWrapper.querySelector('span[style]') as HTMLElement;
     await expect(swatch.style.backgroundColor).toBe('var(--color-design)');
@@ -381,7 +381,7 @@ export const RingChartExample: Story = {
     );
     const tooltipWrapper = canvasElement.querySelector('.recharts-tooltip-wrapper') as HTMLElement;
     const withinTooltip = within(tooltipWrapper);
-    await expect(withinTooltip.getByText('Design')).toBeInTheDocument();
+    await expect(withinTooltip.getByText('Diseño')).toBeInTheDocument();
     const swatch = tooltipWrapper.querySelector('span[style]') as HTMLElement;
     await expect(swatch.style.backgroundColor).toBe('var(--color-design)');
   },

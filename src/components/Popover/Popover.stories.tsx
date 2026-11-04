@@ -19,26 +19,26 @@ export const Default: Story = {
   render: () => (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline">Open popover</Button>
+        <Button variant="outline">Abrir popover</Button>
       </PopoverTrigger>
-      <PopoverContent aria-label="Popover example">
-        <p>This is the popover content.</p>
+      <PopoverContent aria-label="Ejemplo de popover">
+        <p>Este es el contenido del popover.</p>
       </PopoverContent>
     </Popover>
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const trigger = canvas.getByRole('button', { name: 'Open popover' });
+    const trigger = canvas.getByRole('button', { name: 'Abrir popover' });
 
     // The content lives in a Portal outside canvasElement, so it's searched in document.body.
     const body = within(document.body);
-    await expect(body.queryByText('This is the popover content.')).not.toBeInTheDocument();
+    await expect(body.queryByText('Este es el contenido del popover.')).not.toBeInTheDocument();
 
     await userEvent.click(trigger);
 
     // PopoverPrimitive.Content renders with role="dialog".
     const contentPanel = await body.findByRole('dialog');
-    await expect(contentPanel).toHaveTextContent('This is the popover content.');
+    await expect(contentPanel).toHaveTextContent('Este es el contenido del popover.');
 
     // Must use the same DS surface as the rest of the overlays (Select, Dialog).
     await expect(contentPanel.className.split(' ')).toContain('bg-base-100');

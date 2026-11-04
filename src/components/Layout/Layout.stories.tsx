@@ -25,13 +25,13 @@ export const PageExample: StoryObj = {
             any landmark (axe: region). */}
         <SkipToContent />
         <Container className="flex items-center justify-between">
-          <Heading level="h4">My App</Heading>
+          <Heading level="h4">Mi aplicación</Heading>
           <nav className="flex gap-4 text-sm font-medium">
             <a href="/" className="hover:text-primary">
-              Home
+              Inicio
             </a>
             <a href="/about" className="hover:text-primary">
-              About
+              Acerca de
             </a>
           </nav>
         </Container>
@@ -41,11 +41,11 @@ export const PageExample: StoryObj = {
       <main id="main-content" className="py-8">
         <Container>
           <Heading level="h1" className="mb-4">
-            Dashboard Layout
+            Diseño de panel
           </Heading>
           <Text className="mb-8" size="lead">
-            This example demonstrates how the Container constrains content width and how Separators
-            divide sections.
+            Este ejemplo muestra cómo Container limita el ancho del contenido y cómo Separator
+            divide las secciones.
           </Text>
 
           <Separator className="my-8" />
@@ -54,30 +54,30 @@ export const PageExample: StoryObj = {
             <div className="md:col-span-2 space-y-4">
               {/* level keeps the h3 visual size; as fixes the h1->h3 jump (axe: heading-order) */}
               <Heading level="h3" as="h2">
-                Main Area
+                Área principal
               </Heading>
               <Card className="h-64 flex items-center justify-center bg-base-200/50">
-                <Text>Content Block 1</Text>
+                <Text>Bloque de contenido 1</Text>
               </Card>
               <Card className="h-64 flex items-center justify-center bg-base-200/50">
-                <Text>Content Block 2</Text>
+                <Text>Bloque de contenido 2</Text>
               </Card>
             </div>
 
             <div className="space-y-4">
               <Heading level="h3" as="h2">
-                Sidebar
+                Barra lateral
               </Heading>
               <div className="flex flex-col gap-4">
                 <div className="flex h-5 items-center space-x-4 text-sm">
                   <div>Blog</div>
                   <Separator orientation="vertical" />
-                  <div>Docs</div>
+                  <div>Documentación</div>
                   <Separator orientation="vertical" />
-                  <div>Source</div>
+                  <div>Código fuente</div>
                 </div>
                 <Card className="h-40 bg-base-200/50 flex items-center justify-center">
-                  <Text>Ad / Widget</Text>
+                  <Text>Anuncio / widget</Text>
                 </Card>
               </div>
             </div>
@@ -91,16 +91,16 @@ export const PageExample: StoryObj = {
 
     // axe: heading-order; "Main Area"/"Sidebar" jumped from h1 to h3 without going through h2.
     await expect(
-      canvas.getByRole('heading', { level: 1, name: 'Dashboard Layout' }),
+      canvas.getByRole('heading', { level: 1, name: 'Diseño de panel' }),
     ).toBeInTheDocument();
     const h2s = canvas.getAllByRole('heading', { level: 2 });
-    await expect(h2s.map((h) => h.textContent)).toEqual(['Main Area', 'Sidebar']);
+    await expect(h2s.map((h) => h.textContent)).toEqual(['Área principal', 'Barra lateral']);
     // level is still h3 visually (same font size as before).
     await expect(h2s[0].className).toContain('text-2xl');
 
     // axe: region; the header and the skip link were outside any landmark.
     const banner = canvas.getByRole('banner');
-    await expect(within(banner).getByText('My App')).toBeInTheDocument();
+    await expect(within(banner).getByText('Mi aplicación')).toBeInTheDocument();
     await expect(within(banner).getByRole('link', { name: 'Skip to content' })).toBeInTheDocument();
   },
 };

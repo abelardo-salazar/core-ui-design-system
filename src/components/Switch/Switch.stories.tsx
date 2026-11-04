@@ -22,7 +22,7 @@ export const Default: Story = {
   render: (args) => (
     <div className="flex items-center gap-2">
       <Switch {...args} />
-      <label htmlFor="marketing-emails">Marketing emails</label>
+      <label htmlFor="marketing-emails">Correos de marketing</label>
     </div>
   ),
   play: async ({ canvasElement, args }) => {

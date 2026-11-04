@@ -26,12 +26,12 @@ type Story = StoryObj<typeof Textarea>;
 // 1. Default
 export const Default: Story = {
   args: {
-    label: 'Bio',
-    placeholder: 'Tell us about yourself...',
+    label: 'Biografía',
+    placeholder: 'Cuéntanos sobre ti...',
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const textarea = canvas.getByPlaceholderText('Tell us about yourself...');
+    const textarea = canvas.getByPlaceholderText('Cuéntanos sobre ti...');
     // Same "resting" surface as Input, for visual consistency between both fields.
     await expect(textarea.className.split(' ')).toContain('bg-base-100');
   },
@@ -40,13 +40,13 @@ export const Default: Story = {
 // 2. With Error
 export const WithError: Story = {
   args: {
-    label: 'Comment',
-    defaultValue: 'Too short',
+    label: 'Comentario',
+    defaultValue: 'Muy corto',
     error: 'El comentario debe tener al menos 20 caracteres.',
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const label = canvas.getByText('Comment');
+    const label = canvas.getByText('Comentario');
     // text-error (#ef4444) gives 3.76:1 on white, not enough for AA (4.5:1).
     // text-error-focus (--palette-red-dark) does pass. The vitest-browser fixture doesn't expose
     // the --color-* variables derived by @theme through getComputedStyle, so it's tested
@@ -64,7 +64,7 @@ export const WithError: Story = {
 // 3. With Helper Text
 export const WithHelperText: Story = {
   args: {
-    label: 'Description',
+    label: 'Descripción',
     helperText: 'Máximo 500 caracteres.',
   },
   play: async ({ canvasElement }) => {
@@ -78,7 +78,7 @@ export const WithHelperText: Story = {
 // 4. Disabled
 export const Disabled: Story = {
   args: {
-    label: 'Notes',
+    label: 'Notas',
     value: 'No editable',
     disabled: true,
   },

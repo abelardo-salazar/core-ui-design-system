@@ -31,7 +31,7 @@ type Story = StoryObj<typeof Input>;
 // 1. Default
 export const Default: Story = {
   args: {
-    label: 'Email',
+    label: 'Correo electrónico',
     placeholder: 'name@example.com',
     type: 'email',
   },
@@ -46,13 +46,13 @@ export const Default: Story = {
 // 2. With Error
 export const WithError: Story = {
   args: {
-    label: 'Username',
+    label: 'Usuario',
     defaultValue: 'admin',
     error: 'Este nombre de usuario ya está en uso.',
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const label = canvas.getByText('Username');
+    const label = canvas.getByText('Usuario');
     // text-error (#ef4444) gives 3.76:1 on white, not enough for AA (4.5:1).
     // text-error-focus (--palette-red-dark) does pass. The vitest-browser fixture doesn't expose
     // the --color-* variables derived by @theme through getComputedStyle, so it's tested
@@ -73,7 +73,7 @@ export const WithError: Story = {
 // 3. With Helper Text
 export const WithHelperText: Story = {
   args: {
-    label: 'Password',
+    label: 'Contraseña',
     type: 'password',
     helperText: 'Debe tener al menos 8 caracteres.',
   },
@@ -88,8 +88,8 @@ export const WithHelperText: Story = {
 // 4. With Icons
 export const WithIcons: Story = {
   args: {
-    label: 'Search',
-    placeholder: 'Search products...',
+    label: 'Buscar',
+    placeholder: 'Buscar productos...',
     // Simulated SVG icon
     startIcon: (
       <svg
@@ -117,7 +117,7 @@ export const WithIcons: Story = {
 // 5. Disabled
 export const Disabled: Story = {
   args: {
-    label: 'API Key',
+    label: 'Clave de API',
     value: 'sk-123456789',
     disabled: true,
   },
@@ -127,8 +127,8 @@ export const Disabled: Story = {
 // consumer's onChange runs just as if the user had deleted by hand.
 export const Clearable: Story = {
   args: {
-    label: 'Search',
-    placeholder: 'Search products...',
+    label: 'Buscar',
+    placeholder: 'Buscar productos...',
     defaultValue: 'zapatillas',
     clearable: true,
     onChange: fn(),
@@ -136,7 +136,7 @@ export const Clearable: Story = {
   },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    const input = canvas.getByLabelText('Search') as HTMLInputElement;
+    const input = canvas.getByLabelText('Buscar') as HTMLInputElement;
     const button = canvas.getByRole('button', { name: 'Clear' });
 
     // Visibility through CSS only: the input is the peer and the button hides with :placeholder-shown.
@@ -163,7 +163,7 @@ function ControlledClearable({ onChange, onClear }: { onChange: () => void; onCl
   const [value, setValue] = React.useState('zapatillas');
   return (
     <Input
-      label="Search"
+      label="Buscar"
       clearable
       clearLabel="Limpiar búsqueda"
       size="sm"
@@ -188,7 +188,7 @@ export const ClearableControlled: Story = {
   ),
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    const input = canvas.getByLabelText('Search') as HTMLInputElement;
+    const input = canvas.getByLabelText('Buscar') as HTMLInputElement;
     // Without a consumer placeholder, " " is set so :placeholder-shown exists.
     await expect(input).toHaveAttribute('placeholder', ' ');
     await expect(input.className.split(' ')).toContain('pr-8');
@@ -204,14 +204,14 @@ export const ClearableControlled: Story = {
 // 8. Clearable with type="search" in lg: the native ✕ is hidden so it isn't duplicated.
 export const ClearableSearch: Story = {
   args: {
-    label: 'Search',
+    label: 'Buscar',
     type: 'search',
     size: 'lg',
     defaultValue: 'zapatillas',
     clearable: true,
   },
   play: async ({ canvasElement }) => {
-    const input = within(canvasElement).getByLabelText('Search');
+    const input = within(canvasElement).getByLabelText('Buscar');
     await expect(input.className.split(' ')).toContain(
       '[&::-webkit-search-cancel-button]:appearance-none',
     );
@@ -223,14 +223,14 @@ export const ClearableSearch: Story = {
 export const ClearableDisabledReadOnly: Story = {
   render: () => (
     <div className="flex flex-col gap-4">
-      <Input label="Disabled" defaultValue="x" clearable disabled />
-      <Input label="Read only" defaultValue="x" clearable readOnly />
+      <Input label="Deshabilitado" defaultValue="x" clearable disabled />
+      <Input label="Solo lectura" defaultValue="x" clearable readOnly />
     </div>
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.queryByRole('button', { name: 'Clear' })).toBeNull();
-    for (const label of ['Disabled', 'Read only']) {
+    for (const label of ['Deshabilitado', 'Solo lectura']) {
       const input = canvas.getByLabelText(label);
       await expect(input.className.split(' ')).not.toContain('pr-11');
       await expect(input.className.split(' ')).not.toContain('peer');

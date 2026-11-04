@@ -48,7 +48,7 @@ const names = [
   'Nestor',
   'Pablo',
 ];
-const roles = ['Design', 'Engineering', 'Product', 'Sales', 'Support'];
+const roles = ['Diseño', 'Ingeniería', 'Producto', 'Ventas', 'Soporte'];
 
 const people: Person[] = names.map((name, index) => ({
   id: String(index + 1),
@@ -60,7 +60,7 @@ const people: Person[] = names.map((name, index) => ({
 const columnHelper = createColumnHelper<typeof features, Person>();
 const columns = [
   columnHelper.accessor('name', { header: 'Nombre' }),
-  columnHelper.accessor('email', { header: 'Email' }),
+  columnHelper.accessor('email', { header: 'Correo' }),
   columnHelper.accessor('role', { header: 'Rol' }),
 ];
 
@@ -205,7 +205,7 @@ export const ResponsiveCollapse: Story = {
     const firstDataRow = canvas.getByText('Marta').closest('tr');
     const cellsInRow = firstDataRow ? within(firstDataRow).getAllByRole('cell') : [];
     await expect(cellsInRow[0].getAttribute('data-label')).toBe('Nombre');
-    await expect(cellsInRow[1].getAttribute('data-label')).toBe('Email');
+    await expect(cellsInRow[1].getAttribute('data-label')).toBe('Correo');
     await expect(cellsInRow[2].getAttribute('data-label')).toBe('Rol');
   },
 };

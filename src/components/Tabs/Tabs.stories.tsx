@@ -18,9 +18,9 @@ type Story = StoryObj<typeof Tabs>;
 const TabsDemo = () => (
   <Tabs defaultValue="prep" className="w-80">
     <TabsList>
-      <TabsTrigger value="prep">Prep</TabsTrigger>
-      <TabsTrigger value="cook">Cook</TabsTrigger>
-      <TabsTrigger value="serve">Serve</TabsTrigger>
+      <TabsTrigger value="prep">Preparar</TabsTrigger>
+      <TabsTrigger value="cook">Cocinar</TabsTrigger>
+      <TabsTrigger value="serve">Servir</TabsTrigger>
     </TabsList>
     <TabsContent value="prep">Corta los vegetales y marina la proteína.</TabsContent>
     <TabsContent value="cook">Cocina a fuego medio durante 12 minutos.</TabsContent>
@@ -34,8 +34,8 @@ export const Default: Story = {
   render: () => <TabsDemo />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const prepTrigger = canvas.getByRole('tab', { name: 'Prep' });
-    const cookTrigger = canvas.getByRole('tab', { name: 'Cook' });
+    const prepTrigger = canvas.getByRole('tab', { name: 'Preparar' });
+    const cookTrigger = canvas.getByRole('tab', { name: 'Cocinar' });
 
     await expect(prepTrigger).toHaveAttribute('data-state', 'active');
     await expect(canvas.getByText('Corta los vegetales y marina la proteína.')).toBeVisible();
@@ -61,9 +61,9 @@ export const ArrowKeyNavigation: Story = {
   render: () => <TabsDemo />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const prepTrigger = canvas.getByRole('tab', { name: 'Prep' });
-    const cookTrigger = canvas.getByRole('tab', { name: 'Cook' });
-    const serveTrigger = canvas.getByRole('tab', { name: 'Serve' });
+    const prepTrigger = canvas.getByRole('tab', { name: 'Preparar' });
+    const cookTrigger = canvas.getByRole('tab', { name: 'Cocinar' });
+    const serveTrigger = canvas.getByRole('tab', { name: 'Servir' });
 
     prepTrigger.focus();
     await expect(prepTrigger).toHaveFocus();

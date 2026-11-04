@@ -30,7 +30,7 @@ export const UserProfile: Story = {
       </Avatar>
       <div className="flex flex-col">
         <span className="text-sm font-bold">Shadcn</span>
-        <span className="text-xs text-base-content">Creator</span>
+        <span className="text-xs text-base-content">Creador</span>
       </div>
     </div>
   ),
@@ -53,12 +53,12 @@ export const FallbackState: StoryObj<typeof AvatarImage> = {
       <Avatar>
         <AvatarImage
           src="data:image/png;base64,AAAA"
-          alt="@user"
+          alt="@usuario"
           onLoadingStatusChange={args.onLoadingStatusChange}
         />
-        <AvatarFallback>JD</AvatarFallback>
+        <AvatarFallback>JP</AvatarFallback>
       </Avatar>
-      <span className="text-sm">John Doe (No image)</span>
+      <span className="text-sm">Juan Pérez (sin imagen)</span>
     </div>
   ),
   play: async ({ canvasElement, args }) => {
@@ -67,8 +67,8 @@ export const FallbackState: StoryObj<typeof AvatarImage> = {
     // AvatarFallback also shows while the image loads, so seeing it proves nothing on
     // its own: first we wait for Radix to report the error.
     await waitFor(() => expect(args.onLoadingStatusChange).toHaveBeenLastCalledWith('error'));
-    await expect(canvas.queryByAltText('@user')).not.toBeInTheDocument();
-    await expect(canvas.getByText('JD')).toBeInTheDocument();
+    await expect(canvas.queryByAltText('@usuario')).not.toBeInTheDocument();
+    await expect(canvas.getByText('JP')).toBeInTheDocument();
   },
 };
 
@@ -76,19 +76,19 @@ export const FallbackState: StoryObj<typeof AvatarImage> = {
 export const Badges: Story = {
   render: () => (
     <div className="flex gap-2">
-      <Badge>Default</Badge>
-      <Badge variant="secondary">Secondary</Badge>
+      <Badge>Predeterminado</Badge>
+      <Badge variant="secondary">Secundario</Badge>
       {/* interactive: true; the hover (compoundVariants) only exists when the badge is
           interactive; without it there would be no hover: class to check below. */}
       <Badge variant="destructive" interactive>
-        Removed
+        Eliminado
       </Badge>
-      <Badge variant="outline">Outline</Badge>
+      <Badge variant="outline">Contorno</Badge>
     </div>
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const destructiveBadge = canvas.getByText('Removed');
+    const destructiveBadge = canvas.getByText('Eliminado');
     // Same error-content token as Button destructive (see Button.stories.tsx for why
     // we check the raw custom property instead of getComputedStyle().color here).
     await expect(destructiveBadge.className.split(' ')).toContain('text-error-content');
@@ -113,14 +113,14 @@ export const UserCard: Story = {
     <Card className="w-75">
       <CardHeader className="flex-row gap-4 items-center space-y-0">
         <Avatar className="h-12 w-12">
-          <AvatarImage src={TINY_PNG} alt="Google Team logo" />
-          <AvatarFallback>GL</AvatarFallback>
+          <AvatarImage src={TINY_PNG} alt="Logo del equipo de Google" />
+          <AvatarFallback>EG</AvatarFallback>
         </Avatar>
         <div className="flex flex-col gap-1">
-          <CardTitle className="text-base">Google Team</CardTitle>
+          <CardTitle className="text-base">Equipo de Google</CardTitle>
           <div className="flex gap-2">
             <Badge variant="outline" className="text-[10px] px-1 py-0 h-5">
-              Enterprise
+              Empresas
             </Badge>
             <Badge className="text-[10px] px-1 py-0 h-5">Pro</Badge>
           </div>
@@ -132,6 +132,6 @@ export const UserCard: Story = {
     const canvas = within(canvasElement);
     // axe: image-alt; AvatarImage was rendered without alt (the other two Avatar stories do pass it).
     // AvatarImage (Radix) only mounts the <img> once the network load resolves, hence the async find*.
-    await expect(await canvas.findByAltText('Google Team logo')).toBeInTheDocument();
+    await expect(await canvas.findByAltText('Logo del equipo de Google')).toBeInTheDocument();
   },
 };

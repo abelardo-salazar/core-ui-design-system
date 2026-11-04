@@ -38,7 +38,7 @@ const AnnounceDemo = () => (
 const SheetDemo = () => (
   <Sheet>
     <SheetTrigger asChild>
-      <Button variant="outline">Abrir sheet</Button>
+      <Button variant="outline">Abrir panel</Button>
     </SheetTrigger>
     <SheetContent>
       <SheetHeader>
@@ -123,7 +123,7 @@ const expectRegionNotHidden = async (region: HTMLElement, canvasElement: HTMLEle
 };
 
 const openSheet = async (canvasElement: HTMLElement) => {
-  await userEvent.click(within(canvasElement).getByRole('button', { name: 'Abrir sheet' }));
+  await userEvent.click(within(canvasElement).getByRole('button', { name: 'Abrir panel' }));
   await within(document.body).findByRole('dialog');
 };
 

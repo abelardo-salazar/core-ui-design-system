@@ -372,8 +372,8 @@ export const Sizes: Story = {
           {size === 'md' && (
             <div className="w-48 shrink-0">
               <Select>
-                <SelectTrigger aria-label="Select md">
-                  <SelectValue placeholder="Select..." />
+                <SelectTrigger aria-label="Selector md">
+                  <SelectValue placeholder="Elegir..." />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="mx">México</SelectItem>
@@ -383,8 +383,8 @@ export const Sizes: Story = {
           )}
           <Input
             size={size}
-            placeholder={`Input ${size}`}
-            aria-label={`Input ${size}`}
+            placeholder={`Campo ${size}`}
+            aria-label={`Campo ${size}`}
             className="w-48 shrink-0"
           />
         </div>
@@ -401,7 +401,7 @@ export const Sizes: Story = {
       ).toHaveClass(heights[size]);
       const multipleTrigger = canvas.getByRole('button', { name: `Países ${size} México` });
       await expect(multipleTrigger.parentElement).toHaveClass(minHeights[size]);
-      await expect(canvas.getByRole('textbox', { name: `Input ${size}` })).toHaveClass(
+      await expect(canvas.getByRole('textbox', { name: `Campo ${size}` })).toHaveClass(
         heights[size],
       );
     }

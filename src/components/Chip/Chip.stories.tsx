@@ -17,11 +17,11 @@ type Story = StoryObj<typeof Chip>;
 // 1. Neither: static chip, no Toggle and no close button.
 export const Static: Story = {
   args: {
-    children: 'Static',
+    children: 'Estático',
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText('Static')).toBeInTheDocument();
+    await expect(canvas.getByText('Estático')).toBeInTheDocument();
     await expect(canvas.queryByRole('button')).not.toBeInTheDocument();
   },
 };
@@ -29,14 +29,14 @@ export const Static: Story = {
 // 2. Only pressed/onPressedChange: interactive body through a real Radix Toggle.
 export const Toggleable: Story = {
   args: {
-    children: 'Design',
+    children: 'Diseño',
     defaultPressed: false,
     onPressedChange: fn(),
     variant: 'outline',
   },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    const toggle = canvas.getByRole('button', { name: 'Design' });
+    const toggle = canvas.getByRole('button', { name: 'Diseño' });
 
     await expect(toggle).toHaveAttribute('aria-pressed', 'false');
     await expect(toggle).toHaveAttribute('data-state', 'off');
@@ -63,7 +63,7 @@ export const Toggleable: Story = {
 // 3. Only onRemove: a single close button, no Toggle.
 export const Removable: Story = {
   args: {
-    children: 'Design',
+    children: 'Diseño',
     onRemove: fn(),
   },
   play: async ({ canvasElement, args }) => {
@@ -104,14 +104,14 @@ export const Removable: Story = {
 // 4. Both: Toggle + close button, each with its own focus (Tab separates them).
 export const ToggleableAndRemovable: Story = {
   args: {
-    children: 'Design',
+    children: 'Diseño',
     defaultPressed: false,
     onPressedChange: fn(),
     onRemove: fn(),
   },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    const toggle = canvas.getByRole('button', { name: 'Design' });
+    const toggle = canvas.getByRole('button', { name: 'Diseño' });
     const removeButton = canvas.getByRole('button', { name: 'Remove' });
 
     await expect(canvas.getAllByRole('button')).toHaveLength(2);
@@ -156,7 +156,7 @@ export const ToggleableAndRemovable: Story = {
 // the real pixel size was checked by hand in Storybook with a real browser.
 export const Medium: Story = {
   args: {
-    children: 'Design',
+    children: 'Diseño',
     size: 'md',
     defaultPressed: false,
     onPressedChange: fn(),
@@ -164,7 +164,7 @@ export const Medium: Story = {
   },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    const toggle = canvas.getByRole('button', { name: 'Design' });
+    const toggle = canvas.getByRole('button', { name: 'Diseño' });
     const removeButton = canvas.getByRole('button', { name: 'Remove' });
 
     const root = toggle.parentElement as HTMLElement;
@@ -209,14 +209,14 @@ export const Medium: Story = {
 // see the PR).
 export const MediumToggleable: Story = {
   args: {
-    children: 'Design',
+    children: 'Diseño',
     size: 'md',
     defaultPressed: false,
     onPressedChange: fn(),
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const toggle = canvas.getByRole('button', { name: 'Design' });
+    const toggle = canvas.getByRole('button', { name: 'Diseño' });
 
     await expect(toggle.className.split(' ')).toContain('relative');
     await expect(toggle.className).toContain("after:content-['']");
@@ -228,7 +228,7 @@ export const MediumToggleable: Story = {
 // 7. size="lg": touch size (44px). Same criterion as Medium.
 export const Large: Story = {
   args: {
-    children: 'Design',
+    children: 'Diseño',
     size: 'lg',
     defaultPressed: false,
     onPressedChange: fn(),
@@ -236,7 +236,7 @@ export const Large: Story = {
   },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    const toggle = canvas.getByRole('button', { name: 'Design' });
+    const toggle = canvas.getByRole('button', { name: 'Diseño' });
     const removeButton = canvas.getByRole('button', { name: 'Remove' });
 
     const root = toggle.parentElement as HTMLElement;
@@ -274,14 +274,14 @@ export const Large: Story = {
 // visible curve that still activated the Toggle.
 export const LargeToggleable: Story = {
   args: {
-    children: 'Design',
+    children: 'Diseño',
     size: 'lg',
     defaultPressed: false,
     onPressedChange: fn(),
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const toggle = canvas.getByRole('button', { name: 'Design' });
+    const toggle = canvas.getByRole('button', { name: 'Diseño' });
 
     await expect(toggle.className.split(' ')).toContain('relative');
     await expect(toggle.className).toContain("after:content-['']");

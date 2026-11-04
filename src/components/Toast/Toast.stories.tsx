@@ -33,28 +33,31 @@ const ToastDemo = () => {
       <Button
         variant="outline"
         onClick={() =>
-          toast('Event has been created', {
-            description: 'Sunday, December 03, 2023 at 9:00 AM',
+          toast('Se creó el evento', {
+            description: 'Domingo, 3 de diciembre de 2023, 9:00',
             action: {
-              label: 'Undo',
+              label: 'Deshacer',
               onClick: () => console.log('Undo'),
             },
           })
         }
       >
-        Default Toast
+        Toast predeterminado
       </Button>
 
-      <Button variant="secondary" onClick={() => toast.success('Event created successfully!')}>
-        Success
+      <Button
+        variant="secondary"
+        onClick={() => toast.success('¡El evento se creó correctamente!')}
+      >
+        Éxito
       </Button>
 
-      <Button variant="destructive" onClick={() => toast.error('Failed to create event.')}>
+      <Button variant="destructive" onClick={() => toast.error('No se pudo crear el evento.')}>
         Error
       </Button>
 
-      <Button variant="ghost" onClick={() => toast.info('New update available.')}>
-        Info
+      <Button variant="ghost" onClick={() => toast.info('Hay una actualización disponible.')}>
+        Información
       </Button>
     </div>
   );
@@ -64,14 +67,14 @@ export const Interactive: Story = {
   render: () => <ToastDemo />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const successButton = canvas.getByRole('button', { name: 'Success' });
+    const successButton = canvas.getByRole('button', { name: 'Éxito' });
 
     // Fires the notification through Sonner's imperative API (toast.success).
     await userEvent.click(successButton);
 
     // The toast lives in Sonner's portal, outside canvasElement.
     const body = within(document.body);
-    const message = await body.findByText('Event created successfully!');
+    const message = await body.findByText('¡El evento se creó correctamente!');
     const toastEl = message.closest('[data-sonner-toast]');
 
     await expect(toastEl).toBeInTheDocument();

@@ -22,17 +22,17 @@ export const Simple: Story = {
   render: () => (
     <Card className="w-87.5">
       <CardHeader>
-        <CardTitle>Create project</CardTitle>
-        <CardDescription>Deploy your new project in one-click.</CardDescription>
+        <CardTitle>Crear proyecto</CardTitle>
+        <CardDescription>Despliega tu nuevo proyecto con un clic.</CardDescription>
       </CardHeader>
       <CardContent>
         <p className="text-sm text-base-content/80">
-          Your project will be deployed to the edge network instantly.
+          Tu proyecto se desplegará en la red perimetral al instante.
         </p>
       </CardContent>
       <CardFooter className="flex justify-between">
-        <Button variant="ghost">Cancel</Button>
-        <Button>Deploy</Button>
+        <Button variant="ghost">Cancelar</Button>
+        <Button>Desplegar</Button>
       </CardFooter>
     </Card>
   ),
@@ -41,18 +41,18 @@ export const Simple: Story = {
 
     // CardTitle uses <h3> semantically.
     await expect(
-      canvas.getByRole('heading', { level: 3, name: 'Create project' }),
+      canvas.getByRole('heading', { level: 3, name: 'Crear proyecto' }),
     ).toBeInTheDocument();
-    await expect(canvas.getByText('Deploy your new project in one-click.')).toBeInTheDocument();
+    await expect(canvas.getByText('Despliega tu nuevo proyecto con un clic.')).toBeInTheDocument();
     await expect(
-      canvas.getByText('Your project will be deployed to the edge network instantly.'),
+      canvas.getByText('Tu proyecto se desplegará en la red perimetral al instante.'),
     ).toBeInTheDocument();
 
     // CardFooter: exported but not mentioned in any test until now. We confirm that
     // both buttons share the same container (it composes correctly) and that it keeps its
     // base classes in addition to the ones the consumer adds (className is merged, not replaced).
-    const cancelButton = canvas.getByRole('button', { name: 'Cancel' });
-    const deployButton = canvas.getByRole('button', { name: 'Deploy' });
+    const cancelButton = canvas.getByRole('button', { name: 'Cancelar' });
+    const deployButton = canvas.getByRole('button', { name: 'Desplegar' });
     const footer = cancelButton.parentElement;
 
     await expect(footer).toBe(deployButton.parentElement);
@@ -67,21 +67,21 @@ export const LoginForm: Story = {
   render: () => (
     <Card className="w-95">
       <CardHeader>
-        <CardTitle>Login</CardTitle>
-        <CardDescription>Enter your credentials to access the account.</CardDescription>
+        <CardTitle>Acceso</CardTitle>
+        <CardDescription>Ingresa tus credenciales para acceder a la cuenta.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Input id="email" label="Email" placeholder="m@example.com" type="email" />
+          <Input id="email" label="Correo electrónico" placeholder="m@example.com" type="email" />
         </div>
         <div className="space-y-2">
-          <Input id="password" label="Password" type="password" />
+          <Input id="password" label="Contraseña" type="password" />
         </div>
       </CardContent>
       <CardFooter className="flex flex-col gap-4">
-        <Button fullWidth>Sign In</Button>
+        <Button fullWidth>Entrar</Button>
         <Button variant="link" size="sm" className="text-xs">
-          Forgot password?
+          ¿Olvidaste tu contraseña?
         </Button>
       </CardFooter>
     </Card>
@@ -97,12 +97,12 @@ export const BlogPost: Story = {
         <span className="text-4xl">🖼️</span>
       </div>
       <CardHeader>
-        <CardTitle>Design Systems 101</CardTitle>
-        <CardDescription>Learn how to build scalable UI libraries.</CardDescription>
+        <CardTitle>Sistemas de diseño 101</CardTitle>
+        <CardDescription>Aprende a construir bibliotecas de UI escalables.</CardDescription>
       </CardHeader>
       <CardFooter>
         <Button variant="outline" fullWidth>
-          Read Article
+          Leer artículo
         </Button>
       </CardFooter>
     </Card>

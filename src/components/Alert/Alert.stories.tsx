@@ -24,8 +24,8 @@ export const Info: Story = {
   args: {
     children: (
       <>
-        <AlertTitle>Heads up</AlertTitle>
-        <AlertDescription>This is a general information message.</AlertDescription>
+        <AlertTitle>Atención</AlertTitle>
+        <AlertDescription>Este es un mensaje de información general.</AlertDescription>
       </>
     ),
   },
@@ -36,8 +36,10 @@ export const Info: Story = {
     await expect(alert).toBeInTheDocument();
     await expect(canvas.queryByRole('alert')).not.toBeInTheDocument();
 
-    await expect(canvas.getByText('Heads up')).toBeInTheDocument();
-    await expect(canvas.getByText('This is a general information message.')).toBeInTheDocument();
+    await expect(canvas.getByText('Atención')).toBeInTheDocument();
+    await expect(
+      canvas.getByText('Este es un mensaje de información general.'),
+    ).toBeInTheDocument();
 
     await expect(alert.querySelector('svg.text-info')).toBeInTheDocument();
     await expect(alert.className.split(' ')).toEqual(
@@ -52,8 +54,8 @@ export const Success: Story = {
     variant: 'success',
     children: (
       <>
-        <AlertTitle>Success</AlertTitle>
-        <AlertDescription>Your changes have been saved.</AlertDescription>
+        <AlertTitle>Éxito</AlertTitle>
+        <AlertDescription>Tus cambios se guardaron.</AlertDescription>
       </>
     ),
   },
@@ -75,8 +77,8 @@ export const Warning: Story = {
     variant: 'warning',
     children: (
       <>
-        <AlertTitle>Warning</AlertTitle>
-        <AlertDescription>This action may have unintended consequences.</AlertDescription>
+        <AlertTitle>Advertencia</AlertTitle>
+        <AlertDescription>Esta acción puede tener consecuencias no deseadas.</AlertDescription>
       </>
     ),
   },
@@ -99,7 +101,7 @@ export const ErrorVariant: Story = {
     children: (
       <>
         <AlertTitle>Error</AlertTitle>
-        <AlertDescription>Something went wrong. Please try again.</AlertDescription>
+        <AlertDescription>Algo salió mal. Inténtalo de nuevo.</AlertDescription>
       </>
     ),
   },
@@ -122,8 +124,8 @@ export const CustomIcon: Story = {
     icon: <span data-testid="custom-icon">🚀</span>,
     children: (
       <>
-        <AlertTitle>Deployed</AlertTitle>
-        <AlertDescription>Your app is live.</AlertDescription>
+        <AlertTitle>Desplegado</AlertTitle>
+        <AlertDescription>Tu aplicación ya está en línea.</AlertDescription>
       </>
     ),
   },
@@ -143,8 +145,8 @@ export const NoIcon: Story = {
     icon: null,
     children: (
       <>
-        <AlertTitle>No icon</AlertTitle>
-        <AlertDescription>This alert explicitly opts out of any icon.</AlertDescription>
+        <AlertTitle>Sin ícono</AlertTitle>
+        <AlertDescription>Esta alerta indica explícitamente que no lleva ícono.</AlertDescription>
       </>
     ),
   },
