@@ -108,16 +108,20 @@ Una versión sin publicar acumula todos los PRs en una sola entrada del CHANGELO
 Se publica empujando un tag. El flujo:
 
 1. **PR de release:** sube `version` en `package.json` y `package-lock.json`, cierra la entrada del CHANGELOG (de `[Unreleased]` a `[X.Y.Z] - <fecha>`, con el delta neto) y actualiza el badge y la línea de versión del README. `verify:readme` comprueba que coincidan.
-2. **Merge** del PR a `main`.
+2. **Merge** del PR a `main`. Entre este merge y el tag no entra nada a `main`.
 3. **Tag anotado** `vX.Y.Z` sobre el commit del merge: `git tag -a vX.Y.Z -m "vX.Y.Z" <commit>`.
 4. **Push del tag:** `git push origin vX.Y.Z`.
-5. **El workflow `release.yml` publica.** Falla sin publicar si el tag no es `v` + `package.json#version`, si su commit no está en `main` o si esa versión ya está en el registro. Si no falla, corre la misma verificación que `ci.yml` y publica en el registro público de npm con trusted publishing (OIDC) y provenance: no hay token de npm en el repo, y npmjs solo acepta la publicación desde `release.yml` de este repositorio. El chequeo de versión corre sin autenticación porque el paquete es público. Para ese chequeo de versión, un E404 de `npm view` cuenta como "no publicada" (el paquete todavía no existe en npm); cualquier otro error falla el job. Por qué npm: [Registro: npm público](#registro-npm-público).
+5. **El workflow `release.yml` publica.** Falla sin publicar si el tag no es `v` + `package.json#version`, si su commit no está en `main`, si ese commit no cambia `package.json#version` respecto de su primer padre o si esa versión ya está en el registro. Si no falla, corre la misma verificación que `ci.yml` y publica en el registro público de npm con trusted publishing (OIDC) y provenance: no hay token de npm en el repo, y npmjs solo acepta la publicación desde `release.yml` de este repositorio. El chequeo de versión corre sin autenticación porque el paquete es público. Para ese chequeo de versión, un E404 de `npm view` cuenta como "no publicada" (el paquete todavía no existe en npm); cualquier otro error falla el job. Por qué npm: [Registro: npm público](#registro-npm-público).
 
 Razón: el tag define lo que se publica. Antes se publicaba a mano con `npm publish` desde una máquina local y el tag se ponía después, reconstruyendo qué commit se había publicado. Ahora el paquete sale del commit con tag, verificado en CI, y no hay nada que reconstruir.
+
+Si algo entra a `main` después del merge del PR de release, se rehace ese PR: lo revisado en él ya no es lo que se publicaría. Como `version` ya tiene el número nuevo, rehacerlo son dos PR: uno devuelve `version` a la última publicada y lleva la entrada del CHANGELOG a `[Unreleased]`, y luego un PR de release nuevo vuelve a subirla. Así el tag queda sobre un commit que cambia la versión.
 
 Un tag que falló no se mueve para reintentar: se corrige en un PR, se sube la versión si el error ya estaba en el commit con tag y se empuja un tag nuevo. Si la falla fue externa (el registro, la red), se vuelve a correr el workflow.
 
 **Nota histórica:** antes de este flujo, los tags se ubicaban con el `gitHead` del paquete publicado (`npm view …@X.Y.Z gitHead`). GitHub Packages no lo expone (devuelve vacío), así que los tags anteriores se ubicaron por la hora de publicación que registra el registro. Esto aplica a las versiones hasta 0.8.0, que están en GitHub Packages; npm sí guarda `gitHead`, pero desde este flujo el tag ya identifica el commit publicado. Está verificado para 0.6.0 y 0.7.0. `v0.4.1` y `v0.4.2` son tags ligeros (no anotados), creados antes de la convención de tags anotados, y se dejan así. Las versiones anteriores a 0.4.1 no tienen tag.
+
+**Nota histórica:** `v0.10.0` está sobre `601b284` (#107), que no cambia la versión. El PR de release (#100) se mergeó antes que #101 a #107, y esos PR agregaron sus cambios a la entrada de la versión, todavía sin publicar. Lo publicado es correcto, porque el tag incluye todos esos cambios, pero el PR de release no los revisó. A raíz de esto, `release.yml` exige que el commit con tag cambie la versión. `v0.10.0` no se mueve ni se re-crea.
 
 ## Decisiones
 

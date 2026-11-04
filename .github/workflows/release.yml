@@ -1,8 +1,8 @@
 name: Release
 
 # Publishes the package to the public npm registry when a vX.Y.Z tag is pushed. The tag defines what
-# gets published: the tagged commit must be on main and its package.json must have version
-# X.Y.Z. Release flow: ARCHITECTURE.md § Versiones y tags.
+# gets published: the tagged commit must be on main, its package.json must have version X.Y.Z and
+# it must be the commit that changes the version. Release flow: ARCHITECTURE.md § Versiones y tags.
 on:
   push:
     tags: ['v*.*.*']
@@ -43,6 +43,20 @@ jobs:
             exit 1
           fi
           echo "Tag $GITHUB_REF_NAME matches package.json and $commit is on main."
+
+      # The tag must be on the release PR's merge: anything merged after it would be published under
+      # a version whose release PR didn't include it. Compared against the first parent because
+      # main only has squash merges, so that's the previous state of main.
+      - name: Check tagged commit is the one that changes the version
+        run: |
+          commit="$(git rev-parse "$GITHUB_REF^{commit}")"
+          version="$(git show "$commit:package.json" | node -p "JSON.parse(require('fs').readFileSync(0)).version")"
+          parent_version="$(git show "$commit^1:package.json" | node -p "JSON.parse(require('fs').readFileSync(0)).version")"
+          if [ "$version" = "$parent_version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME points to $commit, which does not change package.json version ($version in both the commit and its first parent). Tag the merge of the release PR; if something was merged after it, redo the release PR. See ARCHITECTURE.md § Tags."
+            exit 1
+          fi
+          echo "$commit changes the version from $parent_version to $version."
 
       # Node 22 LTS, same as ci.yml. No registry-url: setup-node would write an .npmrc with a
       # placeholder auth token. The default registry is npmjs, npm view runs anonymously (the
