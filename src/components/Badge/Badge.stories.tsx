@@ -18,11 +18,11 @@ type Story = StoryObj<typeof Badge>;
 // 1. Default
 export const Default: Story = {
   args: {
-    children: 'Default',
+    children: 'Predeterminado',
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const badge = canvas.getByText('Default');
+    const badge = canvas.getByText('Predeterminado');
     await expect(badge.tagName).toBe('DIV');
     await expect(badge.className.split(' ')).toContain('bg-primary');
     await expect(badge.className.split(' ')).toContain('text-primary-content');
@@ -37,12 +37,12 @@ export const Default: Story = {
 // 2. Secondary
 export const Secondary: Story = {
   args: {
-    children: 'Secondary',
+    children: 'Secundario',
     variant: 'secondary',
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const badge = canvas.getByText('Secondary');
+    const badge = canvas.getByText('Secundario');
     await expect(badge.className.split(' ')).toContain('bg-secondary');
     await expect(badge.className.split(' ')).toContain('text-secondary-content');
   },
@@ -51,12 +51,12 @@ export const Secondary: Story = {
 // 3. Outline
 export const Outline: Story = {
   args: {
-    children: 'Outline',
+    children: 'Contorno',
     variant: 'outline',
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const badge = canvas.getByText('Outline');
+    const badge = canvas.getByText('Contorno');
     await expect(badge.className.split(' ')).toContain('text-base-content');
     await expect(badge.className.split(' ')).toContain('border-base-content/20');
   },
@@ -66,13 +66,13 @@ export const Outline: Story = {
 // only adds those classes when interactive=true; without it the badge has no hover at all).
 export const Destructive: Story = {
   args: {
-    children: 'Destructive',
+    children: 'Destructivo',
     variant: 'destructive',
     interactive: true,
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const badge = canvas.getByText('Destructive');
+    const badge = canvas.getByText('Destructivo');
 
     await expect(badge.className.split(' ')).toContain('text-error-content');
     await expect(rootTokenIn('light', '--error-content')).toBe('#000000');
@@ -136,13 +136,13 @@ export const Sizes: Story = {
 // scripts/verify-client-directives.mjs).
 export const Interactive: Story = {
   args: {
-    children: 'Interactive',
+    children: 'Interactivo',
     interactive: true,
     onClick: fn(),
   },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    const badge = canvas.getByRole('button', { name: 'Interactive' });
+    const badge = canvas.getByRole('button', { name: 'Interactivo' });
 
     await expect(badge.tagName).toBe('BUTTON');
     await expect(badge).toHaveAttribute('type', 'button');
@@ -171,14 +171,14 @@ export const Interactive: Story = {
 // 7. Interactive + disabled: native disabled of the <button>; the click must not fire onClick.
 export const InteractiveDisabled: Story = {
   args: {
-    children: 'Disabled',
+    children: 'Deshabilitado',
     interactive: true,
     disabled: true,
     onClick: fn(),
   },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    const badge = canvas.getByRole('button', { name: 'Disabled' });
+    const badge = canvas.getByRole('button', { name: 'Deshabilitado' });
 
     await expect(badge).toBeDisabled();
     await expect(badge.className.split(' ')).toContain('disabled:opacity-50');
@@ -194,11 +194,11 @@ export const InteractiveDisabled: Story = {
 // tabIndex never fires :focus-visible), now they're exclusive to interactive=true.
 export const NonInteractive: Story = {
   args: {
-    children: 'Static',
+    children: 'Estático',
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const badge = canvas.getByText('Static');
+    const badge = canvas.getByText('Estático');
 
     await expect(badge.tagName).toBe('DIV');
     await expect(canvas.queryByRole('button')).not.toBeInTheDocument();

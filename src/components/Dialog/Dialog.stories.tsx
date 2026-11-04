@@ -29,13 +29,13 @@ export const EditProfileExample: Story = {
   render: () => (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">Edit Profile</Button>
+        <Button variant="outline">Editar perfil</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit profile</DialogTitle>
+          <DialogTitle>Editar perfil</DialogTitle>
           <DialogDescription>
-            Make changes to your profile here. Click save when you're done.
+            Haz los cambios en tu perfil aquí. Haz clic en guardar cuando termines.
           </DialogDescription>
         </DialogHeader>
 
@@ -43,13 +43,13 @@ export const EditProfileExample: Story = {
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Text as="label" htmlFor="name" className="text-right" size="lg" weight="medium">
-              Name
+              Nombre
             </Text>
             <Input id="name" defaultValue="Pedro Duarte" className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Text as="label" htmlFor="username" className="text-right" size="lg" weight="medium">
-              Username
+              Usuario
             </Text>
             <Input id="username" defaultValue="@pedrodev" className="col-span-3" />
           </div>
@@ -58,16 +58,16 @@ export const EditProfileExample: Story = {
         <DialogFooter>
           {/* We can use DialogClose to auto-close on click */}
           <DialogClose asChild>
-            <Button variant="ghost">Cancel</Button>
+            <Button variant="ghost">Cancelar</Button>
           </DialogClose>
-          <Button type="submit">Save changes</Button>
+          <Button type="submit">Guardar cambios</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const trigger = canvas.getByRole('button', { name: 'Edit Profile' });
+    const trigger = canvas.getByRole('button', { name: 'Editar perfil' });
 
     const body = within(document.body);
     await expect(body.queryByRole('dialog')).not.toBeInTheDocument();
@@ -101,8 +101,8 @@ export const EditProfileExample: Story = {
     await expect(closeButton.className).not.toMatch(/(^|\s)focus:|ring-offset/);
 
     // axe: label; the inputs had no real label, only loose text without htmlFor.
-    await expect(dialogScope.getByLabelText('Name')).toHaveValue('Pedro Duarte');
-    await expect(dialogScope.getByLabelText('Username')).toHaveValue('@pedrodev');
+    await expect(dialogScope.getByLabelText('Nombre')).toHaveValue('Pedro Duarte');
+    await expect(dialogScope.getByLabelText('Usuario')).toHaveValue('@pedrodev');
 
     // Radix moves focus inside the content on opening (FocusScope), left untested until now.
     await expect(dialog.contains(document.activeElement)).toBe(true);

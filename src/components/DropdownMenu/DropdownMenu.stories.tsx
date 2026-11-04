@@ -40,13 +40,13 @@ const DropdownMenuDemo = ({ onSelect, onCheckedChange, onValueChange }: DemoProp
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">Open menu</Button>
+        <Button variant="outline">Abrir menú</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={onSelect}>Profile</DropdownMenuItem>
-        <DropdownMenuItem>Billing</DropdownMenuItem>
+        <DropdownMenuItem onSelect={onSelect}>Perfil</DropdownMenuItem>
+        <DropdownMenuItem>Facturación</DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuCheckboxItem
           checked={notifications}
@@ -55,7 +55,7 @@ const DropdownMenuDemo = ({ onSelect, onCheckedChange, onValueChange }: DemoProp
             onCheckedChange?.(checked);
           }}
         >
-          Show notifications
+          Mostrar notificaciones
         </DropdownMenuCheckboxItem>
         <DropdownMenuSeparator />
         <DropdownMenuRadioGroup
@@ -65,8 +65,8 @@ const DropdownMenuDemo = ({ onSelect, onCheckedChange, onValueChange }: DemoProp
             onValueChange?.(value);
           }}
         >
-          <DropdownMenuRadioItem value="light">Light</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="dark">Dark</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="light">Claro</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="dark">Oscuro</DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -79,7 +79,7 @@ export const Default: Story = {
   render: (args) => <DropdownMenuDemo {...args} />,
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    const trigger = canvas.getByRole('button', { name: 'Open menu' });
+    const trigger = canvas.getByRole('button', { name: 'Abrir menú' });
 
     // The content lives in a Portal outside canvasElement (same pattern as Select).
     const body = within(document.body);
@@ -88,7 +88,7 @@ export const Default: Story = {
     await userEvent.click(trigger);
     const menu = await body.findByRole('menu');
 
-    const profileItem = within(menu).getByRole('menuitem', { name: 'Profile' });
+    const profileItem = within(menu).getByRole('menuitem', { name: 'Perfil' });
     await userEvent.click(profileItem);
 
     await expect(args.onSelect).toHaveBeenCalledTimes(1);
@@ -103,7 +103,7 @@ export const KeyboardNavigation: Story = {
   render: () => <DropdownMenuDemo />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const trigger = canvas.getByRole('button', { name: 'Open menu' });
+    const trigger = canvas.getByRole('button', { name: 'Abrir menú' });
 
     trigger.focus();
     await userEvent.keyboard('{Enter}');
@@ -134,12 +134,14 @@ export const CheckboxToggle: Story = {
   render: (args) => <DropdownMenuDemo {...args} />,
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    const trigger = canvas.getByRole('button', { name: 'Open menu' });
+    const trigger = canvas.getByRole('button', { name: 'Abrir menú' });
     const body = within(document.body);
 
     await userEvent.click(trigger);
     let menu = await body.findByRole('menu');
-    let checkboxItem = within(menu).getByRole('menuitemcheckbox', { name: 'Show notifications' });
+    let checkboxItem = within(menu).getByRole('menuitemcheckbox', {
+      name: 'Mostrar notificaciones',
+    });
     await expect(checkboxItem).toHaveAttribute('aria-checked', 'false');
 
     await userEvent.click(checkboxItem);
@@ -150,7 +152,7 @@ export const CheckboxToggle: Story = {
 
     await userEvent.click(trigger);
     menu = await body.findByRole('menu');
-    checkboxItem = within(menu).getByRole('menuitemcheckbox', { name: 'Show notifications' });
+    checkboxItem = within(menu).getByRole('menuitemcheckbox', { name: 'Mostrar notificaciones' });
     await expect(checkboxItem).toHaveAttribute('aria-checked', 'true');
   },
 };
@@ -162,13 +164,13 @@ export const RadioGroupSelection: Story = {
   render: (args) => <DropdownMenuDemo {...args} />,
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    const trigger = canvas.getByRole('button', { name: 'Open menu' });
+    const trigger = canvas.getByRole('button', { name: 'Abrir menú' });
     const body = within(document.body);
 
     await userEvent.click(trigger);
     let menu = await body.findByRole('menu');
-    let lightItem = within(menu).getByRole('menuitemradio', { name: 'Light' });
-    let darkItem = within(menu).getByRole('menuitemradio', { name: 'Dark' });
+    let lightItem = within(menu).getByRole('menuitemradio', { name: 'Claro' });
+    let darkItem = within(menu).getByRole('menuitemradio', { name: 'Oscuro' });
     await expect(lightItem).toHaveAttribute('aria-checked', 'true');
     await expect(darkItem).toHaveAttribute('aria-checked', 'false');
 
@@ -179,8 +181,8 @@ export const RadioGroupSelection: Story = {
 
     await userEvent.click(trigger);
     menu = await body.findByRole('menu');
-    lightItem = within(menu).getByRole('menuitemradio', { name: 'Light' });
-    darkItem = within(menu).getByRole('menuitemradio', { name: 'Dark' });
+    lightItem = within(menu).getByRole('menuitemradio', { name: 'Claro' });
+    darkItem = within(menu).getByRole('menuitemradio', { name: 'Oscuro' });
     await expect(darkItem).toHaveAttribute('aria-checked', 'true');
     await expect(lightItem).toHaveAttribute('aria-checked', 'false');
   },

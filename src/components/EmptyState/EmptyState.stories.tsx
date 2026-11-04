@@ -125,7 +125,7 @@ export const HeadingTitle: Story = {
         <FileTextIcon />
       </EmptyStateIcon>
       <EmptyStateTitle as="h2">Tu bandeja está vacía</EmptyStateTitle>
-      <EmptyStateDescription>Los mensajes nuevos van a aparecer acá.</EmptyStateDescription>
+      <EmptyStateDescription>Los mensajes nuevos aparecerán aquí.</EmptyStateDescription>
     </EmptyState>
   ),
   play: async ({ canvasElement }) => {

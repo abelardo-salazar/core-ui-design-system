@@ -51,7 +51,7 @@ function countBrowserEvents(container: HTMLElement) {
 export const LoadsSuccessfully: Story = {
   render: () => (
     <div className="h-32 w-32">
-      <Image src={TINY_PNG} alt="Loaded photo" />
+      <Image src={TINY_PNG} alt="Foto cargada" />
     </div>
   ),
   play: async ({ canvasElement }) => {
@@ -63,7 +63,7 @@ export const LoadsSuccessfully: Story = {
     // AvatarImage (Radix), our <img> is mounted right away (with alt already present) to be
     // able to fire onLoad/onError, so findByAltText resolves as soon as it mounts, not
     // when it finishes loading: we have to wait for the real load event (img.complete).
-    const img = canvas.getByAltText('Loaded photo');
+    const img = canvas.getByAltText('Foto cargada');
     await waitFor(() => expect(img.complete && img.naturalWidth > 0).toBe(true));
     await waitFor(() => expect(img.className).not.toContain('invisible'));
     await expect(canvasElement.querySelector('.animate-pulse')).not.toBeInTheDocument();
@@ -77,10 +77,10 @@ export const ErrorWithFallback: Story = {
     <div className="h-32 w-32">
       <Image
         src={BROKEN_SRC}
-        alt="Broken"
+        alt="Rota"
         fallback={
           <span className="flex h-full w-full items-center justify-center bg-base-200 text-xs">
-            No image
+            Sin imagen
           </span>
         }
       />
@@ -88,8 +88,8 @@ export const ErrorWithFallback: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(await canvas.findByText('No image')).toBeInTheDocument();
-    await expect(canvas.queryByAltText('Broken')).not.toBeInTheDocument();
+    await expect(await canvas.findByText('Sin imagen')).toBeInTheDocument();
+    await expect(canvas.queryByAltText('Rota')).not.toBeInTheDocument();
   },
 };
 
@@ -98,7 +98,7 @@ export const ErrorWithoutFallback: Story = {
   args: { onError: fn() },
   render: (args) => (
     <div className="h-32 w-32" data-testid="image-container">
-      <Image src={BROKEN_SRC} alt="Broken" onError={args.onError} />
+      <Image src={BROKEN_SRC} alt="Rota" onError={args.onError} />
     </div>
   ),
   play: async ({ canvasElement, args }) => {
@@ -111,7 +111,7 @@ export const ErrorWithoutFallback: Story = {
 
     // Image's inner wrapper stays mounted (it has to stay alive in case src changes), but
     // no <img> or visible content must remain inside it: the documented "renders nothing".
-    await expect(canvas.queryByAltText('Broken')).not.toBeInTheDocument();
+    await expect(canvas.queryByAltText('Rota')).not.toBeInTheDocument();
     await expect(container.querySelector('img')).not.toBeInTheDocument();
     await expect(container).toHaveTextContent('');
   },
@@ -129,7 +129,7 @@ function ErrorBeforeEffects() {
   }, []);
   return (
     <div ref={containerRef} data-testid="image-container" style={{ display: 'none' }}>
-      <Image src="/never-loaded.jpg" alt="Early error" loading="lazy" />
+      <Image src="/never-loaded.jpg" alt="Error temprano" loading="lazy" />
     </div>
   );
 }
@@ -155,7 +155,7 @@ export const LoadedBeforeHydration: Story = {
   play: async ({ canvasElement }) => {
     const container = within(canvasElement).getByTestId('ssr-container');
     const onLoad = fn();
-    const ssrImage = <Image src={TINY_PNG} alt="Server image" onLoad={onLoad} />;
+    const ssrImage = <Image src={TINY_PNG} alt="Imagen del servidor" onLoad={onLoad} />;
     const browserEvents = countBrowserEvents(container);
     container.innerHTML = renderToString(ssrImage);
 
@@ -186,8 +186,8 @@ export const ErrorBeforeHydration: Story = {
     const ssrBrokenImage = (
       <Image
         src={BROKEN_SRC}
-        alt="Broken server image"
-        fallback={<span>No image</span>}
+        alt="Imagen del servidor rota"
+        fallback={<span>Sin imagen</span>}
         onError={onError}
       />
     );
@@ -198,7 +198,7 @@ export const ErrorBeforeHydration: Story = {
 
     const root = hydrateRoot(container, ssrBrokenImage);
     try {
-      await waitFor(() => expect(container).toHaveTextContent('No image'));
+      await waitFor(() => expect(container).toHaveTextContent('Sin imagen'));
       await expect(container.querySelector('img')).not.toBeInTheDocument();
       await expect(onError).toHaveBeenCalledOnce();
       await expect(onError.mock.calls[0][0].nativeEvent.isTrusted).toBe(false);
@@ -213,12 +213,12 @@ export const ErrorBeforeHydration: Story = {
 export const WithoutSrc: Story = {
   render: () => (
     <div className="h-32 w-32">
-      <Image alt="Sin imagen" fallback={<span>No image</span>} />
+      <Image alt="Sin imagen" fallback={<span>Sin imagen</span>} />
     </div>
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(await canvas.findByText('No image')).toBeInTheDocument();
+    await expect(await canvas.findByText('Sin imagen')).toBeInTheDocument();
     await expect(canvas.queryByAltText('Sin imagen')).not.toBeInTheDocument();
     await expect(canvasElement.querySelector('.animate-pulse')).not.toBeInTheDocument();
   },
@@ -231,7 +231,7 @@ function SwitchSrcAfterError() {
   return (
     <div className="space-y-2">
       <div className="h-32 w-32">
-        <Image src={src} alt="Switchable" fallback={<span>No image</span>} />
+        <Image src={src} alt="Intercambiable" fallback={<span>Sin imagen</span>} />
       </div>
       <button type="button" onClick={() => setSrc(TINY_PNG)}>
         Cambiar imagen
@@ -244,14 +244,14 @@ export const RecoversWhenSrcChanges: Story = {
   render: () => <SwitchSrcAfterError />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(await canvas.findByText('No image')).toBeInTheDocument();
-    await expect(canvas.queryByAltText('Switchable')).not.toBeInTheDocument();
+    await expect(await canvas.findByText('Sin imagen')).toBeInTheDocument();
+    await expect(canvas.queryByAltText('Intercambiable')).not.toBeInTheDocument();
 
     await userEvent.click(canvas.getByRole('button', { name: 'Cambiar imagen' }));
 
-    const img = await canvas.findByAltText('Switchable');
+    const img = await canvas.findByAltText('Intercambiable');
     await waitFor(() => expect(img.className).not.toContain('invisible'));
-    await expect(canvas.queryByText('No image')).not.toBeInTheDocument();
+    await expect(canvas.queryByText('Sin imagen')).not.toBeInTheDocument();
   },
 };
 

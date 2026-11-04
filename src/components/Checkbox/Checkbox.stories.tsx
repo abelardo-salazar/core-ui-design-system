@@ -22,7 +22,7 @@ export const Default: Story = {
   render: (args) => (
     <div className="flex items-center gap-2">
       <Checkbox {...args} />
-      <label htmlFor="terms">Accept terms and conditions</label>
+      <label htmlFor="terms">Acepto los términos y condiciones</label>
     </div>
   ),
   play: async ({ canvasElement, args }) => {

@@ -27,7 +27,10 @@ const meta: Meta<typeof Button> = {
     },
     isLoading: { control: 'boolean' },
     fullWidth: { control: 'boolean' },
-    asChild: { control: 'boolean', description: 'Enables polymorphism (render as a, Link, etc)' },
+    asChild: {
+      control: 'boolean',
+      description: 'Habilita el polimorfismo (renderiza como a, Link, etc.)',
+    },
   },
 };
 
@@ -37,14 +40,14 @@ type Story = StoryObj<typeof Button>;
 // 1. Base Story (Playground)
 export const Default: Story = {
   args: {
-    children: 'Button UI',
+    children: 'Botón',
     variant: 'primary',
     size: 'md',
     onClick: fn(),
   },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    const button = canvas.getByRole('button', { name: 'Button UI' });
+    const button = canvas.getByRole('button', { name: 'Botón' });
 
     // md = 44px, aligned with Input md and the Select trigger (same family of form controls).
     // No explicit shape: it must still resolve to rounded-btn (defaultVariants), not
@@ -64,13 +67,13 @@ export const Default: Story = {
 // 1b. Native disabled: the click must not fire the consumer's onClick.
 export const Disabled: Story = {
   args: {
-    children: 'Disabled button',
+    children: 'Botón deshabilitado',
     disabled: true,
     onClick: fn(),
   },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    const button = canvas.getByRole('button', { name: 'Disabled button' });
+    const button = canvas.getByRole('button', { name: 'Botón deshabilitado' });
 
     await expect(button).toBeDisabled();
 
@@ -82,26 +85,26 @@ export const Disabled: Story = {
 // 2. Main Variants
 export const Secondary: Story = {
   args: {
-    children: 'Secondary Action',
+    children: 'Acción secundaria',
     variant: 'secondary',
   },
 };
 
 export const Outline: Story = {
   args: {
-    children: 'Outline Button',
+    children: 'Botón con contorno',
     variant: 'outline',
   },
 };
 
 export const Destructive: Story = {
   args: {
-    children: 'Delete Account',
+    children: 'Eliminar cuenta',
     variant: 'destructive',
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const button = canvas.getByRole('button', { name: 'Delete Account' });
+    const button = canvas.getByRole('button', { name: 'Eliminar cuenta' });
     // The vitest-browser fixture doesn't expose the --color-* variables derived by
     // @theme through getComputedStyle (not even for pre-existing tokens such as
     // --color-primary-content), so the contrast assertion is on the raw token
@@ -125,7 +128,7 @@ export const Destructive: Story = {
 // 3. States (Loading)
 export const Loading: Story = {
   args: {
-    children: 'Saving...',
+    children: 'Guardando...',
     isLoading: true,
   },
 };
@@ -133,7 +136,7 @@ export const Loading: Story = {
 // 4. With Icons
 export const WithIcons: Story = {
   args: {
-    children: 'Settings',
+    children: 'Ajustes',
     startIcon: <span>⚙️</span>, // We use an emoji for simplicity; an Icon component would go here.
   },
 };
@@ -148,12 +151,12 @@ export const WithIcons: Story = {
 export const Icon: Story = {
   args: {
     size: 'icon',
-    'aria-label': 'Close',
+    'aria-label': 'Cerrar',
     children: <Cross2Icon />,
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const button = canvas.getByRole('button', { name: 'Close' });
+    const button = canvas.getByRole('button', { name: 'Cerrar' });
 
     await expect(button.className.split(' ')).toContain('h-11');
     await expect(button.className.split(' ')).toContain('w-11');
@@ -172,11 +175,11 @@ export const Icon: Story = {
 export const PillShape: Story = {
   args: {
     shape: 'pill',
-    children: 'Pill button',
+    children: 'Botón píldora',
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const button = canvas.getByRole('button', { name: 'Pill button' });
+    const button = canvas.getByRole('button', { name: 'Botón píldora' });
 
     await expect(button.className.split(' ')).toContain('rounded-full');
     await expect(button.className.split(' ')).not.toContain('rounded-btn');
@@ -191,11 +194,11 @@ export const PillShapeAsChild: Story = {
   args: {
     shape: 'pill',
     asChild: true,
-    children: <a href="/">Pill link</a>,
+    children: <a href="/">Enlace píldora</a>,
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const link = canvas.getByRole('link', { name: 'Pill link' });
+    const link = canvas.getByRole('link', { name: 'Enlace píldora' });
 
     await expect(link.className.split(' ')).toContain('rounded-full');
     await expect(link.className.split(' ')).not.toContain('rounded-btn');
@@ -210,12 +213,12 @@ export const PillIcon: Story = {
   args: {
     shape: 'pill',
     size: 'icon',
-    'aria-label': 'Add',
+    'aria-label': 'Agregar',
     children: <Cross2Icon />,
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const button = canvas.getByRole('button', { name: 'Add' });
+    const button = canvas.getByRole('button', { name: 'Agregar' });
 
     await expect(button.className.split(' ')).toContain('rounded-full');
     await expect(button.className.split(' ')).not.toContain('rounded-btn');
@@ -233,14 +236,14 @@ export const AsLink: Story = {
     // The button will render an <a> tag with button styles.
     children: (
       <a href="https://google.com" target="_blank" rel="noreferrer">
-        Go to Google
+        Ir a Google
       </a>
     ),
   },
   parameters: {
     docs: {
       description: {
-        story: 'Use `asChild` to render an `<a>` link while keeping the button styles.',
+        story: 'Usa `asChild` para renderizar un enlace `<a>` y mantener los estilos del botón.',
       },
     },
   },
@@ -285,14 +288,14 @@ export const AsLinkLoading: Story = {
     onClick: fn(),
     children: (
       <a href="https://google.com" target="_blank" rel="noreferrer">
-        Go to Google
+        Ir a Google
       </a>
     ),
   },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     // aria-disabled doesn't remove the element's role="link" in the accessibility tree.
-    const link = canvas.getByRole('link', { name: 'Go to Google' });
+    const link = canvas.getByRole('link', { name: 'Ir a Google' });
 
     await expect(link).toHaveAttribute('aria-disabled', 'true');
     await expect(link.className.split(' ')).toContain('pointer-events-none');

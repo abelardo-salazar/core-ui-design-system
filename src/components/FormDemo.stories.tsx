@@ -28,24 +28,24 @@ export const SettingsForm: StoryObj = {
   render: () => (
     <Card className="w-[450px]">
       <CardHeader>
-        <CardTitle>Notification Settings</CardTitle>
+        <CardTitle>Ajustes de notificaciones</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Select Component */}
         <div className="space-y-2">
           <Text as="label" htmlFor="email-frequency" className="text-sm font-medium">
-            Email Frequency
+            Frecuencia de correos
           </Text>
           <Select defaultValue="daily">
             <SelectTrigger id="email-frequency">
-              <SelectValue placeholder="Select frequency" />
+              <SelectValue placeholder="Elige la frecuencia" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectLabel>Frequency</SelectLabel>
-                <SelectItem value="realtime">Real-time</SelectItem>
-                <SelectItem value="daily">Daily Digest</SelectItem>
-                <SelectItem value="weekly">Weekly Summary</SelectItem>
+                <SelectLabel>Frecuencia</SelectLabel>
+                <SelectItem value="realtime">En tiempo real</SelectItem>
+                <SelectItem value="daily">Resumen diario</SelectItem>
+                <SelectItem value="weekly">Resumen semanal</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
@@ -55,9 +55,9 @@ export const SettingsForm: StoryObj = {
         <div className="flex items-center justify-between space-x-2">
           <div className="flex flex-col space-y-1">
             <Text as="label" htmlFor="marketing-emails" className="text-sm font-medium">
-              Marketing Emails
+              Correos de marketing
             </Text>
-            <Text className="text-xs text-base-content">Receive offers and updates.</Text>
+            <Text className="text-xs text-base-content">Recibe ofertas y novedades.</Text>
           </div>
           <Switch id="marketing-emails" />
         </div>
@@ -70,22 +70,22 @@ export const SettingsForm: StoryObj = {
               htmlFor="terms"
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
-              Accept terms and conditions
+              Acepto los términos y condiciones
             </label>
             <Text className="text-xs text-base-content">
-              You agree to our Terms of Service and Privacy Policy.
+              Aceptas nuestros Términos del servicio y la Política de privacidad.
             </Text>
           </div>
         </div>
 
         {/* Textarea Component */}
         <div className="space-y-2">
-          <Text className="text-sm font-medium">Feedback</Text>
-          <Textarea placeholder="Tell us what you think..." />
+          <Text className="text-sm font-medium">Comentarios</Text>
+          <Textarea placeholder="Cuéntanos qué opinas..." />
         </div>
       </CardContent>
       <CardFooter>
-        <Button className="w-full">Save Preferences</Button>
+        <Button className="w-full">Guardar preferencias</Button>
       </CardFooter>
     </Card>
   ),
@@ -94,9 +94,12 @@ export const SettingsForm: StoryObj = {
     // axe: button-name; the SelectTrigger (combobox) and the Switch had no accessible name;
     // "Email Frequency"/"Marketing Emails" were loose text without htmlFor. The Checkbox next
     // to them already used <label htmlFor> correctly, which is why it never showed up in the report.
-    await expect(canvas.getByLabelText('Email Frequency')).toHaveAttribute('role', 'combobox');
-    await expect(canvas.getByLabelText('Marketing Emails')).toHaveAttribute('role', 'switch');
-    await expect(canvas.getByLabelText('Accept terms and conditions')).toHaveAttribute(
+    await expect(canvas.getByLabelText('Frecuencia de correos')).toHaveAttribute(
+      'role',
+      'combobox',
+    );
+    await expect(canvas.getByLabelText('Correos de marketing')).toHaveAttribute('role', 'switch');
+    await expect(canvas.getByLabelText('Acepto los términos y condiciones')).toHaveAttribute(
       'role',
       'checkbox',
     );
@@ -118,7 +121,7 @@ export const AlignedFormRow: StoryObj = {
           <SelectValue placeholder="Tamaño" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="sm">Chico</SelectItem>
+          <SelectItem value="sm">Pequeño</SelectItem>
           <SelectItem value="md">Mediano</SelectItem>
           <SelectItem value="lg">Grande</SelectItem>
         </SelectContent>

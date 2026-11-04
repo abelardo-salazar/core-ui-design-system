@@ -36,35 +36,42 @@ const expectInsetFocusRing = async (closeButton: HTMLElement) => {
   await expect(closeButton.className).not.toMatch(/ring-offset/);
 };
 
+const SIDE_LABELS = {
+  top: 'superior',
+  right: 'derecho',
+  bottom: 'inferior',
+  left: 'izquierdo',
+};
+
 const SheetDemo = ({ side }: { side: 'top' | 'right' | 'bottom' | 'left' }) => (
   <Sheet>
     <SheetTrigger asChild>
-      <Button variant="outline">{side} sheet</Button>
+      <Button variant="outline">Panel {SIDE_LABELS[side]}</Button>
     </SheetTrigger>
     <SheetContent side={side}>
       <SheetHeader>
-        <SheetTitle>Edit profile</SheetTitle>
+        <SheetTitle>Editar perfil</SheetTitle>
         <SheetDescription>
-          Make changes to your profile here. Click save when you're done.
+          Haz los cambios en tu perfil aquí. Haz clic en guardar cuando termines.
         </SheetDescription>
       </SheetHeader>
       <div className="grid gap-4">
         <div className="grid grid-cols-4 items-center gap-4">
           <label htmlFor="name" className="text-right text-sm font-medium">
-            Name
+            Nombre
           </label>
           <Input id="name" defaultValue="Pedro Duarte" className="col-span-3" />
         </div>
         <div className="grid grid-cols-4 items-center gap-4">
           <label htmlFor="username" className="text-right text-sm font-medium">
-            Username
+            Usuario
           </label>
           <Input id="username" defaultValue="@pedro" className="col-span-3" />
         </div>
       </div>
       <SheetFooter>
         <SheetClose asChild>
-          <Button type="submit">Save changes</Button>
+          <Button type="submit">Guardar cambios</Button>
         </SheetClose>
       </SheetFooter>
     </SheetContent>
@@ -75,7 +82,7 @@ export const Right: Story = {
   render: () => <SheetDemo side="right" />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const trigger = canvas.getByRole('button', { name: 'right sheet' });
+    const trigger = canvas.getByRole('button', { name: 'Panel derecho' });
 
     const body = within(document.body);
     await expect(body.queryByRole('dialog')).not.toBeInTheDocument();
@@ -109,7 +116,7 @@ export const Left: Story = {
   render: () => <SheetDemo side="left" />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const trigger = canvas.getByRole('button', { name: 'left sheet' });
+    const trigger = canvas.getByRole('button', { name: 'Panel izquierdo' });
     await userEvent.click(trigger);
 
     const dialog = await within(document.body).findByRole('dialog');
@@ -126,7 +133,7 @@ export const Top: Story = {
   render: () => <SheetDemo side="top" />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const trigger = canvas.getByRole('button', { name: 'top sheet' });
+    const trigger = canvas.getByRole('button', { name: 'Panel superior' });
     await userEvent.click(trigger);
 
     const dialog = await within(document.body).findByRole('dialog');
@@ -138,7 +145,7 @@ export const Bottom: Story = {
   render: () => <SheetDemo side="bottom" />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const trigger = canvas.getByRole('button', { name: 'bottom sheet' });
+    const trigger = canvas.getByRole('button', { name: 'Panel inferior' });
     await userEvent.click(trigger);
 
     const dialog = await within(document.body).findByRole('dialog');
@@ -159,25 +166,25 @@ type Side = 'top' | 'right' | 'bottom' | 'left';
 const LongSheetDemo = ({ side }: { side: Side }) => (
   <Sheet>
     <SheetTrigger asChild>
-      <Button variant="outline">{side} long sheet</Button>
+      <Button variant="outline">Panel largo {SIDE_LABELS[side]}</Button>
     </SheetTrigger>
     <SheetContent side={side}>
       <SheetHeader>
-        <SheetTitle>Edit profile</SheetTitle>
+        <SheetTitle>Editar perfil</SheetTitle>
         <SheetDescription>
-          Make changes to your profile here. Click save when you're done.
+          Haz los cambios en tu perfil aquí. Haz clic en guardar cuando termines.
         </SheetDescription>
       </SheetHeader>
       <SheetBody data-testid="sheet-body">
         <div className="grid gap-4">
           {Array.from({ length: 20 }, (_, i) => (
-            <Input key={i} aria-label={`Field ${i + 1}`} placeholder={`Field ${i + 1}`} />
+            <Input key={i} aria-label={`Campo ${i + 1}`} placeholder={`Campo ${i + 1}`} />
           ))}
         </div>
       </SheetBody>
       <SheetFooter>
         <SheetClose asChild>
-          <Button type="submit">Save changes</Button>
+          <Button type="submit">Guardar cambios</Button>
         </SheetClose>
       </SheetFooter>
     </SheetContent>
@@ -191,15 +198,15 @@ const assertLongSheetStructure =
   (side: Side): Story['play'] =>
   async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: `${side} long sheet` }));
+    await userEvent.click(canvas.getByRole('button', { name: `Panel largo ${SIDE_LABELS[side]}` }));
 
     const dialog = await within(document.body).findByRole('dialog');
     const sheetBody = within(dialog).getByTestId('sheet-body');
     await expect(sheetBody).toHaveClass('flex-1', 'min-h-0', 'overflow-y-auto');
     await expect(sheetBody.parentElement).toBe(dialog);
 
-    const header = within(dialog).getByText('Edit profile').parentElement!;
-    const footer = within(dialog).getByRole('button', { name: 'Save changes' }).parentElement!;
+    const header = within(dialog).getByText('Editar perfil').parentElement!;
+    const footer = within(dialog).getByRole('button', { name: 'Guardar cambios' }).parentElement!;
     await expect(header.parentElement).toBe(dialog);
     // Room for the ✕ with the right safe area (without an inset it resolves to 24px; measured in
     // a real browser), symmetric on mobile to keep the centering.

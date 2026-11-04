@@ -24,9 +24,9 @@ export default meta;
 type Story = StoryObj<typeof Table>;
 
 const invoices = [
-  { invoice: 'INV001', status: 'Paid', method: 'Credit Card', amount: '$250.00' },
-  { invoice: 'INV002', status: 'Pending', method: 'PayPal', amount: '$150.00' },
-  { invoice: 'INV003', status: 'Unpaid', method: 'Bank Transfer', amount: '$350.00' },
+  { invoice: 'INV001', status: 'Pagada', method: 'Tarjeta de crédito', amount: '$250.00' },
+  { invoice: 'INV002', status: 'Pendiente', method: 'PayPal', amount: '$150.00' },
+  { invoice: 'INV003', status: 'Sin pagar', method: 'Transferencia bancaria', amount: '$350.00' },
 ];
 
 // 1. Full static table (the 8 subcomponents composed together)
@@ -126,7 +126,7 @@ export const WithoutFooterOrCaption: Story = {
       <TableBody>
         <TableRow>
           <TableCell>Ada Lovelace</TableCell>
-          <TableCell>Engineer</TableCell>
+          <TableCell>Ingeniería</TableCell>
         </TableRow>
       </TableBody>
     </Table>
@@ -148,7 +148,7 @@ export const NotResponsiveByDefault: Story = {
       <TableBody>
         <TableRow>
           <TableCell data-label="Nombre">Ada Lovelace</TableCell>
-          <TableCell data-label="Rol">Engineer</TableCell>
+          <TableCell data-label="Rol">Ingeniería</TableCell>
         </TableRow>
       </TableBody>
     </Table>
@@ -188,7 +188,7 @@ export const Responsive: Story = {
       <TableBody>
         <TableRow>
           <TableCell data-label="Nombre">Ada Lovelace</TableCell>
-          <TableCell data-label="Rol">Engineer</TableCell>
+          <TableCell data-label="Rol">Ingeniería</TableCell>
         </TableRow>
       </TableBody>
     </Table>

@@ -18,35 +18,35 @@ type Story = StoryObj;
 export const HeadingLevels: Story = {
   render: () => (
     <div className="space-y-2">
-      <Heading level="h1">Heading 1</Heading>
-      <Heading level="h2">Heading 2</Heading>
-      <Heading level="h3">Heading 3</Heading>
-      <Heading level="h4">Heading 4</Heading>
-      <Heading as="h5">Heading 5</Heading>
-      <Heading as="h6">Heading 6</Heading>
+      <Heading level="h1">Encabezado 1</Heading>
+      <Heading level="h2">Encabezado 2</Heading>
+      <Heading level="h3">Encabezado 3</Heading>
+      <Heading level="h4">Encabezado 4</Heading>
+      <Heading as="h5">Encabezado 5</Heading>
+      <Heading as="h6">Encabezado 6</Heading>
     </div>
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    const h1 = canvas.getByText('Heading 1');
+    const h1 = canvas.getByText('Encabezado 1');
     await expect(h1.tagName).toBe('H1');
     await expect(h1.className.split(' ')).toContain('text-4xl');
 
-    const h2 = canvas.getByText('Heading 2');
+    const h2 = canvas.getByText('Encabezado 2');
     await expect(h2.tagName).toBe('H2');
     await expect(h2.className.split(' ')).toContain('text-3xl');
 
-    const h3 = canvas.getByText('Heading 3');
+    const h3 = canvas.getByText('Encabezado 3');
     await expect(h3.tagName).toBe('H3');
     await expect(h3.className.split(' ')).toContain('text-2xl');
 
-    const h4 = canvas.getByText('Heading 4');
+    const h4 = canvas.getByText('Encabezado 4');
     await expect(h4.tagName).toBe('H4');
     await expect(h4.className.split(' ')).toContain('text-xl');
 
-    await expect(canvas.getByText('Heading 5').tagName).toBe('H5');
-    await expect(canvas.getByText('Heading 6').tagName).toBe('H6');
+    await expect(canvas.getByText('Encabezado 5').tagName).toBe('H5');
+    await expect(canvas.getByText('Encabezado 6').tagName).toBe('H6');
   },
 };
 
@@ -56,12 +56,12 @@ export const HeadingLevels: Story = {
 export const HeadingAsOverride: Story = {
   render: () => (
     <Heading level="h1" as="h2">
-      Visually h1, semantically h2
+      Visualmente h1, semánticamente h2
     </Heading>
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const heading = canvas.getByText('Visually h1, semantically h2');
+    const heading = canvas.getByText('Visualmente h1, semánticamente h2');
     await expect(heading.tagName).toBe('H2');
     await expect(heading.className.split(' ')).toContain('text-4xl');
   },
@@ -71,29 +71,29 @@ export const HeadingAsOverride: Story = {
 export const TextSizes: Story = {
   render: () => (
     <div className="space-y-2">
-      <Text size="sm">Small text</Text>
-      <Text size="md">Medium text</Text>
-      <Text size="lg">Large text</Text>
-      <Text size="lead">Lead text</Text>
-      <Text size="muted">Muted text</Text>
+      <Text size="sm">Texto pequeño</Text>
+      <Text size="md">Texto mediano</Text>
+      <Text size="lg">Texto grande</Text>
+      <Text size="lead">Texto destacado</Text>
+      <Text size="muted">Texto atenuado</Text>
     </div>
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    await expect(canvas.getByText('Small text').className.split(' ')).toContain('text-sm');
-    await expect(canvas.getByText('Medium text').className.split(' ')).toContain('text-base');
-    await expect(canvas.getByText('Large text').className.split(' ')).toContain('text-lg');
-    await expect(canvas.getByText('Lead text').className.split(' ')).toContain('text-xl');
-    await expect(canvas.getByText('Muted text').className.split(' ')).toContain('text-sm');
+    await expect(canvas.getByText('Texto pequeño').className.split(' ')).toContain('text-sm');
+    await expect(canvas.getByText('Texto mediano').className.split(' ')).toContain('text-base');
+    await expect(canvas.getByText('Texto grande').className.split(' ')).toContain('text-lg');
+    await expect(canvas.getByText('Texto destacado').className.split(' ')).toContain('text-xl');
+    await expect(canvas.getByText('Texto atenuado').className.split(' ')).toContain('text-sm');
   },
 };
 
 // 4. Text also resolves the tag through `as` (<p> by default), same as Heading.
 export const TextAsOverride: Story = {
-  render: () => <Text as="span">Inline text</Text>,
+  render: () => <Text as="span">Texto en línea</Text>,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText('Inline text').tagName).toBe('SPAN');
+    await expect(canvas.getByText('Texto en línea').tagName).toBe('SPAN');
   },
 };

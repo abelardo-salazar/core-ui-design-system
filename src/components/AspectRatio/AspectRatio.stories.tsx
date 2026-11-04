@@ -59,13 +59,13 @@ export const WithImage: Story = {
   render: () => (
     <div style={{ width: 320 }}>
       <AspectRatio ratio={16 / 9}>
-        <Image src={TINY_PNG} alt="Cover photo" />
+        <Image src={TINY_PNG} alt="Foto de portada" />
       </AspectRatio>
     </div>
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const img = canvas.getByAltText('Cover photo');
+    const img = canvas.getByAltText('Foto de portada');
 
     const wrapper = canvasElement.querySelector<HTMLElement>('[data-radix-aspect-ratio-wrapper]');
     await expect(wrapper).toBeInTheDocument();
