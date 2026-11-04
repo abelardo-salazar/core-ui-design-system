@@ -30,6 +30,11 @@
   obligatorios por tipos. `size="sm"` responde en 44px sin cambiar su aspecto; si mide menos de 44px
   de ancho, deja al menos 12px de separación con sus vecinos. Requiere el peer
   `@radix-ui/react-toggle`, que ya era necesario.
+- **`Calendar`: props `size` y `renderDayContent`.** `size` acepta `sm` (36px, el default, sin
+  cambios), `md` (44px) y `lg` (56px); `md` y `lg` necesitan 332px y 416px de ancho. `renderDayContent`
+  dibuja contenido bajo el número y recibe la fecha y los `modifiers`. Ese contenido no entra en el
+  nombre accesible del día: su equivalente textual va en `labels.labelDayButton`, de DayPicker. Con
+  un `DayButton` propio, `renderDayContent` no se aplica.
 
 ## [0.9.2] - 2026-11-03
 

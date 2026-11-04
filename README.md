@@ -1236,7 +1236,7 @@ Uso (ejemplo simplificado, extraído de `DropdownMenu.stories.tsx`):
 | `SwitchField`     | Switch en una fila completa táctil     | `label`, `description?` y los props de `Switch`                                                                                                              |
 | `Checkbox`        | Casilla de selección                   | `checked?`, `defaultChecked?`, `onCheckedChange?`, `disabled?`, `className?`                                                                                 |
 | `CheckboxField`   | Casilla en una fila completa táctil    | `label`, `description?` y los props de `Checkbox`                                                                                                            |
-| `Calendar`        | Grilla de calendario                   | `mode`, `selected`, `onSelect`, `showOutsideDays?` (todos los props de `DayPicker`)                                                                          |
+| `Calendar`        | Grilla de calendario                   | `mode`, `selected`, `onSelect`, `showOutsideDays?`, `size?`, `renderDayContent?` (todos los props de `DayPicker`)                                            |
 | `Combobox`        | Selección con buscador (cmdk)          | `options`, `label` o `aria-label`, `multiple?`, `value?`, `defaultValue?`, `onValueChange?`, `mode?`, `size?`, `disabled?`                                   |
 | `QuantityStepper` | Campo numérico con botones − / +       | `value?`, `defaultValue?`, `onChange?`, `min?`, `max?`, `step?`, `decrementLabel?`, `incrementLabel?`                                                        |
 | `DatePicker`      | Selector de fecha (Popover + Calendar) | `date?`, `onDateChange?`, `placeholder?`, `disabled?`, `className?`, `dialogLabel?`, `locale?`                                                               |
@@ -1527,17 +1527,43 @@ Texto a la izquierda y control a la derecha, en una fila de al menos 48px que re
 ### Calendar — Uso y Props
 
 - **Exports:** `Calendar`.
-- **Props principales:** `CalendarProps = DayPickerProps` (tipo re-exportado de `@daypicker/react`) — soporta todos los props reales de `DayPicker`: `mode: 'single' | 'multiple' | 'range'`, `selected`, `onSelect`, `showOutsideDays?: boolean` (default `true`), etc.
+- **Props principales:** `CalendarProps` soporta todos los props reales de `DayPicker` (`@daypicker/react`): `mode: 'single' | 'multiple' | 'range'`, `selected`, `onSelect`, `showOutsideDays?: boolean` (default `true`), `labels`, etc. Además:
+  - `size?: 'sm' | 'md' | 'lg'` (default `'sm'`) _(desde 0.10)_ — días de 36 / 44 / 56px; los encabezados de la semana lo siguen. Con el padding, la grilla ocupa 276 / 332 / 416px de ancho: `md` y `lg` son para contenedores anchos, porque no caben en 320px y el calendario no se adapta solo.
+  - `renderDayContent?: (date: Date, modifiers: Modifiers) => React.ReactNode` _(desde 0.10)_ — contenido bajo el número, dentro del botón del día. Pensado para `lg`, y para contenido breve y no interactivo: lo que no quepa se recorta.
 
 **Comportamiento no obvio:** `Calendar` es un wrapper de estilos sobre `@daypicker/react`, no una calendarización propia del DS. Por defecto usa versiones propias de `Chevron`, `PreviousMonthButton`, `NextMonthButton` y `DayButton`, con `buttonVariants` del DS (mismos estilos que `Button`). La prop `components` se mezcla con ellas clave por clave, igual que `classNames`: lo que pases gana y el resto sigue siendo del DS. Por ejemplo, con un `DayButton` propio, las flechas conservan su estilo y su área táctil. El estilo visual de cada día sale de los `modifiers` que provee DayPicker, no de una prop propia: `today` (borde + texto `primary` si no está seleccionado), `outside` (opacidad reducida), `disabled` (`pointer-events-none`), `range_middle` (fondo `primary/10`), `selected`/`range_start`/`range_end` (fondo `primary` sólido).
 
-**Área táctil:** las flechas de navegación miden 28x28px, pero responden en 44x44px gracias a un `::after`, sin cambiar su aspecto ni su foco. Los días son una excepción: quedan en 36px sin extensión, porque son una grilla contigua en la que un área mayor pisaría el día vecino, y 44px no cabe en 320px de ancho. `DatePicker` hereda ambas cosas. La extensión de las flechas cabe en el `p-3` de la raíz: si reduces ese padding con `className`, evita un `overflow` en un ancestro que la recorte.
+**Área táctil:** las flechas de navegación miden 28x28px, pero responden en 44x44px gracias a un `::after`, sin cambiar su aspecto ni su foco. Los días no se extienden, porque son una grilla contigua en la que un área mayor pisaría el día vecino. Con el default quedan en 36px, porque 44px no cabe en 320px de ancho; `size="md"` y `size="lg"` sí llegan a 44px en contenedores anchos. `DatePicker` usa el default y hereda todo esto. La extensión de las flechas cabe en el `p-3` de la raíz: si reduces ese padding con `className`, evita un `overflow` en un ancestro que la recorte.
 
 Uso (ejemplo, extraído de `Calendar.stories.tsx`):
 
 ```tsx
 <Calendar mode="single" selected={date} onSelect={setDate} />
 ```
+
+**Equivalente textual del contenido:** el nombre del botón del día sale de `labels.labelDayButton`, de DayPicker, así que lo que dibuja `renderDayContent` no llega a las tecnologías de asistencia por sí solo. Si el contenido informa algo, repítelo ahí. Tu función reemplaza a la de DayPicker, que agrega "hoy" y "seleccionado": usa `modifiers` para conservarlos.
+
+```tsx
+<Calendar
+  mode="single"
+  size="lg"
+  selected={date}
+  onSelect={setDate}
+  renderDayContent={(day) => (reservas(day) ? `${reservas(day)} res.` : null)}
+  labels={{
+    labelDayButton: (day, modifiers) =>
+      [
+        day.toLocaleDateString('es', { dateStyle: 'full' }),
+        reservas(day) && `${reservas(day)} reservas`,
+        modifiers.selected && 'seleccionado',
+      ]
+        .filter(Boolean)
+        .join(', '),
+  }}
+/>
+```
+
+Con un `DayButton` propio en `components`, tu botón reemplaza al del DS: `renderDayContent` no se aplica y `size` solo afecta a los encabezados de la semana.
 
 ### DatePicker — Uso y Props
 

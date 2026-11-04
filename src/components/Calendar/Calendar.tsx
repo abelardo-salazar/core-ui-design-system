@@ -1,10 +1,12 @@
 'use client';
 
+import * as React from 'react';
 import {
   DayPicker,
   type ChevronProps,
   type DayButtonProps,
   type DayPickerProps,
+  type Modifiers,
   type NextMonthButtonProps,
   type PreviousMonthButtonProps,
 } from '@daypicker/react';
@@ -17,7 +19,41 @@ import {
 import { cn } from '../../utils/cn';
 import { buttonVariants } from '../Button/buttonVariants';
 
-export type CalendarProps = DayPickerProps;
+type CalendarSize = 'sm' | 'md' | 'lg';
+
+export type CalendarProps = DayPickerProps & {
+  /** Size of the day cells: 36, 44 or 56px. @default 'sm' */
+  size?: CalendarSize;
+  /**
+   * Rendered under the number, inside the day's button. The button's name comes from
+   * `labels.labelDayButton`, not from this content: put its text equivalent there.
+   */
+  renderDayContent?: (date: Date, modifiers: Modifiers) => React.ReactNode;
+};
+
+const DAY_SIZE: Record<CalendarSize, string> = {
+  sm: 'h-9 w-9',
+  md: 'h-11 w-11',
+  lg: 'h-14 w-14',
+};
+
+const WEEKDAY_WIDTH: Record<CalendarSize, string> = {
+  sm: 'w-9',
+  md: 'w-11',
+  lg: 'w-14',
+};
+
+const DAY_CONTENT_PADDING: Record<CalendarSize, string> = {
+  sm: 'pt-0.5',
+  md: 'pt-1',
+  lg: 'pt-2',
+};
+
+// A context and not a closure in `components`: a new DayButton on each render would remount every
+// day, and the focused one would lose its focus.
+const CalendarDayContext = React.createContext<Pick<CalendarProps, 'size' | 'renderDayContent'>>({
+  size: 'sm',
+});
 
 function CalendarChevron({ orientation, className }: ChevronProps) {
   const classes = cn('h-4 w-4', className);
@@ -72,15 +108,24 @@ function CalendarNextButton({ className, children, ...props }: NextMonthButtonPr
   );
 }
 
-// Days stay at 36px with no ::after, on purpose: the grid is contiguous, so an extension would
-// land on the neighboring day. See ARCHITECTURE.md, "Objetivo táctil de 44px".
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- `day` must be destructured out so it isn't spread onto the DOM button
-function CalendarDayButton({ day, modifiers, className, ...props }: DayButtonProps) {
+// Days have no ::after, on purpose: the grid is contiguous, so an extension would land on the
+// neighboring day. Only md and lg reach 44px. See ARCHITECTURE.md, "Objetivo táctil de 44px".
+function CalendarDayButton({ day, modifiers, className, children, ...props }: DayButtonProps) {
+  const { size = 'sm', renderDayContent } = React.useContext(CalendarDayContext);
+  const content = renderDayContent?.(day.date, modifiers);
+
   return (
     <button
       className={cn(
         buttonVariants({ variant: 'ghost', size: 'icon' }),
-        'h-9 w-9 rounded-btn p-0 font-normal aria-selected:opacity-100',
+        DAY_SIZE[size],
+        'rounded-btn p-0 font-normal aria-selected:opacity-100',
+        // Top-aligned whenever the prop is passed, so the numbers of a row stay in line whether or
+        // not each day has content.
+        renderDayContent && [
+          'flex-col justify-start gap-0 overflow-hidden',
+          DAY_CONTENT_PADDING[size],
+        ],
         modifiers.today && !modifiers.selected && 'border border-primary text-primary',
         modifiers.outside && 'text-base-content/70',
         modifiers.disabled && 'pointer-events-none opacity-50',
@@ -90,7 +135,12 @@ function CalendarDayButton({ day, modifiers, className, ...props }: DayButtonPro
         className,
       )}
       {...props}
-    />
+    >
+      {children}
+      {content !== undefined && content !== null && content !== false && (
+        <span className="max-w-full text-[0.625rem] leading-3">{content}</span>
+      )}
+    </button>
   );
 }
 
@@ -99,32 +149,38 @@ function Calendar({
   classNames,
   components,
   showOutsideDays = true,
+  size = 'sm',
+  renderDayContent,
   ...props
 }: CalendarProps) {
+  const dayContext = React.useMemo(() => ({ size, renderDayContent }), [size, renderDayContent]);
+
   return (
-    <DayPicker
-      showOutsideDays={showOutsideDays}
-      navLayout="around"
-      className={cn('p-3', className)}
-      classNames={{
-        months: 'flex flex-col sm:flex-row gap-4',
-        month: 'grid grid-cols-[auto_1fr_auto] items-center gap-y-4',
-        month_caption:
-          'col-start-2 flex items-center justify-center text-sm font-medium text-base-content',
-        month_grid: 'col-span-3 w-full border-collapse',
-        weekday: 'w-9 pb-2 text-[0.8rem] font-normal text-base-content/70',
-        day: 'relative p-0 text-center text-sm focus-within:relative focus-within:z-20',
-        ...classNames,
-      }}
-      components={{
-        Chevron: CalendarChevron,
-        PreviousMonthButton: CalendarPreviousButton,
-        NextMonthButton: CalendarNextButton,
-        DayButton: CalendarDayButton,
-        ...components,
-      }}
-      {...props}
-    />
+    <CalendarDayContext.Provider value={dayContext}>
+      <DayPicker
+        showOutsideDays={showOutsideDays}
+        navLayout="around"
+        className={cn('p-3', className)}
+        classNames={{
+          months: 'flex flex-col sm:flex-row gap-4',
+          month: 'grid grid-cols-[auto_1fr_auto] items-center gap-y-4',
+          month_caption:
+            'col-start-2 flex items-center justify-center text-sm font-medium text-base-content',
+          month_grid: 'col-span-3 w-full border-collapse',
+          weekday: cn(WEEKDAY_WIDTH[size], 'pb-2 text-[0.8rem] font-normal text-base-content/70'),
+          day: 'relative p-0 text-center text-sm focus-within:relative focus-within:z-20',
+          ...classNames,
+        }}
+        components={{
+          Chevron: CalendarChevron,
+          PreviousMonthButton: CalendarPreviousButton,
+          NextMonthButton: CalendarNextButton,
+          DayButton: CalendarDayButton,
+          ...components,
+        }}
+        {...props}
+      />
+    </CalendarDayContext.Provider>
   );
 }
 Calendar.displayName = 'Calendar';
