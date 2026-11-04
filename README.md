@@ -7,6 +7,8 @@
 
 **Última versión publicada:** `0.10.0`.
 
+**Storybook:** [abelardo-salazar.github.io/core-ui-design-system](https://abelardo-salazar.github.io/core-ui-design-system/). Documenta la última versión publicada, no lo que aún está sin publicar en `main`.
+
 **Core UI** es la biblioteca de componentes oficial para nuestros productos digitales. Construida sobre **React 19**, **Radix UI** y **Tailwind CSS v4**, ofrece componentes accesibles (A11y), ligeros y listos para producción.
 
 ---
@@ -2446,6 +2448,9 @@ El paquete se publica empujando un tag; nadie corre `npm publish` a mano. Por qu
    ```
 
 4. **`.github/workflows/release.yml`** publica. Antes de instalar nada, falla si el tag no es `v` + `package.json#version`, si su commit no está en `main` o si esa versión ya está en npm (un E404 de `npm view` cuenta como "no publicada": el paquete todavía no existe en npm). Después corre los mismos pasos que `verify`, salvo el dependency review y el build de Storybook, y publica en el registro público de npm con trusted publishing (OIDC) y provenance, sin ningún token guardado en el repositorio. El paquete tiene configurado en npmjs.com como trusted publisher este repositorio y el workflow `release.yml`, sin environment; si se renombra el repo o el workflow, hay que actualizarlo allí. El workflow pide los permisos `contents: read` e `id-token: write`.
+5. **`.github/workflows/storybook.yml`** despliega Storybook en GitHub Pages. El mismo push del tag lo dispara y construye ese tag.
+
+Storybook también se puede desplegar a mano desde `main`, con **Run workflow** en la pestaña Actions, por ejemplo para corregir stories sin publicar una versión. El workflow falla antes de instalar nada si se lanza desde otro ref o si el primer encabezado de versión del CHANGELOG es `[Unreleased]`, porque entonces `main` tiene API sin publicar. No lanzarlo entre el merge de un PR de release y su tag. Por qué: [ARCHITECTURE § Documentación publicada](./ARCHITECTURE.md#documentación-publicada).
 
 ## ⚖️ Licencia
 

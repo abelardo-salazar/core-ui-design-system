@@ -111,7 +111,7 @@ Se publica empujando un tag. El flujo:
 2. **Merge** del PR a `main`. Entre este merge y el tag no entra nada a `main`.
 3. **Tag anotado** `vX.Y.Z` sobre el commit del merge: `git tag -a vX.Y.Z -m "vX.Y.Z" <commit>`.
 4. **Push del tag:** `git push origin vX.Y.Z`.
-5. **El workflow `release.yml` publica.** Falla sin publicar si el tag no es `v` + `package.json#version`, si su commit no está en `main`, si ese commit no cambia `package.json#version` respecto de su primer padre o si esa versión ya está en el registro. Si no falla, corre la misma verificación que `ci.yml`, salvo el dependency review y el build de Storybook (una falla de la documentación no debe bloquear la publicación), y publica en el registro público de npm con trusted publishing (OIDC) y provenance: no hay token de npm en el repo, y npmjs solo acepta la publicación desde `release.yml` de este repositorio. El chequeo de versión corre sin autenticación porque el paquete es público. Para ese chequeo de versión, un E404 de `npm view` cuenta como "no publicada" (el paquete todavía no existe en npm); cualquier otro error falla el job. Por qué npm: [Registro: npm público](#registro-npm-público).
+5. **El workflow `release.yml` publica.** Falla sin publicar si el tag no es `v` + `package.json#version`, si su commit no está en `main`, si ese commit no cambia `package.json#version` respecto de su primer padre o si esa versión ya está en el registro. Si no falla, corre la misma verificación que `ci.yml`, salvo el dependency review y el build de Storybook (una falla de la documentación no debe bloquear la publicación), y publica en el registro público de npm con trusted publishing (OIDC) y provenance: no hay token de npm en el repo, y npmjs solo acepta la publicación desde `release.yml` de este repositorio. El chequeo de versión corre sin autenticación porque el paquete es público. Para ese chequeo de versión, un E404 de `npm view` cuenta como "no publicada" (el paquete todavía no existe en npm); cualquier otro error falla el job. Por qué npm: [Registro: npm público](#registro-npm-público). El mismo tag dispara también el deploy de Storybook: [Documentación publicada](#documentación-publicada).
 
 Razón: el tag define lo que se publica. Antes se publicaba a mano con `npm publish` desde una máquina local y el tag se ponía después, reconstruyendo qué commit se había publicado. Ahora el paquete sale del commit con tag, verificado en CI, y no hay nada que reconstruir.
 
@@ -274,3 +274,20 @@ La detección responde tres preguntas por separado, cada una con su mecanismo:
 - **Quién propone el arreglo:** Dependabot (`.github/dependabot.yml`), solo con actualizaciones de seguridad. Las familias que se versionan juntas van en un mismo grupo, para que el arreglo no rompa sus peers exactos.
 
 Razón: el audit dentro del check obligatorio no es determinista. El mismo commit pasa un día y falla al siguiente por avisos nuevos, sin relación con lo que cambia el PR. Precedente: el 2026-11-01, un aviso de Storybook bloqueó el PR #69, que solo cambiaba Markdown.
+
+### Documentación publicada
+
+Storybook se publica en GitHub Pages con `.github/workflows/storybook.yml` (`actions/upload-pages-artifact` y `actions/deploy-pages`), bajo el subpath `/core-ui-design-system/`. Requiere dos ajustes del repositorio: source "GitHub Actions" en Pages, y `main` y la regla de tag `v*` en la environment `github-pages`.
+
+**Por qué Pages:** vive en el mismo repositorio y se despliega con OIDC, sin la cuenta ni el token de un servicio externo. Chromatic queda fuera de este flujo.
+
+**Invariante: el sitio documenta solo la API publicada.** Quien lo lee debe poder usar lo que ve con `npm install`. Lo sostienen dos garantías, una por cada disparador:
+
+- **El tag:** un push de `v*.*.*` construye ese tag, no el estado actual de `main`.
+- **La guardia sobre `[Unreleased]`:** el disparo manual construye `main` y falla antes de instalar nada si el primer encabezado de versión del CHANGELOG es `[Unreleased]`, porque todo cambio para el consumidor deja ahí su entrada. También falla si se lanza desde otro ref, porque la guardia solo tiene sentido sobre `main`. Sirve para corregir stories sin publicar una versión.
+
+**Límites:** el workflow no espera a `release.yml`. Si un tag falla al publicar, el sitio documenta una versión que no está en npm hasta el siguiente tag. La guardia tampoco cubre el tramo entre el merge de un PR de release y su tag, porque el CHANGELOG ya abre con esa versión: en ese tramo no se lanza a mano.
+
+**Por qué un workflow separado de `release.yml`:** una falla de la documentación no debe bloquear la publicación del paquete ni dejarla a medias. Además, los permisos de Pages no deben convivir con el trusted publishing de npm, y el sitio se puede volver a desplegar sin publicar nada. Dentro del workflow, solo el job `deploy` tiene `pages: write` e `id-token: write`: el job `build` ejecuta código de terceros (`npm ci`, el build de Storybook) solo con `contents: read`.
+
+**Por qué el build de Storybook se verifica en `ci.yml` y no en `release.yml`:** en `ci.yml`, un PR que rompe la documentación falla antes de llegar a `main`, así que no se descubre recién al desplegar. En `release.yml` no corre por la misma razón por la que el workflow está separado: la documentación no bloquea la publicación.

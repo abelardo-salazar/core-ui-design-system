@@ -1,0 +1,82 @@
+name: Storybook
+
+# Publishes Storybook to GitHub Pages. The site documents only the published API: a vX.Y.Z tag
+# builds that tag, and a manual run builds main only if main has no unreleased API.
+# Why: ARCHITECTURE.md § Documentación publicada.
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never cancel a deploy half-way; a newer run waits for the one in progress.
+concurrency:
+  group: storybook-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      # Same reading of the first version heading as scripts/verify-readme.mjs. No heading fails
+      # too: if the condition can't be checked, nothing is published.
+      - name: Check main has no unreleased API
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "::error::A manual run only builds main, not $GITHUB_REF."
+            exit 1
+          fi
+          heading="$(grep -m1 -E '^## \[[^]]+\]' CHANGELOG.md || true)"
+          if [ -z "$heading" ]; then
+            echo "::error::CHANGELOG.md has no version heading."
+            exit 1
+          fi
+          case "$heading" in
+            '## [Unreleased]'*)
+              echo "::error::CHANGELOG.md opens with [Unreleased]: main has unpublished API. Publish a version, whose tag deploys the site."
+              exit 1
+              ;;
+          esac
+          echo "CHANGELOG.md opens with: $heading"
+
+      # Node 22 LTS, same as ci.yml.
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Storybook
+        run: npm run build-storybook
+
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: storybook-static
+
+  # Only this job can deploy or request an OIDC token: build runs third-party code (npm ci, the
+  # Storybook build) with contents: read alone.
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
