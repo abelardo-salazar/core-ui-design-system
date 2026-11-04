@@ -36,6 +36,13 @@
   nombre accesible del día: su equivalente textual va en `labels.labelDayButton`, de DayPicker. Con
   un `DayButton` propio, `renderDayContent` no se aplica.
 
+### Fixed
+
+- **`Calendar` y `DatePicker`: las flechas del teclado mueven el foco entre los días.** Antes, el
+  foco se quedaba en el día inicial y las flechas, `PageUp`/`PageDown` y `Home`/`End` no tenían
+  efecto visible. Si pasas un `DayButton` propio en `components`, tu botón debe enfocarse cuando
+  `modifiers.focused` sea verdadero.
+
 ## [0.9.2] - 2026-11-03
 
 ### Fixed

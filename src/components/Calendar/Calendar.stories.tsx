@@ -1,7 +1,7 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import type { DayButtonProps } from '@daypicker/react';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { Button } from '../Button';
 import { Popover, PopoverContent, PopoverTrigger } from '../Popover';
 import { Calendar } from './Calendar';
@@ -297,5 +297,31 @@ export const InPopover: Story = {
       await expect(dialog.scrollWidth).toBeLessThanOrEqual(dialog.clientWidth);
       await userEvent.keyboard('{Escape}');
     }
+  },
+};
+
+// 9. Keyboard: the arrow keys move the real focus and the tab stop, and PageDown the focus to a
+// day of another month, whose button is new. Enter selects the focused day. The tab stop isn't
+// checked after changing months: right after it, DayPicker itself leaves it on the 1st.
+export const KeyboardNavigation: Story = {
+  args: { mode: 'single', defaultMonth: month, defaultSelected: new Date(2026, 10, 12) },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const day = (name: RegExp) => canvas.getByRole('button', { name });
+    const pressAndExpectFocus = async (key: string, name: RegExp) => {
+      await userEvent.keyboard(key);
+      await waitFor(() => expect(day(name)).toHaveFocus());
+    };
+
+    day(/November 12th, 2026/).focus();
+    await pressAndExpectFocus('{ArrowRight}', /November 13th, 2026/);
+    await expect(day(/November 13th, 2026/)).toHaveAttribute('tabindex', '0');
+    await expect(day(/November 12th, 2026/)).toHaveAttribute('tabindex', '-1');
+    await pressAndExpectFocus('{ArrowDown}', /November 20th, 2026/);
+    await pressAndExpectFocus('{ArrowLeft}', /November 19th, 2026/);
+    await pressAndExpectFocus('{ArrowUp}', /November 12th, 2026/);
+
+    await pressAndExpectFocus('{PageDown}', /December 12th, 2026/);
+    await pressAndExpectFocus('{Enter}', /December 12th, 2026, selected/);
   },
 };

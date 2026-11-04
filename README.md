@@ -1563,7 +1563,7 @@ Uso (ejemplo, extraído de `Calendar.stories.tsx`):
 />
 ```
 
-Con un `DayButton` propio en `components`, tu botón reemplaza al del DS: `renderDayContent` no se aplica y `size` solo afecta a los encabezados de la semana.
+Con un `DayButton` propio en `components`, tu botón reemplaza al del DS: `renderDayContent` no se aplica y `size` solo afecta a los encabezados de la semana. Para que las flechas del teclado funcionen, tu botón debe enfocarse cuando `modifiers.focused` sea verdadero.
 
 ### DatePicker — Uso y Props
 

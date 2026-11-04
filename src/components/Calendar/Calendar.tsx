@@ -114,8 +114,16 @@ function CalendarDayButton({ day, modifiers, className, children, ...props }: Da
   const { size = 'sm', renderDayContent } = React.useContext(CalendarDayContext);
   const content = renderDayContent?.(day.date, modifiers);
 
+  // Replacing DayPicker's DayButton also replaces this effect, which is what moves the real focus
+  // when the arrow keys change the focused day.
+  const ref = React.useRef<HTMLButtonElement>(null);
+  React.useEffect(() => {
+    if (modifiers.focused) ref.current?.focus();
+  }, [modifiers.focused]);
+
   return (
     <button
+      ref={ref}
       className={cn(
         buttonVariants({ variant: 'ghost', size: 'icon' }),
         DAY_SIZE[size],
