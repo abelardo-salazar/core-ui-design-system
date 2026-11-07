@@ -147,6 +147,7 @@ Importar desde el barrel principal es seguro en un Server Component; el subpath 
 | `Combobox`                                                                                                                                                                                                                         | No               |
 | `DataTable`                                                                                                                                                                                                                        | No               |
 | `DatePicker`                                                                                                                                                                                                                       | No               |
+| `DateRangePicker`                                                                                                                                                                                                                  | No               |
 | `Dialog`, `DialogPortal`, `DialogOverlay`, `DialogTrigger`, `DialogClose`, `DialogContent`, `DialogHeader`, `DialogFooter`, `DialogTitle`, `DialogDescription`                                                                     | No               |
 | `DropdownMenu`, `DropdownMenuTrigger`, `DropdownMenuGroup`, `DropdownMenuContent`, `DropdownMenuItem`, `DropdownMenuCheckboxItem`, `DropdownMenuRadioGroup`, `DropdownMenuRadioItem`, `DropdownMenuLabel`, `DropdownMenuSeparator` | No               |
 | `EmptyState`, `EmptyStateIcon`, `EmptyStateTitle`, `EmptyStateDescription`, `EmptyStateActions`                                                                                                                                    | Sí               |
@@ -329,6 +330,7 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
     - [SwitchField — Uso y Props](#switchfield--uso-y-props)
     - [Calendar — Uso y Props](#calendar--uso-y-props)
     - [DatePicker — Uso y Props](#datepicker--uso-y-props)
+    - [DateRangePicker — Uso y Props](#daterangepicker--uso-y-props)
     - [Locales — subpath `/locale`](#locales--subpath-locale)
     - [Combobox — Uso y Props](#combobox--uso-y-props)
     - [QuantityStepper — Uso y Props](#quantitystepper--uso-y-props)
@@ -1316,6 +1318,7 @@ Uso (ejemplo simplificado, extraído de `DropdownMenu.stories.tsx`):
 | `Combobox`        | Selección con buscador (cmdk)          | `options`, `label` o `aria-label`, `multiple?`, `value?`, `defaultValue?`, `onValueChange?`, `mode?`, `size?`, `disabled?`, `filter?`, `onCreate?`           |
 | `QuantityStepper` | Campo numérico con botones − / +       | `value?`, `defaultValue?`, `onChange?`, `min?`, `max?`, `step?`, `decrementLabel?`, `incrementLabel?`                                                        |
 | `DatePicker`      | Selector de fecha (Popover + Calendar) | `date?`, `onDateChange?`, `placeholder?`, `disabled?`, `className?`, `dialogLabel?`, `locale?`, `label?`, `error?`, `helperText?`                            |
+| `DateRangePicker` | Selector de rango de fechas            | `range?`, `onRangeChange?`, `minDate?`, `maxDate?`, `placeholder?`, `locale?`, `label?`, `error?`, `helperText?`                                             |
 
 ### Checkbox — Uso y Props
 
@@ -1846,6 +1849,40 @@ function ControlledDatePicker() {
   error={error}
   date={date}
   onDateChange={setDate}
+/>;
+```
+
+### DateRangePicker — Uso y Props
+
+**Desde 0.12.**
+
+- **Exports:** `DateRangePicker`; tipos `DateRangePickerProps` y `DateRange` (`{ from: Date | undefined; to?: Date | undefined }`, el de DayPicker, re-exportado para no importar `@daypicker/react`).
+- **Props principales:**
+  - `range?: DateRange` — rango elegido.
+  - `onRangeChange?: (range: DateRange) => void` — recibe solo rangos completos, con `from` y `to`.
+  - `minDate?: Date` y `maxDate?: Date` — los días antes de `minDate` y después de `maxDate` quedan deshabilitados.
+  - `placeholder?: string` (default `'Pick dates'`) y `dialogLabel?: string` (default `'Choose dates'`) — texto del disparador sin rango y nombre accesible del popover.
+  - `locale?: Locale` (de `date-fns`) — como en [DatePicker](#datepicker--uso-y-props): se aplica a las dos fechas del disparador y al calendario.
+  - `label?`, `error?` y `helperText?` — el mismo campo que `DatePicker`.
+  - `disabled?: boolean` y `className?: string` (se aplica al disparador).
+
+Componente aparte de `DatePicker`, así los tipos de los dos siguen simples. Es controlado, sin estado propio del rango: compone `Popover`, `Button` y `Calendar` en `mode="range"`. El disparador muestra las dos fechas con el formato corto del locale (`Jan 12, 2026 – Jan 15, 2026`).
+
+**Comportamiento no obvio:**
+
+- **Cada apertura empieza un rango nuevo.** El primer día elegido es el inicio y el segundo, el fin; el popover se cierra al completar el rango. Si el segundo día es anterior al primero, pasa a ser el inicio (`to` nunca es anterior a `from`). Elegir el mismo día dos veces da un rango de un día.
+- **Cerrar a mitad de camino conserva el rango anterior.** Si se cierra el popover después de elegir solo el inicio, `onRangeChange` no se llama.
+
+```tsx
+const [rango, setRango] = useState<DateRange>();
+
+<DateRangePicker
+  label="Fechas del viaje"
+  range={rango}
+  onRangeChange={setRango}
+  minDate={new Date()}
+  locale={es}
+  placeholder="Elegir fechas"
 />;
 ```
 
