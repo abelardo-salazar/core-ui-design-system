@@ -677,17 +677,17 @@ Uso (ejemplos, extraídos de `Image.stories.tsx`):
 
 ### 🧬 Moléculas (Estructura)
 
-| Componente          | Descripción                           | API & Composición                                                                                                                          |
-| ------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`Card`**          | Contenedor de información.            | **Subcomponentes:** `<CardHeader>`, `<CardTitle>`, `<CardDescription>`, `<CardContent>`, `<CardFooter>`                                    |
-| **`Dialog`**        | Modal accesible.                      | `open`: boolean; `onOpenChange`: (open: boolean) => void; **Subcomponentes:** `<DialogTrigger>`, `<DialogContent>`                         |
-| **`Sheet`**         | Panel lateral (Drawer).               | `side`: "top" \| "right" \| "bottom" \| "left"; `closeLabel`; **Subcomponentes:** `<SheetHeader>`, `<SheetBody>` (scroll), `<SheetFooter>` |
-| **`Container`**     | Wrapper de layout.                    | `size`: 'sm' \| 'md' \| 'lg' \| 'xl' \| 'full' — controla `max-width` (ver sección `Layout` para el detalle).                              |
-| **`AspectRatio`**   | Fuerza una relación de aspecto.       | `ratio`: number (ej. `16 / 9`). Se compone con otro contenido (`Image`, etc.), no es una API todo-en-uno.                                  |
-| **`Tabs`**          | Navegación por pestañas.              | `defaultValue`/`value`/`onValueChange` en el root; **Subcomponentes:** `<TabsList>`, `<TabsTrigger>`, `<TabsContent>`                      |
-| **`NavigationBar`** | Navegación principal entre secciones. | `aria-label` (obligatorio); **Subcomponentes:** `<NavigationBarItem>` (`icon`, `active`, `asChild`, `badge`, `badgeLabel`)                 |
-| **`Toggle`**        | Botón que queda encendido o apagado.  | `pressed`/`defaultPressed`/`onPressedChange`; `size`: 'sm'                                                                                 | 'md' | 'lg'; `icon`; `aria-label` (obligatorio sin `children`) |
-| **`ToggleGroup`**   | Opciones que cambian un valor.        | `type`: 'single' \| 'multiple'; `size`: 'sm' \| 'md' \| 'lg'; **Subcomponentes:** `<ToggleGroupItem>`                                      |
+| Componente          | Descripción                           | API & Composición                                                                                                                                      |
+| ------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`Card`**          | Contenedor de información.            | **Subcomponentes:** `<CardHeader>`, `<CardTitle>`, `<CardDescription>`, `<CardContent>`, `<CardFooter>`                                                |
+| **`Dialog`**        | Modal accesible.                      | `open`: boolean; `onOpenChange`: (open: boolean) => void; **Subcomponentes:** `<DialogTrigger>`, `<DialogContent>`                                     |
+| **`Sheet`**         | Panel lateral (Drawer).               | `side`: "top" \| "right" \| "bottom" \| "left"; `closeLabel`; **Subcomponentes:** `<SheetHeader>`, `<SheetBody>` (scroll), `<SheetFooter>`             |
+| **`Container`**     | Wrapper de layout.                    | `size`: 'sm' \| 'md' \| 'lg' \| 'xl' \| 'full' — controla `max-width` (ver sección `Layout` para el detalle).                                          |
+| **`AspectRatio`**   | Fuerza una relación de aspecto.       | `ratio`: number (ej. `16 / 9`). Se compone con otro contenido (`Image`, etc.), no es una API todo-en-uno.                                              |
+| **`Tabs`**          | Navegación por pestañas.              | `defaultValue`/`value`/`onValueChange` en el root; **Subcomponentes:** `<TabsList>`, `<TabsTrigger>`, `<TabsContent>`                                  |
+| **`NavigationBar`** | Navegación principal entre secciones. | `aria-label` (obligatorio), `variant?`, `bottomBelow?`; **Subcomponentes:** `<NavigationBarItem>` (`icon`, `active`, `asChild`, `badge`, `badgeLabel`) |
+| **`Toggle`**        | Botón que queda encendido o apagado.  | `pressed`/`defaultPressed`/`onPressedChange`; `size`: 'sm'                                                                                             | 'md' | 'lg'; `icon`; `aria-label` (obligatorio sin `children`) |
+| **`ToggleGroup`**   | Opciones que cambian un valor.        | `type`: 'single' \| 'multiple'; `size`: 'sm' \| 'md' \| 'lg'; **Subcomponentes:** `<ToggleGroupItem>`                                                  |
 
 ### Layout — Uso y Props
 
@@ -984,9 +984,18 @@ Uso (ejemplo, extraído de `Tabs.stories.tsx`):
 
 **Desde 0.10.**
 
-- **Exports:** `NavigationBar`, `NavigationBarItem`; tipos `NavigationBarProps`, `NavigationBarItemProps`.
+- **Exports:** `NavigationBar`, `NavigationBarItem`; tipos `NavigationBarProps`, `NavigationBarVariantProps` _(desde 0.11)_, `NavigationBarItemProps`.
 - **Props principales:**
-  - `NavigationBar`: `aria-label: string` (obligatorio por tipos), `className?: string` y `React.HTMLAttributes<HTMLElement>`. Renderiza un `<nav>` con una lista de ítems. No tiene orientación vertical.
+  - `NavigationBar`: `aria-label: string` (obligatorio por tipos), `className?: string` y `React.HTMLAttributes<HTMLElement>`. Renderiza un `<nav>` con una lista de ítems.
+    - `variant?: 'bottom' | 'horizontal' | 'vertical'` (default `'bottom'`) _(desde 0.11)_:
+
+      | Valor          | Forma                                                                  | Ítem activo                                     |
+      | -------------- | ---------------------------------------------------------------------- | ----------------------------------------------- |
+      | `'bottom'`     | Barra inferior: ícono sobre texto, ítems de 56px que reparten el ancho | Píldora detrás del ícono                        |
+      | `'horizontal'` | Fila: ícono y texto lado a lado, 44px de alto, en una sola línea       | Borde inferior de 2px y texto en negrita media  |
+      | `'vertical'`   | Columna a ancho completo, ítems de al menos 44px, texto al inicio      | Borde de 2px al inicio y texto en negrita media |
+
+    - `bottomBelow?: 'sm' | 'md' | 'lg'` _(desde 0.11)_ — solo con `'horizontal'` o `'vertical'` (con `'bottom'` no compila): por debajo de ese breakpoint (640 / 768 / 1024px) la barra toma la forma `'bottom'`, con el padding del safe area incluido.
   - `NavigationBarItem`:
     - `icon: React.ReactNode` (obligatorio) — decorativo: el texto visible nombra al ítem.
     - `active?: boolean` — sección actual: pone `aria-current="page"` y la píldora detrás del ícono, para que el indicador no dependa solo del color.
@@ -998,9 +1007,11 @@ Uso (ejemplo, extraído de `Tabs.stories.tsx`):
 **Comportamiento no obvio:**
 
 - **Cuándo usarla:** para la navegación principal entre secciones, con un enlace por sección. `Tabs` sirve para cambiar paneles dentro de una vista y no maneja `aria-current`.
-- **Posición:** el componente no se posiciona solo: el `fixed` va por `className`, y el contenido debe reservar el espacio. Sí aplica `padding-bottom` con `env(safe-area-inset-bottom)`. Para que esa variable tenga valor en iOS, el viewport de tu app necesita `viewport-fit=cover`.
+- **Posición:** el componente no se posiciona solo, en ninguna variante: el `fixed` o `sticky` va por `className`, y el contenido debe reservar el espacio. Con `bottomBelow`, el cambio de posición entre breakpoints también es tuyo (por ejemplo, `max-md:fixed max-md:inset-x-0 max-md:bottom-0`). En la forma `'bottom'` aplica `padding-bottom` con `env(safe-area-inset-bottom)`; en `'horizontal'` y `'vertical'`, no. Para que esa variable tenga valor en iOS, el viewport de tu app necesita `viewport-fit=cover`.
 - **Tamaño:** cada ítem mide al menos 56px de alto, y la barra, 64px más el safe area. Si una etiqueta ocupa dos líneas, la barra crece. Para que un toast no la tape, ver el ejemplo de `offset` en [Toast](#toast--uso-y-props).
 - **Cantidad de ítems:** está pensada para 3 a 5, pero el componente no lo valida. Con 5 ítems a 320px de ancho, cada uno mide 64px: usa etiquetas cortas, porque una palabra más larga se parte.
+- **`'horizontal'` sin espacio:** si los ítems no caben, la fila se desplaza de lado (`overflow-x-auto`) sin barra de scroll visible y sin JS. Al llegar con Tab a un ítem oculto, el navegador lo desplaza hasta mostrarlo; si el ítem ya se ve en parte, Chrome le da el foco sin desplazar la fila (el foco nunca queda oculto del todo). Las etiquetas no se parten.
+- **Cómo cambia cada ítem:** `NavigationBarItem` no recibe la variante. La lee del `<nav>` con atributos `data-*` y un grupo de Tailwind, sin Context, así que el ítem sigue siendo server-safe. En `'bottom'`, el `<nav>` no lleva esos atributos y su DOM es el de antes. Usa `NavigationBarItem` solo como hijo directo de un `NavigationBar`.
 - **Server Components:** es server-safe, sin hooks ni handlers propios. Saber cuál es la sección activa sí suele requerir un hook del router, como en los ejemplos: ese componente tuyo necesita `'use client'`.
 - **React Router:** usa `Link`, no `NavLink`: el `className` en forma de función de `NavLink` no se puede mezclar con `asChild`, y la píldora depende de `active`.
 

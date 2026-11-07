@@ -230,6 +230,22 @@ Desde 0.9.0 el paquete se publica en el registro público de npm, bajo el scope 
 
 **Por qué:** crear es del dominio del consumidor, no del DS: puede validar, rechazar, normalizar el texto o persistir en un servidor, y puede ser asíncrono. Si `onCreate` devolviera el valor, el DS tendría que decidir qué hacer con una promesa pendiente o rechazada y con un valor que todavía no está en `options`. Con `void` y valor controlado, la fuente de verdad es una sola: las `options` y el `value` del consumidor.
 
+### Variantes de NavigationBar
+
+`NavigationBar` tiene tres formas: `bottom` (default), `horizontal` y `vertical`, y `bottomBelow` vuelve a `bottom` por debajo de un breakpoint. Cambia la decisión del triage del 2026-11-03, que la dejaba solo como barra inferior y sin orientación vertical.
+
+**Por qué:** la misma navegación principal suele ser una barra inferior en el móvil y una fila o un lateral en pantallas anchas. Sin variantes, el consumidor tenía que mantener dos componentes con los mismos ítems y alternarlos con JS o con clases `hidden`. `bottom` sigue siendo el default con el mismo DOM, así que el cambio es aditivo.
+
+**Sin Context:** `NavigationBarItem` necesita saber la forma, pero un Context lo volvería client component. El `<nav>` declara un grupo de Tailwind con nombre (`group/navigation-bar`) y atributos `data-variant`/`data-bottom-below`, y el ítem se estiliza con `group-data-[…]/navigation-bar:`. Por eso el ítem tiene que ser descendiente de un `NavigationBar`.
+
+### Breakpoints por mapa estático de clases
+
+Una prop que cambia el layout según el breakpoint (`bottomBelow` en NavigationBar; el `responsive` de Table usa el mismo principio con `max-lg:` fijo) se resuelve con un mapa de cadenas de clases literales, una entrada por breakpoint (`{ sm: 'max-sm:…', md: 'max-md:…', lg: 'max-lg:…' }`), sin JS ni `matchMedia`.
+
+**Por qué:** Tailwind solo genera las clases que aparecen literalmente en el código. Una clase armada en tiempo de ejecución (`` `max-${bp}:flex-row` ``) no existe en el CSS. Además, resolverlo con CSS mantiene el componente server-safe y evita el salto de layout en la hidratación que causaría `matchMedia`.
+
+**Cuando un subcomponente debe cambiar con el breakpoint**, la entrada del mapa va en el subcomponente, condicionada al atributo del padre (`group-data-[bottom-below=md]/navigation-bar:max-md:…`). Lleva las tres entradas siempre y solo aplica la que coincide. Las clases que restauran tienen la misma especificidad que las de la variante y Tailwind emite después las que llevan media query, así que ganan sin `!important`. Una story `real-css` lo verifica dentro de iframes de ancho fijo, porque las media queries siguen al viewport y no al contenedor.
+
 ### Fuera del DS
 
 Lo específico de un consumidor queda fuera del design system. Precedente: Kanban, que es un proyecto aparte.
