@@ -1725,10 +1725,10 @@ export function BookingDate() {
 
 **Desde 0.5.**
 
-- **Exports:** `Combobox`; tipos `ComboboxProps`, `ComboboxSingleProps`, `ComboboxMultipleProps`, `ComboboxLabelProps`, `ComboboxModeProps`, `ComboboxListVisibility`, `ComboboxOption`. Requiere el peer `cmdk`.
+- **Exports:** `Combobox`; funciones `comboboxFilter` y `comboboxTextMatch` _(desde 0.11)_; tipos `ComboboxProps`, `ComboboxSingleProps`, `ComboboxMultipleProps`, `ComboboxLabelProps`, `ComboboxModeProps`, `ComboboxListVisibility`, `ComboboxOption`. Requiere el peer `cmdk`.
 - **Props principales:**
   - `options: ComboboxOption[]` (requerido). Cada opción lleva `value: string`, `label: string` y `disabled?: boolean`, además de:
-    - `description?: string` _(desde 0.10)_ — segunda línea bajo el `label`; sobre todo, explica por qué una opción está deshabilitada. Forma parte del nombre accesible de la opción y, en una opción deshabilitada, no se atenúa. El filtro no la busca, y el valor elegido y el `Chip` muestran solo el `label`.
+    - `description?: string` _(desde 0.10)_ — segunda línea bajo el `label`; sobre todo, explica por qué una opción está deshabilitada. Forma parte del nombre accesible de la opción y, en una opción deshabilitada, no se atenúa. El filtro por defecto no la busca, y el valor elegido y el `Chip` muestran solo el `label`.
     - `group?: string` _(desde 0.10)_ — encabezado del grupo. Cada grupo aparece donde está su primera opción, con todas las suyas aunque no sean contiguas en `options`. Las opciones sin `group` van fuera de grupos, en su lugar. Un grupo sin resultados del filtro desaparece.
   - `label: string` **o** `aria-label: string` — uno de los dos, no ambos (lo exigen los tipos). `label` dibuja la etiqueta visible, con el estilo de la de `Input`; `aria-label` nombra el campo sin etiqueta visible.
   - `multiple?: boolean` — sin `multiple`: `value?`/`defaultValue?: string` (`''` sin valor) y `onValueChange?: (value: string) => void`. Con `multiple`: `string[]` y `(value: string[]) => void`.
@@ -1743,6 +1743,7 @@ export function BookingDate() {
 
     Con `'focus'` y `'query'`, el valor de modo único también se muestra como `Chip` (con la lista oculta no se vería de otra forma); su ✕ vacía el valor.
 
+  - `filter?: (option: ComboboxOption, query: string) => boolean` _(desde 0.11)_ — decide qué opciones muestra la búsqueda; default `comboboxFilter`. `query` llega recortada y sin normalizar, y no se llama con el buscador vacío (se muestran todas). Para comparar texto igual que el default, `comboboxTextMatch(text, query)`: `true` si `query` aparece en `text` sin distinguir mayúsculas ni acentos. `comboboxFilter(option, query)` es `comboboxTextMatch(option.label, query)`. Ninguna de las dos depende de `'use client'`.
   - `size?: 'sm' | 'md' | 'lg'` (32 / 44 / 48px, la escala de `Input` y `Select`; default `'md'`).
   - `disabled?: boolean` — deshabilita el disparador, el buscador y los Chips.
   - `id?: string` — id del botón (en `mode="inline"`, del contenedor). No se usa para etiquetar: usar `label`.
@@ -1759,7 +1760,15 @@ export function BookingDate() {
   - Con la lista oculta no hay opciones montadas: Enter y las flechas no eligen ni resaltan nada, y el mensaje `emptyLabel` no aparece. Con `'query'`, las flechas no abren la lista: hay que escribir.
   - **Escape dentro de `Sheet`/`Dialog`:** con la lista visible, el primer Escape la oculta sin cerrar el contenedor; con la lista oculta, Escape cierra el contenedor como siempre. No requiere nada del consumidor: el Combobox previene el Escape antes de que llegue a Radix. Un `onEscapeKeyDown` propio en `SheetContent`/`DialogContent` se sigue llamando, con `event.defaultPrevented === true` en ese primer Escape. Un contenedor que no sea de Radix y escuche Escape en `window` en captura, registrado antes, lo vería primero.
 - **Múltiple:** las opciones elegidas se muestran como `Chip` con ✕, fuera del botón (en línea, encima del buscador). Al quitar uno, el foco pasa al Chip siguiente o, si no hay, al botón (al buscador en línea). Los Chips siguen el `size` del Combobox; medido en navegador real, el campo del popover con un Chip mide 32 / 44 / 53px (`lg` supera los 48 de `Input`: el Chip `lg` mide 44) y crece al pasar a varias líneas.
-- **Filtro:** busca solo en `label`, ni en `description` ni en `group`. Encuentra el texto en cualquier parte de la etiqueta, sin distinguir mayúsculas ni acentos ("mexico" encuentra "México"), y conserva el orden de `options`. No es configurable.
+- **Filtro:** por defecto busca solo en `label`, ni en `description` ni en `group`. Encuentra el texto en cualquier parte de la etiqueta, sin distinguir mayúsculas ni acentos ("mexico" encuentra "México"), y conserva el orden de `options`. Para buscar en otros campos, pasar un `filter` que combine `comboboxTextMatch` sobre ellos. Los grupos se arman después de filtrar: una opción encontrada por su `group` o su `description` aparece bajo su grupo. El filtro no tolera errores de tipeo ni reordena los resultados, tampoco con `filter`: quedan fuera por decisión.
+
+  ```tsx
+  const filter = (option: ComboboxOption, query: string) =>
+    [option.label, option.group, option.description].some(
+      (text) => text !== undefined && comboboxTextMatch(text, query),
+    );
+  ```
+
 - **Accesibilidad:** el disparador anuncia la etiqueta y el valor actual ("País, México"); el popover, el buscador y la lista toman el nombre de la etiqueta. La asociación ya viene en el HTML del servidor y sigue los cambios de `label`. Las opciones elegidas llevan `aria-checked="true"`; `aria-selected` marca la opción resaltada con el teclado.
 - Fuera de esta versión: búsqueda asíncrona y estado de carga.
 

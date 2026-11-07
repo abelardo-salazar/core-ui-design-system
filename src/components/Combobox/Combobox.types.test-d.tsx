@@ -1,5 +1,6 @@
 // Pure TYPE test, same as Input.types.test-d.tsx: it isn't run, only `tsc -b` compiles it.
 import { Combobox } from './Combobox';
+import { comboboxFilter, comboboxTextMatch } from './comboboxFilter';
 
 const options = [{ value: 'mx', label: 'México' }];
 
@@ -74,3 +75,26 @@ void inlineFocusMultiple;
 void withDynamicMode;
 void popoverWithVisibility;
 void explicitPopoverWithVisibility;
+
+// filter: (option, query) => boolean; the exported helpers fit it and compose.
+const withFilter = [
+  <Combobox key="a" label="L" options={options} filter={comboboxFilter} />,
+  <Combobox
+    key="b"
+    label="L"
+    multiple
+    options={options}
+    filter={(option, query) =>
+      comboboxFilter(option, query) || comboboxTextMatch(option.group ?? '', query)
+    }
+  />,
+];
+const invalidFilter = [
+  // @ts-expect-error filter returns a boolean
+  <Combobox key="a" label="L" options={options} filter={(option) => option.label} />,
+  // @ts-expect-error query is a string
+  <Combobox key="b" label="L" options={options} filter={(_, query: number) => query > 0} />,
+];
+
+void withFilter;
+void invalidFilter;

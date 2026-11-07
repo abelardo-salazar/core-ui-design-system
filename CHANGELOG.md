@@ -9,6 +9,13 @@
   `placeholder` y `size` (`sm`/`md`/`lg`), más las props de `Select`. Los hijos son los
   `SelectItem`. La composición con `Select` y `SelectTrigger` no cambia. Tipos `SelectFieldProps` y
   `SelectFieldLabelProps`.
+- **`Combobox`: prop `filter` y funciones `comboboxFilter` y `comboboxTextMatch`.**
+  `filter?: (option, query) => boolean` decide qué opciones muestra la búsqueda; `query` llega
+  recortada y sin normalizar, y con el buscador vacío no se llama. Los grupos se arman después de
+  filtrar, así que una opción encontrada por su `group` o su `description` sigue bajo su grupo.
+  `comboboxFilter` es el filtro por defecto (el texto en el `label`, sin distinguir mayúsculas ni
+  acentos) y `comboboxTextMatch(text, query)` hace esa misma comparación sobre cualquier texto, para
+  componer un filtro propio. Sin `filter`, el comportamiento no cambia.
 
 ## [0.10.0] - 2026-11-03
 
