@@ -742,8 +742,9 @@ Notas:
 
 ### Card — Uso y Props
 
-- **Exports:** `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`.
+- **Exports:** `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter` y el tipo `CardProps` _(desde 0.11)_.
 - **`Card` (root):** `className?: string` y acepta `React.HTMLAttributes<HTMLDivElement>` (atributos y eventos estándar). Renderiza un contenedor `div` con estilos base (`rounded-box border bg-base-100 text-base-content shadow-sm`).
+  - `size?: 'md' | 'sm'` _(desde 0.11)_ (default `'md'`) — padding de `CardHeader`, `CardContent` y `CardFooter`: 24px en `md`, 16px en `sm`. `CardContent` y `CardFooter` siguen sin padding superior.
 - **Subcomponentes:**
   - `CardHeader`: contenedor para título y descripción. Props: `className?: string`.
   - `CardTitle`: se renderiza como un `h3` (tipografía semántica). Props: `className?: string`.
@@ -752,6 +753,8 @@ Notas:
   - `CardFooter`: área de acciones (botones, enlaces). Props: `className?: string`.
 
 La API está pensada para composición: puedes mezclar contenido arbitrario dentro de `Card` (imágenes, grids, formularios) y usar `className` en cada subcomponente para ajustar espaciado y alineación.
+
+**Comportamiento no obvio de `size`:** el tamaño llega a las partes por CSS (`data-size` en la raíz), no por contexto de React, para que `Card` siga siendo server-safe. Por eso, con `size="sm"` el padding de las partes gana sobre su `className`; para cambiarlo, usar la misma variante (`group-data-[size=sm]/card:p-3`). Una `Card` dentro de una `Card` `sm` también toma el padding `sm`.
 
 Uso (ejemplos simplificados extraídos de `Card.stories.tsx`):
 
