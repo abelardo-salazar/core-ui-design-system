@@ -163,6 +163,7 @@ Importar desde el barrel principal es seguro en un Server Component; el subpath 
 | `ProgressRing`                                                                                                                                                                                                                     | Sí               |
 | `QuantityStepper`                                                                                                                                                                                                                  | No               |
 | `RadioGroup`, `RadioGroupItem`, `RadioCard`                                                                                                                                                                                        | No               |
+| `ScrollRow`, `ScrollRowItem`                                                                                                                                                                                                       | No               |
 | `Select`, `SelectGroup`, `SelectValue`, `SelectTrigger`, `SelectContent`, `SelectLabel`, `SelectItem`, `SelectSeparator`, `SelectScrollUpButton`, `SelectScrollDownButton`                                                         | No               |
 | `SelectField`                                                                                                                                                                                                                      | No               |
 | `Sheet`, `SheetPortal`, `SheetOverlay`, `SheetTrigger`, `SheetClose`, `SheetContent`, `SheetHeader`, `SheetBody`, `SheetFooter`, `SheetTitle`, `SheetDescription`                                                                  | No               |
@@ -305,6 +306,7 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
     - [Dialog — Uso y Props](#dialog--uso-y-props)
     - [Sheet — Uso y Props](#sheet--uso-y-props)
     - [AspectRatio — Uso y Props](#aspectratio--uso-y-props)
+    - [ScrollRow — Uso y Props](#scrollrow--uso-y-props)
     - [Tabs — Uso y Props](#tabs--uso-y-props)
     - [NavigationBar — Uso y Props](#navigationbar--uso-y-props)
     - [Toggle — Uso y Props](#toggle--uso-y-props)
@@ -689,6 +691,7 @@ Uso (ejemplos, extraídos de `Image.stories.tsx`):
 | **`Sheet`**         | Panel lateral (Drawer).               | `side`: "top" \| "right" \| "bottom" \| "left"; `closeLabel`; **Subcomponentes:** `<SheetHeader>`, `<SheetBody>` (scroll), `<SheetFooter>`             |
 | **`Container`**     | Wrapper de layout.                    | `size`: 'sm' \| 'md' \| 'lg' \| 'xl' \| 'full' — controla `max-width` (ver sección `Layout` para el detalle).                                          |
 | **`AspectRatio`**   | Fuerza una relación de aspecto.       | `ratio`: number (ej. `16 / 9`). Se compone con otro contenido (`Image`, etc.), no es una API todo-en-uno.                                              |
+| **`ScrollRow`**     | Fila con desplazamiento horizontal.   | `aria-label` (obligatorio), `controls?`, `labels?`; **Subcomponentes:** `<ScrollRowItem>`                                                              |
 | **`Tabs`**          | Navegación por pestañas.              | `defaultValue`/`value`/`onValueChange` en el root; **Subcomponentes:** `<TabsList>`, `<TabsTrigger>`, `<TabsContent>`                                  |
 | **`NavigationBar`** | Navegación principal entre secciones. | `aria-label` (obligatorio), `variant?`, `bottomBelow?`; **Subcomponentes:** `<NavigationBarItem>` (`icon`, `active`, `asChild`, `badge`, `badgeLabel`) |
 | **`Toggle`**        | Botón que queda encendido o apagado.  | `pressed`/`defaultPressed`/`onPressedChange`; `size`: 'sm'                                                                                             | 'md' | 'lg'; `icon`; `aria-label` (obligatorio sin `children`) |
@@ -945,6 +948,37 @@ Uso (ejemplos, extraídos de `AspectRatio.stories.tsx`):
     <Image src="/cover.jpg" alt="Cover photo" />
   </AspectRatio>
 </div>
+```
+
+### ScrollRow — Uso y Props
+
+**Desde 0.12.**
+
+- **Exports:** `ScrollRow`, `ScrollRowItem`; tipos `ScrollRowProps`, `ScrollRowItemProps` y `ScrollRowLabels`.
+- **`ScrollRow`:**
+  - `aria-label: string` — obligatorio, lo exigen los tipos: nombra la región (`role="region"`).
+  - `controls?: boolean` (default `false`) — agrega botones anterior y siguiente de 44px, solo con puntero fino.
+  - `labels?: Partial<ScrollRowLabels>` — nombres de los botones, mezclados con los default en inglés: `previous` (`'Previous items'`) y `next` (`'Next items'`).
+  - Acepta los atributos de `<div>`. `className` y `ref` van a la región.
+- **`ScrollRowItem`:** un `<li>` que no se encoge y es punto de anclaje por su inicio. Acepta los atributos de `<li>`; el ancho de cada ítem lo pones tú (`className="w-40"`).
+
+Fila de ítems que se desplaza de lado, para filas de tarjetas, galerías o chips de filtros activos. Es una región con una lista `<ul>`; los hijos son `ScrollRowItem`. El desplazamiento se ancla al inicio de cada ítem (`scroll-snap`). Con puntero grueso (pantallas táctiles) la barra de desplazamiento se oculta; con puntero fino se ve.
+
+**Comportamiento no obvio:**
+
+- **Botones solo con puntero fino.** En una pantalla táctil se desliza con el dedo, así que `controls` no muestra nada ahí. Cada botón desplaza un ancho visible y desaparece al llegar a su extremo; si tenía el foco, el foco pasa al otro botón (o a la región si los ítems pasan a caber).
+- **Movimiento reducido.** Con `prefers-reduced-motion: reduce`, los botones desplazan sin animación.
+- **El anillo de foco no se recorta.** La lista tiene 4px de padding, el mismo recurso que `TabsList`: el anillo de foco de un ítem cabe dentro del área que desplaza.
+- **Sin contador.** No indica en qué posición estás ni cuántos ítems hay.
+
+```tsx
+<ScrollRow aria-label="Recetas recientes" controls>
+  {recetas.map((receta) => (
+    <ScrollRowItem key={receta.id} className="w-60">
+      <RecetaCard receta={receta} />
+    </ScrollRowItem>
+  ))}
+</ScrollRow>
 ```
 
 ### Tabs — Uso y Props

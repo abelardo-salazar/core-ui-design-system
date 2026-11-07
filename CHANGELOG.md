@@ -13,6 +13,13 @@ npm install @radix-ui/react-radio-group@^1.5.1
 
 ### Added
 
+- **`ScrollRow` y `ScrollRowItem`.** Fila de ítems con desplazamiento horizontal y anclaje al
+  inicio de cada ítem: una región con `aria-label` obligatorio por tipos y una lista `<ul>` cuyos
+  hijos son `ScrollRowItem` (`<li>`). La barra se oculta con puntero grueso. Con `controls`
+  agrega botones anterior y siguiente de 44px, solo con puntero fino, que desplazan un ancho
+  visible y desaparecen en los extremos sin perder el foco; sus nombres se cambian con `labels`
+  (default en inglés). Con `prefers-reduced-motion`, desplazan sin animación. Tipos
+  `ScrollRowProps`, `ScrollRowItemProps` y `ScrollRowLabels`.
 - **`RadioGroup`, `RadioGroupItem` y `RadioCard`.** Grupo de opciones excluyentes sobre
   `@radix-ui/react-radio-group`: Tab entra al grupo, las flechas mueven la selección y se saltan
   los deshabilitados, y una opción elegida no se puede desmarcar (a diferencia de `ToggleGroup`

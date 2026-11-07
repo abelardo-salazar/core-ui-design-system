@@ -45,4 +45,5 @@ export const CLIENT_ENTRY_POINTS = [
   'src/components/FileInput/FileInput.tsx',
   'src/components/ImageUploader/ImageUploader.tsx',
   'src/components/RadioGroup/RadioGroup.tsx',
+  'src/components/ScrollRow/ScrollRow.tsx',
 ];
