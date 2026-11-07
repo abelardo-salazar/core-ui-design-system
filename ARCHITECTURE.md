@@ -182,7 +182,7 @@ La extensión se aplica en el componente que conoce su entorno (paginación de D
 
 Excepción: las grillas contiguas no extienden su hit area, porque un `::after` pisaría la celda vecina. Caso: los días de Calendar, que quedan en 36px. 44px no cabe en 320px de ancho (7 × 44 + padding = 332px) y 40px cambiaría el aspecto sin llegar a 44. La excepción aplica al default: `size="md"` (44px) y `size="lg"` (56px) son opt-in para contenedores anchos.
 
-Button, Input y Select comparten escala para alinear en una misma fila: `sm` 32px, `md` 44px, `lg` 48px.
+Button, Input y SelectField comparten escala para alinear en una misma fila: `sm` 32px, `md` 44px, `lg` 48px. `SelectTrigger` solo tiene la altura `md` (44px); la escala `sm`/`lg` es de `SelectField`.
 
 ### Íconos internos
 
@@ -240,7 +240,7 @@ Desde 0.9.0 el paquete se publica en el registro público de npm, bajo el scope 
 
 ### Breakpoints por mapa estático de clases
 
-Una prop que cambia el layout según el breakpoint (`bottomBelow` en NavigationBar; el `responsive` de Table usa el mismo principio con `max-lg:` fijo) se resuelve con un mapa de cadenas de clases literales, una entrada por breakpoint (`{ sm: 'max-sm:…', md: 'max-md:…', lg: 'max-lg:…' }`), sin JS ni `matchMedia`.
+Una prop que cambia el layout según el breakpoint (`bottomBelow` en NavigationBar, `responsive` en Table con `cardModeClasses`) se resuelve con un mapa de cadenas de clases literales, una entrada por breakpoint (`{ sm: 'max-sm:…', md: 'max-md:…', lg: 'max-lg:…' }`), sin JS ni `matchMedia`.
 
 **Por qué:** Tailwind solo genera las clases que aparecen literalmente en el código. Una clase armada en tiempo de ejecución (`` `max-${bp}:flex-row` ``) no existe en el CSS. Además, resolverlo con CSS mantiene el componente server-safe y evita el salto de layout en la hidratación que causaría `matchMedia`.
 
