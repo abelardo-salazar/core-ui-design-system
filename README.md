@@ -174,6 +174,7 @@ Importar desde el barrel principal es seguro en un Server Component; el subpath 
 | `Table`, `TableHeader`, `TableBody`, `TableFooter`, `TableRow`, `TableHead`, `TableCell`, `TableCaption`                                                                                                                           | Sí               |
 | `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent`                                                                                                                                                                                   | No               |
 | `Textarea`                                                                                                                                                                                                                         | No               |
+| `Timeline`, `TimelineItem`, `TimelineGroup`                                                                                                                                                                                        | Sí               |
 | `Toast`                                                                                                                                                                                                                            | No               |
 | `Toggle`                                                                                                                                                                                                                           | No               |
 | `ToggleGroup`, `ToggleGroupItem`                                                                                                                                                                                                   | No               |
@@ -308,6 +309,7 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
     - [Sheet — Uso y Props](#sheet--uso-y-props)
     - [AspectRatio — Uso y Props](#aspectratio--uso-y-props)
     - [ScrollRow — Uso y Props](#scrollrow--uso-y-props)
+    - [Timeline — Uso y Props](#timeline--uso-y-props)
     - [Tabs — Uso y Props](#tabs--uso-y-props)
     - [NavigationBar — Uso y Props](#navigationbar--uso-y-props)
     - [Toggle — Uso y Props](#toggle--uso-y-props)
@@ -694,6 +696,7 @@ Uso (ejemplos, extraídos de `Image.stories.tsx`):
 | **`Container`**     | Wrapper de layout.                    | `size`: 'sm' \| 'md' \| 'lg' \| 'xl' \| 'full' — controla `max-width` (ver sección `Layout` para el detalle).                                          |
 | **`AspectRatio`**   | Fuerza una relación de aspecto.       | `ratio`: number (ej. `16 / 9`). Se compone con otro contenido (`Image`, etc.), no es una API todo-en-uno.                                              |
 | **`ScrollRow`**     | Fila con desplazamiento horizontal.   | `aria-label` (obligatorio), `controls?`, `labels?`; **Subcomponentes:** `<ScrollRowItem>`                                                              |
+| **`Timeline`**      | Secuencia de solo lectura.            | **Subcomponentes:** `<TimelineItem>` (`time?`, `dateTime?`), `<TimelineGroup>` (`title`, `headingLevel?`)                                              |
 | **`Tabs`**          | Navegación por pestañas.              | `defaultValue`/`value`/`onValueChange` en el root; **Subcomponentes:** `<TabsList>`, `<TabsTrigger>`, `<TabsContent>`                                  |
 | **`NavigationBar`** | Navegación principal entre secciones. | `aria-label` (obligatorio), `variant?`, `bottomBelow?`; **Subcomponentes:** `<NavigationBarItem>` (`icon`, `active`, `asChild`, `badge`, `badgeLabel`) |
 | **`Toggle`**        | Botón que queda encendido o apagado.  | `pressed`/`defaultPressed`/`onPressedChange`; `size`: 'sm'                                                                                             | 'md' | 'lg'; `icon`; `aria-label` (obligatorio sin `children`) |
@@ -981,6 +984,43 @@ Fila de ítems que se desplaza de lado, para filas de tarjetas, galerías o chip
     </ScrollRowItem>
   ))}
 </ScrollRow>
+```
+
+### Timeline — Uso y Props
+
+**Desde 0.12.**
+
+- **Exports:** `Timeline`, `TimelineItem`, `TimelineGroup`; tipos `TimelineProps`, `TimelineItemProps` y `TimelineGroupProps`.
+- **`Timeline`:** una `<ol>`. Acepta sus atributos (`aria-label`, `className`…) y el `ref`.
+- **`TimelineItem`:** un `<li>` con el contenido como `children`.
+  - `time?: React.ReactNode` — hora o fecha al final de la fila, con cifras tabulares.
+  - `dateTime?: string` — valor legible por máquina de `time` (`"2026-11-07T09:30"`): lo renderiza como `<time>`. Solo con `time`; lo exigen los tipos.
+- **`TimelineGroup`:** un `<li>` con un encabezado y una `<ol>` anidada de `TimelineItem`.
+  - `title: React.ReactNode` — obligatorio, el texto del encabezado.
+  - `headingLevel?: 2 | 3 | 4 | 5 | 6` (default `3`) — nivel del encabezado, para encajar en el esquema de la página.
+
+Secuencia de solo lectura: un itinerario, el historial de estados de un pedido. Cada ítem tiene un marcador y una línea que lo une con el siguiente. Los marcadores son decorativos (`aria-hidden`): el orden lo da la lista. Es server-safe: sin hooks ni Context (ver [Server Components](#server-components)).
+
+**Comportamiento no obvio:**
+
+- **Sin `time`, el texto ocupa todo el ancho.** Con `time`, la hora va al final de la fila y el texto se acomoda a su lado.
+- **La línea se corta entre grupos.** Cada lista dibuja su propia línea y el último ítem de cada una no la lleva, así que dos `TimelineGroup` seguidos se ven como tramos separados.
+- **No es interactivo.** Si un ítem lleva un enlace o un botón, va dentro de su contenido.
+
+```tsx
+<Timeline aria-label="Itinerario">
+  <TimelineGroup title="Sábado 7">
+    <TimelineItem time="08:00" dateTime="2026-11-07T08:00">
+      Desayuno
+    </TimelineItem>
+    <TimelineItem time="10:00" dateTime="2026-11-07T10:00">
+      Museo
+    </TimelineItem>
+  </TimelineGroup>
+  <TimelineGroup title="Domingo 8">
+    <TimelineItem>Día libre</TimelineItem>
+  </TimelineGroup>
+</Timeline>
 ```
 
 ### Tabs — Uso y Props
