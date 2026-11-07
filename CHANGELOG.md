@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **`SelectField`.** `Select` como campo de formulario, con el mismo aspecto y el mismo enlace ARIA
+  que `Input`: `label` o `aria-label` (uno de los dos, lo exigen los tipos), `error`, `helperText`,
+  `placeholder` y `size` (`sm`/`md`/`lg`), más las props de `Select`. Los hijos son los
+  `SelectItem`. La composición con `Select` y `SelectTrigger` no cambia. Tipos `SelectFieldProps` y
+  `SelectFieldLabelProps`.
+
 ## [0.10.0] - 2026-11-03
 
 ### Added

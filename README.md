@@ -5,7 +5,7 @@
 ![TypeScript](https://img.shields.io/badge/typescript-5.9+-3178C6.svg)
 ![Registry](https://img.shields.io/badge/registry-npm-CB3837.svg)
 
-**Última versión publicada:** `0.10.0`.
+**Última versión publicada:** `0.10.0`. `main` tiene cambios sin publicar: ver [CHANGELOG § Unreleased](./CHANGELOG.md#unreleased).
 
 **Storybook:** [abelardo-salazar.github.io/core-ui-design-system](https://abelardo-salazar.github.io/core-ui-design-system/). Documenta la última versión publicada, no lo que aún está sin publicar en `main`.
 
@@ -161,6 +161,7 @@ Importar desde el barrel principal es seguro en un Server Component; el subpath 
 | `ProgressRing`                                                                                                                                                                                                                     | Sí               |
 | `QuantityStepper`                                                                                                                                                                                                                  | No               |
 | `Select`, `SelectGroup`, `SelectValue`, `SelectTrigger`, `SelectContent`, `SelectLabel`, `SelectItem`, `SelectSeparator`, `SelectScrollUpButton`, `SelectScrollDownButton`                                                         | No               |
+| `SelectField`                                                                                                                                                                                                                      | No               |
 | `Sheet`, `SheetPortal`, `SheetOverlay`, `SheetTrigger`, `SheetClose`, `SheetContent`, `SheetHeader`, `SheetBody`, `SheetFooter`, `SheetTitle`, `SheetDescription`                                                                  | No               |
 | `Skeleton`                                                                                                                                                                                                                         | Sí               |
 | `Switch`                                                                                                                                                                                                                           | No               |
@@ -316,6 +317,7 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
     - [FileInput — Uso y Props](#fileinput--uso-y-props)
     - [Textarea — Uso y Props](#textarea--uso-y-props)
     - [Select — Uso y Props](#select--uso-y-props)
+    - [SelectField — Uso y Props](#selectfield--uso-y-props)
     - [Switch — Uso y Props](#switch--uso-y-props)
     - [SwitchField — Uso y Props](#switchfield--uso-y-props)
     - [Calendar — Uso y Props](#calendar--uso-y-props)
@@ -1250,6 +1252,7 @@ Uso (ejemplo simplificado, extraído de `DropdownMenu.stories.tsx`):
 | `FileInput`       | Selector de archivos                   | `accept?`, `multiple?`, `onFilesChange?`, `onReject?`, `label?`, `error?`, `variant?`, `size?`, `chooseLabel?`, `changeLabel?`                               |
 | `Textarea`        | Texto multilinea                       | Standard HTML props, `variant?`, `error?`, `className?`                                                                                                      |
 | `Select`          | Dropdown avanzado                      | `value?`, `defaultValue?`, `onValueChange?`, `placeholder?`, `className?`                                                                                    |
+| `SelectField`     | Select con etiqueta, error y ayuda     | `label` o `aria-label`, `error?`, `helperText?`, `placeholder?`, `size?` y los props de `Select`                                                             |
 | `Switch`          | Toggle binario                         | `checked?`, `defaultChecked?`, `onCheckedChange?`, `disabled?`, `className?`                                                                                 |
 | `SwitchField`     | Switch en una fila completa táctil     | `label`, `description?` y los props de `Switch`                                                                                                              |
 | `Checkbox`        | Casilla de selección                   | `checked?`, `defaultChecked?`, `onCheckedChange?`, `disabled?`, `className?`                                                                                 |
@@ -1483,6 +1486,8 @@ const [value, setValue] = useState('');
 
 La implementación usa `@radix-ui/react-select` y aplica estilos/accessibilidad por defecto (foco, roles, ARIA). `SelectTrigger` renderiza el valor actual via `SelectValue`.
 
+Para un campo de formulario con etiqueta, error, texto de ayuda y `size`, usa [`SelectField`](#selectfield--uso-y-props).
+
 Uso (ejemplo mínimo):
 
 ```tsx
@@ -1520,6 +1525,44 @@ Notas:
 
 - Para listas largas, `SelectScrollUpButton`/`SelectScrollDownButton` mejoran la experiencia; `SelectContent` calcula un ancho mínimo basado en el trigger.
 - Usa `asChild` en `SelectTrigger` para renderizar un `Button` o `Input` preservando estilos del trigger.
+
+### SelectField — Uso y Props
+
+**Desde 0.11.**
+
+`Select` listo como campo de formulario: trae el disparador, la etiqueta y el mensaje de error o de ayuda, con el mismo aspecto y el mismo enlace ARIA que `Input`. Los hijos son los `SelectItem`. La composición con `Select` y `SelectTrigger` sigue disponible y no cambia.
+
+- **Exports:** `SelectField`; tipos `SelectFieldProps`, `SelectFieldLabelProps`.
+- **Props principales:**
+  - `label: string` **o** `aria-label: string` — uno de los dos, no ambos (lo exigen los tipos). `label` dibuja la etiqueta visible; `aria-label` nombra el campo sin etiqueta visible.
+  - `children: React.ReactNode` (requerido) — los `SelectItem`, y `SelectGroup`, `SelectLabel` o `SelectSeparator` si hacen falta.
+  - `error?: string` — marca el campo como inválido (`aria-invalid`) y enlaza el mensaje con `aria-describedby`. Reemplaza a `helperText`.
+  - `helperText?: string` — texto de ayuda, también enlazado con `aria-describedby`.
+  - `size?: 'sm' | 'md' | 'lg'` (32 / 44 / 48px, la escala de `Input`; default `'md'`). `sm` es un tamaño compacto, por debajo del objetivo táctil de 44px y sin área táctil extendida, igual que en `Input`.
+  - `placeholder?: string` — texto del disparador sin valor.
+  - `value?`, `defaultValue?`, `onValueChange?`, `disabled?`, `name?`, `required?` y el resto de las props de `Select` pasan directo.
+  - `id?: string` — id del disparador; sin él se genera uno.
+  - `className?: string` — en el contenedor raíz (etiqueta + disparador + mensaje).
+
+**Comportamiento no obvio:**
+
+- El `ref` llega al disparador (`HTMLButtonElement`).
+- Un clic en la etiqueta enfoca el disparador. Radix además abre la lista, salvo que el último puntero usado sobre el disparador haya sido un mouse.
+- `name` solo tiene efecto dentro de un `<form>`: ahí Radix agrega el `<select>` nativo que envía el valor.
+
+```tsx
+<SelectField
+  label="País"
+  placeholder="Elige un país"
+  value={country}
+  onValueChange={setCountry}
+  error={countryError}
+  helperText="Define la moneda de la factura."
+>
+  <SelectItem value="ar">Argentina</SelectItem>
+  <SelectItem value="mx">México</SelectItem>
+</SelectField>
+```
 
 ### Switch — Uso y Props
 
@@ -2370,6 +2413,7 @@ Además de los componentes, cada entry point exporta los tipos de sus props y al
 | Tipos de props (0.5.0)  | `ComboboxProps`, `ComboboxSingleProps`, `ComboboxMultipleProps`, `ComboboxLabelProps`, `ComboboxOption`, `EmptyStateProps`, `EmptyStateTitleProps`, `InputProps`, `InputBaseProps`, `InputWithEndIconProps`, `ClearableInputProps`, `QuantityStepperProps`, `SheetContentProps`, `SkipToContentProps`, `ToggleGroupProps`, `ToggleGroupSingleProps`, `ToggleGroupMultipleProps`, `ToggleGroupItemProps`, `VisuallyHiddenProps`, `AnnounceOptions` |
 | Tipos de props (0.7.0)  | `ComboboxModeProps`, `ComboboxListVisibility`                                                                                                                                                                                                                                                                                                                                                                                                     |
 | Tipos de props (0.10.0) | `NavigationBarProps`, `NavigationBarItemProps`, `SwitchFieldProps`, `CheckboxFieldProps`, `ToggleProps`, `FileInputProps`                                                                                                                                                                                                                                                                                                                         |
+| Tipos de props (0.11.0) | `SelectFieldProps`, `SelectFieldLabelProps`                                                                                                                                                                                                                                                                                                                                                                                                       |
 | Variantes (`cva`)       | `buttonVariants`, `badgeVariants`, `inputVariants`, `alertVariants`, `alertIconVariants` — devuelven las clases de cada variante, para dar el mismo aspecto a un elemento propio (por ejemplo, un `Link` con `buttonVariants({ variant: 'outline' })`)                                                                                                                                                                                            |
 | Utilidades              | `cn(...inputs)` — combina clases con `clsx` y resuelve conflictos de Tailwind con `tailwind-merge` (la última gana); `toast` (ver [Toast](#toast--uso-y-props)); `features` (ver [DataTable](#datatable--uso-y-props)); `announce` (ver [announce()](#announce--uso-y-opciones))                                                                                                                                                                  |
 

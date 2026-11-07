@@ -18,6 +18,7 @@ export const CLIENT_ENTRY_POINTS = [
   'src/components/Dialog/Dialog.tsx',
   'src/components/Sheet/Sheet.tsx',
   'src/components/Select/Select.tsx',
+  'src/components/Select/SelectField.tsx',
   'src/components/Checkbox/Checkbox.tsx',
   'src/components/Switch/Switch.tsx',
   'src/components/Avatar/Avatar.tsx',
