@@ -12,7 +12,15 @@ import { cn } from '../../utils/cn';
 import { Button } from '../Button';
 import { EmptyState, EmptyStateTitle } from '../EmptyState';
 import { Input } from '../Input';
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../Table';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+  type TableResponsive,
+} from '../Table';
 import { features } from './dataTableFeatures';
 
 // `features` is re-exported from this directory through index.ts (dataTableFeatures.ts),
@@ -46,6 +54,11 @@ export interface DataTableProps<TData extends RowData> {
    * @default (page, total) => `Page ${page} of ${total}`
    */
   pageLabel?: (page: number, total: number) => string;
+  /**
+   * Breakpoint below which each row shows as a card; forwarded to Table `responsive`.
+   * `true` is `'lg'` and `false` keeps the table at every width. @default true
+   */
+  responsive?: TableResponsive;
   className?: string;
 }
 
@@ -73,6 +86,7 @@ function DataTable<TData extends RowData>({
   previousLabel = 'Previous',
   nextLabel = 'Next',
   pageLabel = defaultPageLabel,
+  responsive = true,
   className,
 }: DataTableProps<TData>) {
   const table = useTable({ features, columns, data });
@@ -92,7 +106,7 @@ function DataTable<TData extends RowData>({
         className="max-w-sm"
       />
 
-      <Table responsive>
+      <Table responsive={responsive}>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -149,7 +163,7 @@ function DataTable<TData extends RowData>({
           ) : (
             <TableRow>
               {/* No data-label: in card mode no column label is attached. The
-                  w-full div is needed because below `lg` Table makes the td flex
+                  w-full div is needed because in card mode Table makes the td flex
                   justify-between, which would push a single child to the left. */}
               <TableCell colSpan={columnCount} className="text-center">
                 <div className="w-full">{emptyState}</div>
@@ -160,7 +174,7 @@ function DataTable<TData extends RowData>({
       </Table>
 
       {/*
-        Breakpoint `md` (not `lg`, unlike the table's card collapse above): this is just
+        Breakpoint `md` (not `lg`, unlike the table's default card collapse above): this is just
         an input + 2 buttons + page text, which fit in one row at more widths than a full
         table of columns; using `lg` here would force an unnecessary stack on a tablet
         where the toolbar fits perfectly horizontally.

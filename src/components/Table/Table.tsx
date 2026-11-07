@@ -13,23 +13,100 @@ import { cn } from '../../utils/cn';
 // can make some browsers drop the element's implicit table role.
 // It's always added, not only when responsive=true, as a defensive baseline.
 //
-// responsive (opt-in, default false): below the `lg` breakpoint (1024px) each
-// TableRow collapses from a table row to a block card, and each TableCell prepends its
-// data-label through ::before. It's pure CSS (Tailwind's `max-lg:` variant, no JS
-// involved) applied here, on the root, with descendant selectors (same pattern that
-// TableHeader/TableBody already use with `[&_tr]:...`), so TableRow/TableHead/TableCell don't
-// need to know whether they're in responsive mode, with no Context or props repeated in each
-// subcomponent.
+// responsive (opt-in, default false): below a breakpoint (`true` = `lg`, 1024px; also
+// `sm` 640px and `md` 768px) each TableRow collapses from a table row to a block card, and
+// each TableCell prepends its data-label through ::before. It's pure CSS (Tailwind's
+// `max-*:` variants, no JS involved) applied here, on the root, with descendant selectors
+// (same pattern that TableHeader/TableBody already use with `[&_tr]:...`), so
+// TableRow/TableHead/TableCell don't need to know whether they're in responsive mode, with no
+// Context or props repeated in each subcomponent.
 //
-// thead/tbody/tfoot are also "blockified" below `lg`: if the <table> becomes block but
+// thead/tbody/tfoot are also "blockified" below the breakpoint: if the <table> becomes block but
 // its children stay display:table-row-group without a table ancestor, the browser generates
 // an anonymous table box around them (CSS2.1 §17.2.1) and the card layout doesn't
 // behave like a real block. The <thead> is also hidden through sr-only (not display:none)
 // so TableHeader stays in the accessibility tree; the same class the rest of the DS
 // uses (see removeLabel in Chip) for visually hidden but accessible text.
+//
+// The map is static on purpose: Tailwind only generates classes that appear literally in the
+// source, so `max-${bp}:` built at runtime would produce nothing. Same list in each entry.
+export type TableResponsive = boolean | 'sm' | 'md' | 'lg';
+
+const cardModeClasses = {
+  sm: [
+    'max-sm:block',
+    'max-sm:[&_thead]:sr-only',
+    'max-sm:[&_tbody]:block',
+    'max-sm:[&_tfoot]:block',
+    'max-sm:[&_tr]:block',
+    'max-sm:[&_tr]:rounded-box',
+    'max-sm:[&_tr]:border',
+    'max-sm:[&_tr]:border-base-300',
+    'max-sm:[&_tr]:bg-base-100',
+    'max-sm:[&_tr]:shadow-sm',
+    'max-sm:[&_tr]:mb-4',
+    'max-sm:[&_tr]:last:mb-0',
+    'max-sm:[&_th]:block',
+    'max-sm:[&_td]:flex',
+    'max-sm:[&_td]:items-center',
+    'max-sm:[&_td]:justify-between',
+    'max-sm:[&_td]:gap-4',
+    'max-sm:[&_td[data-label]]:before:content-[attr(data-label)]',
+    'max-sm:[&_td[data-label]]:before:shrink-0',
+    'max-sm:[&_td[data-label]]:before:font-medium',
+    'max-sm:[&_td[data-label]]:before:text-base-content/65',
+  ],
+  md: [
+    'max-md:block',
+    'max-md:[&_thead]:sr-only',
+    'max-md:[&_tbody]:block',
+    'max-md:[&_tfoot]:block',
+    'max-md:[&_tr]:block',
+    'max-md:[&_tr]:rounded-box',
+    'max-md:[&_tr]:border',
+    'max-md:[&_tr]:border-base-300',
+    'max-md:[&_tr]:bg-base-100',
+    'max-md:[&_tr]:shadow-sm',
+    'max-md:[&_tr]:mb-4',
+    'max-md:[&_tr]:last:mb-0',
+    'max-md:[&_th]:block',
+    'max-md:[&_td]:flex',
+    'max-md:[&_td]:items-center',
+    'max-md:[&_td]:justify-between',
+    'max-md:[&_td]:gap-4',
+    'max-md:[&_td[data-label]]:before:content-[attr(data-label)]',
+    'max-md:[&_td[data-label]]:before:shrink-0',
+    'max-md:[&_td[data-label]]:before:font-medium',
+    'max-md:[&_td[data-label]]:before:text-base-content/65',
+  ],
+  lg: [
+    'max-lg:block',
+    'max-lg:[&_thead]:sr-only',
+    'max-lg:[&_tbody]:block',
+    'max-lg:[&_tfoot]:block',
+    'max-lg:[&_tr]:block',
+    'max-lg:[&_tr]:rounded-box',
+    'max-lg:[&_tr]:border',
+    'max-lg:[&_tr]:border-base-300',
+    'max-lg:[&_tr]:bg-base-100',
+    'max-lg:[&_tr]:shadow-sm',
+    'max-lg:[&_tr]:mb-4',
+    'max-lg:[&_tr]:last:mb-0',
+    'max-lg:[&_th]:block',
+    'max-lg:[&_td]:flex',
+    'max-lg:[&_td]:items-center',
+    'max-lg:[&_td]:justify-between',
+    'max-lg:[&_td]:gap-4',
+    'max-lg:[&_td[data-label]]:before:content-[attr(data-label)]',
+    'max-lg:[&_td[data-label]]:before:shrink-0',
+    'max-lg:[&_td[data-label]]:before:font-medium',
+    'max-lg:[&_td[data-label]]:before:text-base-content/65',
+  ],
+};
+
 const Table = React.forwardRef<
   HTMLTableElement,
-  React.HTMLAttributes<HTMLTableElement> & { responsive?: boolean }
+  React.HTMLAttributes<HTMLTableElement> & { responsive?: TableResponsive }
 >(({ className, responsive = false, ...props }, ref) => (
   <div className="relative w-full overflow-x-auto">
     <table
@@ -37,29 +114,7 @@ const Table = React.forwardRef<
       role="table"
       className={cn(
         'w-full caption-bottom text-sm',
-        responsive && [
-          'max-lg:block',
-          'max-lg:[&_thead]:sr-only',
-          'max-lg:[&_tbody]:block',
-          'max-lg:[&_tfoot]:block',
-          'max-lg:[&_tr]:block',
-          'max-lg:[&_tr]:rounded-box',
-          'max-lg:[&_tr]:border',
-          'max-lg:[&_tr]:border-base-300',
-          'max-lg:[&_tr]:bg-base-100',
-          'max-lg:[&_tr]:shadow-sm',
-          'max-lg:[&_tr]:mb-4',
-          'max-lg:[&_tr]:last:mb-0',
-          'max-lg:[&_th]:block',
-          'max-lg:[&_td]:flex',
-          'max-lg:[&_td]:items-center',
-          'max-lg:[&_td]:justify-between',
-          'max-lg:[&_td]:gap-4',
-          'max-lg:[&_td[data-label]]:before:content-[attr(data-label)]',
-          'max-lg:[&_td[data-label]]:before:shrink-0',
-          'max-lg:[&_td[data-label]]:before:font-medium',
-          'max-lg:[&_td[data-label]]:before:text-base-content/65',
-        ],
+        responsive && cardModeClasses[responsive === true ? 'lg' : responsive],
         className,
       )}
       {...props}
@@ -72,7 +127,7 @@ Table.displayName = 'Table';
 // Table Header (<thead>)
 // -----------------------------------------------------------------------------
 // Explicit role="rowgroup" for the same reason as Table/TableRow/TableHead/TableCell:
-// Table `responsive` changes this element's display below `lg`, which in some
+// Table `responsive` changes this element's display below its breakpoint, which in some
 // browsers can drop its implicit row group role.
 const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
@@ -136,7 +191,7 @@ TableFooter.displayName = 'TableFooter';
 // by default; the issue here is the readability of the row under the mouse in long tables.
 //
 // Explicit role="row" for the same reason as the rest of the primitives: Table
-// `responsive` changes this element's display below `lg`.
+// `responsive` changes this element's display below its breakpoint.
 const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTMLTableRowElement>>(
   ({ className, ...props }, ref) => (
     <tr
@@ -177,7 +232,7 @@ TableHead.displayName = 'TableHead';
 //
 // Optional data-label: whoever uses the primitives directly (without DataTable) in a
 // responsive Table passes it by hand so Table draws the column label through ::before
-// below `lg` (DataTable generates it from each column's header).
+// below the breakpoint (DataTable generates it from each column's header).
 const TableCell = React.forwardRef<
   HTMLTableCellElement,
   React.TdHTMLAttributes<HTMLTableCellElement> & { 'data-label'?: string }

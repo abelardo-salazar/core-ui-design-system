@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, within } from 'storybook/test';
+import { expect, waitFor, within } from 'storybook/test';
+import { InFrame } from '../../../.storybook/InFrame';
+import { styleIn } from '../../../.storybook/styleIn';
 import {
   Table,
   TableHeader,
@@ -216,5 +218,77 @@ export const Responsive: Story = {
     // data-label passed by hand by the consumer stays in the DOM as is.
     const cell = canvas.getByText('Ada Lovelace');
     await expect(cell.getAttribute('data-label')).toBe('Nombre');
+  },
+};
+
+const breakpointTables = (
+  <div className="flex flex-col gap-4">
+    {(
+      [
+        ['sm', 'sm'],
+        ['md', 'md'],
+        ['lg', 'lg'],
+        ['true', true],
+        ['false', false],
+      ] as const
+    ).map(([name, responsive]) => (
+      <Table key={name} responsive={responsive} aria-label={name}>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Nombre</TableHead>
+            <TableHead>Rol</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableCell data-label="Nombre">Ada Lovelace</TableCell>
+            <TableCell data-label="Rol">Ingeniería</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    ))}
+  </div>
+);
+
+// Frame width → tables that must be cards there (sm 640px, md 768px, lg 1024px; true = lg).
+const cardsAt: [number, string[]][] = [
+  [600, ['sm', 'md', 'lg', 'true']],
+  [700, ['md', 'lg', 'true']],
+  [900, ['lg', 'true']],
+  [1100, []],
+];
+
+// 5. responsive per breakpoint with the CSS applied: each frame sits on one side of a
+// breakpoint, and each table is a card (block table, thead sr-only, flex cells with the label)
+// only below its own. false is never a card.
+export const ResponsiveBreakpoints: Story = {
+  tags: ['real-css'],
+  render: () => (
+    <div className="flex flex-col gap-4">
+      {cardsAt.map(([width]) => (
+        <InFrame key={width} title={`${width}px`} width={width} height={200}>
+          {breakpointTables}
+        </InFrame>
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    for (const [width, cards] of cardsAt) {
+      const frame = within(canvasElement).getByTitle(`${width}px`) as HTMLIFrameElement;
+      await waitFor(() => expect(frame.contentDocument!.querySelectorAll('table').length).toBe(5));
+      const frameBody = within(frame.contentDocument!.body);
+      for (const name of ['sm', 'md', 'lg', 'true', 'false']) {
+        const table = frameBody.getByRole('table', { name });
+        const isCard = cards.includes(name);
+        const cell = within(table).getByText('Ada Lovelace');
+        const context = `${name} at ${width}px`;
+        await expect(styleIn(table).display, context).toBe(isCard ? 'block' : 'table');
+        await expect(styleIn(table.querySelector('thead')!).position, context).toBe(
+          isCard ? 'absolute' : 'static',
+        );
+        await expect(styleIn(cell).display, context).toBe(isCard ? 'flex' : 'table-cell');
+        await expect(styleIn(cell, '::before').content, context).toBe(isCard ? '"Nombre"' : 'none');
+      }
+    }
   },
 };

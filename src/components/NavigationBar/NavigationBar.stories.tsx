@@ -1,6 +1,5 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { createPortal } from 'react-dom';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import {
   BellIcon,
@@ -9,6 +8,8 @@ import {
   HomeIcon,
   PersonIcon,
 } from '@radix-ui/react-icons';
+import { InFrame } from '../../../.storybook/InFrame';
+import { styleIn } from '../../../.storybook/styleIn';
 import { NavigationBar, NavigationBarItem } from './NavigationBar';
 
 const meta: Meta<typeof NavigationBar> = {
@@ -362,33 +363,6 @@ export const HorizontalLayout: Story = {
   },
 };
 
-// Media queries follow the viewport, not a container: to test both sides of a breakpoint in one
-// run, each case renders in an iframe of fixed width, with the page's stylesheets copied in.
-const InFrame = ({
-  title,
-  width,
-  children,
-}: {
-  title: string;
-  width: number;
-  children: React.ReactNode;
-}) => {
-  const [body, setBody] = React.useState<HTMLElement | null>(null);
-  const frameRef = React.useRef<HTMLIFrameElement>(null);
-  React.useEffect(() => {
-    const doc = frameRef.current!.contentDocument!;
-    for (const node of document.head.querySelectorAll('style, link[rel="stylesheet"]')) {
-      doc.head.appendChild(node.cloneNode(true));
-    }
-    setBody(doc.body);
-  }, []);
-  return (
-    <iframe ref={frameRef} title={title} style={{ width, height: 420, border: 0 }}>
-      {body && createPortal(children, body)}
-    </iframe>
-  );
-};
-
 const frameContent = (
   <div className="flex flex-col gap-4">
     <NavigationBar aria-label="Fila" variant="horizontal" bottomBelow="sm">
@@ -400,8 +374,6 @@ const frameContent = (
     <NavigationBar aria-label="Referencia">{items(4)}</NavigationBar>
   </div>
 );
-
-const styleIn = (element: Element) => element.ownerDocument.defaultView!.getComputedStyle(element);
 
 // 10. bottomBelow with the CSS applied. At 600px (below sm and lg), horizontal and vertical take
 // the 'bottom' form, item by item the same geometry as the default bar. At 1100px they keep
