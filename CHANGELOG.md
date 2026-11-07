@@ -13,6 +13,14 @@ npm install @radix-ui/react-radio-group@^1.5.1
 
 ### Added
 
+- **`DateRangePicker`.** Selector de rango de días, aparte de `DatePicker`: `range` y
+  `onRangeChange` con el tipo `DateRange` (re-exportado), `minDate`/`maxDate` como días
+  deshabilitados, `placeholder`, `dialogLabel`, `locale` y el mismo campo que `DatePicker`
+  (`label`, `error`, `helperText`). El disparador muestra las dos fechas con el locale. Cada
+  apertura empieza un rango nuevo y el popover se cierra al completarlo; `to` nunca es anterior a
+  `from`, y el mismo día dos veces da un rango de un día. `onRangeChange` recibe solo rangos
+  completos: cerrar a mitad de camino conserva el anterior. Tipos `DateRangePickerProps` y
+  `DateRange`.
 - **`DatePicker`: props `label`, `error` y `helperText`.** Opcionales, con el mismo aspecto y los
   mismos atributos que `SelectField`: `error` pone `aria-invalid` y `aria-describedby` en el
   disparador y reemplaza a `helperText`. `label` nombra el disparador junto con su texto, así que

@@ -19,6 +19,7 @@ export * from './components/Chip';
 export * from './components/Combobox';
 export * from './components/DataTable';
 export * from './components/DatePicker';
+export * from './components/DateRangePicker';
 export * from './components/Dialog';
 export * from './components/DropdownMenu';
 export * from './components/EmptyState';
