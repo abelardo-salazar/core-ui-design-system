@@ -23,6 +23,13 @@
   `` `Create "${text}"` ``. `onCreate` no cambia el valor: agrega la opción a `options` y
   selecciónala con `value`. Por eso, con `onCreate` los tipos exigen `value` y `onValueChange`.
   Funciona en popover e inline, en modo único y múltiple. Tipo `ComboboxCreateProps`.
+- **`NavigationBar`: props `variant` y `bottomBelow`.** `variant` acepta `'bottom'` (default, sin
+  cambios en el DOM), `'horizontal'` (fila de ítems de 44px con ícono y texto lado a lado; si no
+  caben, se desplaza de lado sin barra visible) y `'vertical'` (columna a ancho completo, con el
+  texto siempre visible). Fuera de `'bottom'`, el ítem activo se marca con un borde de 2px y el
+  texto en negrita media, no solo con color. `bottomBelow` (`'sm'` | `'md'` | `'lg'`, solo con
+  `'horizontal'` o `'vertical'`) vuelve a la forma `'bottom'` por debajo de ese breakpoint. Sigue
+  siendo server-safe y no se posiciona sola. Tipo `NavigationBarVariantProps`.
 
 ## [0.10.0] - 2026-11-03
 

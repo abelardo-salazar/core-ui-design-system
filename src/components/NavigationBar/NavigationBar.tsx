@@ -1,27 +1,58 @@
 import * as React from 'react';
 import { Slot, Slottable } from '@radix-ui/react-slot';
 import { cn } from '../../utils/cn';
+import {
+  navigationBarBadgeClass,
+  navigationBarIconVariants,
+  navigationBarItemClass,
+  navigationBarLinkVariants,
+  navigationBarListVariants,
+  navigationBarVariants,
+  type NavigationBarBreakpoint,
+} from './navigationBarVariants';
 
-export interface NavigationBarProps extends React.HTMLAttributes<HTMLElement> {
-  /** Accessible name of the landmark: a page can have several `<nav>`. */
-  'aria-label': string;
-}
+// Union discriminated by `variant`: `bottomBelow` only exists for horizontal/vertical. The first
+// branch accepts every variant so that `variant={dynamic}` without `bottomBelow` compiles.
+export type NavigationBarVariantProps =
+  | {
+      /**
+       * `'bottom'`: bottom bar, icon over text. `'horizontal'`: a row with icon beside text,
+       * 44px high; scrolls sideways if it doesn't fit. `'vertical'`: a full-width column.
+       * @default 'bottom'
+       */
+      variant?: 'bottom' | 'horizontal' | 'vertical';
+      bottomBelow?: never;
+    }
+  | {
+      variant: 'horizontal' | 'vertical';
+      /** Uses the `'bottom'` form below this breakpoint (640 / 768 / 1024px). */
+      bottomBelow?: NavigationBarBreakpoint;
+    };
+
+export type NavigationBarProps = React.HTMLAttributes<HTMLElement> &
+  NavigationBarVariantProps & {
+    /** Accessible name of the landmark: a page can have several `<nav>`. */
+    'aria-label': string;
+  };
 
 // Not positioned on purpose: where the bar goes (fixed, sticky, in a grid) belongs to the
 // consumer's layout. The safe-area padding does live here: it's the same for all of them.
+// 'bottom' renders no data attributes: its DOM is the same as before the variants existed.
 const NavigationBar = React.forwardRef<HTMLElement, NavigationBarProps>(
-  ({ className, children, ...props }, ref) => (
-    <nav
-      ref={ref}
-      className={cn(
-        'border-t border-base-300 bg-base-100 pb-[env(safe-area-inset-bottom)]',
-        className,
-      )}
-      {...props}
-    >
-      <ul className="flex">{children}</ul>
-    </nav>
-  ),
+  ({ className, children, variant = 'bottom', bottomBelow, ...props }, ref) => {
+    const below = variant === 'bottom' ? undefined : bottomBelow;
+    return (
+      <nav
+        ref={ref}
+        data-variant={variant === 'bottom' ? undefined : variant}
+        data-bottom-below={below}
+        className={cn(navigationBarVariants({ variant, bottomBelow: below }), className)}
+        {...props}
+      >
+        <ul className={navigationBarListVariants({ variant, bottomBelow: below })}>{children}</ul>
+      </nav>
+    );
+  },
 );
 NavigationBar.displayName = 'NavigationBar';
 
@@ -52,35 +83,18 @@ const NavigationBarItem = React.forwardRef<HTMLAnchorElement, NavigationBarItemP
     const showBadge = badge !== undefined && badge > 0;
 
     return (
-      <li className="min-w-0 flex-1">
+      // The variant comes from the parent's data attributes (see navigationBarVariants.ts), not
+      // from Context: Context would make the item a client component.
+      <li className={navigationBarItemClass}>
         <Comp
           ref={ref}
           aria-current={active ? 'page' : undefined}
-          className={cn(
-            'flex min-h-14 w-full flex-col items-center justify-center gap-1 px-0.5 py-1.5 text-center text-xs leading-tight [overflow-wrap:anywhere]',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
-            active
-              ? 'font-medium text-base-content'
-              : 'text-base-content/70 pointer-fine:hover:bg-base-200 pointer-fine:hover:text-base-content',
-            className,
-          )}
+          className={cn(navigationBarLinkVariants({ active }), className)}
           {...props}
         >
-          <span
-            aria-hidden
-            className={cn(
-              'relative flex h-8 w-14 items-center justify-center rounded-full [&_svg]:size-5',
-              // The transparent border shows up in forced-colors mode, which removes backgrounds:
-              // the indicator must not depend on color alone.
-              active && 'border border-transparent bg-primary text-primary-content',
-            )}
-          >
+          <span aria-hidden className={navigationBarIconVariants({ active })}>
             {icon}
-            {showBadge && (
-              <span className="absolute -top-1 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[0.625rem] font-semibold leading-none text-error-content ring-2 ring-base-100">
-                {badge}
-              </span>
-            )}
+            {showBadge && <span className={navigationBarBadgeClass}>{badge}</span>}
           </span>
           <Slottable>{children}</Slottable>
           {/* A separate text node: a space inside the span is trimmed when computing the

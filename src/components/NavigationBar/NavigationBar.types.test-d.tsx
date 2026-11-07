@@ -45,9 +45,38 @@ const invalid = [
   <NavigationBarItem key="k" href="/">
     Inicio
   </NavigationBarItem>,
-  // @ts-expect-error there is no vertical orientation
+  // @ts-expect-error there is no orientation prop: the form is chosen with variant
   <NavigationBar key="l" aria-label="Principal" orientation="vertical" />,
 ];
 
 void valid;
 void invalid;
+
+// --- variant and bottomBelow ---------------------------------------------------------------
+
+declare const dynamicVariant: 'bottom' | 'horizontal' | 'vertical';
+
+const validVariants = [
+  <NavigationBar key="a" aria-label="P" variant="bottom" />,
+  <NavigationBar key="b" aria-label="P" variant="horizontal" />,
+  <NavigationBar key="c" aria-label="P" variant="vertical" bottomBelow="lg" />,
+  <NavigationBar key="d" aria-label="P" variant="horizontal" bottomBelow="sm" />,
+  // A dynamic variant without bottomBelow still compiles.
+  <NavigationBar key="e" aria-label="P" variant={dynamicVariant} />,
+];
+
+const invalidVariants = [
+  // @ts-expect-error bottomBelow needs horizontal or vertical
+  <NavigationBar key="a" aria-label="P" bottomBelow="md" />,
+  // @ts-expect-error bottomBelow makes no sense with 'bottom'
+  <NavigationBar key="b" aria-label="P" variant="bottom" bottomBelow="md" />,
+  // @ts-expect-error unknown breakpoint
+  <NavigationBar key="c" aria-label="P" variant="horizontal" bottomBelow="xl" />,
+  // @ts-expect-error unknown variant
+  <NavigationBar key="d" aria-label="P" variant="top" />,
+  // @ts-expect-error a dynamic variant may be 'bottom': no bottomBelow
+  <NavigationBar key="e" aria-label="P" variant={dynamicVariant} bottomBelow="md" />,
+];
+
+void validVariants;
+void invalidVariants;
