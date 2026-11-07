@@ -1263,7 +1263,7 @@ Uso (ejemplo simplificado, extraído de `DropdownMenu.stories.tsx`):
 | Componente        | Descripción                            | Props clave                                                                                                                                                  |
 | :---------------- | :------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Input`           | Campo de texto                         | `type`, `label?`, `error?`, `helperText?`, `startIcon?`, `endIcon?`, `clearable?`, `onClear?`, `clearLabel?`, `variant?`, `size?`, `disabled?`, `className?` |
-| `FileInput`       | Selector de archivos                   | `accept?`, `multiple?`, `onFilesChange?`, `onReject?`, `label?`, `error?`, `variant?`, `size?`, `chooseLabel?`, `changeLabel?`                               |
+| `FileInput`       | Selector de archivos                   | `accept?`, `multiple?`, `onFilesChange?`, `onReject?`, `label?`, `error?`, `variant?`, `size?`, `chooseLabel?`, `changeLabel?`, `dropzone?`, `dropLabel?`    |
 | `Textarea`        | Texto multilinea                       | Standard HTML props, `variant?`, `error?`, `className?`                                                                                                      |
 | `Select`          | Dropdown avanzado                      | `value?`, `defaultValue?`, `onValueChange?`, `placeholder?`, `className?`                                                                                    |
 | `SelectField`     | Select con etiqueta, error y ayuda     | `label` o `aria-label`, `error?`, `helperText?`, `placeholder?`, `size?` y los props de `Select`                                                             |
@@ -1421,7 +1421,9 @@ export function SearchField() {
 - **Props principales:**
   - `accept?: string`, `multiple?: boolean` — los atributos nativos.
   - `onFilesChange?: (files: File[]) => void` — los archivos elegidos que pasan `accept`.
-  - `onReject?: (files: File[]) => void` — los que no lo pasan.
+  - `onReject?: (files: File[], reason: 'type' | 'count') => void` — los rechazados, y por qué: `'type'` si no pasan `accept`, `'count'` si se soltaron varios sin `multiple`. El parámetro `reason` es _(desde 0.12)_.
+  - `dropzone?: boolean` _(desde 0.12)_ (default `false`) — envuelve el botón en una zona que también acepta archivos soltados encima.
+  - `dropLabel?: string` _(desde 0.12)_ (default `'Drop file here'`, o `'Drop files here'` con `multiple`) — texto de la zona.
   - `label?: string` — nombre visible del campo, asociado al `input`. Si no lo usas, el nombre accesible es solo el texto del botón.
   - `error?: string` — mensaje de error, con el mismo aspecto y los mismos atributos ARIA que en `Input`.
   - `variant?` (default `'outline'`) — las variantes de `Button`.
@@ -1452,7 +1454,20 @@ const [error, setError] = useState<string>();
 />;
 ```
 
-No incluye una zona para soltar archivos.
+**Zona para soltar:** con `dropzone`, el botón, su texto y el nombre elegido quedan dentro de un recuadro de borde punteado que lleva `data-dragging` mientras se arrastran archivos encima. Los archivos soltados siguen las mismas reglas que los elegidos y quedan en el `input` nativo; también disparan el `onChange` del `input`, como al elegirlos. Sin `multiple`, soltar más de un archivo los rechaza todos con `reason` `'count'` y se mantiene la selección anterior. La zona no tiene rol ni recibe el foco, y su texto está oculto para los lectores de pantalla: el botón sigue siendo el control para teclado y lectores. Con `disabled`, ignora lo que se suelta.
+
+```tsx
+<FileInput
+  label="Adjuntos"
+  accept="image/*"
+  multiple
+  dropzone
+  dropLabel="Suelta las imágenes aquí"
+  onReject={(files, reason) =>
+    setError(reason === 'count' ? 'Sube un solo archivo.' : 'Solo imágenes.')
+  }
+/>
+```
 
 ### Textarea — Uso y Props
 

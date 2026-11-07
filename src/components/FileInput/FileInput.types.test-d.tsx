@@ -21,8 +21,15 @@ const valid = [
     changeLabel="Cambiar"
     onFilesChange={(files: File[]) => void files}
     onReject={(files: File[]) => void files}
+    dropzone
+    dropLabel="Suelta aquí"
     className="w-full"
     ref={React.createRef<HTMLInputElement>()}
+  />,
+  // onReject receives the reason as its second parameter; a one-parameter callback still fits.
+  <FileInput
+    key="g"
+    onReject={(files: File[], reason: 'type' | 'count') => void [files, reason]}
   />,
 ];
 
@@ -37,6 +44,10 @@ const invalid = [
   <FileInput key="e" size="icon" />,
   // @ts-expect-error onFilesChange receives an array of File
   <FileInput key="f" onFilesChange={(files: string) => void files} />,
+  // @ts-expect-error the reason is 'type' or 'count', not any string
+  <FileInput key="h" onReject={(files: File[], reason: 'size') => void [files, reason]} />,
+  // @ts-expect-error dropLabel is text: the zone's text is hidden from assistive tech
+  <FileInput key="i" dropLabel={<span />} />,
 ];
 
 void valid;
