@@ -1,11 +1,11 @@
 # Core UI Design System
 
-![Version](https://img.shields.io/badge/version-0.10.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.11.0-blue.svg)
 ![React](https://img.shields.io/badge/react-19.0.0+-61DAFB.svg)
 ![TypeScript](https://img.shields.io/badge/typescript-5.9+-3178C6.svg)
 ![Registry](https://img.shields.io/badge/registry-npm-CB3837.svg)
 
-**Última versión publicada:** `0.10.0`. `main` tiene cambios sin publicar: ver [CHANGELOG § Unreleased](./CHANGELOG.md#unreleased).
+**Última versión publicada:** `0.11.0`.
 
 **Storybook:** [abelardo-salazar.github.io/core-ui-design-system](https://abelardo-salazar.github.io/core-ui-design-system/). Documenta la última versión publicada, no lo que aún está sin publicar en `main`.
 
