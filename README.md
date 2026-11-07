@@ -1716,9 +1716,9 @@ export function BookingDate() {
   - Con la lista oculta no hay opciones montadas: Enter y las flechas no eligen ni resaltan nada, y el mensaje `emptyLabel` no aparece. Con `'query'`, las flechas no abren la lista: hay que escribir.
   - **Escape dentro de `Sheet`/`Dialog`:** con la lista visible, el primer Escape la oculta sin cerrar el contenedor; con la lista oculta, Escape cierra el contenedor como siempre. No requiere nada del consumidor: el Combobox previene el Escape antes de que llegue a Radix. Un `onEscapeKeyDown` propio en `SheetContent`/`DialogContent` se sigue llamando, con `event.defaultPrevented === true` en ese primer Escape. Un contenedor que no sea de Radix y escuche Escape en `window` en captura, registrado antes, lo vería primero.
 - **Múltiple:** las opciones elegidas se muestran como `Chip` con ✕, fuera del botón (en línea, encima del buscador). Al quitar uno, el foco pasa al Chip siguiente o, si no hay, al botón (al buscador en línea). Los Chips siguen el `size` del Combobox; medido en navegador real, el campo del popover con un Chip mide 32 / 44 / 53px (`lg` supera los 48 de `Input`: el Chip `lg` mide 44) y crece al pasar a varias líneas.
-- **Filtro:** busca el texto en cualquier parte de la etiqueta, sin distinguir mayúsculas ni acentos ("mexico" encuentra "México"), y conserva el orden de `options`. No es configurable.
+- **Filtro:** busca solo en `label`, ni en `description` ni en `group`. Encuentra el texto en cualquier parte de la etiqueta, sin distinguir mayúsculas ni acentos ("mexico" encuentra "México"), y conserva el orden de `options`. No es configurable.
 - **Accesibilidad:** el disparador anuncia la etiqueta y el valor actual ("País, México"); el popover, el buscador y la lista toman el nombre de la etiqueta. La asociación ya viene en el HTML del servidor y sigue los cambios de `label`. Las opciones elegidas llevan `aria-checked="true"`; `aria-selected` marca la opción resaltada con el teclado.
-- Fuera de esta versión: búsqueda asíncrona, estado de carga y grupos.
+- Fuera de esta versión: búsqueda asíncrona y estado de carga.
 
 ```tsx
 import { useState } from 'react';
@@ -2122,7 +2122,37 @@ export function AddToCart({ onAdd }: { onAdd: () => void }) {
 
 8 primitivos de bajo nivel, cada uno mapea 1:1 a su elemento HTML de tabla (`<table>`, `<thead>`, `<tbody>`, `<tfoot>`, `<tr>`, `<th>`, `<td>`, `<caption>` respectivamente) con estilos del DS. Todos aceptan `className?: string` y los atributos/eventos HTML estándar de su elemento — no traen ninguna lógica de datos (para eso está `DataTable`).
 
+- **Props del modo tarjeta:**
+  - `responsive?: boolean` _(desde 0.4)_, en `Table` (default `false`) — debajo de 1024px de ancho de viewport (`max-lg`), cada fila se muestra como una tarjeta y cada celda como una línea.
+  - `data-label?: string` _(desde 0.4)_, en `TableCell` — etiqueta de la columna que la celda muestra en modo tarjeta. Sin `responsive`, no se ve.
+
 **Comportamiento no obvio:** `Table` envuelve el `<table>` en un `<div className="relative w-full overflow-x-auto">` — el scroll horizontal para tablas con muchas columnas es responsabilidad del propio primitivo, no de quien lo consume. El `ref` se forwardea al `<table>`, no al `div` wrapper. `TableRow` aplica `hover:bg-base-200` (mismo token de highlight que `SelectItem`/`DropdownMenuItem`, pero en `hover` en vez de `focus`, porque una fila de tabla no es un ítem navegable por teclado por defecto).
+
+**Modo tarjeta (`responsive`):**
+
+- El cambio es solo CSS y depende del viewport, no del ancho del contenedor.
+- El `<thead>` se oculta con `sr-only`: no se ve, pero sigue disponible para los lectores de pantalla.
+- Una celda sin `data-label` no muestra etiqueta. `Table` no la deduce del encabezado: con los primitivos, se pasa a mano en cada `TableCell` (`DataTable` [la genera sola](#datatable--uso-y-props)).
+- La etiqueta se dibuja con `::before` en la celda, así que no nombra a un control que esté dentro. El control necesita su propio nombre accesible, por ejemplo con `aria-label`.
+
+```tsx
+<Table responsive>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Nombre</TableHead>
+      <TableHead>Cantidad</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    <TableRow>
+      <TableCell data-label="Nombre">Ada Lovelace</TableCell>
+      <TableCell data-label="Cantidad">
+        <Input type="number" aria-label="Cantidad de Ada Lovelace" />
+      </TableCell>
+    </TableRow>
+  </TableBody>
+</Table>
+```
 
 Uso (ejemplo simplificado, extraído de `Table.stories.tsx`):
 
@@ -2199,6 +2229,7 @@ Notas:
 
 - Hacer click en un `TableHead` ordenable alterna el sort de esa columna (ícono `CaretUpIcon`/`CaretDownIcon`/`CaretSortIcon`, con `text-primary` cuando la columna está efectivamente ordenada).
 - El filtro global resetea la paginación a la primera página.
+- **Modo tarjeta:** `DataTable` activa siempre el modo `responsive` de [`Table`](#table--uso-y-props), con sus mismas reglas; no es configurable. El `data-label` de cada celda sale solo del encabezado de la columna, sin forma de indicar otro: si `header` es un string, ese texto; si es una función o JSX, o si no hay `header`, el `id` de la columna, que se ve tal cual en la tarjeta. Para una etiqueta legible, usa un `header` de tipo string. La celda del estado vacío no lleva etiqueta.
 - Área táctil: los botones de paginación se ven en 32px (`sm`), pero responden en 44px de alto gracias a un `::after`, sin cambiar su aspecto ni su foco. Esa área sobresale 6px por debajo de la raíz de `DataTable`: deja al menos ese espacio antes del siguiente control y evita un `overflow` que la recorte justo en el borde inferior.
 
 ### Chart — Uso y Props
