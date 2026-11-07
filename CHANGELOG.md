@@ -16,6 +16,13 @@
   `comboboxFilter` es el filtro por defecto (el texto en el `label`, sin distinguir mayúsculas ni
   acentos) y `comboboxTextMatch(text, query)` hace esa misma comparación sobre cualquier texto, para
   componer un filtro propio. Sin `filter`, el comportamiento no cambia.
+- **`Combobox`: opción "crear" con `onCreate` y `createLabel`.** Con `onCreate(text)`, la lista
+  ofrece al final una opción para crear el texto buscado (recortado), solo si no está vacío y no
+  coincide con el `label` de ninguna opción, sin distinguir mayúsculas ni acentos. Se navega con
+  flechas y Enter como las demás; su nombre accesible es `createLabel(text)`, por defecto
+  `` `Create "${text}"` ``. `onCreate` no cambia el valor: agrega la opción a `options` y
+  selecciónala con `value`. Por eso, con `onCreate` los tipos exigen `value` y `onValueChange`.
+  Funciona en popover e inline, en modo único y múltiple. Tipo `ComboboxCreateProps`.
 
 ## [0.10.0] - 2026-11-03
 

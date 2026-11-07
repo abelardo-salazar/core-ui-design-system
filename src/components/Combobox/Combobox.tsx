@@ -3,11 +3,12 @@
 import * as React from 'react';
 import { Command } from 'cmdk';
 import { useControllableState } from '@radix-ui/react-use-controllable-state';
-import { CheckIcon, ChevronDownIcon, MagnifyingGlassIcon } from '@radix-ui/react-icons';
+import { CheckIcon, ChevronDownIcon, MagnifyingGlassIcon, PlusIcon } from '@radix-ui/react-icons';
 import { cn } from '../../utils/cn';
 import { Chip } from '../Chip';
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from '../Popover';
 import { comboboxFilter } from './comboboxFilter';
+import { normalizeText } from './normalizeText';
 import {
   comboboxFieldVariants,
   comboboxGroupClass,
@@ -100,27 +101,48 @@ export type ComboboxLabelProps =
       'aria-label': string;
     };
 
+// Value props, discriminated by `onCreate`. `onCreate` doesn't change the value: the consumer
+// adds the new option and selects it through `value`, so with `onCreate` the value must be
+// controlled (`value` + `onValueChange`, no `defaultValue`).
+export type ComboboxCreateProps<TValue> =
+  | {
+      value?: TValue;
+      defaultValue?: TValue;
+      onValueChange?: (value: TValue) => void;
+      onCreate?: never;
+      createLabel?: never;
+    }
+  | {
+      value: TValue;
+      defaultValue?: never;
+      onValueChange: (value: TValue) => void;
+      /**
+       * Offers a "create" option at the end of the list while the trimmed search text is
+       * non-empty and matches no option's `label` (ignoring case and accents; it's compared with
+       * every option, not only the filtered ones). Choosing it calls `onCreate` with that text;
+       * the value doesn't change: add the option to `options` and select it with `value`.
+       */
+      onCreate: (text: string) => void;
+      /** Text and accessible name of the "create" option. @default (text) => `Create "${text}"` */
+      createLabel?: (text: string) => string;
+    };
+
 export type ComboboxSingleProps = ComboboxBaseProps &
   ComboboxLabelProps &
   ComboboxModeProps & {
     multiple?: false;
-    value?: string;
-    defaultValue?: string;
-    onValueChange?: (value: string) => void;
-  };
+  } & ComboboxCreateProps<string>;
 
 export type ComboboxMultipleProps = ComboboxBaseProps &
   ComboboxLabelProps &
   ComboboxModeProps & {
     multiple: true;
-    value?: string[];
-    defaultValue?: string[];
-    onValueChange?: (value: string[]) => void;
-  };
+  } & ComboboxCreateProps<string[]>;
 
 export type ComboboxProps = ComboboxSingleProps | ComboboxMultipleProps;
 
 const defaultRemoveLabel = (label: string) => `Remove ${label}`;
+const defaultCreateLabel = (text: string) => `Create "${text}"`;
 
 // Each group goes where its first option appears, with all of its options; an option without
 // a group keeps its own place.
@@ -150,6 +172,8 @@ interface ComboboxImplProps extends ComboboxBaseProps {
   onToggle: (value: string) => void;
   /** Remove with the Chip's ✕: in single mode it clears the value (`onToggle` doesn't deselect). */
   onRemove: (value: string) => void;
+  onCreate?: (text: string) => void;
+  createLabel?: (text: string) => string;
 }
 
 const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
@@ -172,6 +196,8 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
       emptyLabel = 'No results.',
       filter = comboboxFilter,
       removeLabel = defaultRemoveLabel,
+      onCreate,
+      createLabel = defaultCreateLabel,
       className,
     },
     ref,
@@ -205,6 +231,16 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
       const query = search.trim();
       return query ? options.filter((option) => filter(option, query)) : options;
     }, [options, search, filter]);
+
+    // Text offered by the "create" option, or '' when there's none. Compared with every option
+    // (disabled ones too), not only the filtered ones: a custom `filter` that hides an option
+    // doesn't make its label creatable again.
+    const createText = React.useMemo(() => {
+      const text = search.trim();
+      if (!onCreate || !text) return '';
+      const normalized = normalizeText(text);
+      return options.some((option) => normalizeText(option.label) === normalized) ? '' : text;
+    }, [onCreate, options, search]);
 
     const selectedOptions = selected
       .map((value) => options.find((option) => option.value === value))
@@ -252,6 +288,16 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
 
     const handleSelect = (value: string) => {
       onToggle(value);
+      afterChoose();
+    };
+
+    // "Create" leaves the search field like choosing an option does; the value is the consumer's.
+    const handleCreate = () => {
+      onCreate?.(createText);
+      afterChoose();
+    };
+
+    const afterChoose = () => {
       if (!multiple && !inline) {
         setOpen(false);
         setSearch('');
@@ -380,6 +426,19 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
             ) : (
               entry.options.map(renderItem)
             ),
+          )}
+          {/* Last, outside every group. Its cmdk value comes from useId so it can't collide
+              with an option's value. While it's shown, cmdk doesn't render Command.Empty. */}
+          {listVisible && createText && (
+            <Command.Item
+              value={`${generatedId}-create`}
+              disabled={disabled}
+              onSelect={handleCreate}
+              className={comboboxItemVariants({ size, described: false })}
+            >
+              <PlusIcon aria-hidden className="h-4 w-4 shrink-0" />
+              {createLabel(createText)}
+            </Command.Item>
           )}
         </Command.List>
       </Command>
@@ -558,6 +617,9 @@ MultipleCombobox.displayName = 'MultipleCombobox';
  * `mode="inline"`: search field and list in the form flow; **inside a `Sheet` or `Dialog`,
  * use `mode="inline"`**. `listVisibility` (`'always'` | `'focus'` | `'query'`) decides when the
  * list is visible inline; with `'focus'`/`'query'`, the single value is also shown as a `Chip`.
+ *
+ * `onCreate` offers a last "create" option for a text that matches no label; it doesn't change
+ * the value (the consumer adds the option and selects it with `value`, which is then required).
  *
  * Requires `label` (visible label, styled like Input's) or `aria-label`, not both.
  * The trigger announces the label and the current value; the popover, the search field and

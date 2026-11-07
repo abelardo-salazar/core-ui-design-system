@@ -1258,7 +1258,7 @@ Uso (ejemplo simplificado, extraído de `DropdownMenu.stories.tsx`):
 | `Checkbox`        | Casilla de selección                   | `checked?`, `defaultChecked?`, `onCheckedChange?`, `disabled?`, `className?`                                                                                 |
 | `CheckboxField`   | Casilla en una fila completa táctil    | `label`, `description?` y los props de `Checkbox`                                                                                                            |
 | `Calendar`        | Grilla de calendario                   | `mode`, `selected`, `onSelect`, `showOutsideDays?`, `size?`, `renderDayContent?` (todos los props de `DayPicker`)                                            |
-| `Combobox`        | Selección con buscador (cmdk)          | `options`, `label` o `aria-label`, `multiple?`, `value?`, `defaultValue?`, `onValueChange?`, `mode?`, `size?`, `disabled?`                                   |
+| `Combobox`        | Selección con buscador (cmdk)          | `options`, `label` o `aria-label`, `multiple?`, `value?`, `defaultValue?`, `onValueChange?`, `mode?`, `size?`, `disabled?`, `filter?`, `onCreate?`           |
 | `QuantityStepper` | Campo numérico con botones − / +       | `value?`, `defaultValue?`, `onChange?`, `min?`, `max?`, `step?`, `decrementLabel?`, `incrementLabel?`                                                        |
 | `DatePicker`      | Selector de fecha (Popover + Calendar) | `date?`, `onDateChange?`, `placeholder?`, `disabled?`, `className?`, `dialogLabel?`, `locale?`                                                               |
 
@@ -1725,7 +1725,7 @@ export function BookingDate() {
 
 **Desde 0.5.**
 
-- **Exports:** `Combobox`; funciones `comboboxFilter` y `comboboxTextMatch` _(desde 0.11)_; tipos `ComboboxProps`, `ComboboxSingleProps`, `ComboboxMultipleProps`, `ComboboxLabelProps`, `ComboboxModeProps`, `ComboboxListVisibility`, `ComboboxOption`. Requiere el peer `cmdk`.
+- **Exports:** `Combobox`; funciones `comboboxFilter` y `comboboxTextMatch` _(desde 0.11)_; tipos `ComboboxProps`, `ComboboxSingleProps`, `ComboboxMultipleProps`, `ComboboxLabelProps`, `ComboboxModeProps`, `ComboboxListVisibility`, `ComboboxOption`, `ComboboxCreateProps` _(desde 0.11)_. Requiere el peer `cmdk`.
 - **Props principales:**
   - `options: ComboboxOption[]` (requerido). Cada opción lleva `value: string`, `label: string` y `disabled?: boolean`, además de:
     - `description?: string` _(desde 0.10)_ — segunda línea bajo el `label`; sobre todo, explica por qué una opción está deshabilitada. Forma parte del nombre accesible de la opción y, en una opción deshabilitada, no se atenúa. El filtro por defecto no la busca, y el valor elegido y el `Chip` muestran solo el `label`.
@@ -1744,6 +1744,8 @@ export function BookingDate() {
     Con `'focus'` y `'query'`, el valor de modo único también se muestra como `Chip` (con la lista oculta no se vería de otra forma); su ✕ vacía el valor.
 
   - `filter?: (option: ComboboxOption, query: string) => boolean` _(desde 0.11)_ — decide qué opciones muestra la búsqueda; default `comboboxFilter`. `query` llega recortada y sin normalizar, y no se llama con el buscador vacío (se muestran todas). Para comparar texto igual que el default, `comboboxTextMatch(text, query)`: `true` si `query` aparece en `text` sin distinguir mayúsculas ni acentos. `comboboxFilter(option, query)` es `comboboxTextMatch(option.label, query)`. Ninguna de las dos depende de `'use client'`.
+  - `onCreate?: (text: string) => void` _(desde 0.11)_ — ofrece la opción "crear" al final de la lista. Recibe el texto recortado y **no cambia el valor**: el consumidor agrega la opción a `options` y la selecciona con `value`. Por eso, con `onCreate` los tipos exigen `value` y `onValueChange` y no admiten `defaultValue`.
+  - `createLabel?: (text: string) => string` _(desde 0.11)_ — texto y nombre accesible de la opción "crear"; default `` (text) => `Create "${text}"` ``. Solo con `onCreate`.
   - `size?: 'sm' | 'md' | 'lg'` (32 / 44 / 48px, la escala de `Input` y `Select`; default `'md'`).
   - `disabled?: boolean` — deshabilita el disparador, el buscador y los Chips.
   - `id?: string` — id del botón (en `mode="inline"`, del contenedor). No se usa para etiquetar: usar `label`.
@@ -1770,6 +1772,7 @@ export function BookingDate() {
   ```
 
 - **Accesibilidad:** el disparador anuncia la etiqueta y el valor actual ("País, México"); el popover, el buscador y la lista toman el nombre de la etiqueta. La asociación ya viene en el HTML del servidor y sigue los cambios de `label`. Las opciones elegidas llevan `aria-checked="true"`; `aria-selected` marca la opción resaltada con el teclado.
+- **Crear (`onCreate`):** la opción aparece al final, fuera de los grupos, solo si el texto recortado no está vacío y no coincide con el `label` de ninguna opción, sin distinguir mayúsculas ni acentos ("peru" no ofrece crear si existe "Perú"). Es una igualdad, no una búsqueda parcial: "Per" sí la ofrece. Se compara contra todas las `options`, incluidas las deshabilitadas, no solo contra las que deja pasar `filter`. Se navega con las flechas y se elige con Enter o con el puntero, como las demás. Mientras aparece no se muestra `emptyLabel`. Al elegirla, el buscador queda como al elegir una opción: en el popover de modo único se cierra; con `'focus'`/`'query'` se vacía el texto; con `'always'` el texto se conserva, y cuando el consumidor agrega la opción esta aparece marcada y "crear" desaparece. Con `listVisibility="query"` aparece junto con la lista, nunca antes. Si la creación es asíncrona, el consumidor decide qué mostrar mientras tanto: el Combobox no tiene estado de carga.
 - Fuera de esta versión: búsqueda asíncrona y estado de carga.
 
 ```tsx

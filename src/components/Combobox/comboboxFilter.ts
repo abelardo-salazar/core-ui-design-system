@@ -1,10 +1,7 @@
 // Pure helpers, without 'use client': a module that only builds a custom `filter` can import
 // them without pulling in the client component.
 import type { ComboboxOption } from './Combobox';
-
-// Without case or diacritics: "mexico" finds "México".
-const normalize = (text: string) =>
-  text.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase();
+import { normalizeText as normalize } from './normalizeText';
 
 /**
  * Whether `query` appears anywhere in `text`, ignoring case and accents. It's the comparison
