@@ -35,6 +35,10 @@
   muestra como una tarjeta. `true` sigue siendo `'lg'` y con `true` o `false` el HTML no cambia.
   `DataTable` suma la prop `responsive` con el mismo tipo (default `true`, como hasta ahora) y la
   pasa a `Table`; con `responsive={false}`, sus filas no pasan a tarjetas. Tipo `TableResponsive`.
+- **`Card`: prop `size`.** `'md'` (default, el padding de siempre: 24px) o `'sm'` (16px) en
+  `CardHeader`, `CardContent` y `CardFooter`. `Card` sigue siendo server-safe: la raíz agrega
+  `data-size` y la clase `group/card`. Con `'sm'`, el padding de las partes gana sobre su
+  `className`; se cambia con la misma variante (`group-data-[size=sm]/card:…`). Tipo `CardProps`.
 
 ## [0.10.0] - 2026-11-03
 

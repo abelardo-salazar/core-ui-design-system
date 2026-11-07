@@ -108,3 +108,78 @@ export const BlogPost: Story = {
     </Card>
   ),
 };
+
+const sizedCard = (size: 'md' | 'sm' | undefined, label: string) => (
+  <Card size={size} aria-label={label} className="w-72">
+    <CardHeader>
+      <CardTitle>Plan {label}</CardTitle>
+      <CardDescription>Facturación mensual.</CardDescription>
+    </CardHeader>
+    <CardContent>
+      <p className="text-sm">Hasta 5 proyectos.</p>
+    </CardContent>
+    <CardFooter>
+      <Button size="sm">Elegir</Button>
+    </CardFooter>
+  </Card>
+);
+
+// 4. size: the root only gets data-size and the named group (size never reaches the DOM as an
+// attribute); each part carries its md padding and the sm override, active only under an sm Card.
+export const Sizes: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      {sizedCard(undefined, 'por defecto')}
+      {sizedCard('sm', 'compacto')}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const byDefault = canvas.getByLabelText('por defecto');
+    const compact = canvas.getByLabelText('compacto');
+
+    await expect(byDefault).toHaveAttribute('data-size', 'md');
+    await expect(compact).toHaveAttribute('data-size', 'sm');
+    for (const card of [byDefault, compact]) {
+      await expect(card).toHaveClass('group/card');
+      await expect(card).not.toHaveAttribute('size');
+      const [header, content, footer] = [...card.children] as HTMLElement[];
+      await expect(header).toHaveClass('p-6', 'group-data-[size=sm]/card:p-4');
+      for (const part of [content, footer]) {
+        await expect(part).toHaveClass(
+          'p-6',
+          'pt-0',
+          'group-data-[size=sm]/card:px-4',
+          'group-data-[size=sm]/card:pb-4',
+        );
+        // Not p-4: in sm it would also beat the base's pt-0.
+        await expect(part).not.toHaveClass('group-data-[size=sm]/card:p-4');
+      }
+    }
+  },
+};
+
+const paddings = (element: Element) => {
+  const { paddingTop, paddingRight, paddingBottom, paddingLeft } = getComputedStyle(element);
+  return [paddingTop, paddingRight, paddingBottom, paddingLeft].join(' ');
+};
+
+// 5. size with the CSS applied: md keeps 24px, sm is 16px, and content/footer keep no top padding
+// in both.
+export const SizePadding: Story = {
+  tags: ['real-css'],
+  render: Sizes.render,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const cases = [
+      ['por defecto', '24px', '24px 24px 24px 24px', '0px 24px 24px 24px'],
+      ['compacto', '16px', '16px 16px 16px 16px', '0px 16px 16px 16px'],
+    ] as const;
+    for (const [label, size, header, body] of cases) {
+      const [headerEl, content, footer] = [...canvas.getByLabelText(label).children];
+      await expect(paddings(headerEl), `${label} (${size}) header`).toBe(header);
+      await expect(paddings(content), `${label} (${size}) content`).toBe(body);
+      await expect(paddings(footer), `${label} (${size}) footer`).toBe(body);
+    }
+  },
+};
