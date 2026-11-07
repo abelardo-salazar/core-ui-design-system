@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **`SelectTrigger`: prop `size` y estado de error por `aria-invalid`.** `size` acepta `'sm'` (32px,
+  compacto), `'md'` (44px, default, el alto de siempre) o `'lg'` (48px), la escala de `Input` y
+  `Button`. Con `aria-invalid="true"`, el trigger toma el borde, el texto y el anillo de foco de
+  error por CSS. Sin `size` ni `aria-invalid` se ve igual que antes; su `className` suma las clases
+  de error, que no aplican sin el atributo. `SelectField` reenvía `size` y `aria-invalid` al
+  trigger y no cambia de aspecto. Tipo `SelectTriggerProps`.
+
 ## [0.11.0] - 2026-11-07
 
 ### Added
