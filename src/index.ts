@@ -24,6 +24,7 @@ export * from './components/DropdownMenu';
 export * from './components/EmptyState';
 export * from './components/FileInput';
 export * from './components/Image';
+export * from './components/ImageUploader';
 export * from './components/Input';
 export * from './components/Layout'; // Container, Separator, SkipToContent
 export * from './components/Popover';
