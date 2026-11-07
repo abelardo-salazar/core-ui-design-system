@@ -35,6 +35,7 @@ npm install react@^19.0.0 react-dom@^19.0.0 \
   @radix-ui/react-dropdown-menu@^2.1.24 \
   @radix-ui/react-popover@^1.1.23 \
   @radix-ui/react-progress@^1.1.16 \
+  @radix-ui/react-radio-group@^1.5.1 \
   @radix-ui/react-select@^2.2.6 \
   @radix-ui/react-switch@^1.2.6 \
   @radix-ui/react-tabs@^1.1.21 \
@@ -161,6 +162,7 @@ Importar desde el barrel principal es seguro en un Server Component; el subpath 
 | `Progress`                                                                                                                                                                                                                         | No               |
 | `ProgressRing`                                                                                                                                                                                                                     | Sí               |
 | `QuantityStepper`                                                                                                                                                                                                                  | No               |
+| `RadioGroup`, `RadioGroupItem`, `RadioCard`                                                                                                                                                                                        | No               |
 | `Select`, `SelectGroup`, `SelectValue`, `SelectTrigger`, `SelectContent`, `SelectLabel`, `SelectItem`, `SelectSeparator`, `SelectScrollUpButton`, `SelectScrollDownButton`                                                         | No               |
 | `SelectField`                                                                                                                                                                                                                      | No               |
 | `Sheet`, `SheetPortal`, `SheetOverlay`, `SheetTrigger`, `SheetClose`, `SheetContent`, `SheetHeader`, `SheetBody`, `SheetFooter`, `SheetTitle`, `SheetDescription`                                                                  | No               |
@@ -314,6 +316,7 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
     - [📝 Formularios (Forms)](#-formularios-forms)
     - [Checkbox — Uso y Props](#checkbox--uso-y-props)
     - [CheckboxField — Uso y Props](#checkboxfield--uso-y-props)
+    - [RadioGroup — Uso y Props](#radiogroup--uso-y-props)
     - [Input — Uso y Props](#input--uso-y-props)
     - [FileInput — Uso y Props](#fileinput--uso-y-props)
     - [ImageUploader — Uso y Props](#imageuploader--uso-y-props)
@@ -1274,6 +1277,7 @@ Uso (ejemplo simplificado, extraído de `DropdownMenu.stories.tsx`):
 | `SwitchField`     | Switch en una fila completa táctil     | `label`, `description?` y los props de `Switch`                                                                                                              |
 | `Checkbox`        | Casilla de selección                   | `checked?`, `defaultChecked?`, `onCheckedChange?`, `disabled?`, `className?`                                                                                 |
 | `CheckboxField`   | Casilla en una fila completa táctil    | `label`, `description?` y los props de `Checkbox`                                                                                                            |
+| `RadioGroup`      | Grupo de opciones excluyentes          | `label` o `aria-label`, `error?`, `helperText?`, `orientation?`, `value?`, `onValueChange?`; hijos `RadioGroupItem` o `RadioCard`                            |
 | `Calendar`        | Grilla de calendario                   | `mode`, `selected`, `onSelect`, `showOutsideDays?`, `size?`, `renderDayContent?` (todos los props de `DayPicker`)                                            |
 | `Combobox`        | Selección con buscador (cmdk)          | `options`, `label` o `aria-label`, `multiple?`, `value?`, `defaultValue?`, `onValueChange?`, `mode?`, `size?`, `disabled?`, `filter?`, `onCreate?`           |
 | `QuantityStepper` | Campo numérico con botones − / +       | `value?`, `defaultValue?`, `onChange?`, `min?`, `max?`, `step?`, `decrementLabel?`, `incrementLabel?`                                                        |
@@ -1339,6 +1343,40 @@ Casilla a la izquierda y texto a la derecha, en una fila de al menos 48px que re
 />
 
 <CheckboxField label="Envío gratis" description="Disponible en compras desde $50" disabled />
+```
+
+### RadioGroup — Uso y Props
+
+**Desde 0.12.**
+
+- **Exports:** `RadioGroup`, `RadioGroupItem`, `RadioCard`; tipos `RadioGroupProps`, `RadioGroupLabelProps`, `RadioGroupItemProps` y `RadioCardProps`. Requiere el peer `@radix-ui/react-radio-group`.
+- **`RadioGroup`:**
+  - `label` o `aria-label` — uno de los dos, lo exigen los tipos. El `label` visible nombra el grupo con `aria-labelledby`.
+  - `error?: string` — marca el grupo con `aria-invalid` y lo describe con `aria-describedby`; reemplaza a `helperText`.
+  - `helperText?: string` — texto de ayuda, enlazado con `aria-describedby`.
+  - `orientation?: 'horizontal' | 'vertical'` — pasa a Radix: decide la disposición (columna por defecto, fila con salto de línea en `'horizontal'`) y qué flechas navegan. Sin ella, navegan las cuatro.
+  - Acepta los props de Radix (`value`, `defaultValue`, `onValueChange`, `name`, `required`, `disabled`, `loop`…). `className` y `ref` van al `radiogroup`, donde están los ítems: es el lugar para cambiar su disposición (por ejemplo `grid grid-cols-2`).
+- **`RadioGroupItem`:** `value`, `label: React.ReactNode` (obligatorio) y `description?: React.ReactNode`, más los props del ítem de Radix (`disabled`, `id`…). Es la fila de `CheckboxField` con un radio: al menos 48px, toda la fila responde al toque. `className` va a la fila y `ref` al radio.
+- **`RadioCard`:** `value`, `title: React.ReactNode` (obligatorio) y `description?: React.ReactNode`, más los props del ítem de Radix. La tarjeta entera es el radio, de al menos 48px. `className` y `ref` van a la tarjeta.
+
+Es un `radiogroup` real: Tab entra al grupo, las flechas mueven la selección dentro de él y se saltan los ítems deshabilitados. Una opción elegida no se puede desmarcar, a diferencia de `ToggleGroup` con `type="single"`. Dentro de un `<form>`, el valor elegido se envía con el `name` del grupo.
+
+**Comportamiento no obvio:**
+
+- **Nombre y descripción de `RadioCard`.** El nombre accesible es solo el `title`; la `description` la describe con `aria-describedby`, así que no se lee dos veces. `title` reemplaza al atributo nativo del mismo nombre.
+- **Selección sin depender del color.** `RadioCard` elegida muestra un borde más grueso y un ícono de check; `RadioGroupItem` muestra un punto dentro del círculo.
+- **Deshabilitados.** Con `disabled` se atenúa el `label` o el `title`, pero no la `description`: es el lugar para explicar el motivo ("Sold out").
+
+```tsx
+<RadioGroup label="Envío" value={envio} onValueChange={setEnvio} error={error}>
+  <RadioGroupItem value="normal" label="Normal" description="De 3 a 5 días" />
+  <RadioGroupItem value="express" label="Express" description="No disponible hoy" disabled />
+</RadioGroup>
+
+<RadioGroup label="Talla" name="talla" className="grid grid-cols-2">
+  <RadioCard value="s" title="S" description="Pecho 86–91 cm" />
+  <RadioCard value="l" title="L" description="Sold out" disabled />
+</RadioGroup>
 ```
 
 ### Input — Uso y Props

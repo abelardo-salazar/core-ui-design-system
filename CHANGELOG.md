@@ -2,7 +2,28 @@
 
 ## [Unreleased]
 
+### Instalación
+
+Un peer nuevo: `@radix-ui/react-radio-group@^1.5.1` (lo usan `RadioGroup`, `RadioGroupItem` y
+`RadioCard`). Sin él, el import del paquete falla aunque no uses esos componentes:
+
+```bash
+npm install @radix-ui/react-radio-group@^1.5.1
+```
+
 ### Added
+
+- **`RadioGroup`, `RadioGroupItem` y `RadioCard`.** Grupo de opciones excluyentes sobre
+  `@radix-ui/react-radio-group`: Tab entra al grupo, las flechas mueven la selección y se saltan
+  los deshabilitados, y una opción elegida no se puede desmarcar (a diferencia de `ToggleGroup`
+  single). `RadioGroup` lleva `label` o `aria-label` (uno de los dos, lo exigen los tipos),
+  `error` (con `aria-invalid` y `aria-describedby`) y `helperText`; `orientation` pasa a Radix y
+  `className` va al `radiogroup`. `RadioGroupItem` es una fila táctil de al menos 48px con
+  `label` y `description`. `RadioCard` es una tarjeta entera seleccionable, de al menos 48px, con
+  `title` (su nombre accesible) y `description` (su descripción); elegida, muestra un borde más
+  grueso y un ícono de check. Con `disabled`, la `description` sigue legible para explicar el
+  motivo. Tipos `RadioGroupProps`, `RadioGroupLabelProps`, `RadioGroupItemProps` y
+  `RadioCardProps`.
 
 - **`ImageUploader`.** Galería de imágenes controlada (`value`/`onValueChange`) con portada, orden
   y quitar. Cada ítem es `{ kind: 'file', id, file }` o `{ kind: 'remote', id, src, alt? }`, para

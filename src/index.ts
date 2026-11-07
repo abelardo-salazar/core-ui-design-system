@@ -31,6 +31,7 @@ export * from './components/Popover';
 export * from './components/Progress';
 export * from './components/ProgressRing';
 export * from './components/QuantityStepper';
+export * from './components/RadioGroup';
 export * from './components/Select';
 export * from './components/Sheet';
 export * from './components/Skeleton';
