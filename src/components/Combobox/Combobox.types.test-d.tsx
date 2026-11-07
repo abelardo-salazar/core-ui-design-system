@@ -98,3 +98,60 @@ const invalidFilter = [
 
 void withFilter;
 void invalidFilter;
+
+// onCreate: the value must be controlled (value + onValueChange), and createLabel needs onCreate.
+declare const setOne: (value: string) => void;
+declare const setMany: (value: string[]) => void;
+const withCreate = [
+  <Combobox
+    key="a"
+    label="L"
+    options={options}
+    value=""
+    onValueChange={setOne}
+    onCreate={() => {}}
+  />,
+  <Combobox
+    key="b"
+    label="L"
+    mode="inline"
+    listVisibility="query"
+    multiple
+    options={options}
+    value={[]}
+    onValueChange={setMany}
+    onCreate={() => {}}
+    createLabel={(text) => `Crear ${text}`}
+  />,
+];
+const invalidCreate = [
+  // @ts-expect-error onCreate without value
+  <Combobox key="a" label="L" options={options} onValueChange={setOne} onCreate={() => {}} />,
+  // @ts-expect-error onCreate without onValueChange
+  <Combobox key="b" label="L" options={options} value="" onCreate={() => {}} />,
+  // @ts-expect-error onCreate with defaultValue instead of value
+  <Combobox key="c" label="L" options={options} defaultValue="" onCreate={() => {}} />,
+  // @ts-expect-error multiple: onCreate without value
+  <Combobox
+    key="d"
+    label="L"
+    multiple
+    options={options}
+    onValueChange={setMany}
+    onCreate={() => {}}
+  />,
+  // @ts-expect-error createLabel without onCreate
+  <Combobox key="e" label="L" options={options} createLabel={(text) => text} />,
+  <Combobox
+    key="f"
+    label="L"
+    options={options}
+    value=""
+    onValueChange={setOne}
+    // @ts-expect-error onCreate receives a string
+    onCreate={(text: number) => text}
+  />,
+];
+
+void withCreate;
+void invalidCreate;

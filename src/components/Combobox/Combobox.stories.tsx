@@ -14,7 +14,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '../Sheet';
-import { Combobox, type ComboboxOption } from './Combobox';
+import { Combobox, type ComboboxListVisibility, type ComboboxOption } from './Combobox';
 import { comboboxFilter, comboboxTextMatch } from './comboboxFilter';
 
 const meta: Meta<typeof Combobox> = {
@@ -973,5 +973,190 @@ export const CustomFilter: StoryObj<{ filter: typeof searchEverywhere }> = {
     // The exported default filter keeps the previous behavior: label only.
     await expect(comboboxFilter(byRegion[3], 'peru')).toBe(true);
     await expect(comboboxFilter(byRegion[3], 'lima')).toBe(false);
+  },
+};
+
+// "Create": the consumer adds the option and selects it through `value` (onCreate is void).
+const toOption = (text: string): ComboboxOption => ({ value: `new:${text}`, label: text });
+
+type CreateArgs = { onCreate: (text: string) => void };
+
+const CreatableSingle = ({ onCreate }: CreateArgs) => {
+  const [options, setOptions] = React.useState(countries);
+  const [value, setValue] = React.useState('');
+  return (
+    <Field>
+      <Combobox
+        label="País"
+        options={options}
+        value={value}
+        onValueChange={setValue}
+        onCreate={(text) => {
+          onCreate(text);
+          const option = toOption(text);
+          setOptions((current) => [...current, option]);
+          setValue(option.value);
+        }}
+      />
+    </Field>
+  );
+};
+
+const CreatableMultiple = ({
+  onCreate,
+  listVisibility,
+  filter,
+}: CreateArgs & {
+  listVisibility?: ComboboxListVisibility;
+  filter?: (option: ComboboxOption, query: string) => boolean;
+}) => {
+  const [options, setOptions] = React.useState(countries);
+  const [value, setValue] = React.useState<string[]>([]);
+  return (
+    <Field>
+      <Combobox
+        label="Países"
+        mode="inline"
+        listVisibility={listVisibility}
+        multiple
+        filter={filter}
+        options={options}
+        value={value}
+        onValueChange={setValue}
+        createLabel={(text) => `Crear «${text}»`}
+        onCreate={(text) => {
+          onCreate(text);
+          const option = toOption(text);
+          setOptions((current) => [...current, option]);
+          setValue((current) => [...current, option.value]);
+        }}
+      />
+    </Field>
+  );
+};
+
+const highlightedIn = (root: HTMLElement) =>
+  root.querySelector('[role="option"][aria-selected="true"]')?.textContent;
+
+// 23. Create, popover single, keyboard only. The option appears last only when the trimmed text
+// matches no label (ignoring case and accents, disabled options included); Enter on it calls
+// onCreate with the trimmed text and closes like choosing. The consumer selects the new option.
+export const CreateSingle: StoryObj<CreateArgs> = {
+  args: { onCreate: fn() },
+  render: (args) => <CreatableSingle {...args} />,
+  play: async ({ canvasElement, args }) => {
+    const trigger = within(canvasElement).getByRole('button', { name: /País/ });
+    trigger.focus();
+    await userEvent.keyboard('{Enter}');
+    const listbox = await body().findByRole('listbox', { name: 'País' });
+    const input = body().getByRole('combobox', { name: 'País' });
+    const createOption = () => within(listbox).queryByRole('option', { name: /^Create/ });
+
+    await expect(createOption()).toBeNull();
+    for (const existing of ['PERU', 'cuba', '   ']) {
+      await userEvent.clear(input);
+      await userEvent.type(input, existing);
+      await expect(createOption()).toBeNull();
+    }
+
+    await userEvent.clear(input);
+    await userEvent.type(input, 'Per');
+    await expect(optionNames(listbox)).toEqual(['Perú', 'Create "Per"']);
+    await waitFor(() => expect(highlightedIn(listbox)).toBe('Perú'));
+    await userEvent.keyboard('{ArrowDown}');
+    await expect(highlightedIn(listbox)).toBe('Create "Per"');
+    await expect(createOption()).not.toHaveAttribute('aria-checked');
+
+    // Only "create": cmdk highlights it and the empty message doesn't appear.
+    await userEvent.clear(input);
+    await userEvent.type(input, '  Lima ');
+    await expect(optionNames(listbox)).toEqual(['Create "Lima"']);
+    await expect(body().queryByText('No results.')).toBeNull();
+    await waitFor(() => expect(highlightedIn(listbox)).toBe('Create "Lima"'));
+    await userEvent.keyboard('{Enter}');
+
+    await expect(args.onCreate).toHaveBeenCalledTimes(1);
+    await expect(args.onCreate).toHaveBeenCalledWith('Lima');
+    await waitFor(() => expect(body().queryByRole('listbox')).toBeNull());
+    await waitFor(() => expect(trigger).toHaveFocus());
+    await expect(trigger).toHaveAccessibleName('País Lima');
+
+    // The created label now exists: no "create" for it.
+    await userEvent.keyboard('{Enter}');
+    await userEvent.type(await body().findByRole('combobox', { name: 'País' }), 'lima');
+    const reopened = body().getByRole('listbox', { name: 'País' });
+    await expect(optionNames(reopened)).toEqual(['Lima']);
+  },
+};
+
+// 24. Create, inline multiple with createLabel, keyboard only. With 'always' the text stays, so
+// the created option shows up checked and "create" disappears.
+export const CreateMultipleInline: StoryObj<CreateArgs> = {
+  args: { onCreate: fn() },
+  render: (args) => <CreatableMultiple {...args} />,
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const listbox = canvas.getByRole('listbox', { name: 'Países' });
+    const input = canvas.getByRole('combobox', { name: 'Países' });
+
+    await userEvent.click(input);
+    await userEvent.type(input, 'Arg');
+    await expect(optionNames(listbox)).toEqual(['Argentina', 'Crear «Arg»']);
+    await userEvent.keyboard('{ArrowDown}{Enter}');
+
+    await expect(args.onCreate).toHaveBeenCalledWith('Arg');
+    await expect(input).toHaveValue('Arg');
+    await expect(input).toHaveFocus();
+    await expect(optionNames(listbox)).toEqual(['Argentina', 'Arg']);
+    await expect(within(listbox).getByRole('option', { name: 'Arg' })).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+    await expect(canvas.getByRole('button', { name: 'Remove Arg' })).toBeVisible();
+  },
+};
+
+// 25. Create with listVisibility="query": it appears together with the list, never before.
+// Choosing it clears the text (and hides the list), like choosing an option.
+export const CreateWithQuery: StoryObj<CreateArgs> = {
+  args: { onCreate: fn() },
+  render: (args) => <CreatableMultiple {...args} listVisibility="query" />,
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const input = canvas.getByRole('combobox', { name: 'Países' });
+
+    await userEvent.click(input);
+    await expect(canvas.queryAllByRole('option')).toHaveLength(0);
+    await userEvent.type(input, 'Lima');
+    const listbox = canvas.getByRole('listbox', { name: 'Países' });
+    await expect(listbox).toBeVisible();
+    await expect(optionNames(listbox)).toEqual(['Crear «Lima»']);
+    await userEvent.keyboard('{Enter}');
+
+    await expect(args.onCreate).toHaveBeenCalledWith('Lima');
+    await expect(input).toHaveValue('');
+    await expect(canvas.queryAllByRole('option')).toHaveLength(0);
+    await expect(input).toHaveAttribute('aria-expanded', 'false');
+    await expect(canvas.getByRole('button', { name: 'Remove Lima' })).toBeVisible();
+  },
+};
+
+// 26. The match is checked against every option, not the ones `filter` lets through: a filter
+// that hides everything doesn't make an existing label creatable.
+export const CreateIgnoresFilter: StoryObj<CreateArgs> = {
+  args: { onCreate: fn() },
+  render: (args) => <CreatableMultiple {...args} filter={() => false} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const input = canvas.getByRole('combobox', { name: 'Países' });
+    const listbox = canvas.getByRole('listbox', { name: 'Países' });
+
+    await userEvent.type(input, 'méxico');
+    await expect(within(listbox).queryAllByRole('option')).toHaveLength(0);
+    await expect(canvas.getByText('No results.')).toBeVisible();
+
+    await userEvent.clear(input);
+    await userEvent.type(input, 'Méx');
+    await expect(optionNames(listbox)).toEqual(['Crear «Méx»']);
   },
 };

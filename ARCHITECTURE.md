@@ -224,6 +224,12 @@ Desde 0.9.0 el paquete se publica en el registro público de npm, bajo el scope 
 
 **Dependency confusion:** antes el `.npmrc` del consumidor mapeaba el scope a GitHub Packages para que npm no lo resolviera contra npmjs. Ahora el paquete vive en npmjs y el scope pertenece al mantenedor, así que nadie más puede publicar bajo él.
 
+### `onCreate` de Combobox devuelve `void`
+
+`onCreate(text)` solo avisa que se pidió crear: no devuelve el valor de la opción nueva ni cambia la selección. El consumidor agrega la opción a `options` y la selecciona con `value`; por eso los tipos exigen `value` y `onValueChange` cuando hay `onCreate`. Reemplaza la del triage del 2026-11-03, en la que `onCreate` devolvía el `value` y el Combobox lo seleccionaba (no llegó a publicarse).
+
+**Por qué:** crear es del dominio del consumidor, no del DS: puede validar, rechazar, normalizar el texto o persistir en un servidor, y puede ser asíncrono. Si `onCreate` devolviera el valor, el DS tendría que decidir qué hacer con una promesa pendiente o rechazada y con un valor que todavía no está en `options`. Con `void` y valor controlado, la fuente de verdad es una sola: las `options` y el `value` del consumidor.
+
 ### Fuera del DS
 
 Lo específico de un consumidor queda fuera del design system. Precedente: Kanban, que es un proyecto aparte.
