@@ -6,8 +6,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '../Popover';
 import { Button } from '../Button';
 import { Calendar } from '../Calendar';
 import { cn } from '../../utils/cn';
+import { PickerField, type PickerFieldTextProps } from '../PickerField/PickerField';
 
-export interface DatePickerProps {
+export interface DatePickerProps extends PickerFieldTextProps {
   date?: Date;
   onDateChange?: (date: Date | undefined) => void;
   placeholder?: string;
@@ -20,6 +21,8 @@ export interface DatePickerProps {
    * Without a locale, everything stays in English.
    */
   locale?: Locale;
+  // label, error and helperText come from PickerFieldTextProps: all optional, so a DatePicker
+  // without them keeps its DOM and its name (the trigger's text).
 }
 
 function DatePicker({
@@ -30,23 +33,36 @@ function DatePicker({
   disabled,
   dialogLabel = 'Choose date',
   locale,
+  label,
+  error,
+  helperText,
 }: DatePickerProps) {
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          disabled={disabled}
-          startIcon={<CalendarIcon className="h-4 w-4" />}
-          className={cn(
-            'w-60 justify-start font-normal',
-            !date && 'text-base-content/70',
-            className,
-          )}
-        >
-          {date ? format(date, 'PPP', { locale }) : placeholder}
-        </Button>
-      </PopoverTrigger>
+      <PickerField
+        label={label}
+        error={error}
+        helperText={helperText}
+        renderTrigger={(fieldProps, { hasError }) => (
+          <PopoverTrigger asChild>
+            <Button
+              {...fieldProps}
+              variant="outline"
+              disabled={disabled}
+              startIcon={<CalendarIcon className="h-4 w-4" />}
+              className={cn(
+                'w-60 justify-start font-normal',
+                !date && 'text-base-content/70',
+                // Same error look as FileInput's trigger: border and focus ring.
+                hasError && 'border-error focus-visible:ring-error',
+                className,
+              )}
+            >
+              {date ? format(date, 'PPP', { locale }) : placeholder}
+            </Button>
+          </PopoverTrigger>
+        )}
+      />
       <PopoverContent className="w-auto p-0" align="start" aria-label={dialogLabel}>
         {/* DayPickerLocale extends date-fns' Locale (it only adds `labels?`): it's assigned
             without a cast. The navigation labels come from `labels`, which the date-fns locales

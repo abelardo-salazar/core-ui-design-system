@@ -1315,7 +1315,7 @@ Uso (ejemplo simplificado, extraído de `DropdownMenu.stories.tsx`):
 | `Calendar`        | Grilla de calendario                   | `mode`, `selected`, `onSelect`, `showOutsideDays?`, `size?`, `renderDayContent?` (todos los props de `DayPicker`)                                            |
 | `Combobox`        | Selección con buscador (cmdk)          | `options`, `label` o `aria-label`, `multiple?`, `value?`, `defaultValue?`, `onValueChange?`, `mode?`, `size?`, `disabled?`, `filter?`, `onCreate?`           |
 | `QuantityStepper` | Campo numérico con botones − / +       | `value?`, `defaultValue?`, `onChange?`, `min?`, `max?`, `step?`, `decrementLabel?`, `incrementLabel?`                                                        |
-| `DatePicker`      | Selector de fecha (Popover + Calendar) | `date?`, `onDateChange?`, `placeholder?`, `disabled?`, `className?`, `dialogLabel?`, `locale?`                                                               |
+| `DatePicker`      | Selector de fecha (Popover + Calendar) | `date?`, `onDateChange?`, `placeholder?`, `disabled?`, `className?`, `dialogLabel?`, `locale?`, `label?`, `error?`, `helperText?`                            |
 
 ### Checkbox — Uso y Props
 
@@ -1824,6 +1824,11 @@ Con un `DayButton` propio en `components`, tu botón reemplaza al del DS: `rende
   - `locale?: Locale` (de `date-fns`) _(desde 0.5)_ — se aplica a la fecha del disparador y al calendario. Con un locale de `date-fns` las etiquetas de navegación del calendario quedan en inglés; con los locales que exporta el DS desde el subpath `/locale` (`import { es } from '@abelardo-salazar/core-ui-design-system/locale'`) también se traducen. Ese subpath reexporta los locales de DayPicker (los de `date-fns` con las etiquetas traducidas), es server-safe y solo empaqueta los locales que se importan. No importar desde `@daypicker/react`: es dependencia del DS, no de la app (con pnpm no se resuelve).
   - `disabled?: boolean`.
   - `className?: string` — se aplica al `Button` trigger.
+  - `label?: string` _(desde 0.12)_ — nombre visible del campo. Nombra el disparador junto con su texto, así que se lee la etiqueta y la fecha elegida.
+  - `error?: string` _(desde 0.12)_ — mensaje de error, con el mismo aspecto y los mismos atributos que en `SelectField`: `aria-invalid` y `aria-describedby` en el disparador. Reemplaza a `helperText`.
+  - `helperText?: string` _(desde 0.12)_ — texto de ayuda, enlazado con `aria-describedby`.
+
+**Campo:** sin `label`, `error` ni `helperText`, `DatePicker` es solo el disparador, como antes, y su nombre accesible es su texto. Con alguna de ellas se envuelve en un campo (etiqueta, disparador y mensaje). La etiqueta es un `<span>` enlazado con `aria-labelledby`, no un `<label>`: hacer clic en ella no abre el calendario.
 
 **Comportamiento no obvio:** `DatePicker` es **100% controlado, sin estado interno propio** — compone `Popover` + `Button` (trigger) + `Calendar` (`mode="single"`) tal cual ya existen en el DS, no una API monolítica aparte. El consumidor maneja `date`/`onDateChange` desde afuera, igual que lo haría en una app real. Formatea la fecha visible con `date-fns` (`format(date, 'PPP', { locale })`). El calendario abre en el mes de `date` (sin `date`, en el mes actual) y la navegación sigue libre. Para el `locale`, ver [Locales](#locales--subpath-locale): no se puede pasar desde un Server Component.
 
@@ -1834,6 +1839,14 @@ function ControlledDatePicker() {
   const [date, setDate] = useState<Date | undefined>(undefined);
   return <DatePicker date={date} onDateChange={setDate} />;
 }
+
+<DatePicker
+  label="Fecha de entrega"
+  helperText="De lunes a sábado"
+  error={error}
+  date={date}
+  onDateChange={setDate}
+/>;
 ```
 
 ### Locales — subpath `/locale`

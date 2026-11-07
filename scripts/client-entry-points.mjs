@@ -39,6 +39,7 @@ export const CLIENT_ENTRY_POINTS = [
   'src/components/QuantityStepper/QuantityStepper.tsx',
   'src/components/Button/Button.tsx',
   'src/components/SelectionField/SelectionField.tsx',
+  'src/components/PickerField/PickerField.tsx',
   'src/components/SwitchField/SwitchField.tsx',
   'src/components/CheckboxField/CheckboxField.tsx',
   'src/components/Toggle/Toggle.tsx',
