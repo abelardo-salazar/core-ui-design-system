@@ -754,7 +754,7 @@ Notas:
 
 La API está pensada para composición: puedes mezclar contenido arbitrario dentro de `Card` (imágenes, grids, formularios) y usar `className` en cada subcomponente para ajustar espaciado y alineación.
 
-**Comportamiento no obvio de `size`:** el tamaño llega a las partes por CSS (`data-size` en la raíz), no por contexto de React, para que `Card` siga siendo server-safe. Por eso, con `size="sm"` el padding de las partes gana sobre su `className`; para cambiarlo, usar la misma variante (`group-data-[size=sm]/card:p-3`). Una `Card` dentro de una `Card` `sm` también toma el padding `sm`.
+**Comportamiento no obvio de `size`:** el tamaño llega a las partes por CSS (`data-size` en la raíz), no por contexto de React, para que `Card` siga siendo server-safe. Por eso, con `size="sm"` el padding de las partes gana sobre su `className`; para cambiarlo, usar la misma variante (`group-data-[size=sm]/card:p-3`). Una `Card` anidada dentro de una `Card` `sm` también toma el padding `sm`, aunque declare `size="md"`: `group-data` alcanza a cualquier ancestro, no solo al más cercano. Es el mismo caso que `EmptyState`.
 
 Uso (ejemplos simplificados extraídos de `Card.stories.tsx`):
 
