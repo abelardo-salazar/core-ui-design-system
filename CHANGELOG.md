@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.12.0] - 2026-11-07
 
 ### Instalación
 
@@ -11,47 +11,10 @@ Un peer nuevo: `@radix-ui/react-radio-group@^1.5.1` (lo usan `RadioGroup`, `Radi
 npm install @radix-ui/react-radio-group@^1.5.1
 ```
 
-### Added
+Ningún cambio de API es incompatible. Antes de actualizar, revisar **Changed**: hay dos cambios de
+aspecto y de DOM, en `SelectTrigger` y en `DatePicker`.
 
-- **`Timeline`, `TimelineItem` y `TimelineGroup`.** Secuencia de solo lectura (itinerario,
-  historial de estados), server-safe. `Timeline` es una `<ol>`; `TimelineItem` lleva un marcador
-  decorativo (`aria-hidden`), la línea hasta el siguiente y `time` opcional al final de la fila,
-  con cifras tabulares (como `<time>` si se pasa `dateTime`); sin `time`, el texto ocupa todo el
-  ancho. `TimelineGroup` agrupa ítems bajo un encabezado (`title`, `headingLevel` de 2 a 6, por
-  defecto 3) en una `<ol>` anidada; la línea se corta entre grupos. Tipos `TimelineProps`,
-  `TimelineItemProps` y `TimelineGroupProps`.
-- **`DateRangePicker`.** Selector de rango de días, aparte de `DatePicker`: `range` y
-  `onRangeChange` con el tipo `DateRange` (re-exportado), `minDate`/`maxDate` como días
-  deshabilitados, `placeholder`, `dialogLabel`, `locale` y el mismo campo que `DatePicker`
-  (`label`, `error`, `helperText`). El disparador muestra las dos fechas con el locale. Cada
-  apertura empieza un rango nuevo y el popover se cierra al completarlo; `to` nunca es anterior a
-  `from`, y el mismo día dos veces da un rango de un día. `onRangeChange` recibe solo rangos
-  completos: cerrar a mitad de camino conserva el anterior. Tipos `DateRangePickerProps` y
-  `DateRange`.
-- **`DatePicker`: props `label`, `error` y `helperText`.** Opcionales, con el mismo aspecto y los
-  mismos atributos que `SelectField`: `error` pone `aria-invalid` y `aria-describedby` en el
-  disparador y reemplaza a `helperText`. `label` nombra el disparador junto con su texto, así que
-  se lee la etiqueta y la fecha elegida; es un `<span>`, así que un clic en ella no abre el
-  calendario. Sin estas props, el aspecto y el nombre accesible no cambian: el disparador queda
-  dentro de un envoltorio con `display: contents`.
-- **`ScrollRow` y `ScrollRowItem`.** Fila de ítems con desplazamiento horizontal y anclaje al
-  inicio de cada ítem: una región con `aria-label` obligatorio por tipos y una lista `<ul>` cuyos
-  hijos son `ScrollRowItem` (`<li>`). La barra se oculta con puntero grueso. Con `controls`
-  agrega botones anterior y siguiente de 44px, solo con puntero fino, que desplazan un ancho
-  visible y desaparecen en los extremos sin perder el foco; sus nombres se cambian con `labels`
-  (default en inglés). Con `prefers-reduced-motion`, desplazan sin animación. Tipos
-  `ScrollRowProps`, `ScrollRowItemProps` y `ScrollRowLabels`.
-- **`RadioGroup`, `RadioGroupItem` y `RadioCard`.** Grupo de opciones excluyentes sobre
-  `@radix-ui/react-radio-group`: Tab entra al grupo, las flechas mueven la selección y se saltan
-  los deshabilitados, y una opción elegida no se puede desmarcar (a diferencia de `ToggleGroup`
-  single). `RadioGroup` lleva `label` o `aria-label` (uno de los dos, lo exigen los tipos),
-  `error` (con `aria-invalid` y `aria-describedby`) y `helperText`; `orientation` pasa a Radix y
-  `className` va al `radiogroup`. `RadioGroupItem` es una fila táctil de al menos 48px con
-  `label` y `description`. `RadioCard` es una tarjeta entera seleccionable, de al menos 48px, con
-  `title` (su nombre accesible) y `description` (su descripción); elegida, muestra un borde más
-  grueso y un ícono de check. Con `disabled`, la `description` sigue legible para explicar el
-  motivo. Tipos `RadioGroupProps`, `RadioGroupLabelProps`, `RadioGroupItemProps` y
-  `RadioCardProps`.
+### Added
 
 - **`ImageUploader`.** Galería de imágenes controlada (`value`/`onValueChange`) con portada, orden
   y quitar. Cada ítem es `{ kind: 'file', id, file }` o `{ kind: 'remote', id, src, alt? }`, para
@@ -64,12 +27,42 @@ npm install @radix-ui/react-radio-group@^1.5.1
   tipos), `error`, `helperText`, `disabled` y `labels` para los textos (default en inglés). No
   envía archivos con el formulario nativo: subirlos es tarea de la app. Tipos
   `ImageUploaderProps`, `ImageUploaderItem`, `ImageUploaderLabels` e `ImageUploaderLabelProps`.
-- **`SelectTrigger`: prop `size` y estado de error por `aria-invalid`.** `size` acepta `'sm'` (32px,
-  compacto), `'md'` (44px, default, el alto de siempre) o `'lg'` (48px), la escala de `Input` y
-  `Button`. Con `aria-invalid="true"`, el trigger toma el borde, el texto y el anillo de foco de
-  error por CSS. Sin `size` ni `aria-invalid` se ve igual que antes; su `className` suma las clases
-  de error, que no aplican sin el atributo. `SelectField` reenvía `size` y `aria-invalid` al
-  trigger y no cambia de aspecto. Tipo `SelectTriggerProps`.
+- **`RadioGroup`, `RadioGroupItem` y `RadioCard`.** Grupo de opciones excluyentes sobre
+  `@radix-ui/react-radio-group` (peer nuevo, ver **Instalación**): Tab entra al grupo, las flechas
+  mueven la selección y se saltan los deshabilitados, y una opción elegida no se puede desmarcar
+  (a diferencia de `ToggleGroup` single). `RadioGroup` lleva `label` o `aria-label` (uno de los
+  dos, lo exigen los tipos), `error` (con `aria-invalid` y `aria-describedby`) y `helperText`;
+  `orientation` pasa a Radix y `className` va al `radiogroup`. `RadioGroupItem` es una fila
+  táctil de al menos 48px con `label` y `description`. `RadioCard` es una tarjeta entera
+  seleccionable, de al menos 48px, con `title` (su nombre accesible) y `description` (su
+  descripción); elegida, muestra un borde más grueso y un ícono de check. Con `disabled`, la
+  `description` sigue legible para explicar el motivo. Tipos `RadioGroupProps`,
+  `RadioGroupLabelProps`, `RadioGroupItemProps` y `RadioCardProps`.
+- **`ScrollRow` y `ScrollRowItem`.** Fila de ítems con desplazamiento horizontal y anclaje al
+  inicio de cada ítem: una región con `aria-label` obligatorio por tipos y una lista `<ul>` cuyos
+  hijos son `ScrollRowItem` (`<li>`). La barra se oculta con puntero grueso. Con `controls`
+  agrega botones anterior y siguiente de 44px, solo con puntero fino, que desplazan un ancho
+  visible y desaparecen en los extremos sin perder el foco; sus nombres se cambian con `labels`
+  (default en inglés). Con `prefers-reduced-motion`, desplazan sin animación. Tipos
+  `ScrollRowProps`, `ScrollRowItemProps` y `ScrollRowLabels`.
+- **`DateRangePicker`.** Selector de rango de días, aparte de `DatePicker`: `range` y
+  `onRangeChange` con el tipo `DateRange` (re-exportado), `minDate`/`maxDate` como días
+  deshabilitados, `placeholder`, `dialogLabel`, `locale` y el mismo campo que `DatePicker`
+  (`label`, `error`, `helperText`). El disparador muestra las dos fechas con el locale. Cada
+  apertura empieza un rango nuevo y el popover se cierra al completarlo; `to` nunca es anterior a
+  `from`, y el mismo día dos veces da un rango de un día. `onRangeChange` recibe solo rangos
+  completos: cerrar a mitad de camino conserva el anterior. Tipos `DateRangePickerProps` y
+  `DateRange`.
+- **`Timeline`, `TimelineItem` y `TimelineGroup`.** Secuencia de solo lectura (itinerario,
+  historial de estados), server-safe. `Timeline` es una `<ol>`; `TimelineItem` lleva un marcador
+  decorativo (`aria-hidden`), la línea hasta el siguiente y `time` opcional al final de la fila,
+  con cifras tabulares (como `<time>` si se pasa `dateTime`); sin `time`, el texto ocupa todo el
+  ancho. `TimelineGroup` agrupa ítems bajo un encabezado (`title`, `headingLevel` de 2 a 6, por
+  defecto 3) en una `<ol>` anidada; la línea se corta entre grupos. Tipos `TimelineProps`,
+  `TimelineItemProps` y `TimelineGroupProps`.
+- **`SelectTrigger`: prop `size`.** Acepta `'sm'` (32px, compacto), `'md'` (44px, default, el alto
+  de siempre) o `'lg'` (48px), la escala de `Input` y `Button`. `SelectField` la reenvía al
+  trigger. Tipo `SelectTriggerProps`. El estado de error por `aria-invalid` está en **Changed**.
 - **`FileInput`: zona para soltar archivos con `dropzone` y `dropLabel`.** Con `dropzone`, el botón
   y su texto quedan dentro de una zona que acepta archivos soltados y lleva `data-dragging`
   mientras se arrastran encima. `dropLabel` es su texto, por defecto `'Drop file here'` (o
@@ -81,6 +74,26 @@ npm install @radix-ui/react-radio-group@^1.5.1
   `onReject(files, reason)`, con `reason: 'type' | 'count'`: `'type'` si no pasan `accept`,
   `'count'` si se soltaron varios archivos sin `multiple`, que se rechazan todos. Un callback de un
   solo parámetro sigue funcionando igual.
+- **`DatePicker`: props `label`, `error` y `helperText`.** Opcionales, con el mismo aspecto y los
+  mismos atributos que `SelectField`: `error` pone `aria-invalid` y `aria-describedby` en el
+  disparador y reemplaza a `helperText`. `label` nombra el disparador junto con su texto, así que
+  se lee la etiqueta y la fecha elegida; es un `<span>`, así que un clic en ella no abre el
+  calendario. Sin estas props, el aspecto y el nombre accesible no cambian (el envoltorio del
+  disparador está en **Changed**).
+
+### Changed
+
+- **`SelectTrigger` con `aria-invalid="true"` se ve como error.** Toma el borde, el texto y el
+  anillo de foco de error por CSS, sin `className` propio. Si compones `Select` a mano y ya pones
+  `aria-invalid="true"` en el trigger, ahora se ve en estado de error; si además le dabas ese
+  aspecto con tus clases, puedes quitarlas. Sin el atributo, nada cambia, y `SelectField` se ve
+  igual que antes.
+- **`DatePicker` envuelve siempre su disparador en un `<div>` con `display: contents`.** El aspecto
+  no cambia, porque el envoltorio no participa del layout. Pero el botón deja de ser hijo directo
+  del elemento que contiene al `DatePicker`, así que un selector de hijo directo (`.fila > button`,
+  o la variante `*:` de Tailwind) ya no lo alcanza: usa un selector de descendiente o `className`.
+  El envoltorio evita que el disparador se vuelva a montar, y pierda el foco, cuando aparece un
+  `error`.
 
 ## [0.11.0] - 2026-11-07
 

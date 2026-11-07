@@ -1,11 +1,11 @@
 # Core UI Design System
 
-![Version](https://img.shields.io/badge/version-0.11.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.12.0-blue.svg)
 ![React](https://img.shields.io/badge/react-19.0.0+-61DAFB.svg)
 ![TypeScript](https://img.shields.io/badge/typescript-5.9+-3178C6.svg)
 ![Registry](https://img.shields.io/badge/registry-npm-CB3837.svg)
 
-**Última versión publicada:** `0.11.0`. `main` tiene cambios sin publicar: ver [CHANGELOG § Unreleased](./CHANGELOG.md#unreleased).
+**Última versión publicada:** `0.12.0`.
 
 **Storybook:** [abelardo-salazar.github.io/core-ui-design-system](https://abelardo-salazar.github.io/core-ui-design-system/). Documenta la última versión publicada, no lo que aún está sin publicar en `main`.
 
@@ -2664,6 +2664,7 @@ Además de los componentes, cada entry point exporta los tipos de sus props y al
 | Tipos de props (0.7.0)  | `ComboboxModeProps`, `ComboboxListVisibility`                                                                                                                                                                                                                                                                                                                                                                                                     |
 | Tipos de props (0.10.0) | `NavigationBarProps`, `NavigationBarItemProps`, `SwitchFieldProps`, `CheckboxFieldProps`, `ToggleProps`, `FileInputProps`                                                                                                                                                                                                                                                                                                                         |
 | Tipos de props (0.11.0) | `SelectFieldProps`, `SelectFieldLabelProps`                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Tipos de props (0.12.0) | `ImageUploaderProps`, `ImageUploaderItem`, `ImageUploaderLabels`, `ImageUploaderLabelProps`, `RadioGroupProps`, `RadioGroupLabelProps`, `RadioGroupItemProps`, `RadioCardProps`, `ScrollRowProps`, `ScrollRowItemProps`, `ScrollRowLabels`, `DateRangePickerProps`, `DateRange`, `TimelineProps`, `TimelineItemProps`, `TimelineGroupProps`, `SelectTriggerProps`                                                                                 |
 | Variantes (`cva`)       | `buttonVariants`, `badgeVariants`, `inputVariants`, `alertVariants`, `alertIconVariants` — devuelven las clases de cada variante, para dar el mismo aspecto a un elemento propio (por ejemplo, un `Link` con `buttonVariants({ variant: 'outline' })`)                                                                                                                                                                                            |
 | Utilidades              | `cn(...inputs)` — combina clases con `clsx` y resuelve conflictos de Tailwind con `tailwind-merge` (la última gana); `toast` (ver [Toast](#toast--uso-y-props)); `features` (ver [DataTable](#datatable--uso-y-props)); `announce` (ver [announce()](#announce--uso-y-opciones))                                                                                                                                                                  |
 
