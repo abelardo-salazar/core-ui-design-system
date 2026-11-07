@@ -13,6 +13,13 @@ npm install @radix-ui/react-radio-group@^1.5.1
 
 ### Added
 
+- **`Timeline`, `TimelineItem` y `TimelineGroup`.** Secuencia de solo lectura (itinerario,
+  historial de estados), server-safe. `Timeline` es una `<ol>`; `TimelineItem` lleva un marcador
+  decorativo (`aria-hidden`), la línea hasta el siguiente y `time` opcional al final de la fila,
+  con cifras tabulares (como `<time>` si se pasa `dateTime`); sin `time`, el texto ocupa todo el
+  ancho. `TimelineGroup` agrupa ítems bajo un encabezado (`title`, `headingLevel` de 2 a 6, por
+  defecto 3) en una `<ol>` anidada; la línea se corta entre grupos. Tipos `TimelineProps`,
+  `TimelineItemProps` y `TimelineGroupProps`.
 - **`DateRangePicker`.** Selector de rango de días, aparte de `DatePicker`: `range` y
   `onRangeChange` con el tipo `DateRange` (re-exportado), `minDate`/`maxDate` como días
   deshabilitados, `placeholder`, `dialogLabel`, `locale` y el mismo campo que `DatePicker`
