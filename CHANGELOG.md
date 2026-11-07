@@ -10,6 +10,17 @@
   error por CSS. Sin `size` ni `aria-invalid` se ve igual que antes; su `className` suma las clases
   de error, que no aplican sin el atributo. `SelectField` reenvía `size` y `aria-invalid` al
   trigger y no cambia de aspecto. Tipo `SelectTriggerProps`.
+- **`FileInput`: zona para soltar archivos con `dropzone` y `dropLabel`.** Con `dropzone`, el botón
+  y su texto quedan dentro de una zona que acepta archivos soltados y lleva `data-dragging`
+  mientras se arrastran encima. `dropLabel` es su texto, por defecto `'Drop file here'` (o
+  `'Drop files here'` con `multiple`), oculto para lectores de pantalla. Los archivos soltados
+  pasan por las mismas reglas que los elegidos (`accept`, `onFilesChange`, `onReject`), quedan en
+  el `input` nativo y disparan su `onChange`. La zona no tiene rol ni foco: el botón sigue siendo
+  el control. Con `disabled`, lo soltado se ignora. Sin `dropzone`, el DOM no cambia.
+- **`FileInput`: `onReject` recibe el motivo como segundo parámetro.**
+  `onReject(files, reason)`, con `reason: 'type' | 'count'`: `'type'` si no pasan `accept`,
+  `'count'` si se soltaron varios archivos sin `multiple`, que se rechazan todos. Un callback de un
+  solo parámetro sigue funcionando igual.
 
 ## [0.11.0] - 2026-11-07
 

@@ -4,6 +4,12 @@ import * as React from 'react';
 import { type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import { buttonVariants } from '../Button/buttonVariants';
+import {
+  setNativeFiles,
+  sortFiles,
+  useFileDrop,
+  type FileRejectReason,
+} from '../../utils/fileDrop';
 
 type ButtonVariantProps = VariantProps<typeof buttonVariants>;
 
@@ -25,34 +31,16 @@ export interface FileInputProps extends Omit<
   changeLabel?: string;
   /** The files chosen that pass `accept`. Not called if all of them were rejected. */
   onFilesChange?: (files: File[]) => void;
-  /** The files chosen that don't pass `accept`, which the user can reach with "All files". */
-  onReject?: (files: File[]) => void;
-}
-
-// The same rules as the native attribute, which only filters the dialog: a token is an extension
-// (".pdf"), a MIME wildcard ("image/*") or an exact MIME. Everything case-insensitive. A file whose
-// type the browser doesn't know has an empty type, so it only passes by extension.
-function matchesAccept(file: File, accept: string | undefined) {
-  const tokens = accept
-    ?.split(',')
-    .map((token) => token.trim().toLowerCase())
-    .filter(Boolean);
-  if (!tokens?.length) return true;
-
-  const name = file.name.toLowerCase();
-  const type = file.type.toLowerCase();
-  return tokens.some((token) => {
-    if (token.startsWith('.')) return name.endsWith(token);
-    if (token.endsWith('/*')) return type.startsWith(token.slice(0, -1));
-    return type === token;
-  });
-}
-
-// So that a form submit only carries the files shown. Setting `files` doesn't fire `change`.
-function setNativeFiles(input: HTMLInputElement, files: File[]) {
-  const transfer = new DataTransfer();
-  files.forEach((file) => transfer.items.add(file));
-  input.files = transfer.files;
+  /**
+   * The files chosen or dropped that are rejected, and why: `'type'` if they don't pass `accept`
+   * (the user can reach them with "All files"), `'count'` if several were dropped without
+   * `multiple`.
+   */
+  onReject?: (files: File[], reason: FileRejectReason) => void;
+  /** Wraps the trigger in a zone that also accepts files dropped on it. @default false */
+  dropzone?: boolean;
+  /** Text of the zone, hidden from assistive tech. Default: "Drop file here", or "Drop files here" with `multiple`. */
+  dropLabel?: string;
 }
 
 /**
@@ -74,6 +62,8 @@ const FileInput = React.forwardRef<HTMLInputElement, FileInputProps>(
       disabled,
       chooseLabel = multiple ? 'Choose files' : 'Choose file',
       changeLabel = multiple ? 'Change files' : 'Change file',
+      dropzone = false,
+      dropLabel = multiple ? 'Drop files here' : 'Drop file here',
       onFilesChange,
       onReject,
       onChange,
@@ -112,13 +102,12 @@ const FileInput = React.forwardRef<HTMLInputElement, FileInputProps>(
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       const chosen = Array.from(event.target.files ?? []);
-      const accepted = chosen.filter((file) => matchesAccept(file, accept));
-      const rejected = chosen.filter((file) => !matchesAccept(file, accept));
+      const { accepted, rejected, reason } = sortFiles(chosen, { accept, multiple });
 
       if (rejected.length > 0) {
         // With nothing valid, the previous choice stays: a wrong pick shouldn't cost it.
         setNativeFiles(event.target, accepted.length > 0 ? accepted : files);
-        onReject?.(rejected);
+        onReject?.(rejected, reason);
       }
       if (accepted.length > 0 || rejected.length === 0) {
         setFiles(accepted);
@@ -127,6 +116,20 @@ const FileInput = React.forwardRef<HTMLInputElement, FileInputProps>(
       // Last, so a form library reads the files that were kept.
       onChange?.(event);
     };
+
+    // A drop does what the browser does when files are dropped on a native file input: it fills
+    // the input and fires `input` and `change`. So dropped files go through handleChange, with the
+    // same rules and the same consumer onChange as chosen ones.
+    const { dragging, dropZoneProps } = useFileDrop({
+      disabled,
+      onDrop: (dropped) => {
+        const input = inputRef.current;
+        if (!input) return;
+        setNativeFiles(input, dropped);
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      },
+    });
 
     return (
       <div className="flex w-full flex-col gap-1.5">
@@ -143,7 +146,18 @@ const FileInput = React.forwardRef<HTMLInputElement, FileInputProps>(
         )}
 
         {/* relative: sr-only is absolute, and focusing it must not scroll to another place. */}
-        <div className="relative flex min-w-0 items-center gap-3">
+        {/* With dropzone, this row is the zone: no role and not focusable, the trigger stays the
+            control for keyboard and screen readers. */}
+        <div
+          className={cn(
+            'relative flex min-w-0 items-center gap-3',
+            dropzone &&
+              'flex-col justify-center rounded-lg border-2 border-dashed p-6 text-center transition-colors data-dragging:border-primary data-dragging:bg-primary/5',
+            dropzone && (hasError ? 'border-error' : 'border-base-300'),
+          )}
+          data-dragging={dropzone && dragging ? '' : undefined}
+          {...(dropzone ? dropZoneProps : {})}
+        >
           <input
             id={inputId}
             ref={setRefs}
@@ -161,6 +175,14 @@ const FileInput = React.forwardRef<HTMLInputElement, FileInputProps>(
             className="peer sr-only"
             {...props}
           />
+          {dropzone && (
+            <span
+              aria-hidden="true"
+              className={cn('text-sm text-base-content/70', disabled && 'opacity-50')}
+            >
+              {dropLabel}
+            </span>
+          )}
           <label
             htmlFor={inputId}
             className={cn(
@@ -179,7 +201,10 @@ const FileInput = React.forwardRef<HTMLInputElement, FileInputProps>(
             <span
               id={namesId}
               title={names}
-              className="min-w-0 truncate text-sm text-base-content/70"
+              className={cn(
+                'min-w-0 truncate text-sm text-base-content/70',
+                dropzone && 'max-w-full',
+              )}
             >
               {names}
             </span>
