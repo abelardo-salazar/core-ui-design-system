@@ -15,6 +15,7 @@ import {
   SheetTrigger,
 } from '../Sheet';
 import { Combobox, type ComboboxOption } from './Combobox';
+import { comboboxFilter, comboboxTextMatch } from './comboboxFilter';
 
 const meta: Meta<typeof Combobox> = {
   title: 'Components/Combobox',
@@ -921,5 +922,56 @@ export const GroupsWithListVisibility: Story = {
     await expect(
       canvas.getByRole('option', { name: 'Exprés No disponible en tu zona' }),
     ).toBeVisible();
+  },
+};
+
+const byRegion: ComboboxOption[] = [
+  { value: 'gt', label: 'Guatemala', group: 'Centroamérica', description: 'Ciudad de Guatemala' },
+  { value: 'ar', label: 'Argentina', group: 'Sudamérica', description: 'Buenos Aires' },
+  { value: 'hn', label: 'Honduras', group: 'Centroamérica', description: 'Tegucigalpa' },
+  { value: 'pe', label: 'Perú', group: 'Sudamérica', description: 'Lima' },
+  { value: 'mx', label: 'México', description: 'Ciudad de México' },
+];
+
+const searchEverywhere = (option: ComboboxOption, query: string) =>
+  [option.label, option.group, option.description].some(
+    (text) => text !== undefined && comboboxTextMatch(text, query),
+  );
+
+// 22. Custom filter composed with comboboxTextMatch: searching by region finds the options by
+// their group or description, and they stay under their group (groups are built after
+// filtering). The query arrives trimmed and not normalized; empty, the filter isn't called.
+export const CustomFilter: StoryObj<{ filter: typeof searchEverywhere }> = {
+  args: { filter: fn(searchEverywhere) },
+  render: ({ filter }) => (
+    <Field>
+      <Combobox label="País" mode="inline" options={byRegion} filter={filter} />
+    </Field>
+  ),
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const listbox = canvas.getByRole('listbox', { name: 'País' });
+    const input = canvas.getByRole('combobox', { name: 'País' });
+    await expect(args.filter).not.toHaveBeenCalled();
+
+    await userEvent.type(input, '  CENTROAMERICA ');
+    await expect(args.filter).toHaveBeenLastCalledWith(expect.anything(), 'CENTROAMERICA');
+    await expect(optionNames(listbox)).toEqual([
+      'Guatemala Ciudad de Guatemala',
+      'Honduras Tegucigalpa',
+    ]);
+    const central = within(listbox).getByRole('group', { name: 'Centroamérica' });
+    await expect(within(central).getAllByRole('option')).toHaveLength(2);
+    await expect(within(listbox).queryByRole('group', { name: 'Sudamérica' })).toBeNull();
+
+    await userEvent.clear(input);
+    await userEvent.type(input, 'lima');
+    await expect(optionNames(listbox)).toEqual(['Perú Lima']);
+    const south = within(listbox).getByRole('group', { name: 'Sudamérica' });
+    await expect(within(south).getByRole('option', { name: 'Perú Lima' })).toBeVisible();
+
+    // The exported default filter keeps the previous behavior: label only.
+    await expect(comboboxFilter(byRegion[3], 'peru')).toBe(true);
+    await expect(comboboxFilter(byRegion[3], 'lima')).toBe(false);
   },
 };

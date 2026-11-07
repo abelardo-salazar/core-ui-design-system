@@ -7,6 +7,7 @@ import { CheckIcon, ChevronDownIcon, MagnifyingGlassIcon } from '@radix-ui/react
 import { cn } from '../../utils/cn';
 import { Chip } from '../Chip';
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from '../Popover';
+import { comboboxFilter } from './comboboxFilter';
 import {
   comboboxFieldVariants,
   comboboxGroupClass,
@@ -25,7 +26,7 @@ export interface ComboboxOption {
   disabled?: boolean;
   /**
    * Second line under the label; above all, why the option is disabled. It's part of the
-   * option's accessible name. The filter doesn't search it.
+   * option's accessible name. The default filter doesn't search it.
    */
   description?: string;
   /** Heading of the group this option belongs to. Without it, the option goes outside groups. */
@@ -46,6 +47,13 @@ interface ComboboxBaseProps {
   placeholder?: string;
   /** @default 'Search...' */
   searchPlaceholder?: string;
+  /**
+   * Decides which options the search shows. `query` arrives trimmed and not normalized; it isn't
+   * called while the search field is empty (all options are shown). Groups are built after
+   * filtering, so a matching option stays under its `group`. To compare text the same way as the
+   * default, use `comboboxTextMatch`. @default comboboxFilter (`query` in the `label`)
+   */
+  filter?: (option: ComboboxOption, query: string) => boolean;
   /** Text when the filter finds no options. @default 'No results.' */
   emptyLabel?: string;
   /** Accessible name of each Chip's ✕ (multiple mode). @default (label) => `Remove ${label}` */
@@ -112,10 +120,6 @@ export type ComboboxMultipleProps = ComboboxBaseProps &
 
 export type ComboboxProps = ComboboxSingleProps | ComboboxMultipleProps;
 
-// Without case or diacritics: "mexico" finds "México".
-const normalize = (text: string) =>
-  text.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase();
-
 const defaultRemoveLabel = (label: string) => `Remove ${label}`;
 
 // Each group goes where its first option appears, with all of its options; an option without
@@ -166,6 +170,7 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
       placeholder = 'Select...',
       searchPlaceholder = 'Search...',
       emptyLabel = 'No results.',
+      filter = comboboxFilter,
       removeLabel = defaultRemoveLabel,
       className,
     },
@@ -197,9 +202,9 @@ const ComboboxImpl = React.forwardRef<HTMLDivElement, ComboboxImplProps>(
     const pendingFocus = React.useRef<string | null>(null);
 
     const filtered = React.useMemo(() => {
-      const query = normalize(search.trim());
-      return query ? options.filter((option) => normalize(option.label).includes(query)) : options;
-    }, [options, search]);
+      const query = search.trim();
+      return query ? options.filter((option) => filter(option, query)) : options;
+    }, [options, search, filter]);
 
     const selectedOptions = selected
       .map((value) => options.find((option) => option.value === value))
@@ -539,9 +544,9 @@ const MultipleCombobox = React.forwardRef<HTMLDivElement, ComboboxMultipleProps>
 MultipleCombobox.displayName = 'MultipleCombobox';
 
 /**
- * Selection field with a search box over a list of options (`options`). The filter looks for
- * the text anywhere in the label, ignoring case and accents, and keeps the order of
- * `options`.
+ * Selection field with a search box over a list of options (`options`). By default the filter
+ * looks for the text anywhere in the label, ignoring case and accents (`filter` replaces it), and
+ * keeps the order of `options`.
  *
  * - Single mode (default): `value: string` (`''` with no value). Choosing an option closes the
  *   popover and returns focus to the trigger; choosing the current one doesn't deselect it.
