@@ -210,6 +210,23 @@ export const ResponsiveCollapse: Story = {
   },
 };
 
+// 5b. responsive is forwarded to Table as is: a breakpoint swaps the card mode classes, false
+// removes them. The geometry per breakpoint is tested in Table's ResponsiveBreakpoints.
+export const ResponsiveBreakpoint: Story = {
+  render: () => (
+    <div className="space-y-8">
+      <DataTable columns={columns} data={people} responsive="md" />
+      <DataTable columns={columns} data={people} responsive={false} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const [mdTable, plainTable] = within(canvasElement).getAllByRole('table');
+    await expect(mdTable.className).toContain('max-md:block');
+    await expect(mdTable.className).not.toContain('max-lg:');
+    await expect(plainTable.className).not.toMatch(/max-(sm|md|lg):/);
+  },
+};
+
 // 6. Empty state: the filter with no results shows a single row with colSpan = columns.
 export const EmptyState: Story = {
   render: () => <DataTable columns={columns} data={people} />,

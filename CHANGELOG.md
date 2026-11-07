@@ -30,6 +30,11 @@
   texto en negrita media, no solo con color. `bottomBelow` (`'sm'` | `'md'` | `'lg'`, solo con
   `'horizontal'` o `'vertical'`) vuelve a la forma `'bottom'` por debajo de ese breakpoint. Sigue
   siendo server-safe y no se posiciona sola. Tipo `NavigationBarVariantProps`.
+- **`Table` y `DataTable`: `responsive` acepta un breakpoint.** Además de `true`/`false`, acepta
+  `'sm'` (640px), `'md'` (768px) o `'lg'` (1024px): debajo de ese ancho de viewport, cada fila se
+  muestra como una tarjeta. `true` sigue siendo `'lg'` y con `true` o `false` el HTML no cambia.
+  `DataTable` suma la prop `responsive` con el mismo tipo (default `true`, como hasta ahora) y la
+  pasa a `Table`; con `responsive={false}`, sus filas no pasan a tarjetas. Tipo `TableResponsive`.
 
 ## [0.10.0] - 2026-11-03
 

@@ -2184,12 +2184,12 @@ export function AddToCart({ onAdd }: { onAdd: () => void }) {
 
 **Desde 0.4.**
 
-- **Exports:** `Table`, `TableHeader`, `TableBody`, `TableFooter`, `TableRow`, `TableHead`, `TableCell`, `TableCaption`.
+- **Exports:** `Table`, `TableHeader`, `TableBody`, `TableFooter`, `TableRow`, `TableHead`, `TableCell`, `TableCaption` y el tipo `TableResponsive` _(desde 0.11)_.
 
 8 primitivos de bajo nivel, cada uno mapea 1:1 a su elemento HTML de tabla (`<table>`, `<thead>`, `<tbody>`, `<tfoot>`, `<tr>`, `<th>`, `<td>`, `<caption>` respectivamente) con estilos del DS. Todos aceptan `className?: string` y los atributos/eventos HTML estándar de su elemento — no traen ninguna lógica de datos (para eso está `DataTable`).
 
 - **Props del modo tarjeta:**
-  - `responsive?: boolean` _(desde 0.4)_, en `Table` (default `false`) — debajo de 1024px de ancho de viewport (`max-lg`), cada fila se muestra como una tarjeta y cada celda como una línea.
+  - `responsive?: boolean | 'sm' | 'md' | 'lg'` _(desde 0.4; `'sm'`, `'md'` y `'lg'` desde 0.11)_, en `Table` (default `false`) — debajo del breakpoint indicado (`'sm'` 640px, `'md'` 768px, `'lg'` 1024px de ancho de viewport), cada fila se muestra como una tarjeta y cada celda como una línea. `true` equivale a `'lg'`.
   - `data-label?: string` _(desde 0.4)_, en `TableCell` — etiqueta de la columna que la celda muestra en modo tarjeta. Sin `responsive`, no se ve.
 
 **Comportamiento no obvio:** `Table` envuelve el `<table>` en un `<div className="relative w-full overflow-x-auto">` — el scroll horizontal para tablas con muchas columnas es responsabilidad del propio primitivo, no de quien lo consume. El `ref` se forwardea al `<table>`, no al `div` wrapper. `TableRow` aplica `hover:bg-base-200` (mismo token de highlight que `SelectItem`/`DropdownMenuItem`, pero en `hover` en vez de `focus`, porque una fila de tabla no es un ítem navegable por teclado por defecto).
@@ -2264,6 +2264,7 @@ Nota: `TableCaption` y `TableFooter` son opcionales — una tabla mínima (sin c
   - `emptyState?: React.ReactNode` _(desde 0.5)_ (default: `EmptyState` `sm` con el título `'No results.'`).
   - `previousLabel?: string` (default `'Previous'`), `nextLabel?: string` (default `'Next'`) _(desde 0.5)_.
   - `pageLabel?: (page: number, total: number) => string` _(desde 0.5)_ (default `` (page, total) => `Page ${page} of ${total}` ``) — `page` empieza en 1.
+  - `responsive?: boolean | 'sm' | 'md' | 'lg'` _(desde 0.11)_ (default `true`) — se pasa tal cual a [`responsive` de `Table`](#table--uso-y-props): un breakpoint cambia desde qué ancho las filas se muestran como tarjetas y `false` deja la tabla a todo ancho.
   - `className?: string`.
 
 **Comportamiento no obvio:** construida sobre `@tanstack/react-table` v9. Las columnas deben tiparse contra `typeof features` (exportado por este mismo módulo, vía `createColumnHelper<typeof features, TData>()`) — es un requisito real de los generics de v9, no un detalle estilístico. `features` combina `rowSortingFeature` + `columnFilteringFeature` + `globalFilteringFeature` + `rowPaginationFeature`, pero **`columnFilteringFeature` está registrada únicamente porque el sistema de tipos de v9 la exige como prerequisito** de `globalFilteringFeature`/`filteredRowModel`/`filterFns` — `DataTable` no expone ningún filtro por columna, solo el filtro global (la caja de búsqueda). Alcance v1: sorting + filtro global + paginación; sin selección de filas, visibilidad de columnas, resize, agrupación/agregación ni pinning.
