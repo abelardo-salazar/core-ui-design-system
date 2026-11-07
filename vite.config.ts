@@ -168,6 +168,7 @@ export default defineConfig({
         '@radix-ui/react-tooltip',
         '@radix-ui/react-popover',
         '@radix-ui/react-progress',
+        '@radix-ui/react-radio-group',
         '@radix-ui/react-tabs',
         '@radix-ui/react-toggle-group',
         '@radix-ui/react-toggle',
