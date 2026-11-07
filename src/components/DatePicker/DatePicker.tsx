@@ -43,7 +43,7 @@ function DatePicker({
         label={label}
         error={error}
         helperText={helperText}
-        renderTrigger={(fieldProps, { hasError }) => (
+        renderTrigger={(fieldProps) => (
           <PopoverTrigger asChild>
             <Button
               {...fieldProps}
@@ -53,8 +53,9 @@ function DatePicker({
               className={cn(
                 'w-60 justify-start font-normal',
                 !date && 'text-base-content/70',
-                // Same error look as FileInput's trigger: border and focus ring.
-                hasError && 'border-error focus-visible:ring-error',
+                // Error from the aria-invalid PickerField sets, as in SelectTrigger: each class is one
+                // attribute more specific than the outline variant's, so it wins without tailwind-merge.
+                'aria-[invalid=true]:border-error aria-[invalid=true]:focus-visible:ring-error',
                 className,
               )}
             >

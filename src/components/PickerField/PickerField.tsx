@@ -19,8 +19,11 @@ export interface PickerFieldTriggerProps {
 }
 
 interface PickerFieldProps extends PickerFieldTextProps {
-  /** Receives the attributes for the trigger; spread them on the button. */
-  renderTrigger: (props: PickerFieldTriggerProps, state: { hasError: boolean }) => React.ReactNode;
+  /**
+   * Receives the attributes for the trigger; spread them on the button. The error look goes in
+   * the trigger's own aria-[invalid=true]: classes, as in SelectTrigger.
+   */
+  renderTrigger: (props: PickerFieldTriggerProps) => React.ReactNode;
 }
 
 // Internal, not exported from the barrel: label + trigger + message of the date pickers
@@ -32,8 +35,11 @@ interface PickerFieldProps extends PickerFieldTextProps {
 // native label instead of its content, which drops the date again; and a click on a button's
 // <label> activates the button, opening the popover.
 //
-// Without label, error or helperText it renders the trigger alone with no attributes, so the DOM of
-// a picker without these props doesn't change.
+// The wrapper is always rendered, also without label, error or helperText: then it's display:
+// contents, so the trigger's layout doesn't change, and the trigger gets no attributes. Returning
+// the trigger alone there would change the root's type when an error appears, and React would
+// remount the trigger, losing the focus. A div with no role and display: contents stays out of the
+// accessibility tree on its own; the button inside it doesn't.
 function PickerField({ label, error, helperText, renderTrigger }: PickerFieldProps) {
   const triggerId = React.useId();
   const labelId = `${triggerId}-label`;
@@ -41,10 +47,10 @@ function PickerField({ label, error, helperText, renderTrigger }: PickerFieldPro
   const descriptionId = `${triggerId}-description`;
   const hasError = !!error;
 
-  if (!label && !hasError && !helperText) return <>{renderTrigger({}, { hasError })}</>;
+  const hasField = !!label || hasError || !!helperText;
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className={hasField ? 'flex flex-col gap-1.5' : 'contents'}>
       {label && (
         <span
           id={labelId}
@@ -58,13 +64,14 @@ function PickerField({ label, error, helperText, renderTrigger }: PickerFieldPro
       )}
 
       {renderTrigger(
-        {
-          id: triggerId,
-          'aria-labelledby': label ? `${labelId} ${triggerId}` : undefined,
-          'aria-invalid': hasError,
-          'aria-describedby': hasError ? errorId : helperText ? descriptionId : undefined,
-        },
-        { hasError },
+        hasField
+          ? {
+              id: triggerId,
+              'aria-labelledby': label ? `${labelId} ${triggerId}` : undefined,
+              'aria-invalid': hasError,
+              'aria-describedby': hasError ? errorId : helperText ? descriptionId : undefined,
+            }
+          : {},
       )}
 
       {hasError ? (
