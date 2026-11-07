@@ -146,16 +146,21 @@ export const WithError: Story = {
     await expect(canvas.queryByText('Hasta 20 noches')).toBeNull();
     await expect(canvas.getByText('Fechas del viaje')).toHaveClass('text-error-focus');
     await expect(trigger.className.split(/\s+/)).toEqual(
-      expect.arrayContaining(['border-error', 'focus-visible:ring-error']),
+      expect.arrayContaining([
+        'aria-[invalid=true]:border-error',
+        'aria-[invalid=true]:focus-visible:ring-error',
+      ]),
     );
   },
 };
 
-// 7. Without label, error or helperText: the trigger alone, named by its text.
+// 7. Without label, error or helperText: the trigger, named by its text, in a display: contents
+// wrapper.
 export const WithoutField: Story = {
   play: async ({ canvasElement }) => {
     const trigger = within(canvasElement).getByRole('button', { name: 'Pick dates' });
-    await expect(trigger.parentElement).toBe(canvasElement);
+    await expect(trigger.parentElement!.className).toBe('contents');
+    await expect(trigger.parentElement!.parentElement).toBe(canvasElement);
     await expect(trigger).not.toHaveAttribute('aria-describedby');
   },
 };

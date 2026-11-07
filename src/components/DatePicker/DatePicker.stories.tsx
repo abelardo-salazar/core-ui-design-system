@@ -139,13 +139,17 @@ export const KeyboardNavigation: Story = {
   },
 };
 
-// 6. Without label, error or helperText the DOM is the one of before: the trigger alone, named by
-// its text, with no field attributes.
+// 6. Without label, error or helperText: the trigger, named by its text, with no field attributes,
+// inside a wrapper with display: contents (always rendered, so the trigger isn't remounted when an
+// error appears; see ErrorKeepsFocus).
 export const WithoutField: Story = {
   render: () => <DatePicker />,
   play: async ({ canvasElement }) => {
     const trigger = within(canvasElement).getByRole('button', { name: 'Pick a date' });
-    await expect(trigger.parentElement).toBe(canvasElement);
+    const wrapper = trigger.parentElement!;
+    await expect(wrapper.parentElement).toBe(canvasElement);
+    await expect(wrapper.className).toBe('contents');
+    await expect(wrapper.children).toHaveLength(1);
     for (const attribute of ['id', 'aria-labelledby', 'aria-invalid', 'aria-describedby']) {
       await expect(trigger).not.toHaveAttribute(attribute);
     }
@@ -198,10 +202,13 @@ export const WithError: Story = {
     );
     await expect(canvas.getByText('Fecha de entrega')).toHaveClass('text-error-focus');
     const classes = trigger.className.split(/\s+/);
+    // From aria-invalid, as in SelectTrigger; ErrorLook checks the computed style.
     await expect(classes).toEqual(
-      expect.arrayContaining(['border-error', 'focus-visible:ring-error']),
+      expect.arrayContaining([
+        'aria-[invalid=true]:border-error',
+        'aria-[invalid=true]:focus-visible:ring-error',
+      ]),
     );
-    await expect(classes).not.toContain('focus-visible:ring-primary');
   },
 };
 
@@ -212,5 +219,75 @@ export const HelperTextOnly: Story = {
     const trigger = within(canvasElement).getByRole('button', { name: 'Pick a date' });
     await expect(trigger).not.toHaveAttribute('aria-labelledby');
     await expect(trigger).toHaveAccessibleDescription('De lunes a sábado');
+  },
+};
+
+function ErrorAppears() {
+  const [error, setError] = React.useState<string>();
+  return (
+    <div className="flex flex-col gap-2">
+      <DatePicker error={error} />
+      <button type="button" onClick={() => setError('Elige una fecha')}>
+        Validar
+      </button>
+    </div>
+  );
+}
+
+// 10. When the error appears, the trigger is the same node and keeps the focus: the field's root
+// doesn't change type, so React doesn't remount the trigger.
+export const ErrorKeepsFocus: Story = {
+  render: () => <ErrorAppears />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole('button', { name: 'Pick a date' });
+    trigger.focus();
+    // click() without userEvent: it doesn't move the focus off the trigger.
+    canvas.getByRole('button', { name: 'Validar' }).click();
+    await canvas.findByText('Elige una fecha');
+    await expect(document.activeElement).toBe(trigger);
+    await expect(trigger.isConnected).toBe(true);
+    await expect(trigger).toHaveAttribute('aria-invalid', 'true');
+    await expect(trigger).toHaveAccessibleDescription('Elige una fecha');
+  },
+};
+
+// 11. With the real CSS: the error look comes from aria-invalid and is the same as before, the
+// error border and focus ring, compared with a reference element. Without the field, the wrapper
+// doesn't take part in the layout.
+export const ErrorLook: Story = {
+  tags: ['real-css'],
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <DatePicker label="Con error" error="Elige una fecha" />
+      <DatePicker label="Sin error" />
+      <DatePicker />
+      <div
+        data-testid="reference"
+        className="border border-error ring-2 ring-error ring-offset-2"
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const reference = getComputedStyle(canvas.getByTestId('reference'));
+    const invalid = canvas.getByRole('button', { name: /Con error/ });
+    const valid = canvas.getByRole('button', { name: /Sin error/ });
+
+    await expect(getComputedStyle(invalid).borderTopColor).toBe(reference.borderTopColor);
+    await expect(getComputedStyle(valid).borderTopColor).not.toBe(reference.borderTopColor);
+
+    // Keyboard focus, so :focus-visible applies.
+    invalid.focus();
+    await userEvent.tab({ shift: true });
+    await userEvent.tab();
+    await expect(invalid).toHaveFocus();
+    // The ring layer of the reference (color and 4px spread). The trigger also has Button's own
+    // shadow-sm, and transition-all animates the ring: wait until it ends.
+    const ring = reference.boxShadow.match(/rgba?\([^)]*\) 0px 0px 0px 4px/)![0];
+    await waitFor(() => expect(getComputedStyle(invalid).boxShadow).toContain(ring));
+
+    const bare = canvas.getByRole('button', { name: 'Pick a date' });
+    await expect(getComputedStyle(bare.parentElement!).display).toBe('contents');
   },
 };

@@ -161,7 +161,12 @@ export const Cards: Story = {
     await expect(canvas.getByText('L')).toHaveClass('opacity-50');
     await expect(canvas.getByText('Sold out')).not.toHaveClass('opacity-50');
     await expect(classesOf(s)).toEqual(
-      expect.arrayContaining(['min-h-12', 'focus-visible:ring-primary']),
+      expect.arrayContaining([
+        'min-h-12',
+        'focus-visible:ring-primary',
+        // Hover only with a fine pointer, as in the rest of the DS.
+        'pointer-fine:enabled:hover:bg-base-200',
+      ]),
     );
     await expect(s.querySelector('svg')).toBeNull();
 
