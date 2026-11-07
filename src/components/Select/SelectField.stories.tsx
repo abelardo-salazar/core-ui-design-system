@@ -74,7 +74,8 @@ export const WithError: Story = {
     await expect(trigger).toHaveAttribute('aria-invalid', 'true');
     await expect(trigger).toHaveAccessibleDescription('Elige un país.');
     await expect(canvas.queryByText('Ayuda que no se muestra.')).not.toBeInTheDocument();
-    await expect(trigger.className.split(' ')).toContain('border-error!');
+    // The error border is SelectTrigger's own, from aria-invalid (see SizesAndErrorStyles).
+    await expect(trigger).toHaveClass('aria-[invalid=true]:border-error');
     await expect(canvas.getByText('País').className.split(' ')).toContain('text-error-focus');
     await expect(canvas.getByText('Elige un país.').className.split(' ')).toContain(
       'text-error-focus',
@@ -173,8 +174,8 @@ export const LabelClickReachesTrigger: Story = {
   },
 };
 
-// 8. Same heights as Input, and the trigger's border changes with the error. Real CSS: the
-// `!` overrides are what's being checked.
+// 8. Same heights as Input, and the trigger's border changes with the error. Real CSS: size and
+// aria-invalid reach SelectTrigger, whose classes win with no `!`.
 export const SizesAndErrorStyles: Story = {
   tags: ['real-css'],
   render: () => (

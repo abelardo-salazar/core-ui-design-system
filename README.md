@@ -5,7 +5,7 @@
 ![TypeScript](https://img.shields.io/badge/typescript-5.9+-3178C6.svg)
 ![Registry](https://img.shields.io/badge/registry-npm-CB3837.svg)
 
-**Última versión publicada:** `0.11.0`.
+**Última versión publicada:** `0.11.0`. `main` tiene cambios sin publicar: ver [CHANGELOG § Unreleased](./CHANGELOG.md#unreleased).
 
 **Storybook:** [abelardo-salazar.github.io/core-ui-design-system](https://abelardo-salazar.github.io/core-ui-design-system/). Documenta la última versión publicada, no lo que aún está sin publicar en `main`.
 
@@ -1489,10 +1489,12 @@ const [value, setValue] = useState('');
 
 ### Select — Uso y Props
 
-- **Exports:** `Select`, `SelectGroup`, `SelectValue`, `SelectTrigger`, `SelectContent`, `SelectLabel`, `SelectItem`, `SelectSeparator`, `SelectScrollUpButton`, `SelectScrollDownButton`.
+- **Exports:** `Select`, `SelectGroup`, `SelectValue`, `SelectTrigger`, `SelectContent`, `SelectLabel`, `SelectItem`, `SelectSeparator`, `SelectScrollUpButton`, `SelectScrollDownButton`; tipo `SelectTriggerProps` _(desde 0.12)_.
 - **Props y comportamiento clave:**
   - `Select` (root): `value?: string`, `defaultValue?: string`, `onValueChange?: (value: string) => void` — API para controlado/no-controlado.
-  - `SelectTrigger`: `className?: string`, `asChild?: boolean` — dispara el panel y puede renderizar elementos existentes como trigger. Alto fijo de 44px (sin prop `size`: `SelectTrigger` no tiene escala propia) — comparte altura con `Button` `md` e `Input` `md`, ver la nota de alineación en la sección de `Button`.
+  - `SelectTrigger`: `className?: string`, `asChild?: boolean` — dispara el panel y puede renderizar elementos existentes como trigger.
+    - `size?: 'sm' | 'md' | 'lg'` _(desde 0.12)_ (default `'md'`) — 32 / 44 / 48px, la escala de `Input` y `Button`, para alinearlos en una misma fila (ver la nota de alineación en la sección de `Button`). `sm` es un tamaño compacto, por debajo del objetivo táctil de 44px y sin área táctil extendida, igual que en `Input`.
+    - Estado de error _(desde 0.12)_: con `aria-invalid="true"`, el trigger toma solo el borde, el texto y el anillo de foco de error. Es CSS (`aria-[invalid=true]:`), así que alcanza con pasar el atributo.
   - `SelectContent`: `position?: 'popper'` (usa `popper` por defecto en la implementación), `className?: string` — controla el panel desplegable (animaciones, tamaño mínimo).
   - `SelectItem`: `value: string`, `disabled?: boolean`, `className?: string` — representa una opción; usa `ItemIndicator` (check) cuando está seleccionada.
   - `SelectGroup` y `SelectLabel`: para agrupar opciones y mostrar labels de grupo.
@@ -1552,7 +1554,7 @@ Notas:
   - `children: React.ReactNode` (requerido) — los `SelectItem`, y `SelectGroup`, `SelectLabel` o `SelectSeparator` si hacen falta.
   - `error?: string` — marca el campo como inválido (`aria-invalid`) y enlaza el mensaje con `aria-describedby`. Reemplaza a `helperText`.
   - `helperText?: string` — texto de ayuda, también enlazado con `aria-describedby`.
-  - `size?: 'sm' | 'md' | 'lg'` (32 / 44 / 48px, la escala de `Input`; default `'md'`). `sm` es un tamaño compacto, por debajo del objetivo táctil de 44px y sin área táctil extendida, igual que en `Input`.
+  - `size?: 'sm' | 'md' | 'lg'` (32 / 44 / 48px, la escala de `Input`; default `'md'`). Se pasa a [`size` de `SelectTrigger`](#select--uso-y-props). `sm` es un tamaño compacto, por debajo del objetivo táctil de 44px y sin área táctil extendida, igual que en `Input`.
   - `placeholder?: string` — texto del disparador sin valor.
   - `value?`, `defaultValue?`, `onValueChange?`, `disabled?`, `name?`, `required?` y el resto de las props de `Select` pasan directo.
   - `id?: string` — id del disparador; sin él se genera uno.

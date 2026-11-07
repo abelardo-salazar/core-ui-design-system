@@ -182,7 +182,7 @@ La extensión se aplica en el componente que conoce su entorno (paginación de D
 
 Excepción: las grillas contiguas no extienden su hit area, porque un `::after` pisaría la celda vecina. Caso: los días de Calendar, que quedan en 36px. 44px no cabe en 320px de ancho (7 × 44 + padding = 332px) y 40px cambiaría el aspecto sin llegar a 44. La excepción aplica al default: `size="md"` (44px) y `size="lg"` (56px) son opt-in para contenedores anchos.
 
-Button, Input y SelectField comparten escala para alinear en una misma fila: `sm` 32px, `md` 44px, `lg` 48px. `SelectTrigger` solo tiene la altura `md` (44px); la escala `sm`/`lg` es de `SelectField`.
+Button, Input y Select comparten escala para alinear en una misma fila: `sm` 32px, `md` 44px, `lg` 48px. En Select, la escala es de `SelectTrigger` y `SelectField` la reenvía.
 
 ### Íconos internos
 

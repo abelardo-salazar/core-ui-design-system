@@ -2,8 +2,13 @@
 
 import * as React from 'react';
 import { cn } from '../../utils/cn';
-import { Select, SelectContent, SelectTrigger, SelectValue } from './Select';
-import { selectFieldTriggerVariants, type SelectFieldSize } from './selectFieldVariants';
+import {
+  Select,
+  SelectContent,
+  SelectTrigger,
+  SelectValue,
+  type SelectTriggerProps,
+} from './Select';
 
 // Visible label (`label`) or screen-reader-only label (`aria-label`): one of the two, same
 // pattern as ComboboxLabelProps.
@@ -28,7 +33,7 @@ export type SelectFieldProps = Omit<React.ComponentPropsWithoutRef<typeof Select
     /** Trigger text with no value. */
     placeholder?: string;
     /** Trigger height (32 / 44 / 48, the Input scale). @default 'md' */
-    size?: SelectFieldSize;
+    size?: SelectTriggerProps['size'];
     /** Marks the field as invalid and takes the place of `helperText`. */
     error?: string;
     helperText?: string;
@@ -83,7 +88,14 @@ const SelectField = React.forwardRef<React.ElementRef<typeof SelectTrigger>, Sel
             aria-label={ariaLabel}
             aria-invalid={hasError}
             aria-describedby={hasError ? errorId : helperText ? descriptionId : undefined}
-            className={selectFieldTriggerVariants({ size, error: hasError })}
+            size={size}
+            // The size and the error style are SelectTrigger's own (aria-invalid); this only adds
+            // what makes it look like Input. Without error: the primary border on focus, which in
+            // error must stay the error one.
+            className={cn(
+              'transition-colors data-[placeholder]:text-base-content/50',
+              !hasError && 'focus-visible:border-primary',
+            )}
           >
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>

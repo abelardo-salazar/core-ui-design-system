@@ -4,27 +4,26 @@ import * as React from 'react';
 import * as SelectPrimitive from '@radix-ui/react-select';
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from '@radix-ui/react-icons'; // Consistent iconography
 import { cn } from '../../utils/cn';
+import { selectTriggerVariants, type SelectTriggerSize } from './selectVariants';
 
 const Select = SelectPrimitive.Root;
 const SelectGroup = SelectPrimitive.Group;
 const SelectValue = SelectPrimitive.Value;
 
 // 1. Trigger Component
+export type SelectTriggerProps = React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> & {
+  /** Height: `sm` 32px (compact), `md` 44px, `lg` 48px, the Input and Button scale. @default 'md' */
+  size?: SelectTriggerSize;
+};
+
+// With aria-invalid="true" it takes the error style on its own (see selectVariants.ts).
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
->(({ className, children, ...props }, ref) => (
+  SelectTriggerProps
+>(({ className, size, children, ...props }, ref) => (
   <SelectPrimitive.Trigger
     ref={ref}
-    className={cn(
-      // h-11 (44px): aligns with Button md and Input md, the same family of form
-      // controls; before it was h-10 (40px), misaligned against Button md after its own fix.
-      'flex h-11 w-full items-center justify-between rounded-btn border border-base-300 bg-base-100 px-3 py-2 text-sm placeholder:text-base-content/50',
-      'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
-      'disabled:cursor-not-allowed disabled:opacity-50',
-      '[&>span]:line-clamp-1',
-      className,
-    )}
+    className={cn(selectTriggerVariants({ size }), className)}
     {...props}
   >
     {children}
