@@ -151,6 +151,7 @@ Importar desde el barrel principal es seguro en un Server Component; el subpath 
 | `EmptyState`, `EmptyStateIcon`, `EmptyStateTitle`, `EmptyStateDescription`, `EmptyStateActions`                                                                                                                                    | Sí               |
 | `FileInput`                                                                                                                                                                                                                        | No               |
 | `Image`                                                                                                                                                                                                                            | No               |
+| `ImageUploader`                                                                                                                                                                                                                    | No               |
 | `Input`                                                                                                                                                                                                                            | No               |
 | `Container`                                                                                                                                                                                                                        | Sí               |
 | `Separator`                                                                                                                                                                                                                        | Sí               |
@@ -315,6 +316,7 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
     - [CheckboxField — Uso y Props](#checkboxfield--uso-y-props)
     - [Input — Uso y Props](#input--uso-y-props)
     - [FileInput — Uso y Props](#fileinput--uso-y-props)
+    - [ImageUploader — Uso y Props](#imageuploader--uso-y-props)
     - [Textarea — Uso y Props](#textarea--uso-y-props)
     - [Select — Uso y Props](#select--uso-y-props)
     - [SelectField — Uso y Props](#selectfield--uso-y-props)
@@ -1264,6 +1266,7 @@ Uso (ejemplo simplificado, extraído de `DropdownMenu.stories.tsx`):
 | :---------------- | :------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Input`           | Campo de texto                         | `type`, `label?`, `error?`, `helperText?`, `startIcon?`, `endIcon?`, `clearable?`, `onClear?`, `clearLabel?`, `variant?`, `size?`, `disabled?`, `className?` |
 | `FileInput`       | Selector de archivos                   | `accept?`, `multiple?`, `onFilesChange?`, `onReject?`, `label?`, `error?`, `variant?`, `size?`, `chooseLabel?`, `changeLabel?`, `dropzone?`, `dropLabel?`    |
+| `ImageUploader`   | Galería de imágenes con portada        | `value`, `onValueChange`, `label` o `aria-label`, `max?`, `accept?`, `onReject?`, `labels?`                                                                  |
 | `Textarea`        | Texto multilinea                       | Standard HTML props, `variant?`, `error?`, `className?`                                                                                                      |
 | `Select`          | Dropdown avanzado                      | `value?`, `defaultValue?`, `onValueChange?`, `placeholder?`, `className?`                                                                                    |
 | `SelectField`     | Select con etiqueta, error y ayuda     | `label` o `aria-label`, `error?`, `helperText?`, `placeholder?`, `size?` y los props de `Select`                                                             |
@@ -1467,6 +1470,46 @@ const [error, setError] = useState<string>();
     setError(reason === 'count' ? 'Sube un solo archivo.' : 'Solo imágenes.')
   }
 />
+```
+
+### ImageUploader — Uso y Props
+
+**Desde 0.12.**
+
+- **Exports:** `ImageUploader`; tipos `ImageUploaderProps`, `ImageUploaderItem`, `ImageUploaderLabels` y `ImageUploaderLabelProps`.
+- **Props principales:**
+  - `value: ImageUploaderItem[]` y `onValueChange: (value) => void` — obligatorios: el componente es solo controlado. Un ítem es `{ kind: 'file', id, file }` (elegido en esta sesión) o `{ kind: 'remote', id, src, alt? }` (ya subido, como las fotos que trae un registro al editarlo). El componente crea el `id` de las fotos nuevas.
+  - `label` o `aria-label` — uno de los dos, lo exigen los tipos. Nombran el grupo (`role="group"`).
+  - `accept?: string` (default `'image/*'`) — se vuelve a comprobar en cada archivo, con las mismas reglas que `FileInput`.
+  - `max?: number` — máximo de fotos. Muestra el conteo ("3 of 10") y, al llegar, deshabilita el botón de agregar.
+  - `onReject?: (files: File[], reason: 'type' | 'count') => void` — los archivos no agregados: `'type'` si no pasan `accept`, `'count'` si superan `max`.
+  - `error?: string` y `helperText?: string` — como en `Input`: el error reemplaza la ayuda.
+  - `disabled?: boolean` — deshabilita todos los botones e ignora lo que se suelta.
+  - `labels?: Partial<ImageUploaderLabels>` — textos, mezclados con los default en inglés: `add`, `drop`, `cover`, `image(position, cover)`, `remove(image)`, `moveBefore(image)`, `moveAfter(image)`, `count(count, max)`, `removed(name)` y `moved(name, position, total)`. `image` arma el nombre de cada foto (default `'image 2'`, o `'image 1 (cover)'` para la portada) y los botones lo reciben, así que se traducen frases completas.
+  - `id?: string` (del botón de agregar), `className?: string` (en la raíz) y `ref` (la raíz).
+
+Muestra una grilla de miniaturas. La primera foto es la portada: lleva un badge visible y "cover" en el nombre de sus botones. Cada foto tiene botones para quitarla y para moverla antes o después, todos de 44px; el de mover no aparece en el extremo correspondiente. El `alt` de cada miniatura es el nombre del archivo sin la extensión, o el `alt` de la foto remota (sin él, el nombre de la foto, como `'image 2'`). Agregar suma fotos, no reemplaza las que ya hay. Toda la galería es una zona para soltar archivos, con `data-dragging` mientras se arrastran encima.
+
+**Comportamiento no obvio:**
+
+- **No envía archivos con el formulario.** El `input` nativo no tiene `name` y se vacía tras cada elección. Subir los archivos (los ítems `'file'`) es tarea de la app, por ejemplo al enviar el formulario.
+- **Ciclo de las object URLs.** Las miniaturas de los ítems `'file'` usan `URL.createObjectURL`. Cada URL se revoca cuando su foto sale de `value` o cambia de archivo, y todas al desmontar. También funciona en `StrictMode`. No reutilices el `src` de una miniatura fuera del componente: puede revocarse en cualquier momento.
+- **El foco no se pierde.** Al mover, el foco sigue en el mismo botón de la foto movida, o en el otro botón de mover si en el extremo ese desaparece. Al quitar, pasa a la siguiente foto, a la anterior o al botón de agregar. Mover y quitar se anuncian con [`announce()`](#announce--uso-y-opciones).
+- **Galería llena.** Al llegar a `max`, el botón de agregar queda con `aria-disabled` pero sigue recibiendo el foco. Lo que se suelte va a `onReject` con `'count'`.
+
+```tsx
+const [fotos, setFotos] = useState<ImageUploaderItem[]>(
+  registro.fotos.map((foto) => ({ kind: 'remote', id: foto.id, src: foto.url, alt: foto.alt })),
+);
+
+<ImageUploader
+  label="Fotos"
+  value={fotos}
+  onValueChange={setFotos}
+  max={10}
+  onReject={(files, reason) => setError(reason === 'count' ? 'Máximo 10 fotos.' : 'Solo imágenes.')}
+  labels={{ add: 'Agregar fotos', cover: 'Portada' }}
+/>;
 ```
 
 ### Textarea — Uso y Props

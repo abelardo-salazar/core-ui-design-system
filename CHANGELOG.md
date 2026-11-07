@@ -4,6 +4,17 @@
 
 ### Added
 
+- **`ImageUploader`.** Galería de imágenes controlada (`value`/`onValueChange`) con portada, orden
+  y quitar. Cada ítem es `{ kind: 'file', id, file }` o `{ kind: 'remote', id, src, alt? }`, para
+  editar registros con fotos ya subidas; el componente crea los `id` nuevos. Agregar suma fotos,
+  no las reemplaza. La primera es la portada (badge visible y "cover" en el nombre de sus
+  botones). Cada foto tiene botones de 44px para quitarla y moverla antes o después, que mantienen
+  el foco y se anuncian con `announce()`. `max` muestra el conteo y deshabilita el botón al
+  llegar; el exceso va a `onReject(files, 'count')` y el tipo inválido a `onReject(files, 'type')`.
+  Toda la galería acepta archivos soltados. `label` o `aria-label` (uno de los dos, lo exigen los
+  tipos), `error`, `helperText`, `disabled` y `labels` para los textos (default en inglés). No
+  envía archivos con el formulario nativo: subirlos es tarea de la app. Tipos
+  `ImageUploaderProps`, `ImageUploaderItem`, `ImageUploaderLabels` e `ImageUploaderLabelProps`.
 - **`SelectTrigger`: prop `size` y estado de error por `aria-invalid`.** `size` acepta `'sm'` (32px,
   compacto), `'md'` (44px, default, el alto de siempre) o `'lg'` (48px), la escala de `Input` y
   `Button`. Con `aria-invalid="true"`, el trigger toma el borde, el texto y el anillo de foco de

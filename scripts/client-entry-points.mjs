@@ -43,4 +43,5 @@ export const CLIENT_ENTRY_POINTS = [
   'src/components/CheckboxField/CheckboxField.tsx',
   'src/components/Toggle/Toggle.tsx',
   'src/components/FileInput/FileInput.tsx',
+  'src/components/ImageUploader/ImageUploader.tsx',
 ];
