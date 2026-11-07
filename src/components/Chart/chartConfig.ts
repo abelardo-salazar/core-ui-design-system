@@ -4,6 +4,8 @@ import type { ReactNode } from 'react';
 // doesn't include `error`: that token is reserved for error states (Alert, Button
 // destructive), not for telling data series apart in a chart. It doesn't include `neutral`
 // either: in dark mode `--neutral` is pure white, indistinguishable from the chart text/axes.
+// `muted` is for reference/auxiliary series: it has no DS token of its own and resolves to a
+// tone of base-content (see ChartContainer), never pure white.
 export const CHART_COLOR_TOKENS = [
   'primary',
   'secondary',
@@ -11,6 +13,7 @@ export const CHART_COLOR_TOKENS = [
   'success',
   'warning',
   'info',
+  'muted',
 ] as const;
 
 export type ChartColorToken = (typeof CHART_COLOR_TOKENS)[number];

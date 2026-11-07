@@ -2,8 +2,15 @@
 
 import * as React from 'react';
 import { ResponsiveContainer } from './ChartPrimitives';
-import type { ChartConfig } from './chartConfig';
+import type { ChartColorToken, ChartConfig } from './chartConfig';
 import { cn } from '../../utils/cn';
+
+// CSS value of the tokens that aren't a `--color-<token>` of the DS. `muted` is the same mix as
+// the `text-base-content/65` utility the DS uses for muted text: at least 3:1 against base-100
+// in light and dark (checked in Chart's MutedReferenceSeries story).
+const CHART_TOKEN_VALUES: Partial<Record<ChartColorToken, string>> = {
+  muted: 'color-mix(in oklab, var(--color-base-content) 65%, transparent)',
+};
 
 export interface ChartContainerProps extends React.ComponentPropsWithoutRef<'div'> {
   /** Maps each series dataKey to a DS color token. See ChartConfig. */
@@ -27,7 +34,7 @@ const ChartContainer = React.forwardRef<HTMLDivElement, ChartContainerProps>(
     const chartStyle = React.useMemo(() => {
       const vars: Record<string, string> = {};
       for (const [dataKey, { color }] of Object.entries(config)) {
-        vars[`--color-${dataKey}`] = `var(--color-${color})`;
+        vars[`--color-${dataKey}`] = CHART_TOKEN_VALUES[color] ?? `var(--color-${color})`;
       }
       return vars;
     }, [config]);

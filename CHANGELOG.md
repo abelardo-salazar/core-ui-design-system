@@ -39,6 +39,10 @@
   `CardHeader`, `CardContent` y `CardFooter`. `Card` sigue siendo server-safe: la raíz agrega
   `data-size` y la clase `group/card`. Con `'sm'`, el padding de las partes gana sobre su
   `className`; se cambia con la misma variante (`group-data-[size=sm]/card:…`). Tipo `CardProps`.
+- **`Chart`: token `'muted'` en `CHART_COLOR_TOKENS`.** Para series de referencia o auxiliares en
+  `ChartConfig`. Es un tono de `base-content` (la mezcla de `text-base-content/65`), nunca blanco
+  puro, con al menos 3:1 de contraste sobre `base-100` en claro y en oscuro. Los tokens existentes
+  no cambian.
 
 ## [0.10.0] - 2026-11-03
 
