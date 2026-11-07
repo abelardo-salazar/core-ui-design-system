@@ -138,3 +138,79 @@ export const KeyboardNavigation: Story = {
     await userEvent.keyboard('{Escape}');
   },
 };
+
+// 6. Without label, error or helperText the DOM is the one of before: the trigger alone, named by
+// its text, with no field attributes.
+export const WithoutField: Story = {
+  render: () => <DatePicker />,
+  play: async ({ canvasElement }) => {
+    const trigger = within(canvasElement).getByRole('button', { name: 'Pick a date' });
+    await expect(trigger.parentElement).toBe(canvasElement);
+    for (const attribute of ['id', 'aria-labelledby', 'aria-invalid', 'aria-describedby']) {
+      await expect(trigger).not.toHaveAttribute(attribute);
+    }
+    await expect(canvasElement.querySelector('label')).toBeNull();
+  },
+};
+
+function LabeledDatePicker() {
+  const [date, setDate] = React.useState<Date | undefined>(new Date(2026, 0, 15));
+  return (
+    <DatePicker
+      label="Fecha de entrega"
+      helperText="De lunes a sábado"
+      date={date}
+      onDateChange={setDate}
+    />
+  );
+}
+
+// 7. The label names the trigger together with its text, so the chosen date stays in the name;
+// helperText describes it.
+export const WithLabel: Story = {
+  render: () => <LabeledDatePicker />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole('button', { name: 'Fecha de entrega January 15th, 2026' });
+    await expect(trigger).toHaveAttribute('aria-invalid', 'false');
+    await expect(trigger).toHaveAccessibleDescription('De lunes a sábado');
+    await expect(canvas.getByText('Fecha de entrega')).toHaveClass('text-base-content');
+
+    // A span, not a <label>: a click on it doesn't open the popover.
+    await expect(canvas.getByText('Fecha de entrega').tagName).toBe('SPAN');
+  },
+};
+
+// 8. Same pattern as SelectField: aria-invalid and aria-describedby to the error, which takes the
+// place of helperText, and the error look on the label and the trigger.
+export const WithError: Story = {
+  render: () => (
+    <DatePicker label="Fecha de entrega" error="Elige una fecha" helperText="De lunes a sábado" />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole('button', { name: 'Fecha de entrega Pick a date' });
+    await expect(trigger).toHaveAttribute('aria-invalid', 'true');
+    await expect(trigger).toHaveAccessibleDescription('Elige una fecha');
+    await expect(canvas.queryByText('De lunes a sábado')).toBeNull();
+    await expect(canvas.getByText('Elige una fecha').className).toBe(
+      'text-xs text-error-focus font-medium',
+    );
+    await expect(canvas.getByText('Fecha de entrega')).toHaveClass('text-error-focus');
+    const classes = trigger.className.split(/\s+/);
+    await expect(classes).toEqual(
+      expect.arrayContaining(['border-error', 'focus-visible:ring-error']),
+    );
+    await expect(classes).not.toContain('focus-visible:ring-primary');
+  },
+};
+
+// 9. helperText alone, without a label: the trigger keeps its text as its name.
+export const HelperTextOnly: Story = {
+  render: () => <DatePicker helperText="De lunes a sábado" />,
+  play: async ({ canvasElement }) => {
+    const trigger = within(canvasElement).getByRole('button', { name: 'Pick a date' });
+    await expect(trigger).not.toHaveAttribute('aria-labelledby');
+    await expect(trigger).toHaveAccessibleDescription('De lunes a sábado');
+  },
+};

@@ -13,6 +13,11 @@ npm install @radix-ui/react-radio-group@^1.5.1
 
 ### Added
 
+- **`DatePicker`: props `label`, `error` y `helperText`.** Opcionales, con el mismo aspecto y los
+  mismos atributos que `SelectField`: `error` pone `aria-invalid` y `aria-describedby` en el
+  disparador y reemplaza a `helperText`. `label` nombra el disparador junto con su texto, así que
+  se lee la etiqueta y la fecha elegida; es un `<span>`, así que un clic en ella no abre el
+  calendario. Sin estas props, el DOM y el nombre accesible no cambian.
 - **`ScrollRow` y `ScrollRowItem`.** Fila de ítems con desplazamiento horizontal y anclaje al
   inicio de cada ítem: una región con `aria-label` obligatorio por tipos y una lista `<ul>` cuyos
   hijos son `ScrollRowItem` (`<li>`). La barra se oculta con puntero grueso. Con `controls`
