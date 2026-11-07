@@ -20,6 +20,7 @@ import {
   YAxis,
 } from './ChartPrimitives';
 import type { ChartConfig } from './chartConfig';
+import { readInTheme, rootTokenIn } from '../../../.storybook/rootTheme';
 
 // dataKeys without accents (escritorio/movil) on purpose: they are identifiers also used in
 // "var(--color-<dataKey>)" and in DOM attributes; the accented label ("Móvil") lives
@@ -384,5 +385,112 @@ export const RingChartExample: Story = {
     await expect(withinTooltip.getByText('Diseño')).toBeInTheDocument();
     const swatch = tooltipWrapper.querySelector('span[style]') as HTMLElement;
     await expect(swatch.style.backgroundColor).toBe('var(--color-design)');
+  },
+};
+
+const referenceConfig: ChartConfig = {
+  ventas: { label: 'Ventas', color: 'primary' },
+  objetivo: { label: 'Objetivo', color: 'muted' },
+};
+
+// Targets only in some months: null breaks the series, and with connectNulls={false} each value
+// stays a loose point.
+const referenceData = [
+  { month: 'Ene', ventas: 186, objetivo: 200 },
+  { month: 'Feb', ventas: 305, objetivo: null },
+  { month: 'Mar', ventas: 237, objetivo: 250 },
+  { month: 'Abr', ventas: 173, objetivo: null },
+  { month: 'May', ventas: 209, objetivo: null },
+  { month: 'Jun', ventas: 214, objetivo: 260 },
+];
+
+// Paints `color` over `surface` on a 1px canvas and returns the resulting sRGB. The canvas
+// parses any computed CSS color (oklab, color(srgb …), with alpha) and composites like the page.
+const compositeOver = (surface: string, color: string) => {
+  const ctx = document.createElement('canvas').getContext('2d')!;
+  ctx.fillStyle = surface;
+  ctx.fillRect(0, 0, 1, 1);
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, 1, 1);
+  return [...ctx.getImageData(0, 0, 1, 1).data.slice(0, 3)];
+};
+
+// WCAG 2 relative luminance and contrast ratio.
+const luminance = (rgb: number[]) => {
+  const [r, g, b] = rgb.map((v) => {
+    const c = v / 255;
+    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+const contrast = (a: number[], b: number[]) => {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+};
+
+// 6. Token muted: a main series plus loose reference points (Line with no stroke, hollow dots in
+// var(--color-objetivo), connectNulls={false}), with their legend entry. With the CSS applied,
+// muted keeps at least 3:1 against the chart surface (base-100) in light and dark, and is never
+// pure white. Each theme is read with readInTheme, so it passes with any theme of the toolbar.
+export const MutedReferenceSeries: Story = {
+  tags: ['real-css'],
+  render: () => (
+    <ChartContainer config={referenceConfig} className="max-w-2xl" style={testSize}>
+      <LineChart data={referenceData}>
+        <CartesianGrid vertical={false} />
+        <XAxis dataKey="month" tickLine={false} axisLine={false} />
+        <YAxis tickLine={false} axisLine={false} />
+        <ChartLegend content={<ChartLegendContent config={referenceConfig} />} />
+        <Line
+          dataKey="ventas"
+          stroke="var(--color-ventas)"
+          strokeWidth={2}
+          dot={false}
+          isAnimationActive={false}
+        />
+        <Line
+          dataKey="objetivo"
+          stroke="none"
+          connectNulls={false}
+          dot={{ r: 4, fill: 'none', stroke: 'var(--color-objetivo)', strokeWidth: 2 }}
+          activeDot={false}
+          isAnimationActive={false}
+        />
+      </LineChart>
+    </ChartContainer>
+  ),
+  play: async ({ canvasElement }) => {
+    const container = canvasElement.querySelector('div') as HTMLElement;
+    await expect(container.style.getPropertyValue('--color-objetivo')).toBe(
+      'color-mix(in oklab, var(--color-base-content) 65%, transparent)',
+    );
+
+    // One hollow dot per non-null target, and no line between them.
+    await waitFor(() =>
+      expect(canvasElement.querySelectorAll('.recharts-line-dots circle').length).toBe(3),
+    );
+    for (const dot of canvasElement.querySelectorAll('.recharts-line-dots circle')) {
+      await expect(dot).toHaveAttribute('fill', 'none');
+      await expect(dot).toHaveAttribute('stroke', 'var(--color-objetivo)');
+    }
+    const curves = [...canvasElement.querySelectorAll('.recharts-line-curve')];
+    await expect(curves.map((curve) => curve.getAttribute('stroke'))).toContain('none');
+
+    // Legend entry, with its swatch in the same color.
+    const legendItem = within(canvasElement).getByText('Objetivo').parentElement!;
+    const swatch = legendItem.querySelector('[style*="--color-objetivo"]') as HTMLElement;
+    await expect(swatch).toBeInTheDocument();
+
+    for (const theme of ['light', 'dark'] as const) {
+      const surface = rootTokenIn(theme, '--base-100').trim();
+      const muted = readInTheme(theme, () => getComputedStyle(swatch).backgroundColor);
+      const surfaceRgb = compositeOver(surface, surface);
+      const mutedRgb = compositeOver(surface, muted);
+      await expect(
+        contrast(mutedRgb, surfaceRgb),
+        `${theme}: ${muted} on ${surface}`,
+      ).toBeGreaterThanOrEqual(3);
+      await expect(mutedRgb, theme).not.toEqual([255, 255, 255]);
+    }
   },
 };
