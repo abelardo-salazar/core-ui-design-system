@@ -2131,8 +2131,8 @@ toast.warning('Ten cuidado');
   - `position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'top-center' | 'bottom-center'` (default `'bottom-right'`) — posición del contenedor.
   - `richColors?: boolean` — colores más vibrantes.
   - `closeButton?: boolean` — mostrar botón de cierre en cada toast.
-  - `offset?: string | number | { top?, right?, bottom?, left? }` (default `24px`) — distancia a los bordes de la ventana en anchos mayores a 600px. Un número son píxeles y un string, cualquier longitud CSS. El valor suelto se aplica a los cuatro lados; en el objeto, cada lado omitido conserva su default.
-  - `mobileOffset?: string | number | { top?, right?, bottom?, left? }` (default `16px`) — igual que `offset`, para anchos de hasta 600px. No hereda de `offset`: si solo pasas `offset`, en móvil sigue el default.
+  - `offset?: string | number | { top?, right?, bottom?, left? }` (default `24px` más el safe area de cada lado) — distancia a los bordes de la ventana en anchos mayores a 600px. Un número son píxeles y un string, cualquier longitud CSS. El valor suelto se aplica a los cuatro lados; en el objeto, cada lado omitido queda en `24px`, sin el safe area.
+  - `mobileOffset?: string | number | { top?, right?, bottom?, left? }` (default `16px` más el safe area de cada lado) — igual que `offset`, para anchos de hasta 600px (un lado omitido queda en `16px`). No hereda de `offset`: si solo pasas `offset`, en móvil sigue el default.
   - Acepta `React.ComponentProps<typeof import('sonner').Toaster>` (props del `Toaster` de Sonner).
 
 Descripción: envoltorio ligero sobre `sonner` que provee un `Toaster` con tema y clases por defecto y el helper `toast` para disparar notificaciones. El componente `Toast` debe renderizarse una sola vez (por ejemplo en el `App` o en el layout global) para que los toasts se muestren correctamente.
@@ -2169,10 +2169,19 @@ toast('Evento creado', {
 });
 
 // 4. App con barra inferior fija de 64px: el toast queda 16px por encima de ella
-<Toast offset={{ bottom: 80 }} mobileOffset={{ bottom: 80 }} />;
+<Toast
+  offset={{ bottom: 'calc(80px + env(safe-area-inset-bottom))' }}
+  mobileOffset={{ bottom: 'calc(80px + env(safe-area-inset-bottom))' }}
+/>;
 ```
 
 En el ejemplo 4 hacen falta las dos props: solo con `offset`, el toast tapa la barra en anchos de hasta 600px. Usa la forma de objeto: con un valor suelto, `mobileOffset={80}` también se aplica a los lados y deja el toast en 215px de ancho en una pantalla de 375px, en lugar de 343px.
+
+**Comportamiento no obvio:** los offsets por defecto suman el safe area (`env(safe-area-inset-*)`) de cada lado, así que con `viewport-fit=cover` un toast arriba no queda bajo la muesca ni uno abajo sobre el indicador de inicio. Solo surte efecto si la app declara `viewport-fit=cover` (en Next.js: `export const viewport = { viewportFit: 'cover' }`); sin eso, `env()` vale 0 y la posición es la de Sonner. Pasar `offset` o `mobileOffset` reemplaza el default completo de esa prop: los lados que indiques llevan tu valor y los que omitas quedan en `24px` / `16px`, sin el safe area. Por eso un offset propio debería incluirlo también, con `calc()`, como en el ejemplo 4:
+
+```tsx
+<Toast position="top-center" mobileOffset={{ top: 'calc(8px + env(safe-area-inset-top))' }} />
+```
 
 Consejos:
 
