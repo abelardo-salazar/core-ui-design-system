@@ -42,7 +42,7 @@ export const badgeVariants = cva(
       // onClick by hand. true: Badge is a real <button> (see Badge.tsx) and these classes DO
       // make sense. focus-visible (not focus:) is the convention in the rest of the DS.
       interactive: {
-        true: 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+        true: '[-webkit-tap-highlight-color:transparent] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
       },
     },
 
@@ -51,15 +51,32 @@ export const badgeVariants = cva(
     // hover before: an interactive element without visual feedback makes no sense, so it gets
     // one here (it wasn't defined for the non-interactive div, it was never noticed).
     compoundVariants: [
-      { variant: 'default', interactive: true, class: 'hover:bg-primary-focus' },
-      { variant: 'secondary', interactive: true, class: 'hover:bg-secondary-focus' },
+      {
+        variant: 'default',
+        interactive: true,
+        class: 'hover:bg-primary-focus enabled:active:bg-primary-focus',
+      },
+      {
+        variant: 'secondary',
+        interactive: true,
+        class: 'hover:bg-secondary-focus enabled:active:bg-secondary-focus',
+      },
       {
         variant: 'destructive',
         interactive: true,
-        class: 'hover:bg-error-focus hover:text-error-focus-content',
+        class:
+          'hover:bg-error-focus hover:text-error-focus-content enabled:active:bg-error-focus enabled:active:text-error-focus-content',
       },
-      { variant: 'outline', interactive: true, class: 'hover:bg-base-200' },
-      { variant: 'ghost', interactive: true, class: 'hover:bg-base-300' },
+      {
+        variant: 'outline',
+        interactive: true,
+        class: 'hover:bg-base-200 enabled:active:bg-base-200',
+      },
+      {
+        variant: 'ghost',
+        interactive: true,
+        class: 'hover:bg-base-300 enabled:active:bg-base-300',
+      },
     ],
 
     defaultVariants: {

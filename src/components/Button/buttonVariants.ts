@@ -7,21 +7,24 @@ export const buttonVariants = cva(
   // rules in the stylesheet, not on which variant cva was called with. shape ALWAYS resolves to
   // 'default' or 'pill' (never absent: defaultVariants guarantees it), so the base needs no
   // fallback.
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 aria-disabled:opacity-50  [&_svg]:size-4 [&_svg]:shrink-0',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all cursor-pointer [-webkit-tap-highlight-color:transparent] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 aria-disabled:opacity-50  [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
-        primary: 'bg-primary text-primary-content hover:bg-primary-focus shadow-sm',
-        secondary: 'bg-secondary text-secondary-content hover:bg-secondary-focus shadow-sm',
+        primary:
+          'bg-primary text-primary-content hover:bg-primary-focus not-disabled:not-aria-disabled:active:bg-primary-focus shadow-sm',
+        secondary:
+          'bg-secondary text-secondary-content hover:bg-secondary-focus not-disabled:not-aria-disabled:active:bg-secondary-focus shadow-sm',
         outline:
-          'border border-base-300 bg-transparent text-base-content hover:bg-base-200 shadow-sm',
-        ghost: 'hover:bg-base-200 text-base-content hover:text-base-content',
-        link: 'text-primary underline-offset-4 hover:underline decoration-primary',
+          'border border-base-300 bg-transparent text-base-content hover:bg-base-200 not-disabled:not-aria-disabled:active:bg-base-200 shadow-sm',
+        ghost:
+          'hover:bg-base-200 text-base-content hover:text-base-content not-disabled:not-aria-disabled:active:bg-base-200 not-disabled:not-aria-disabled:active:text-base-content',
+        link: 'text-primary underline-offset-4 hover:underline not-disabled:not-aria-disabled:active:underline decoration-primary',
         // hover:text-error-focus-content is needed: --error is light and --error-focus is
         // dark (the opposite of the other variants), so text-error-content (black)
         // only gives enough contrast in the base state, not on hover. See tailwind.css.
         destructive:
-          'bg-error text-error-content hover:bg-error-focus hover:text-error-focus-content shadow-sm',
+          'bg-error text-error-content hover:bg-error-focus hover:text-error-focus-content not-disabled:not-aria-disabled:active:bg-error-focus not-disabled:not-aria-disabled:active:text-error-focus-content shadow-sm',
       },
       // md = 44px: lines up with Input md and the Select trigger (same family of form
       // controls, see inputVariants.ts/Select.tsx). Before, all three measured 40px, but a

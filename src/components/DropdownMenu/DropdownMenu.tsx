@@ -48,7 +48,7 @@ const DropdownMenuItem = React.forwardRef<
     ref={ref}
     className={cn(
       'relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none',
-      'focus:bg-base-200 focus:text-base-content',
+      'focus:bg-base-200 focus:text-base-content [-webkit-tap-highlight-color:transparent]',
       'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className,
     )}
@@ -71,7 +71,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
     ref={ref}
     className={cn(
       'relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none',
-      'focus:bg-base-200 focus:text-base-content',
+      'focus:bg-base-200 focus:text-base-content [-webkit-tap-highlight-color:transparent]',
       'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className,
     )}
@@ -98,7 +98,7 @@ const DropdownMenuRadioItem = React.forwardRef<
     ref={ref}
     className={cn(
       'relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none',
-      'focus:bg-base-200 focus:text-base-content',
+      'focus:bg-base-200 focus:text-base-content [-webkit-tap-highlight-color:transparent]',
       'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className,
     )}

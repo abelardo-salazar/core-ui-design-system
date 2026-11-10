@@ -2,7 +2,7 @@ import { cva } from 'class-variance-authority';
 
 export const inputVariants = cva(
   // Base styles. 16px text in every size: iOS Safari zooms in on focus below 16px.
-  'flex w-full rounded-btn border bg-base-100 px-3 text-base transition-colors file:border-0 file:bg-transparent file:text-base file:font-medium placeholder:text-base-content/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+  'flex w-full rounded-btn border bg-base-100 px-3 text-base [-webkit-tap-highlight-color:transparent] transition-colors file:border-0 file:bg-transparent file:text-base file:font-medium placeholder:text-base-content/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
   {
     variants: {
       // Visual state (borders and focus ring)

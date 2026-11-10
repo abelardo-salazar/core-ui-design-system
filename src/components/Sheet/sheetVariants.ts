@@ -32,7 +32,7 @@ const closeRight = 'right-[calc(0.125rem_+_env(safe-area-inset-right))]';
 export const sheetCloseVariants = cva(
   // ring-inset without offset: the ring is drawn inside the touch area, so the panel's
   // overflow-y-auto doesn't clip it.
-  'absolute rounded-sm p-3.5 opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary disabled:pointer-events-none data-[state=open]:bg-base-200 data-[state=open]:text-base-content/50',
+  'absolute rounded-sm p-3.5 opacity-70 transition-opacity hover:opacity-100 enabled:active:opacity-100 [-webkit-tap-highlight-color:transparent] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary disabled:pointer-events-none data-[state=open]:bg-base-200 data-[state=open]:text-base-content/50',
   {
     variants: {
       side: {

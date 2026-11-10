@@ -81,7 +81,7 @@ function CalendarPreviousButton({ className, children, ...props }: PreviousMonth
     <button
       className={cn(
         buttonVariants({ variant: 'outline' }),
-        'h-7 w-7 p-0 text-base-content/60 hover:text-base-content',
+        'h-7 w-7 p-0 text-base-content/60 hover:text-base-content not-disabled:not-aria-disabled:active:text-base-content',
         NAV_BUTTON_HIT_AREA,
         className,
       )}
@@ -97,7 +97,7 @@ function CalendarNextButton({ className, children, ...props }: NextMonthButtonPr
     <button
       className={cn(
         buttonVariants({ variant: 'outline' }),
-        'h-7 w-7 p-0 text-base-content/60 hover:text-base-content',
+        'h-7 w-7 p-0 text-base-content/60 hover:text-base-content not-disabled:not-aria-disabled:active:text-base-content',
         NAV_BUTTON_HIT_AREA,
         className,
       )}
@@ -137,9 +137,10 @@ function CalendarDayButton({ day, modifiers, className, children, ...props }: Da
         modifiers.today && !modifiers.selected && 'border border-primary text-primary',
         modifiers.outside && 'text-base-content/70',
         modifiers.disabled && 'pointer-events-none opacity-50',
-        modifiers.range_middle && 'rounded-none bg-primary/10 hover:bg-primary/10',
+        modifiers.range_middle &&
+          'rounded-none bg-primary/10 hover:bg-primary/10 not-disabled:not-aria-disabled:active:bg-primary/10',
         (modifiers.selected || modifiers.range_start || modifiers.range_end) &&
-          'bg-primary text-primary-content hover:bg-primary-focus',
+          'bg-primary text-primary-content hover:bg-primary-focus not-disabled:not-aria-disabled:active:bg-primary-focus',
         className,
       )}
       {...props}

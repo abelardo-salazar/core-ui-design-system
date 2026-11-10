@@ -64,7 +64,7 @@ function SelectionField({
     <label
       htmlFor={id}
       className={cn(
-        'flex min-h-12 w-full',
+        'flex min-h-12 w-full [-webkit-tap-highlight-color:transparent]',
         rowClassName,
         disabled ? 'cursor-not-allowed' : 'cursor-pointer',
         className,

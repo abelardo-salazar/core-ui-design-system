@@ -176,7 +176,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               type="button"
               aria-label={clearLabel}
               onClick={handleClear}
-              className="absolute right-0 top-0 flex h-full aspect-square items-center justify-center rounded-btn text-base-content/50 transition-colors hover:text-base-content focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary peer-placeholder-shown:hidden"
+              className="absolute right-0 top-0 flex h-full aspect-square items-center justify-center rounded-btn text-base-content/50 transition-colors hover:text-base-content enabled:active:text-base-content [-webkit-tap-highlight-color:transparent] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary peer-placeholder-shown:hidden"
             >
               <Cross2Icon aria-hidden="true" className="size-4" />
             </button>

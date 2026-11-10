@@ -5,7 +5,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 // Safari zooms in on focusing a field with smaller text (the search field).
 export const comboboxTriggerVariants = cva(
   [
-    'flex w-full items-center justify-between gap-2 rounded-btn border border-base-300 bg-base-100 text-left text-base',
+    'flex w-full items-center justify-between gap-2 rounded-btn border border-base-300 bg-base-100 text-left text-base [-webkit-tap-highlight-color:transparent]',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
     'disabled:cursor-not-allowed disabled:opacity-50',
   ],
@@ -45,7 +45,7 @@ export const comboboxFieldVariants = cva(
 );
 
 export const comboboxMultipleTriggerVariants = cva(
-  'flex flex-1 items-center justify-between gap-2 self-stretch text-left focus-visible:outline-none disabled:cursor-not-allowed',
+  'flex flex-1 items-center justify-between gap-2 self-stretch text-left focus-visible:outline-none disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]',
   {
     variants: {
       size: {
@@ -59,7 +59,7 @@ export const comboboxMultipleTriggerVariants = cva(
 );
 
 export const comboboxSearchVariants = cva(
-  'flex w-full bg-transparent text-base outline-none placeholder:text-base-content/50 disabled:cursor-not-allowed disabled:opacity-50',
+  'flex w-full bg-transparent text-base [-webkit-tap-highlight-color:transparent] outline-none placeholder:text-base-content/50 disabled:cursor-not-allowed disabled:opacity-50',
   {
     variants: {
       size: {
@@ -74,7 +74,7 @@ export const comboboxSearchVariants = cva(
 
 export const comboboxItemVariants = cva(
   [
-    'flex cursor-default select-none items-center gap-2 rounded-sm px-2 outline-none',
+    'flex cursor-default select-none items-center gap-2 rounded-sm px-2 outline-none [-webkit-tap-highlight-color:transparent]',
     'data-[selected=true]:bg-base-200',
     'data-[disabled=true]:pointer-events-none',
   ],
