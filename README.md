@@ -182,6 +182,72 @@ Importar desde el barrel principal es seguro en un Server Component; el subpath 
 | `Heading`, `Text`                                                                                                                                                                                                                  | Sí               |
 | `VisuallyHidden`                                                                                                                                                                                                                   | Sí               |
 
+### Uso en WebView (Capacitor)
+
+Esta sección junta lo que el DS hace por su cuenta en una WebView y lo que le toca a la app al empaquetarse con Capacitor. Las APIs de Capacitor que se nombran son las de su documentación oficial para la versión 8.
+
+**Requisito: `viewport-fit=cover`.** Sin esto, `env(safe-area-inset-*)` vale 0 y ninguno de los ajustes de safe area del DS tiene efecto.
+
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+```
+
+En Next.js: `export const viewport = { viewportFit: 'cover' }`. En Android, con Capacitor 8, el plugin `SystemBars` (incluido en `@capacitor/core`) decide con `insetsHandling` cómo llegan esos valores. Con la WebView de Chromium 140 o posterior, `viewport-fit=cover` hace que `env()` traiga los insets reales. Para versiones anteriores, la documentación de `SystemBars` indica qué agregar en la actividad nativa.
+
+**Lo que el DS ya hace:**
+
+- **Sin zoom de iOS al enfocar un campo:** el texto de los campos mide 16px en todos los tamaños (`Input`, `Textarea`, `Select`, `Combobox`, los disparadores de `DatePicker` y `DateRangePicker`). Si lo achicas con `className`, el zoom vuelve. Ver [Input](#input--uso-y-props).
+- **Respuesta al toque:** los componentes interactivos muestran su estado presionado (`active:`) y no muestran el destello gris del navegador. Ver [la decisión en ARCHITECTURE](./ARCHITECTURE.md#estado-presionado-y-destello-de-toque).
+- **Sin selección de texto al mantener presionado** un botón o un control con aspecto de botón. Los campos siguen siendo seleccionables. Ver [la decisión en ARCHITECTURE](./ARCHITECTURE.md#estado-presionado-y-destello-de-toque).
+- **Safe area:**
+  - [Sheet](#sheet--uso-y-props): el panel, la ✕ y el header.
+  - [NavigationBar](#navigationbar--uso-y-props): solo en la forma `'bottom'`, con `padding-bottom`.
+  - [Toast](#toast--uso-y-props): los valores por defecto de `offset` y `mobileOffset`.
+- **Alto visible en Sheet:** `top` y `bottom` miden como máximo el 85% del alto visible (`dvh`), no del alto con las barras del navegador ocultas. Ver [Sheet](#sheet--uso-y-props).
+- **Ítem activo a la vista en `NavigationBar` `'horizontal'`:** lo hace con `scroll-initial-target`. Lo aplica la WebView de Android (Chromium 133 o posterior), pero no la de iOS. Ver [NavigationBar](#navigationbar--uso-y-props).
+
+**Lo que le toca a la app:**
+
+- **`-webkit-touch-callout: none` en tu propio CSS.** En iOS, mantener presionado un enlace o una imagen abre la vista previa y el menú de «abrir en otra pestaña», que en una app no tienen sentido. El DS no lo aplica porque en la web móvil ese menú sí es útil. Si el mismo código sirve también la web, aplícalo solo en la build nativa, por ejemplo con una clase en `<html>` que pongas al detectar la plataforma.
+
+  ```css
+  html.native a,
+  html.native img {
+    -webkit-touch-callout: none;
+  }
+  ```
+
+- **Un listener vacío de `touchstart`, si en iOS no se ve el estado presionado.** WebKit puede no aplicar `:active` si la página no registra ninguno. Falta verificarlo en un dispositivo, así que agrégalo solo si hace falta: `document.addEventListener('touchstart', () => {}, { passive: true })`.
+- **El destello de toque en tus propios elementos.** El DS lo quita solo en sus componentes, nunca con una regla global, así que tus enlaces y botones conservan el destello gris. Quítalo en su clase (`[-webkit-tap-highlight-color:transparent]`) y dales un `active:`, porque sin destello y sin estado presionado el toque queda sin respuesta. También puedes usar una regla global en tu CSS.
+- **Cerrar `Dialog` y `Sheet` con el botón atrás de Android.** Ninguno de los dos lo escucha. Con `@capacitor/app`, el evento `backButton` (solo Android) avisa del botón, y registrarlo desactiva el comportamiento por defecto, así que tu listener también maneja el historial y la salida. Controla el overlay con `open` y `onOpenChange` para poder cerrarlo desde ahí:
+
+  ```tsx
+  import { App } from '@capacitor/app';
+
+  // Registered once, at app startup. closeOpenOverlay() closes the open Dialog or Sheet
+  // (through the state you pass to its `open`) and returns true; false if none is open.
+  App.addListener('backButton', ({ canGoBack }) => {
+    if (closeOpenOverlay()) return;
+    if (canGoBack) window.history.back();
+    else App.exitApp();
+  });
+  ```
+
+- **El teclado y los elementos fijos abajo (`Sheet` con `side="bottom"`, `NavigationBar` fija).**
+  - **En iOS** lo decide `plugins.Keyboard.resize` de `@capacitor/keyboard`:
+    - `'native'` (default) redimensiona toda la WebView. Lo fijo abajo sube sobre el teclado, y el alto en `dvh` de `Sheet` se achica con ella, así que su footer y el campo enfocado siguen a la vista.
+    - `'body'` redimensiona solo el `<body>`, sin cambiar el viewport. Lo fijo abajo se posiciona respecto del viewport, así que no se mueve y el teclado lo tapa.
+    - `'none'` no redimensiona nada, y el teclado tapa lo que esté abajo.
+  - **En Android** esa opción no aplica: cómo se redimensiona la WebView depende de la configuración nativa de la actividad. Si la app se muestra a pantalla completa (por ejemplo, con la barra de estado superpuesta), `resizeOnFullScreen: true` de `Keyboard` corrige que el teclado no redimensione la WebView.
+  - **Una `NavigationBar` fija abajo** que sube con el teclado ocupa espacio mientras se escribe. Si molesta, ocúltala entre los eventos `keyboardWillShow` y `keyboardWillHide` del mismo plugin.
+- **La barra de estado y `safe-area-inset-top` en tus encabezados.** Con `viewport-fit=cover`, el contenido llega hasta debajo de la barra de estado. En Android 15 y posteriores, Capacitor 8 lo impone siempre: ahí `setOverlaysWebView` y `setBackgroundColor` de `@capacitor/status-bar` ya no están disponibles. El DS solo reserva ese espacio en `Sheet` y en los defaults de `Toast`; tus encabezados fijos o `sticky` (y una `NavigationBar` `'horizontal'` arriba) necesitan el suyo:
+
+  ```tsx
+  <header className="sticky top-0 bg-base-100 pt-[env(safe-area-inset-top)]">…</header>
+  ```
+
+  El color del texto de la barra se elige con `StatusBar.setStyle`: `Style.Dark` pone texto claro para fondos oscuros, y `Style.Light`, texto oscuro para fondos claros.
+
 ---
 
 ## 🎨 3. Theming (Custom Properties)
@@ -287,6 +353,7 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
     - [Con Tailwind v4](#con-tailwind-v4)
     - [Sin Tailwind](#sin-tailwind)
     - [Server Components](#server-components)
+    - [Uso en WebView (Capacitor)](#uso-en-webview-capacitor)
   - [🎨 3. Theming (Custom Properties)](#-3-theming-custom-properties)
     - [Tokens overrideables](#tokens-overrideables)
     - [Patrón sancionado: override sin capa (`@layer`)](#patrón-sancionado-override-sin-capa-layer)
