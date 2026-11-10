@@ -192,7 +192,7 @@ const RadioCard = React.forwardRef<
         undefined
       }
       className={cn(
-        'relative flex min-h-12 w-full cursor-pointer flex-col items-start justify-center gap-0.5 rounded-lg border border-base-300 bg-base-100 py-3 pl-4 pr-10 text-left transition-colors',
+        'relative flex min-h-12 w-full cursor-pointer flex-col items-start justify-center gap-0.5 rounded-lg border border-base-300 bg-base-100 py-3 pl-4 pr-10 text-left transition-colors select-none',
         'pointer-fine:enabled:hover:bg-base-200 enabled:active:bg-base-200 [-webkit-tap-highlight-color:transparent]',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
         // inset-ring adds the second pixel inside: a thicker border without moving the layout.

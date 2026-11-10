@@ -196,6 +196,10 @@ Todo `hover:X` de un elemento interactivo tiene su `active:X` con el mismo token
 
 **Estados que ganan al hover:** en el ítem encendido de `ToggleGroup` y la pestaña activa de `Tabs`, `data-[state=…]` gana al hover por orden. Un `active:` con guarda tiene más especificidad y le ganaría, así que se excluye ese estado (`not-data-[state=on]:`) para que presionar se siga viendo como el hover.
 
+**Sin selección de texto al mantener presionado:** en iOS, mantener presionado un botón selecciona su texto y muestra los tiradores de copia. Los controles accionables con aspecto de botón llevan `user-select: none` (`select-none`): la base de `buttonVariants` y lo que se arma sobre ella, `Toggle`, `ToggleGroupItem`, `TabsTrigger`, `NavigationBarItem`, `Badge` interactivo, el cuerpo y la ✕ de `Chip`, y `RadioCard`. Nunca en un ancestro de un campo editable, porque en iOS bloquea seleccionar y editar el campo (el contenedor del `Combobox` múltiple queda sin `select-none` y solo lo llevan sus Chips), ni en texto de contenido, celdas o enlaces de contenido, que el usuario puede querer copiar. Los disparadores de `Select` y `Combobox` y las filas de `SelectionField` quedan seleccionables: tienen aspecto de campo o fila, y muestran el valor elegido o una descripción.
+
+**Sin `-webkit-touch-callout: none` en el DS:** ni siquiera en los enlaces de `NavigationBar`. En la web móvil quitaría el menú del enlace al mantenerlo presionado ("abrir en otra pestaña", vista previa), que en un sitio web es útil. Una app nativa envuelta (Capacitor), donde ese menú no tiene sentido, lo agrega en su propio CSS.
+
 **Pendiente de verificar en un iPhone:** en iOS, Safari puede no aplicar `:active` si la página no registra un listener de `touchstart`. El DS no agrega JS por esto; si pasa, la app puede registrar `document.addEventListener('touchstart', () => {}, { passive: true })`.
 
 **Inconsistencia conocida:** el botón para agregar de `ImageUploader` lleno (`aria-disabled`) muestra el hover con mouse pero no el `active:`. No se corrige aquí.

@@ -71,7 +71,8 @@ const linkBottomBelow = {
 
 export const navigationBarLinkVariants = cva(
   [
-    '[-webkit-tap-highlight-color:transparent]',
+    // No -webkit-touch-callout: it would remove the link's open-in-new-tab menu (ARCHITECTURE).
+    'select-none [-webkit-tap-highlight-color:transparent]',
     // 'bottom' form: icon over text, at least 56px.
     'flex min-h-14 w-full flex-col items-center justify-center gap-1 px-0.5 py-1.5 text-center text-xs leading-tight [overflow-wrap:anywhere]',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',

@@ -7,7 +7,7 @@ export const buttonVariants = cva(
   // rules in the stylesheet, not on which variant cva was called with. shape ALWAYS resolves to
   // 'default' or 'pill' (never absent: defaultVariants guarantees it), so the base needs no
   // fallback.
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all cursor-pointer [-webkit-tap-highlight-color:transparent] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 aria-disabled:opacity-50  [&_svg]:size-4 [&_svg]:shrink-0',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all cursor-pointer select-none [-webkit-tap-highlight-color:transparent] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 aria-disabled:opacity-50  [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {

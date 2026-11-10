@@ -4,6 +4,18 @@
 
 ### Changed
 
+- **Mantener presionado un botón ya no selecciona su texto.** En iOS, mantener presionado un
+  control mostraba la selección y los tiradores de copia. Ahora llevan `user-select: none`
+  `Button` (también con `asChild` sobre un `<a>`) y todo lo que usa `buttonVariants`
+  (días y navegación de `Calendar`, el botón de `FileInput`, `ImageUploader`, `ScrollRow`,
+  `QuantityStepper`, la paginación de `DataTable`, los disparadores de `DatePicker` y
+  `DateRangePicker`, `SkipToContent`), `Toggle`, `ToggleGroupItem`, `TabsTrigger`,
+  `NavigationBarItem`, `Badge` con `interactive`, el cuerpo y la ✕ de `Chip`, y `RadioCard`.
+  Los campos (`Input`, `Textarea`, la búsqueda de `Combobox`) siguen siendo seleccionables.
+  El DS no aplica `-webkit-touch-callout: none`, porque en la web quitaría el menú de
+  los enlaces al mantenerlos presionados. En una app con Capacitor, agrégalo en tu propio CSS.
+  Sin cambios de API. Para volver a permitir la selección en un caso puntual, pasa `select-text`
+  en `className`. En `Chip` no sirve, porque su `className` va al contenedor y no a los botones.
 - **`Toast` separa los toasts del safe area del dispositivo.** Los defaults de `offset` (24px)
   y `mobileOffset` (16px) suman ahora `env(safe-area-inset-*)` en cada lado, así que con
   `viewport-fit=cover` un toast arriba ya no queda bajo la muesca ni uno abajo sobre el
