@@ -25,8 +25,13 @@ export default meta;
 // actionable control that looks like a button has user-select: none. An editable field must
 // stay selectable, also when it sits next to Chips (Combobox multiple): select-none on one of
 // its ancestors would block selecting and editing it on iOS.
+const userSelect = (element: Element) => getComputedStyle(element).getPropertyValue('user-select');
+
+const describe = (element: Element) =>
+  `${element.tagName.toLowerCase()}${element.className ? `.${String(element.className).split(' ').slice(0, 3).join('.')}` : ''}`;
+
 const checkUserSelect = async (
-  root: ParentNode,
+  root: Element,
   cases: Record<string, string>,
   expected: 'none' | 'selectable',
 ) => {
@@ -37,8 +42,19 @@ const checkUserSelect = async (
       wrong[name] = `not found: ${selector}`;
       continue;
     }
-    const value = getComputedStyle(element).getPropertyValue('user-select');
-    if ((expected === 'none') !== (value === 'none')) wrong[name] = value;
+    if (expected === 'none') {
+      if (userSelect(element) !== 'none') wrong[name] = userSelect(element);
+      continue;
+    }
+    // user-select isn't inherited per the spec, and engines differ in what the field itself
+    // computes: walk the field and every ancestor up to the root, none may compute to none.
+    for (let node: Element | null = element; node; node = node.parentElement) {
+      if (userSelect(node) === 'none') {
+        wrong[name] = `none on ${node === element ? 'the field' : describe(node)}`;
+        break;
+      }
+      if (node === root) break;
+    }
   }
   await expect(wrong).toEqual({});
 };
