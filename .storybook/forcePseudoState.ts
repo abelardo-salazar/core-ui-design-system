@@ -1,7 +1,7 @@
 // Forces :hover / :active on an element through the Chrome DevTools Protocol, the same as the
 // DevTools ":hov" panel. Only in vitest-browser with Playwright's Chromium (the storybook-css
-// project). In the Storybook UI it returns false and the caller skips its assertions; in vitest
-// a missing CDP session throws, so the test can't pass green without checking anything.
+// project). In the Storybook UI it returns false and the caller skips its assertions; anywhere
+// else a missing CDP session throws, so the test can't pass green without checking anything.
 type CdpSession = {
   send: <T = Record<string, never>>(method: string, params?: object) => Promise<T>;
 };
@@ -15,11 +15,15 @@ type CdpNode = {
 
 let session: CdpSession | undefined;
 
-// vitest-browser sets this global on the page that runs the tests; the Storybook UI doesn't.
-export const inVitestBrowser = () => '__vitest_browser__' in globalThis;
+// Fails closed: it skips only where the Storybook UI is confirmed, and anywhere else it runs and
+// throws without CDP. Storybook serves every story, in dev and in the static build, from its
+// documented iframe.html (the same URL used to embed stories); vitest-browser serves its tester
+// at "/". Vitest's own markers aren't usable here: __vitest_browser__ is internal, and
+// import.meta.env.VITEST is undefined in browser mode.
+export const inStorybookUI = () => /\/iframe\.html$/.test(location.pathname);
 
 const getSession = async (): Promise<CdpSession | null> => {
-  if (!inVitestBrowser()) return null;
+  if (inStorybookUI()) return null;
   if (session) return session;
   try {
     const { cdp } = await import('vitest/browser');
@@ -28,7 +32,7 @@ const getSession = async (): Promise<CdpSession | null> => {
     await opened.send('CSS.enable');
     session = opened;
   } catch (error) {
-    throw new Error(`forcePseudoState: no CDP session in vitest-browser (${String(error)})`);
+    throw new Error(`forcePseudoState: no CDP session outside the Storybook UI (${String(error)})`);
   }
   return session;
 };
@@ -50,8 +54,8 @@ const findNode = (node: CdpNode, marker: string): CdpNode | undefined => {
 };
 
 /**
- * Forces `states` on `element` (an empty list clears them). False in the Storybook UI; throws in
- * vitest-browser if CDP isn't available.
+ * Forces `states` on `element` (an empty list clears them). False in the Storybook UI; throws
+ * anywhere else if CDP isn't available.
  */
 export const forcePseudoState = async (
   element: Element,
