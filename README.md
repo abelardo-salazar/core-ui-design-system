@@ -390,7 +390,7 @@ Cada sección indica desde qué versión existe el componente (**Desde 0.4.**), 
 
 La implementación usa `class-variance-authority` (`buttonVariants`, exportado para que un consumidor arme su propio elemento con el mismo look) para combinar variantes y tamaños. Variantes por defecto: `variant: 'primary'`, `size: 'md'`, `shape: 'default'`.
 
-> **Regla de alineación: `Button`, `Input` y el trigger de `Select` comparten la misma escala de alturas** (`sm` = 32px, `md` = 44px, `lg` = 48px — `Input`/`Select` no tienen `size="icon"`). En una misma fila (p. ej. un campo con un botón de búsqueda al lado, o un `Select` junto a un `Button`), usa el mismo `size` en los tres para que queden alineados por arriba y por abajo — ver el story `AlignedFormRow` en `FormDemo.stories.tsx`.
+> **Regla de alineación: `Button`, `Input` y el trigger de `Select` comparten la misma escala de alturas** (`sm` = 32px, `md` = 44px, `lg` = 48px — `Input`/`Select` no tienen `size="icon"`). En una misma fila (p. ej. un campo con un botón de búsqueda al lado, o un `Select` junto a un `Button`), usa el mismo `size` en los tres para que queden alineados por arriba y por abajo — ver el story `AlignedFormRow` en `FormDemo.stories.tsx`. Lo que se alinea es la altura, no el texto: el texto de los campos (`Input`, `Textarea`, `Combobox` y los disparadores de `Select`, `DatePicker` y `DateRangePicker`) mide 16px en todos los tamaños, intencionalmente mayor que el de `Button` (12px en `sm`, 14px en `md`), porque Safari en iOS hace zoom al enfocar un campo con texto menor a 16px.
 
 > **Nota sobre `variant="destructive"` y el token `--error-focus-content`:** en primary/secondary/accent/neutral, tanto el color base como su `-focus` (hover) son oscuros en modo claro, así que un solo `-content` (blanco) sirve como color de texto para los dos estados. `error` es el único color del sistema donde eso no es cierto: el base (`--error`, `#ef4444`) es claro pero el `-focus` (`--error-focus`, `#b91c1c` en claro / `#f87171` en oscuro) es oscuro — la relación se invierte. Por eso `destructive` es la única variante que necesita `hover:text-error-focus-content` además de `hover:bg-error-focus`; sin ese token, el texto (`text-error-content`, negro) cae a 3.25:1 sobre el fondo de hover. No es un descuido de copiar/pegar de las otras variantes — no lo agregues a primary/secondary/accent/neutral, ahí un solo `-content` ya cubre ambos estados. Ver `src/tailwind.css` para el detalle y el cálculo de contraste en ambos temas.
 
@@ -1470,7 +1470,7 @@ Es un `radiogroup` real: Tab entra al grupo, las flechas mueven la selección de
   - `onClear?: () => void` _(desde 0.5)_ — se llama después de vaciar el campo. Solo con `clearable`.
   - `clearLabel?: string` (default `'Clear'`) _(desde 0.5)_ — `aria-label` del botón de limpiar. Solo con `clearable`.
   - `variant?: 'default' | 'error'` — variantes visuales (definidas en `inputVariants.ts`).
-  - `size?: 'sm' | 'md' | 'lg'` (default `'md'`) — alturas: `sm` = 32px, `md` = 44px, `lg` = 48px. Comparte escala con `Button` y el trigger de `Select` — ver la nota de alineación en la sección de `Button`.
+  - `size?: 'sm' | 'md' | 'lg'` (default `'md'`) — alturas: `sm` = 32px, `md` = 44px, `lg` = 48px; el texto mide 16px en los tres. Comparte escala con `Button` y el trigger de `Select` — ver la nota de alineación en la sección de `Button`.
   - `disabled?: boolean`, `className?: string` y el resto de `React.InputHTMLAttributes<HTMLInputElement>`.
 
 La implementación genera un `id` accesible si no se pasa uno y enlaza `aria-invalid` y `aria-describedby` según `error`/`helperText`. Usa `inputVariants` (class-variance-authority) para combinar `variant` y `size`.
@@ -1647,7 +1647,7 @@ const [fotos, setFotos] = useState<ImageUploaderItem[]>(
   - `variant?: 'default' | 'error'` — controla la apariencia visual (implementado en `textareaVariants.ts`).
   - `error?: string` — mensaje de error; activa la variante visual `error` y `aria-invalid`.
   - `helperText?: string` — texto de ayuda descriptivo (vinculado mediante `aria-describedby`).
-  - `className?: string` — clases Tailwind adicionales para ajustar tamaño/espaciado.
+  - `className?: string` — clases Tailwind adicionales para ajustar tamaño/espaciado. El texto mide 16px; achicarlo por `className` vuelve a provocar el zoom de iOS al enfocar.
   - Acepta `React.TextareaHTMLAttributes<HTMLTextAreaElement>` y `VariantProps<typeof textareaVariants>`.
 
 Descripción: textarea estilizada con `class-variance-authority` (`textareaVariants`) que aplica `min-h-[80px]`, bordes, padding y estados (`error`, `disabled`). Se usa para input multilinea en formularios y admite `rows`, `placeholder`, y otras props estándar de `textarea`.
@@ -1666,7 +1666,7 @@ const [value, setValue] = useState('');
 <Textarea label="comentario" value={value} onChange={(e) => setValue(e.target.value)} />
 
 // 4. Personalizar filas y tamaño
-<Textarea label="comentario" rows={6} className="text-sm" />
+<Textarea label="comentario" rows={6} className="min-h-40" />
 
 // 5. Deshabilitado
 <Textarea label="comentario" disabled value="No editable" />
@@ -1678,7 +1678,7 @@ const [value, setValue] = useState('');
 - **Props y comportamiento clave:**
   - `Select` (root): `value?: string`, `defaultValue?: string`, `onValueChange?: (value: string) => void` — API para controlado/no-controlado.
   - `SelectTrigger`: `className?: string`, `asChild?: boolean` — dispara el panel y puede renderizar elementos existentes como trigger.
-    - `size?: 'sm' | 'md' | 'lg'` _(desde 0.12)_ (default `'md'`) — 32 / 44 / 48px, la escala de `Input` y `Button`, para alinearlos en una misma fila (ver la nota de alineación en la sección de `Button`). `sm` es un tamaño compacto, por debajo del objetivo táctil de 44px y sin área táctil extendida, igual que en `Input`.
+    - `size?: 'sm' | 'md' | 'lg'` _(desde 0.12)_ (default `'md'`) — 32 / 44 / 48px, la escala de `Input` y `Button`, para alinearlos en una misma fila (ver la nota de alineación en la sección de `Button`). El texto mide 16px en los tres tamaños, como en `Input`. `sm` es un tamaño compacto, por debajo del objetivo táctil de 44px y sin área táctil extendida, igual que en `Input`.
     - Estado de error _(desde 0.12)_: con `aria-invalid="true"`, el trigger toma solo el borde, el texto y el anillo de foco de error. Es CSS (`aria-[invalid=true]:`), así que alcanza con pasar el atributo.
   - `SelectContent`: `position?: 'popper'` (usa `popper` por defecto en la implementación), `className?: string` — controla el panel desplegable (animaciones, tamaño mínimo).
   - `SelectItem`: `value: string`, `disabled?: boolean`, `className?: string` — representa una opción; usa `ItemIndicator` (check) cuando está seleccionada.
@@ -1878,7 +1878,7 @@ Con un `DayButton` propio en `components`, tu botón reemplaza al del DS: `rende
   - `dialogLabel?: string` (default `'Choose date'`) _(desde 0.5)_ — nombre accesible del popover.
   - `locale?: Locale` (de `date-fns`) _(desde 0.5)_ — se aplica a la fecha del disparador y al calendario. Con un locale de `date-fns` las etiquetas de navegación del calendario quedan en inglés; con los locales que exporta el DS desde el subpath `/locale` (`import { es } from '@abelardo-salazar/core-ui-design-system/locale'`) también se traducen. Ese subpath reexporta los locales de DayPicker (los de `date-fns` con las etiquetas traducidas), es server-safe y solo empaqueta los locales que se importan. No importar desde `@daypicker/react`: es dependencia del DS, no de la app (con pnpm no se resuelve).
   - `disabled?: boolean`.
-  - `className?: string` — se aplica al `Button` trigger.
+  - `className?: string` — se aplica al `Button` trigger. Su texto mide 16px, como el de los demás campos, en lugar de los 14px de `Button`.
   - `label?: string` _(desde 0.12)_ — nombre visible del campo. Nombra el disparador junto con su texto, así que se lee la etiqueta y la fecha elegida.
   - `error?: string` _(desde 0.12)_ — mensaje de error, con el mismo aspecto y los mismos atributos que en `SelectField`: `aria-invalid` y `aria-describedby` en el disparador. Reemplaza a `helperText`.
   - `helperText?: string` _(desde 0.12)_ — texto de ayuda, enlazado con `aria-describedby`.
@@ -1916,7 +1916,7 @@ function ControlledDatePicker() {
   - `placeholder?: string` (default `'Pick dates'`) y `dialogLabel?: string` (default `'Choose dates'`) — texto del disparador sin rango y nombre accesible del popover.
   - `locale?: Locale` (de `date-fns`) — como en [DatePicker](#datepicker--uso-y-props): se aplica a las dos fechas del disparador y al calendario.
   - `label?`, `error?` y `helperText?` — el mismo campo que `DatePicker`.
-  - `disabled?: boolean` y `className?: string` (se aplica al disparador).
+  - `disabled?: boolean` y `className?: string` (se aplica al disparador, con texto de 16px como en `DatePicker`).
 
 Componente aparte de `DatePicker`, así los tipos de los dos siguen simples. Es controlado, sin estado propio del rango: compone `Popover`, `Button` y `Calendar` en `mode="range"`. El disparador muestra las dos fechas con el formato corto del locale (`Jan 12, 2026 – Jan 15, 2026`).
 
@@ -1994,7 +1994,7 @@ export function BookingDate() {
   - `filter?: (option: ComboboxOption, query: string) => boolean` _(desde 0.11)_ — decide qué opciones muestra la búsqueda; default `comboboxFilter`. `query` llega recortada y sin normalizar, y no se llama con el buscador vacío (se muestran todas). Para comparar texto igual que el default, `comboboxTextMatch(text, query)`: `true` si `query` aparece en `text` sin distinguir mayúsculas ni acentos. `comboboxFilter(option, query)` es `comboboxTextMatch(option.label, query)`. Ninguna de las dos depende de `'use client'`.
   - `onCreate?: (text: string) => void` _(desde 0.11)_ — ofrece la opción "crear" al final de la lista. Recibe el texto recortado y **no cambia el valor**: el consumidor agrega la opción a `options` y la selecciona con `value`. Por eso, con `onCreate` los tipos exigen `value` y `onValueChange` y no admiten `defaultValue`.
   - `createLabel?: (text: string) => string` _(desde 0.11)_ — texto y nombre accesible de la opción "crear"; default `` (text) => `Create "${text}"` ``. Solo con `onCreate`.
-  - `size?: 'sm' | 'md' | 'lg'` (32 / 44 / 48px, la escala de `Input` y `Select`; default `'md'`).
+  - `size?: 'sm' | 'md' | 'lg'` (32 / 44 / 48px, la escala de `Input` y `Select`; default `'md'`). El texto del disparador y del campo de búsqueda mide 16px en los tres; las opciones de la lista siguen el tamaño.
   - `disabled?: boolean` — deshabilita el disparador, el buscador y los Chips.
   - `id?: string` — id del botón (en `mode="inline"`, del contenedor). No se usa para etiquetar: usar `label`.
   - Textos, en inglés por defecto: `placeholder` (`'Select...'`), `searchPlaceholder` (`'Search...'`), `emptyLabel` (`'No results.'`), `removeLabel: (label: string) => string` (default `` (label) => `Remove ${label}` ``).

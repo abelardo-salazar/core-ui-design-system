@@ -99,7 +99,8 @@ function DateRangePicker({
               disabled={disabled}
               startIcon={<CalendarIcon className="h-4 w-4" />}
               className={cn(
-                'w-72 justify-start font-normal',
+                // 16px like the other fields of a form; replaces Button's text-sm through cn.
+                'w-72 justify-start text-base font-normal',
                 !range?.from && 'text-base-content/70',
                 // Error from the aria-invalid PickerField sets, as in SelectTrigger: each class is one
                 // attribute more specific than the outline variant's, so it wins without tailwind-merge.

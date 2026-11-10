@@ -109,11 +109,11 @@ export const TriggerSizeAndError: Story = {
     const small = canvas.getByRole('combobox', { name: 'Pequeño' });
     const byDefault = canvas.getByRole('combobox', { name: 'Por defecto' });
     await expect(small).not.toHaveAttribute('size');
-    await expect(small).toHaveClass('h-8', 'px-2', 'text-xs');
+    await expect(small).toHaveClass('h-8', 'px-2', 'text-base');
     await expect(byDefault).toHaveClass(
       'h-11',
       'px-3',
-      'text-sm',
+      'text-base',
       'aria-[invalid=true]:border-error',
     );
     await expect(byDefault).not.toHaveAttribute('aria-invalid');

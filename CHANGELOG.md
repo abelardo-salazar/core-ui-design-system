@@ -10,6 +10,16 @@
   133+; en Firefox y Safari la fila arranca al inicio, como antes. Si el activo cambia con el
   `<nav>` ya montado, la fila no se vuelve a desplazar. Sin cambios de API ni en la forma
   `'bottom'` (tampoco por debajo del breakpoint de `bottomBelow`).
+- **El texto de los campos de formulario mide 16px en todos los tamaños.** Safari en iOS (y la
+  WebView de Capacitor) hace zoom al enfocar un campo editable con texto menor a 16px. Cambia en
+  `Input` (antes 12px en `sm` y 14px en `md`, también el botón de `type="file"`), `Textarea`
+  (antes 14px), `QuantityStepper` (lo hereda de `Input`), el disparador y el campo de búsqueda
+  de `Combobox`, `SelectTrigger` y `SelectField` (antes 12px en `sm` y 14px en `md`) y los
+  disparadores de `DatePicker` y `DateRangePicker` (antes 14px). Select y los pickers no hacen
+  zoom, pero cambian para que el formulario se vea parejo. Las alturas (32 / 44 / 48px) no
+  cambian, así que siguen alineados con `Button`, cuyo texto queda más chico. Las opciones de
+  las listas, los labels y los textos de ayuda no cambian. Sin cambios de API. Si achicabas el
+  texto de un campo con `className`, en iOS vuelve el zoom al enfocarlo.
 
 ## [0.12.0] - 2026-11-07
 

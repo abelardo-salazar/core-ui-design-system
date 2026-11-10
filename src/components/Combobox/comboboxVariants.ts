@@ -1,19 +1,20 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 
-// Same scale as Input (32 / 44 / 48, with the same horizontal padding and text size) so a
-// Combobox lines up with Input and the Select trigger in a form.
+// Same scale as Input (32 / 44 / 48, with the same horizontal padding and 16px text in every
+// size) so a Combobox lines up with Input and the Select trigger in a form. 16px because iOS
+// Safari zooms in on focusing a field with smaller text (the search field).
 export const comboboxTriggerVariants = cva(
   [
-    'flex w-full items-center justify-between gap-2 rounded-btn border border-base-300 bg-base-100 text-left',
+    'flex w-full items-center justify-between gap-2 rounded-btn border border-base-300 bg-base-100 text-left text-base',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
     'disabled:cursor-not-allowed disabled:opacity-50',
   ],
   {
     variants: {
       size: {
-        sm: 'h-8 px-2 text-xs',
-        md: 'h-11 px-3 text-sm',
-        lg: 'h-12 px-4 text-base',
+        sm: 'h-8 px-2',
+        md: 'h-11 px-3',
+        lg: 'h-12 px-4',
       },
     },
     defaultVariants: { size: 'md' },
@@ -27,16 +28,16 @@ export const comboboxTriggerVariants = cva(
 // the field.
 export const comboboxFieldVariants = cva(
   [
-    'flex w-full flex-wrap items-center rounded-btn border border-base-300 bg-base-100',
+    'flex w-full flex-wrap items-center rounded-btn border border-base-300 bg-base-100 text-base',
     'has-[[data-combobox-trigger]:focus-visible]:ring-2 has-[[data-combobox-trigger]:focus-visible]:ring-primary has-[[data-combobox-trigger]:focus-visible]:ring-offset-2',
     'data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50',
   ],
   {
     variants: {
       size: {
-        sm: 'min-h-8 gap-1 pl-1 text-xs',
-        md: 'min-h-11 gap-1 py-1 pl-1.5 text-sm',
-        lg: 'min-h-12 gap-1.5 py-1 pl-2 text-base',
+        sm: 'min-h-8 gap-1 pl-1',
+        md: 'min-h-11 gap-1 py-1 pl-1.5',
+        lg: 'min-h-12 gap-1.5 py-1 pl-2',
       },
     },
     defaultVariants: { size: 'md' },
@@ -58,13 +59,13 @@ export const comboboxMultipleTriggerVariants = cva(
 );
 
 export const comboboxSearchVariants = cva(
-  'flex w-full bg-transparent outline-none placeholder:text-base-content/50 disabled:cursor-not-allowed disabled:opacity-50',
+  'flex w-full bg-transparent text-base outline-none placeholder:text-base-content/50 disabled:cursor-not-allowed disabled:opacity-50',
   {
     variants: {
       size: {
-        sm: 'h-8 text-xs',
-        md: 'h-11 text-sm',
-        lg: 'h-12 text-base',
+        sm: 'h-8',
+        md: 'h-11',
+        lg: 'h-12',
       },
     },
     defaultVariants: { size: 'md' },

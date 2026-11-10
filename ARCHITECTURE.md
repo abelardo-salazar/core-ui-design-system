@@ -261,6 +261,17 @@ Una prop que cambia el layout según el breakpoint (`bottomBelow` en NavigationB
 
 **Cuando un subcomponente debe cambiar con el breakpoint**, la entrada del mapa va en el subcomponente, condicionada al atributo del padre (`group-data-[bottom-below=md]/navigation-bar:max-md:…`). Lleva las tres entradas siempre y solo aplica la que coincide. Las clases que restauran tienen la misma especificidad que las de la variante y Tailwind emite después las que llevan media query, así que ganan sin `!important`. Una story `real-css` lo verifica dentro de iframes de ancho fijo, porque las media queries siguen al viewport y no al contenedor.
 
+### Campos de formulario a 16px
+
+Todo control con aspecto de campo (`Input`, `Textarea`, `Combobox`, `SelectTrigger` y los disparadores de `DatePicker` y `DateRangePicker`) usa texto de 16px (`text-base`) en `sm`, `md` y `lg`, sin reglas por plataforma. Las alturas de la escala (32 / 44 / 48px) no cambian, y `Button` mantiene su texto más chico.
+
+**Por qué:** Safari en iOS, y con él la WebView de Capacitor, hace zoom al enfocar un campo editable con texto menor a 16px. Un solo tamaño en todas las plataformas es lo más predecible: el formulario se ve igual en el escritorio y en el teléfono. Select y los pickers son `<button>` y no provocan zoom, pero entran para que todos los campos de un formulario se vean iguales.
+
+**Alternativas descartadas:**
+
+- **`pointer-coarse:text-base`:** limita el cambio a pantallas táctiles, pero el mismo formulario se vería distinto según el dispositivo, y la corrección dependería del puntero principal que informe cada uno, no del navegador que hace el zoom.
+- **Por breakpoint (`max-sm:text-base`):** el zoom depende del navegador, no del ancho. Un iPad o un iPhone en horizontal superan el breakpoint y vuelven a hacer zoom, y un escritorio angosto cambia de tamaño sin motivo.
+
 ### Fuera del DS
 
 Lo específico de un consumidor queda fuera del design system. Precedente: Kanban, que es un proyecto aparte.
