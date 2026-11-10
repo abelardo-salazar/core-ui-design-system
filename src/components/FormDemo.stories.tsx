@@ -239,5 +239,20 @@ export const FieldTextSize: StoryObj = {
     if (fileButton < 16) sizesBelow16['Input file button'] = fileButton;
     await expect(sizesBelow16).toEqual({});
     await expect(canvasElement.querySelectorAll('[data-case]')).toHaveLength(20);
+
+    // In sm (32px) the content area must fit a whole line of 16px text: with vertical padding in
+    // the base, it was 14px for a 24px line-height and the descenders could be clipped.
+    const shortContent: Record<string, { content: number; lineHeight: number }> = {};
+    for (const box of canvasElement.querySelectorAll('[data-case$=" sm"]')) {
+      const field = editable(box) as HTMLElement;
+      const computed = getComputedStyle(field);
+      const content =
+        field.clientHeight - parseFloat(computed.paddingTop) - parseFloat(computed.paddingBottom);
+      const lineHeight = parseFloat(computed.lineHeight);
+      if (content < lineHeight)
+        shortContent[box.getAttribute('data-case')!] = { content, lineHeight };
+    }
+    await expect(canvasElement.querySelectorAll('[data-case$=" sm"]')).toHaveLength(5);
+    await expect(shortContent).toEqual({});
   },
 };

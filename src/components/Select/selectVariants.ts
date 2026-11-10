@@ -2,7 +2,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 
 // SelectTrigger. Same height scale as Input and Button, so they align in one row: sm 32px
 // (compact, below the 44px touch target), md 44px, lg 48px. Height and padding live only in
-// `size`. Text is 16px in every size, like Input: a <button> doesn't trigger iOS's focus zoom,
+// `size`; sm has no vertical padding, as in Input, so its content fits the 24px line. Text is 16px in every size, like Input: a <button> doesn't trigger iOS's focus zoom,
 // but the form's fields must look alike.
 //
 // Error state from aria-invalid, in CSS: each aria-[invalid=true]: class carries one more
@@ -14,7 +14,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 // data-placeholder. It stays so the classes of the default trigger don't change.
 export const selectTriggerVariants = cva(
   [
-    'flex w-full items-center justify-between rounded-btn border border-base-300 bg-base-100 py-2 text-base placeholder:text-base-content/50',
+    'flex w-full items-center justify-between rounded-btn border border-base-300 bg-base-100 text-base placeholder:text-base-content/50',
     'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
     'disabled:cursor-not-allowed disabled:opacity-50',
     '[&>span]:line-clamp-1',
@@ -24,8 +24,8 @@ export const selectTriggerVariants = cva(
     variants: {
       size: {
         sm: 'h-8 px-2',
-        md: 'h-11 px-3',
-        lg: 'h-12 px-4',
+        md: 'h-11 px-3 py-2',
+        lg: 'h-12 px-4 py-2',
       },
     },
     defaultVariants: { size: 'md' },
