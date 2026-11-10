@@ -235,13 +235,13 @@ const sections = [
   { href: '#ajustes', label: 'Ajustes de la cuenta', icon: <GearIcon /> },
 ];
 
-const items = (count = sections.length) =>
+const items = (count = sections.length, activeIndex = 0) =>
   sections.slice(0, count).map(({ href, label, icon, badge }, index) => (
     <NavigationBarItem
       key={href}
       href={href}
       icon={icon}
-      active={index === 0}
+      active={index === activeIndex}
       {...(badge ? { badge, badgeLabel: unreadLabel } : {})}
     >
       {label}
@@ -363,6 +363,28 @@ export const HorizontalLayout: Story = {
   },
 };
 
+// 9b. horizontal with the CSS applied: a scrolling row whose current item is the last one starts
+// scrolled to show it (scroll-initial-target, no JS). Only Chromium-based browsers apply it.
+export const HorizontalActiveInView: Story = {
+  tags: ['real-css'],
+  render: () => (
+    <div className="w-80">
+      <NavigationBar aria-label="Secciones" variant="horizontal">
+        {items(sections.length, sections.length - 1)}
+      </NavigationBar>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const list = canvasElement.querySelector('ul')!;
+    const active = within(canvasElement).getByRole('link', { current: 'page' });
+    await expect(list.scrollWidth).toBeGreaterThan(list.clientWidth);
+    await expect(list.scrollLeft).toBeGreaterThan(0);
+    // 1px of slack: scrollLeft is whole pixels and the items' widths aren't.
+    await expect(rect(active).left).toBeGreaterThanOrEqual(rect(list).left - 1);
+    await expect(rect(active).right).toBeLessThanOrEqual(rect(list).right + 1);
+  },
+};
+
 const frameContent = (
   <div className="flex flex-col gap-4">
     <NavigationBar aria-label="Fila" variant="horizontal" bottomBelow="sm">
@@ -420,6 +442,7 @@ export const BottomBelowLayout: Story = {
         await expect(styleIn(link).borderBottomWidth).toBe('0px');
         await expect(styleIn(link).borderInlineStartWidth).toBe('0px');
         await expect(styleIn(link).paddingInlineStart).toBe(styleIn(expected).paddingInlineStart);
+        await expect(styleIn(link).getPropertyValue('scroll-initial-target')).toBe('none');
         const icon = link.querySelector('[aria-hidden]')!;
         const expectedIcon = expected.querySelector('[aria-hidden]')!;
         await expect(rect(icon).width).toBe(56);
@@ -436,6 +459,11 @@ export const BottomBelowLayout: Story = {
 
     const wide = await frameBody('Ancho');
     const row = wide.getByRole('navigation', { name: 'Fila' });
+    await expect(
+      styleIn(within(row).getByRole('link', { current: 'page' })).getPropertyValue(
+        'scroll-initial-target',
+      ),
+    ).toBe('nearest');
     for (const link of within(row).getAllByRole('link')) {
       await expect(styleIn(link).flexDirection).toBe('row');
       await expect(rect(link).height).toBe(44);

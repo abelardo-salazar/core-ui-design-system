@@ -5,7 +5,7 @@
 ![TypeScript](https://img.shields.io/badge/typescript-5.9+-3178C6.svg)
 ![Registry](https://img.shields.io/badge/registry-npm-CB3837.svg)
 
-**Última versión publicada:** `0.12.0`.
+**Última versión publicada:** `0.12.0`. `main` tiene cambios sin publicar: ver [CHANGELOG § Unreleased](./CHANGELOG.md#unreleased).
 
 **Storybook:** [abelardo-salazar.github.io/core-ui-design-system](https://abelardo-salazar.github.io/core-ui-design-system/). Documenta la última versión publicada, no lo que aún está sin publicar en `main`.
 
@@ -1095,6 +1095,7 @@ Uso (ejemplo, extraído de `Tabs.stories.tsx`):
 - **Tamaño:** cada ítem mide al menos 56px de alto, y la barra, 64px más el safe area. Si una etiqueta ocupa dos líneas, la barra crece. Para que un toast no la tape, ver el ejemplo de `offset` en [Toast](#toast--uso-y-props).
 - **Cantidad de ítems:** está pensada para 3 a 5, pero el componente no lo valida. Con 5 ítems a 320px de ancho, cada uno mide 64px: usa etiquetas cortas, porque una palabra más larga se parte.
 - **`'horizontal'` sin espacio:** si los ítems no caben, la fila se desplaza de lado (`overflow-x-auto`) sin barra de scroll visible y sin JS. Al llegar con Tab a un ítem oculto, el navegador lo desplaza hasta mostrarlo; si el ítem ya se ve en parte, Chrome le da el foco sin desplazar la fila (el foco nunca queda oculto del todo). Las etiquetas no se parten.
+- **Ítem activo a la vista en `'horizontal'`:** si la fila se desplaza, arranca mostrando el ítem activo (`aria-current="page"`), sin JS. Lo aplican Chrome y Edge 133+; en Firefox y Safari la fila arranca al inicio. Solo actúa cuando la fila se renderiza por primera vez: en un layout persistente entre navegaciones, donde el `<nav>` no se desmonta al cambiar de página, la fila no se vuelve a desplazar hacia el nuevo activo. Para muchos ítems sigue siendo recomendable `'vertical'`.
 - **Cómo cambia cada ítem:** `NavigationBarItem` no recibe la variante. La lee del `<nav>` con atributos `data-*` y un grupo de Tailwind, sin Context, así que el ítem sigue siendo server-safe. En `'bottom'`, el `<nav>` no lleva esos atributos y su DOM es el de antes. Usa `NavigationBarItem` solo como hijo directo de un `NavigationBar`.
 - **Server Components:** es server-safe, sin hooks ni handlers propios. Saber cuál es la sección activa sí suele requerir un hook del router, como en los ejemplos: ese componente tuyo necesita `'use client'`.
 - **React Router:** usa `Link`, no `NavLink`: el `className` en forma de función de `NavLink` no se puede mezclar con `asChild`, y la píldora depende de `active`.
