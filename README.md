@@ -1500,6 +1500,17 @@ Notas:
 
 **Comportamiento no obvio (`clearable`):** vaciar el campo dispara el `onChange` del consumidor, en modo controlado, no controlado y con `register` de react-hook-form; después se llama a `onClear` y el foco vuelve al input. El botón solo se ve mientras el campo tiene valor (también tras `reset()`/`setValue()` de RHF) y no aparece con `disabled` ni `readOnly`. No limpia con Escape, para no interferir con el cierre de un `Dialog`/`Sheet`. `clearable` acepta un `boolean` dinámico.
 
+**Comportamiento no obvio (`type="time"`):** `Input` pasa `type` al `input` nativo, así que `type="time"` funciona sin un componente aparte, con el teclado y la accesibilidad del navegador. El formato que se muestra (12 h o 24 h) y el aspecto del control los decide el navegador según el idioma del sistema, no el atributo `lang` ni el locale de la app. El valor de `value` y `onChange`, en cambio, es siempre `"HH:mm"` en 24 h, cualquiera sea el formato mostrado: "2:30 PM" llega como `"14:30"`. Con `step` menor que 60 incluye segundos (`"HH:mm:ss"`), y un valor que no es una hora válida queda como `""`.
+
+```tsx
+<Input
+  label="Hora de inicio"
+  type="time"
+  value={time}
+  onChange={(event) => setTime(event.target.value)}
+/>
+```
+
 **Tipos:** `InputProps` es una unión discriminada por `clearable` (`InputWithEndIconProps | ClearableInputProps`), así que `endIcon` junto a `clearable`, o `onClear`/`clearLabel` sin `clearable`, no compilan. Dos consecuencias para quien deriva tipos de `Input`:
 
 - `interface X extends InputProps` no compila (una interface no puede extender una unión): extender `InputBaseProps`.
