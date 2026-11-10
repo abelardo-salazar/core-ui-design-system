@@ -4,6 +4,13 @@
 
 ### Changed
 
+- **`Toast` separa los toasts del safe area del dispositivo.** Los defaults de `offset` (24px)
+  y `mobileOffset` (16px) suman ahora `env(safe-area-inset-*)` en cada lado, así que con
+  `viewport-fit=cover` un toast arriba ya no queda bajo la muesca ni uno abajo sobre el
+  indicador de inicio. Sin `viewport-fit=cover` la posición no cambia. Sin cambios de API: si
+  pasas `offset` o `mobileOffset`, reemplazan el default de esa prop, y los lados que omitas
+  quedan en 24px / 16px sin el safe area; para conservarlo, inclúyelo en tu valor con
+  `calc()` (por ejemplo `bottom: 'calc(80px + env(safe-area-inset-bottom))'`).
 - **`NavigationBar` con `variant="horizontal"` arranca mostrando el ítem activo.** Si los ítems no
   caben y la fila se desplaza, al renderizarse por primera vez queda desplazada hasta mostrar el
   enlace con `aria-current="page"`, sin JS (`scroll-initial-target`). Lo aplican Chrome y Edge
