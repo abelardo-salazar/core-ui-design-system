@@ -27,6 +27,7 @@ Las decisiones detrás de estas reglas, con su razón, están en [ARCHITECTURE.m
 
 - Auditar todo control interactivo y todo botón de solo ícono contra el objetivo de 44px. [Decisión](../../ARCHITECTURE.md#objetivo-táctil-de-44px)
 - Detectar touch con `pointer-coarse:`/`pointer-fine:`, no con `hover:none`.
+- Dar a todo `hover:X` de un elemento interactivo su `active:X` con el mismo token y sin `pointer-fine:`. Un deshabilitado no lo muestra: `enabled:active:` en un `<button>`, y `not-disabled:not-aria-disabled:active:` en `buttonVariants` y en lo que se arma sobre él. Si un estado encendido (`data-[state=on]`, `data-[state=active]`) gana al hover, excluirlo con `not-data-[state=…]:`. El mismo elemento lleva `[-webkit-tap-highlight-color:transparent]` en su clase, nunca en una regla global. Cubrirlo en `PressedState.stories.tsx`. [Decisión](../../ARCHITECTURE.md#estado-presionado-y-destello-de-toque)
 
 ## Tipos
 

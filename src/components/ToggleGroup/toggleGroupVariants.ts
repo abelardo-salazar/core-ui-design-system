@@ -6,7 +6,9 @@ import { cva, type VariantProps } from 'class-variance-authority';
 export const toggleGroupItemVariants = cva(
   [
     'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-btn font-medium text-base-content/70 transition-colors cursor-pointer',
-    'hover:text-base-content',
+    // Pressed looks like hover. Not on the pressed item, where data-[state=on] wins the hover.
+    'hover:text-base-content enabled:not-data-[state=on]:active:text-base-content',
+    '[-webkit-tap-highlight-color:transparent]',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
     'disabled:pointer-events-none disabled:opacity-50',
     // Same active state as TabsTrigger.

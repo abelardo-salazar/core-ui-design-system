@@ -173,7 +173,7 @@ const Chip = React.forwardRef<HTMLSpanElement, ChipProps>(
             onClick={onRemove}
             disabled={disabled}
             className={cn(
-              'inline-flex shrink-0 items-center justify-center rounded-full opacity-70 transition-opacity hover:opacity-100',
+              'inline-flex shrink-0 items-center justify-center rounded-full opacity-70 transition-opacity hover:opacity-100 enabled:active:opacity-100 [-webkit-tap-highlight-color:transparent]',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
               'disabled:cursor-not-allowed disabled:opacity-50',
               CLOSE_BUTTON_SIZE[size],

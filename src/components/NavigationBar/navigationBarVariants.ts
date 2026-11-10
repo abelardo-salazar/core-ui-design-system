@@ -71,6 +71,7 @@ const linkBottomBelow = {
 
 export const navigationBarLinkVariants = cva(
   [
+    '[-webkit-tap-highlight-color:transparent]',
     // 'bottom' form: icon over text, at least 56px.
     'flex min-h-14 w-full flex-col items-center justify-center gap-1 px-0.5 py-1.5 text-center text-xs leading-tight [overflow-wrap:anywhere]',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
@@ -96,7 +97,8 @@ export const navigationBarLinkVariants = cva(
         // there too). In vertical, ps-2.5 + the 2px border keep the text where ps-3 puts it.
         true: 'font-medium text-base-content group-data-[variant=horizontal]/navigation-bar:border-b-2 group-data-[variant=horizontal]/navigation-bar:border-primary group-data-[variant=vertical]/navigation-bar:border-s-2 group-data-[variant=vertical]/navigation-bar:border-primary group-data-[variant=vertical]/navigation-bar:ps-2.5',
         false:
-          'text-base-content/70 pointer-fine:hover:bg-base-200 pointer-fine:hover:text-base-content',
+          // active: without pointer-fine: on touch, pressing gives the feedback hover gives with a mouse.
+          'text-base-content/70 pointer-fine:hover:bg-base-200 pointer-fine:hover:text-base-content active:bg-base-200 active:text-base-content',
       },
     },
     defaultVariants: { active: false },

@@ -184,6 +184,22 @@ Excepción: las grillas contiguas no extienden su hit area, porque un `::after` 
 
 Button, Input y Select comparten escala para alinear en una misma fila: `sm` 32px, `md` 44px, `lg` 48px. En Select, la escala es de `SelectTrigger` y `SelectField` la reenvía.
 
+### Estado presionado y destello de toque
+
+Todo `hover:X` de un elemento interactivo tiene su `active:X` con el mismo token, y ese elemento lleva `-webkit-tap-highlight-color: transparent` en su propia clase. Un deshabilitado no muestra `active:`.
+
+**Por qué:** en Tailwind v4, `hover:` solo aplica dentro de `@media (hover: hover)`, así que en una pantalla táctil los interactivos no daban ninguna respuesta al presionarlos, salvo el destello gris del navegador. Con `active:` igual al hover, presionar se ve como el hover del escritorio. Quitar el destello sin estado presionado dejaría el toque sin respuesta, por eso van juntos.
+
+**Por componente, no global:** una regla global (`* { -webkit-tap-highlight-color: transparent }`) en la hoja del DS alcanzaría también los elementos del consumidor, que pueden contar con el destello.
+
+**La guarda de deshabilitado va en el CSS:** el navegador no aplica `:active` a un `<button disabled>`, pero `aria-disabled` no lo frena. Un `<button>` usa `enabled:active:`. Lo que se arma sobre `buttonVariants` usa `not-disabled:not-aria-disabled:active:`, porque Button puede ser un `<a>` con `asChild`, donde `enabled:` no aplica; los overrides sobre esa base repiten la misma cadena para que tailwind-merge reemplace la de la variante. Se usan variantes de Tailwind y no una propia (`@custom-variant`) porque `tailwind.css` lo compila el Tailwind del consumidor: una variante propia entraría en su espacio de nombres y quitarla después sería un breaking change.
+
+**Estados que ganan al hover:** en el ítem encendido de `ToggleGroup` y la pestaña activa de `Tabs`, `data-[state=…]` gana al hover por orden. Un `active:` con guarda tiene más especificidad y le ganaría, así que se excluye ese estado (`not-data-[state=on]:`) para que presionar se siga viendo como el hover.
+
+**Pendiente de verificar en un iPhone:** en iOS, Safari puede no aplicar `:active` si la página no registra un listener de `touchstart`. El DS no agrega JS por esto; si pasa, la app puede registrar `document.addEventListener('touchstart', () => {}, { passive: true })`.
+
+**Inconsistencia conocida:** el botón para agregar de `ImageUploader` lleno (`aria-disabled`) muestra el hover con mouse pero no el `active:`. No se corrige aquí.
+
 ### Íconos internos
 
 Los íconos internos usan `@radix-ui/react-icons`, por coherencia con la retícula de las primitivas Radix. Los consumidores pasan cualquier ícono por `startIcon`/`endIcon`. Costo aceptado: en la app del consumidor conviven dos familias de íconos.

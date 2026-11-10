@@ -20,6 +20,17 @@
   cambian, así que siguen alineados con `Button`, cuyo texto queda más chico. Las opciones de
   las listas, los labels y los textos de ayuda no cambian. Sin cambios de API. Si achicabas el
   texto de un campo con `className`, en iOS vuelve el zoom al enfocarlo.
+- **Los componentes interactivos responden al presionarlos en pantallas táctiles.** En Tailwind
+  v4, `hover:` solo aplica con mouse, así que en touch no había respuesta visual. Ahora cada
+  elemento con hover se ve igual mientras se presiona, con el mismo color: `Button` (y lo que
+  se arma sobre él: botones de `Calendar`, `ImageUploader`, `FileInput`, `QuantityStepper`,
+  `ScrollRow` y los disparadores de los pickers), `Badge` `interactive`, `Toggle`,
+  `ToggleGroupItem`, `TabsTrigger`, `NavigationBarItem`, `RadioCard`, la ✕ de `Chip`,
+  `Dialog` y `Sheet`, y el botón de limpiar de `Input`. Los deshabilitados no cambian. Esos
+  elementos ya no muestran el destello gris del navegador al tocarlos
+  (`-webkit-tap-highlight-color: transparent`); el resto de tu página no cambia. En iOS, si al
+  presionar no ves el estado, registra un listener vacío de `touchstart` en tu app (pendiente
+  de verificar en un dispositivo). Sin cambios de API.
 
 ## [0.12.0] - 2026-11-07
 
