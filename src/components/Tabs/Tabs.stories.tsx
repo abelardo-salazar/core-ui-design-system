@@ -138,7 +138,20 @@ export const ScrollsWhenItDoesNotFit: Story = {
     const canvas = within(canvasElement);
     const frame = canvas.getByTestId('frame');
     const list = canvas.getByRole('tablist');
-    const [first, , third, , last] = canvas.getAllByRole('tab');
+    const tabs = canvas.getAllByRole('tab');
+    const [first, , third, , last] = tabs;
+
+    // Ubuntu loads with font-display: swap. If it arrives after a reveal, the triggers widen and
+    // the active one ends up clipped (12px past the edge with these labels): the list only
+    // reveals again when the value changes. Seen under load (full suite, --maxWorkers=48).
+    // Wait for the triggers' own font, with their text so unicode-range picks the right files.
+    await Promise.all(
+      tabs.map((tab) => {
+        const style = getComputedStyle(tab);
+        const font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+        return document.fonts.load(font, tab.textContent ?? '');
+      }),
+    );
 
     await expect(list.offsetWidth).toBe(390);
     await expect(frame.scrollWidth).toBe(390);
@@ -158,8 +171,11 @@ export const ScrollsWhenItDoesNotFit: Story = {
     last.focus();
     await userEvent.keyboard('{Home}');
     await waitFor(() => expect(first).toHaveFocus());
-    await waitFor(() => expectRevealed(list, first));
-    await expect(list.scrollLeft).toBe(0);
+    // scrollLeft in the same wait: read after it, the scroll may not have reached 0 yet.
+    await waitFor(async () => {
+      await expectRevealed(list, first);
+      await expect(list.scrollLeft).toBe(0);
+    });
 
     // A click on a trigger that is only partly in view.
     await userEvent.click(third);
