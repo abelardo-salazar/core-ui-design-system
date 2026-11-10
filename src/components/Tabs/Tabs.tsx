@@ -86,7 +86,7 @@ const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      'inline-flex items-center justify-center whitespace-nowrap rounded-btn px-3 py-1.5 text-sm font-medium text-base-content/70 transition-colors',
+      'inline-flex items-center justify-center whitespace-nowrap rounded-btn px-3 py-1.5 text-sm font-medium text-base-content/70 transition-colors select-none',
       // Pressed looks like hover. Not on the active tab, where data-[state=active] wins the hover.
       'hover:text-base-content enabled:not-data-[state=active]:active:text-base-content',
       '[-webkit-tap-highlight-color:transparent]',

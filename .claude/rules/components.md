@@ -29,6 +29,7 @@ Las decisiones detrás de estas reglas, con su razón, están en [ARCHITECTURE.m
 - Detectar touch con `pointer-coarse:`/`pointer-fine:`, no con `hover:none`.
 - Dar a todo `hover:X` de un elemento interactivo su `active:X` con el mismo token y sin `pointer-fine:`. Un deshabilitado no lo muestra: `enabled:active:` en un `<button>`, y `not-disabled:not-aria-disabled:active:` en `buttonVariants` y en lo que se arma sobre él. Si un estado encendido (`data-[state=on]`, `data-[state=active]`) gana al hover, excluirlo con `not-data-[state=…]:`. Cubrirlo en `PressedState.stories.tsx`. [Decisión](../../ARCHITECTURE.md#estado-presionado-y-destello-de-toque)
 - Poner `[-webkit-tap-highlight-color:transparent]` en la clase de todo elemento que responde a un toque (botón, enlace, campo, opción, fila `<label>`, overlay), tenga o no `hover:`; nunca en una regla global. Cubrirlo en `TapHighlight.stories.tsx`.
+- Poner `select-none` en todo control accionable con aspecto de botón (en `buttonVariants` lo hereda lo que se arma sobre él). Nunca en un elemento que contenga un campo editable (en iOS bloquea seleccionarlo y editarlo; por ejemplo, el contenedor del Combobox múltiple), ni en texto de contenido, celdas de tabla o enlaces de contenido. Nunca `-webkit-touch-callout: none`, tampoco en enlaces. Cubrirlo en `UserSelect.stories.tsx`. [Decisión](../../ARCHITECTURE.md#estado-presionado-y-destello-de-toque)
 
 ## Tipos
 

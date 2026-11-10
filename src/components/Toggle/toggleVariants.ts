@@ -12,7 +12,7 @@ const SM_HIT_AREA =
 // compound variants, because iconOnly replaces it with a square width.
 export const toggleVariants = cva(
   [
-    'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-btn border font-medium transition-colors cursor-pointer [-webkit-tap-highlight-color:transparent]',
+    'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-btn border font-medium transition-colors cursor-pointer select-none [-webkit-tap-highlight-color:transparent]',
     'border-base-content/20 bg-transparent text-base-content enabled:hover:bg-base-200 enabled:active:bg-base-200',
     'data-[state=on]:border-transparent data-[state=on]:bg-primary data-[state=on]:text-primary-content data-[state=on]:enabled:hover:bg-primary-focus data-[state=on]:enabled:active:bg-primary-focus',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',

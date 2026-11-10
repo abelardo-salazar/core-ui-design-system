@@ -5,7 +5,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 // the group measures the same as its items.
 export const toggleGroupItemVariants = cva(
   [
-    'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-btn font-medium text-base-content/70 transition-colors cursor-pointer',
+    'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-btn font-medium text-base-content/70 transition-colors cursor-pointer select-none',
     // Pressed looks like hover. Not on the pressed item, where data-[state=on] wins the hover.
     'hover:text-base-content enabled:not-data-[state=on]:active:text-base-content',
     '[-webkit-tap-highlight-color:transparent]',

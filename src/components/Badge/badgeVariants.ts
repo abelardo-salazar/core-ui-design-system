@@ -42,7 +42,7 @@ export const badgeVariants = cva(
       // onClick by hand. true: Badge is a real <button> (see Badge.tsx) and these classes DO
       // make sense. focus-visible (not focus:) is the convention in the rest of the DS.
       interactive: {
-        true: '[-webkit-tap-highlight-color:transparent] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+        true: 'select-none [-webkit-tap-highlight-color:transparent] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
       },
     },
 
