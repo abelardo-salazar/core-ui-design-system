@@ -192,19 +192,24 @@ Esta sección junta lo que el DS hace por su cuenta en una WebView y lo que le t
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 ```
 
-En Next.js: `export const viewport = { viewportFit: 'cover' }`. En Android, con Capacitor 8, el plugin `SystemBars` (incluido en `@capacitor/core`) decide con `insetsHandling` cómo llegan esos valores. Con la WebView de Chromium 140 o posterior, `viewport-fit=cover` hace que `env()` traiga los insets reales. Con versiones anteriores, Capacitor agrega padding a la WebView según el tamaño de las barras del sistema y `env()` vale 0: el contenido ya queda dentro del área segura y el DS no necesita nada más. Las variables `--safe-area-inset-*` que inyecta con `insetsHandling: 'css'` traen esos mismos valores, así que el DS no las lee.
+En Next.js: `export const viewport = { viewportFit: 'cover' }`. En Android, con Capacitor 8, el plugin `SystemBars` (incluido en `@capacitor/core`) maneja los insets:
+
+- **WebView de Chromium 140 o posterior, con `viewport-fit=cover`:** la WebView va de borde a borde y `env()` trae los insets reales.
+- **WebView anterior a Chromium 140:** Capacitor agrega padding nativo a la WebView, que queda dentro del área segura, y pone los insets en 0 a propósito, tanto en `env()` como en las variables `--safe-area-inset-*` que inyecta.
+
+En los dos casos el DS no necesita nada más que `viewport-fit=cover`. Esto está verificado en el código de `@capacitor/android` 8.6.0 con la configuración por defecto de `SystemBars`; con otro valor de `insetsHandling`, el manejo puede cambiar.
 
 **Lo que el DS ya hace:**
 
-- **Sin zoom de iOS al enfocar un campo:** el texto de los campos mide 16px en todos los tamaños (`Input`, `Textarea`, `Select`, `Combobox`, los disparadores de `DatePicker` y `DateRangePicker`). Si lo achicas con `className`, el zoom vuelve. Ver [Input](#input--uso-y-props).
-- **Respuesta al toque:** los componentes interactivos muestran su estado presionado (`active:`) y no muestran el destello gris del navegador. Ver [la decisión en ARCHITECTURE](./ARCHITECTURE.md#estado-presionado-y-destello-de-toque).
-- **Sin selección de texto al mantener presionado** un botón o un control con aspecto de botón. Los campos siguen siendo seleccionables. Ver [la decisión en ARCHITECTURE](./ARCHITECTURE.md#estado-presionado-y-destello-de-toque).
+- **Sin zoom de iOS al enfocar un campo** _(desde 0.13)_: el texto de los campos mide 16px en todos los tamaños (`Input`, `Textarea`, `Select`, `Combobox`, los disparadores de `DatePicker` y `DateRangePicker`). Si lo achicas con `className`, el zoom vuelve. Ver [Input](#input--uso-y-props).
+- **Respuesta al toque** _(desde 0.13)_: los componentes interactivos muestran su estado presionado (`active:`) y no muestran el destello gris del navegador. Ver [la decisión en ARCHITECTURE](./ARCHITECTURE.md#estado-presionado-y-destello-de-toque).
+- **Sin selección de texto al mantener presionado** _(desde 0.13)_ un botón o un control con aspecto de botón. Los campos siguen siendo seleccionables. Ver [la decisión en ARCHITECTURE](./ARCHITECTURE.md#estado-presionado-y-destello-de-toque).
 - **Safe area:**
   - [Sheet](#sheet--uso-y-props): el panel, la ✕ y el header.
   - [NavigationBar](#navigationbar--uso-y-props): solo en la forma `'bottom'`, con `padding-bottom`.
-  - [Toast](#toast--uso-y-props): los valores por defecto de `offset` y `mobileOffset`.
+  - [Toast](#toast--uso-y-props): los valores por defecto de `offset` y `mobileOffset` _(desde 0.13)_.
 - **Alto visible en Sheet:** `top` y `bottom` miden como máximo el 85% del alto visible (`dvh`), no del alto con las barras del navegador ocultas. Ver [Sheet](#sheet--uso-y-props).
-- **Ítem activo a la vista en `NavigationBar` `'horizontal'`:** lo hace con `scroll-initial-target`. Lo aplica la WebView de Android (Chromium 133 o posterior), pero no la de iOS. Ver [NavigationBar](#navigationbar--uso-y-props).
+- **Ítem activo a la vista en `NavigationBar` `'horizontal'`** _(desde 0.13)_: lo hace con `scroll-initial-target`. Lo aplica la WebView de Android (Chromium 133 o posterior), pero no la de iOS. Ver [NavigationBar](#navigationbar--uso-y-props).
 
 **Lo que le toca a la app:**
 
