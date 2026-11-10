@@ -238,6 +238,21 @@ Desde 0.9.0 el paquete se publica en el registro público de npm, bajo el scope 
 
 **Sin Context:** `NavigationBarItem` necesita saber la forma, pero un Context lo volvería client component. El `<nav>` declara un grupo de Tailwind con nombre (`group/navigation-bar`) y atributos `data-variant`/`data-bottom-below`, y el ítem se estiliza con `group-data-[…]/navigation-bar:`. Por eso el ítem tiene que ser descendiente de un `NavigationBar`.
 
+### Ítem activo a la vista en NavigationBar horizontal
+
+En `variant="horizontal"`, el enlace con `aria-current="page"` lleva `scroll-initial-target: nearest`, para que la fila con desplazamiento arranque mostrándolo. Decisión del 2026-11-09 (opción A).
+
+**Por qué:** es solo CSS, así que `NavigationBar` sigue siendo server-safe, sin JS ni `scrollIntoView`. Es mejora progresiva: Chrome y Edge 133+ la aplican, y Firefox y Safari la ignoran y se comportan como antes. No necesita scroll-snap en la lista, así que el desplazamiento se siente igual que antes. Como pisa la forma `'bottom'`, `bottomBelow` la restaura en cada breakpoint, aunque allí sea inerte.
+
+**Límite:** solo actúa cuando el contenedor se renderiza por primera vez. Si el activo cambia con el `<nav>` ya montado (un layout persistente entre navegaciones), la fila no se desplaza.
+
+**Alternativas evaluadas:**
+
+- **B:** un componente cliente interno que observa `aria-current` con `MutationObserver` y desplaza al activo. Cubre todos los navegadores y el layout persistente, pero agrega JS y `'use client'` a un componente que hoy es server-safe.
+- **C:** un componente opt-in exportado que el consumidor monta junto a la barra. Mismo costo que la B, más una API pública que mantener.
+
+**Cuándo pasar a la B:** si aparece un problema real en Safari o Firefox, o con un layout persistente, que justifique el JS.
+
 ### Breakpoints por mapa estático de clases
 
 Una prop que cambia el layout según el breakpoint (`bottomBelow` en NavigationBar, `responsive` en Table con `cardModeClasses`) se resuelve con un mapa de cadenas de clases literales, una entrada por breakpoint (`{ sm: 'max-sm:…', md: 'max-md:…', lg: 'max-lg:…' }`), sin JS ni `matchMedia`.

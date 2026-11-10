@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- **`NavigationBar` con `variant="horizontal"` arranca mostrando el ítem activo.** Si los ítems no
+  caben y la fila se desplaza, al renderizarse por primera vez queda desplazada hasta mostrar el
+  enlace con `aria-current="page"`, sin JS (`scroll-initial-target`). Lo aplican Chrome y Edge
+  133+; en Firefox y Safari la fila arranca al inicio, como antes. Si el activo cambia con el
+  `<nav>` ya montado, la fila no se vuelve a desplazar. Sin cambios de API ni en la forma
+  `'bottom'` (tampoco por debajo del breakpoint de `bottomBelow`).
+
 ## [0.12.0] - 2026-11-07
 
 ### Instalación
