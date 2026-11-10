@@ -21,6 +21,7 @@ Las decisiones detrás de estas reglas, con su razón, están en [ARCHITECTURE.m
 - Usar solo tokens semánticos para color, y `ring-primary` para el anillo de foco. [Decisión](../../ARCHITECTURE.md#solo-tokens-semánticos)
 - No repetir el mismo grupo de utilidades en la base de cva y en una variante; no depender de tailwind-merge para resolver el conflicto.
 - Desestructurar toda variante de cva y pasarla a la función de variantes en todas las ramas del componente; verificar que no llegue al DOM como atributo.
+- Variante de escritorio con vuelta a la forma base por breakpoint: toda propiedad que la variante pise sobre la forma base lleva su restauración en cada breakpoint del mapa estático, y la story `real-css` de la vuelta se extiende para afirmarla. Si falta una, la propiedad de escritorio se filtra a la forma base sin ningún error. Caso: en NavigationBar, `horizontal`/`vertical` pisan la forma `bottom` del contenedor, la lista, el enlace, el ícono y el badge, y `bottomBelow` la restaura en `sm`, `md` y `lg` (`navigationBarVariants.ts`); la story es `BottomBelowLayout`.
 
 ## Táctil
 
