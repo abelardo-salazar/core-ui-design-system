@@ -192,7 +192,7 @@ Esta sección junta lo que el DS hace por su cuenta en una WebView y lo que le t
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 ```
 
-En Next.js: `export const viewport = { viewportFit: 'cover' }`. En Android, con Capacitor 8, el plugin `SystemBars` (incluido en `@capacitor/core`) decide con `insetsHandling` cómo llegan esos valores. Con la WebView de Chromium 140 o posterior, `viewport-fit=cover` hace que `env()` traiga los insets reales. Para versiones anteriores, la documentación de `SystemBars` indica qué agregar en la actividad nativa.
+En Next.js: `export const viewport = { viewportFit: 'cover' }`. En Android, con Capacitor 8, el plugin `SystemBars` (incluido en `@capacitor/core`) decide con `insetsHandling` cómo llegan esos valores. Con la WebView de Chromium 140 o posterior, `viewport-fit=cover` hace que `env()` traiga los insets reales. Con versiones anteriores, Capacitor agrega padding a la WebView según el tamaño de las barras del sistema y `env()` vale 0: el contenido ya queda dentro del área segura y el DS no necesita nada más. Las variables `--safe-area-inset-*` que inyecta con `insetsHandling: 'css'` traen esos mismos valores, así que el DS no las lee.
 
 **Lo que el DS ya hace:**
 
