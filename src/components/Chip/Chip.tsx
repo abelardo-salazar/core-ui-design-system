@@ -144,7 +144,7 @@ const Chip = React.forwardRef<HTMLSpanElement, ChipProps>(
         onPressedChange={onPressedChange}
         disabled={disabled}
         className={cn(
-          'inline-flex items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+          'inline-flex items-center rounded-full [-webkit-tap-highlight-color:transparent] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
           'disabled:cursor-not-allowed disabled:opacity-50',
           !disabled && 'cursor-pointer',
           bodyPadding,

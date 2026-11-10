@@ -144,7 +144,7 @@ const RadioGroupItem = React.forwardRef<
         {...props}
         ref={ref}
         className={cn(
-          'flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full border border-primary',
+          'flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full border border-primary [-webkit-tap-highlight-color:transparent]',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
           'disabled:cursor-not-allowed disabled:opacity-50',
         )}

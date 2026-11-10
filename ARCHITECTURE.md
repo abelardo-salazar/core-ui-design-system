@@ -186,9 +186,9 @@ Button, Input y Select comparten escala para alinear en una misma fila: `sm` 32p
 
 ### Estado presionado y destello de toque
 
-Todo `hover:X` de un elemento interactivo tiene su `active:X` con el mismo token, y ese elemento lleva `-webkit-tap-highlight-color: transparent` en su propia clase. Un deshabilitado no muestra `active:`.
+Todo `hover:X` de un elemento interactivo tiene su `active:X` con el mismo token; un deshabilitado no muestra `active:`. Aparte, todo elemento del DS que responde a un toque lleva `-webkit-tap-highlight-color: transparent` en su propia clase, tenga o no hover: botones, enlaces, campos, opciones de listas y menús, filas `<label>` y overlays.
 
-**Por qué:** en Tailwind v4, `hover:` solo aplica dentro de `@media (hover: hover)`, así que en una pantalla táctil los interactivos no daban ninguna respuesta al presionarlos, salvo el destello gris del navegador. Con `active:` igual al hover, presionar se ve como el hover del escritorio. Quitar el destello sin estado presionado dejaría el toque sin respuesta, por eso van juntos.
+**Por qué:** en Tailwind v4, `hover:` solo aplica dentro de `@media (hover: hover)`, así que en una pantalla táctil los interactivos no daban ninguna respuesta al presionarlos, salvo el destello gris del navegador. Con `active:` igual al hover, presionar se ve como el hover del escritorio. El destello, en cambio, no depende del hover: el navegador lo muestra en todo elemento que responde a un toque, así que se quita en todos, también en los que no tienen hover (`Checkbox`, `Switch`, opciones de `Select`). Quitarlo donde hay hover sin agregar el estado presionado dejaría el toque sin respuesta, por eso los dos cambios entraron juntos.
 
 **Por componente, no global:** una regla global (`* { -webkit-tap-highlight-color: transparent }`) en la hoja del DS alcanzaría también los elementos del consumidor, que pueden contar con el destello.
 

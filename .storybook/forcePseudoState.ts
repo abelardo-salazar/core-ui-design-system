@@ -1,6 +1,7 @@
 // Forces :hover / :active on an element through the Chrome DevTools Protocol, the same as the
 // DevTools ":hov" panel. Only in vitest-browser with Playwright's Chromium (the storybook-css
-// project); in the Storybook UI it returns false and the caller skips its assertions.
+// project). In the Storybook UI it returns false and the caller skips its assertions; in vitest
+// a missing CDP session throws, so the test can't pass green without checking anything.
 type CdpSession = {
   send: <T = Record<string, never>>(method: string, params?: object) => Promise<T>;
 };
@@ -12,17 +13,22 @@ type CdpNode = {
   shadowRoots?: CdpNode[];
 };
 
-let session: CdpSession | null | undefined;
+let session: CdpSession | undefined;
+
+// vitest-browser sets this global on the page that runs the tests; the Storybook UI doesn't.
+export const inVitestBrowser = () => '__vitest_browser__' in globalThis;
 
 const getSession = async (): Promise<CdpSession | null> => {
-  if (session !== undefined) return session;
+  if (!inVitestBrowser()) return null;
+  if (session) return session;
   try {
     const { cdp } = await import('vitest/browser');
-    session = cdp() as CdpSession;
-    await session.send('DOM.enable');
-    await session.send('CSS.enable');
-  } catch {
-    session = null;
+    const opened = cdp() as CdpSession;
+    await opened.send('DOM.enable');
+    await opened.send('CSS.enable');
+    session = opened;
+  } catch (error) {
+    throw new Error(`forcePseudoState: no CDP session in vitest-browser (${String(error)})`);
   }
   return session;
 };
@@ -43,7 +49,10 @@ const findNode = (node: CdpNode, marker: string): CdpNode | undefined => {
   return undefined;
 };
 
-/** Forces `states` on `element` (an empty list clears them). False outside vitest-browser. */
+/**
+ * Forces `states` on `element` (an empty list clears them). False in the Storybook UI; throws in
+ * vitest-browser if CDP isn't available.
+ */
 export const forcePseudoState = async (
   element: Element,
   states: Array<'hover' | 'active'>,

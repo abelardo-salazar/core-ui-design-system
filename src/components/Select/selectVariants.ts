@@ -14,7 +14,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 // data-placeholder. It stays so the classes of the default trigger don't change.
 export const selectTriggerVariants = cva(
   [
-    'flex w-full items-center justify-between rounded-btn border border-base-300 bg-base-100 text-base placeholder:text-base-content/50',
+    'flex w-full items-center justify-between rounded-btn border border-base-300 bg-base-100 text-base placeholder:text-base-content/50 [-webkit-tap-highlight-color:transparent]',
     'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
     'disabled:cursor-not-allowed disabled:opacity-50',
     '[&>span]:line-clamp-1',

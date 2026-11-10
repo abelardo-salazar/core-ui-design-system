@@ -26,11 +26,16 @@
   se arma sobre él: botones de `Calendar`, `ImageUploader`, `FileInput`, `QuantityStepper`,
   `ScrollRow` y los disparadores de los pickers), `Badge` `interactive`, `Toggle`,
   `ToggleGroupItem`, `TabsTrigger`, `NavigationBarItem`, `RadioCard`, la ✕ de `Chip`,
-  `Dialog` y `Sheet`, y el botón de limpiar de `Input`. Los deshabilitados no cambian. Esos
-  elementos ya no muestran el destello gris del navegador al tocarlos
-  (`-webkit-tap-highlight-color: transparent`); el resto de tu página no cambia. En iOS, si al
-  presionar no ves el estado, registra un listener vacío de `touchstart` en tu app (pendiente
-  de verificar en un dispositivo). Sin cambios de API.
+  `Dialog` y `Sheet`, y el botón de limpiar de `Input`. Los deshabilitados no cambian. En iOS,
+  si al presionar no ves el estado, registra un listener vacío de `touchstart` en tu app
+  (pendiente de verificar en un dispositivo). Sin cambios de API.
+- **Sin el destello gris del navegador al tocar los elementos del DS.** Todo elemento del DS
+  que responde a un toque lleva `-webkit-tap-highlight-color: transparent`: los de arriba y
+  también `Checkbox`, `Switch`, `RadioGroupItem`, los campos de `Input` y `Textarea`, el
+  disparador, la búsqueda y las opciones de `Combobox`, `SelectTrigger` y `SelectItem`, los
+  ítems de `DropdownMenu`, las filas de `CheckboxField`, `SwitchField` y `RadioGroupItem`, el
+  cuerpo de `Chip`, los encabezados ordenables de `DataTable` y los overlays de `Dialog` y
+  `Sheet`. Solo esos elementos: el resto de tu página no cambia. Sin cambios de API.
 
 ## [0.12.0] - 2026-11-07
 
