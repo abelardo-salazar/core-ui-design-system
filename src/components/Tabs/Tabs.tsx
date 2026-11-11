@@ -46,17 +46,41 @@ const TabsList = React.forwardRef<
 
   // Radix doesn't expose the value outside its context, and Tabs can be controlled or not: the
   // data-state of the triggers is the only signal that covers every case.
+  // It also reveals again when the triggers' geometry changes for reasons the user didn't cause:
+  // - fonts: with font-display: swap, the reveal on mount runs with the fallback font, and the web
+  //   font widens the triggers later. fonts.ready covers the load in progress on mount, and
+  //   loadingdone the later ones. A list that already overflows keeps its box, so the
+  //   ResizeObserver doesn't see this.
+  // - the list's own size (rotation, resizing).
+  // Not on every content change of a trigger (e.g. a Badge counter): that would move the list
+  // while the user scrolls it by hand.
   React.useEffect(() => {
     const list = listRef.current;
     if (!list) return;
+    let disposed = false;
     const revealActive = () => {
+      if (disposed) return;
       const active = list.querySelector('[role="tab"][data-state="active"]');
       if (active) revealTrigger(list, active);
     };
     revealActive();
     const observer = new MutationObserver(revealActive);
     observer.observe(list, { subtree: true, attributes: true, attributeFilter: ['data-state'] });
-    return () => observer.disconnect();
+
+    const fonts = typeof document !== 'undefined' ? document.fonts : undefined;
+    fonts?.ready.then(revealActive);
+    fonts?.addEventListener('loadingdone', revealActive);
+
+    const resizeObserver =
+      typeof ResizeObserver !== 'undefined' ? new ResizeObserver(revealActive) : undefined;
+    resizeObserver?.observe(list);
+
+    return () => {
+      disposed = true;
+      observer.disconnect();
+      fonts?.removeEventListener('loadingdone', revealActive);
+      resizeObserver?.disconnect();
+    };
   }, []);
 
   return (

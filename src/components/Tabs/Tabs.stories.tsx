@@ -129,6 +129,23 @@ const expectRevealed = async (list: HTMLElement, trigger: HTMLElement) => {
   await expect(listRect.bottom - triggerRect.bottom).toBeGreaterThanOrEqual(3.5);
 };
 
+// Ubuntu loads with font-display: swap. If it arrives in the middle of a play, the triggers widen
+// (12px past the edge with these labels). Seen under load (full suite, --maxWorkers=48). Wait for
+// the triggers' own font, with their text so unicode-range picks the right files.
+const waitForTriggerFonts = (tabs: HTMLElement[]) =>
+  Promise.all(
+    tabs.map((tab) => {
+      const style = getComputedStyle(tab);
+      const font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+      return document.fonts.load(font, tab.textContent ?? '');
+    }),
+  );
+
+// Two rendered frames: what TabsList schedules on mount (the ResizeObserver's first notification,
+// which always comes once after observe(), and fonts.ready) has already run.
+const nextFrames = () =>
+  new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
 // 3. 5 tabs at 390px: the list scrolls inside its container instead of overflowing it, with no
 // visible scrollbar, and the active trigger stays in view however the value changes.
 export const ScrollsWhenItDoesNotFit: Story = {
@@ -141,17 +158,7 @@ export const ScrollsWhenItDoesNotFit: Story = {
     const tabs = canvas.getAllByRole('tab');
     const [first, , third, , last] = tabs;
 
-    // Ubuntu loads with font-display: swap. If it arrives after a reveal, the triggers widen and
-    // the active one ends up clipped (12px past the edge with these labels): the list only
-    // reveals again when the value changes. Seen under load (full suite, --maxWorkers=48).
-    // Wait for the triggers' own font, with their text so unicode-range picks the right files.
-    await Promise.all(
-      tabs.map((tab) => {
-        const style = getComputedStyle(tab);
-        const font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
-        return document.fonts.load(font, tab.textContent ?? '');
-      }),
-    );
+    await waitForTriggerFonts(tabs);
 
     await expect(list.offsetWidth).toBe(390);
     await expect(frame.scrollWidth).toBe(390);
@@ -271,5 +278,69 @@ export const TriggerWithBadge: Story = {
       'data-state',
       'active',
     );
+  },
+};
+
+// 9. A web font that arrives after the reveal widens the triggers: the active one is revealed
+// again when the font load ends. Simulated with padding (no real fonts) and a loadingdone event.
+// The list already overflows, so its box doesn't change and only loadingdone can catch it.
+export const RevealsAfterFontsLoad: Story = {
+  tags: ['real-css'],
+  render: () => (
+    <Tabs defaultValue={LONG_TABS[4]} className="w-[390px]">
+      <LongTriggers />
+    </Tabs>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const list = canvas.getByRole('tablist');
+    const tabs = canvas.getAllByRole('tab');
+    const last = tabs[4];
+    // A real loadingdone, the fonts.ready of the mount or the ResizeObserver's first
+    // notification, arriving in the middle, would reveal before the clipped check: let them run.
+    await waitForTriggerFonts(tabs);
+    await document.fonts.ready;
+    await nextFrames();
+    await waitFor(() => expectRevealed(list, last));
+    const listWidth = list.offsetWidth;
+
+    for (const tab of tabs.slice(0, 4)) tab.style.paddingInline = '24px';
+    await expect(list.offsetWidth).toBe(listWidth);
+    // Two frames: a ResizeObserver callback would have revealed it by now.
+    await nextFrames();
+    await expect(last.getBoundingClientRect().right).toBeGreaterThan(
+      list.getBoundingClientRect().right,
+    );
+
+    document.fonts.dispatchEvent(new Event('loadingdone'));
+    await waitFor(() => expectRevealed(list, last));
+  },
+};
+
+// 10. When the list's size changes (rotation, resizing), the active one is revealed again.
+export const RevealsOnResize: Story = {
+  tags: ['real-css'],
+  render: () => (
+    <div className="w-[390px]" data-testid="frame">
+      <Tabs defaultValue={LONG_TABS[4]}>
+        <LongTriggers />
+      </Tabs>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const frame = canvas.getByTestId('frame');
+    const list = canvas.getByRole('tablist');
+    const tabs = canvas.getAllByRole('tab');
+    const last = tabs[4];
+    await waitForTriggerFonts(tabs);
+    await document.fonts.ready;
+    await nextFrames();
+    await waitFor(() => expectRevealed(list, last));
+
+    // 90px narrower: without a new reveal, the active one would end 90px past the edge.
+    frame.style.width = '300px';
+    await expect(list.offsetWidth).toBe(300);
+    await waitFor(() => expectRevealed(list, last));
   },
 };

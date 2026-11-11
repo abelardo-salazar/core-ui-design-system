@@ -56,6 +56,17 @@
   cuerpo de `Chip`, los encabezados ordenables de `DataTable` y los overlays de `Dialog` y
   `Sheet`. Solo esos elementos: el resto de tu página no cambia. Sin cambios de API.
 
+### Fixed
+
+- **La pestaña activa de `Tabs` podía quedar recortada al cargar la página con fuentes web.**
+  Desde 0.10, cuando las pestañas no entran, `TabsList` se desplaza para mostrar la activa al
+  montarse y al cambiar el valor. Con una fuente que se carga con `font-display: swap`, ese
+  desplazamiento se hacía con la fuente de respaldo; al llegar la definitiva, las pestañas se
+  ensanchaban y la activa quedaba cortada hasta el siguiente cambio de valor. Ahora también se
+  vuelve a mostrar al terminar de cargar las fuentes y al cambiar el tamaño de la lista (por
+  ejemplo, al rotar el dispositivo). Un cambio en el contenido de una pestaña, como un contador,
+  no la vuelve a mostrar, para no mover la lista mientras se desplaza a mano. Sin cambios de API.
+
 ## [0.12.0] - 2026-11-07
 
 ### Instalación

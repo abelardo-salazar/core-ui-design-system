@@ -273,6 +273,18 @@ En `variant="horizontal"`, el enlace con `aria-current="page"` lleva `scroll-ini
 
 **Cuándo pasar a la B:** si aparece un problema real en Safari o Firefox, o con un layout persistente, que justifique el JS.
 
+### Pestaña activa a la vista en Tabs
+
+`TabsList` desplaza solo la lista (no la página, por eso sin `scrollIntoView`) hasta la pestaña activa al montarse, cuando cambia `data-state` (`MutationObserver`), cuando termina una carga de fuentes (`document.fonts.ready` para la que está en curso al montar y el evento `loadingdone` para las posteriores) y cuando cambia el tamaño de la lista (`ResizeObserver`). Decisión del 2026-11-10 (opción A).
+
+**Por qué:** con una fuente que se carga con `font-display: swap`, el primer desplazamiento se hace con la fuente de respaldo. Cuando llega la definitiva, las pestañas se ensanchan y la activa queda recortada (12px con las etiquetas de las stories). Una lista que ya desborda no cambia de caja cuando sus pestañas se ensanchan, así que el `ResizeObserver` no lo ve: hace falta escuchar las fuentes. El `ResizeObserver` cubre la rotación y el redimensionado, que sí cambian la caja.
+
+**Alternativa descartada:**
+
+- **B:** observar el tamaño de cada pestaña. Cubriría también el cambio de fuente, pero cualquier cambio de contenido (un contador en un `Badge`, un texto que cambia) movería la lista mientras el usuario la desplaza a mano para ver otra pestaña.
+
+**Límite:** una carga de fuentes posterior (otro peso o idioma) también vuelve a mostrar la activa, aunque el usuario haya desplazado la lista.
+
 ### Breakpoints por mapa estático de clases
 
 Una prop que cambia el layout según el breakpoint (`bottomBelow` en NavigationBar, `responsive` en Table con `cardModeClasses`) se resuelve con un mapa de cadenas de clases literales, una entrada por breakpoint (`{ sm: 'max-sm:…', md: 'max-md:…', lg: 'max-lg:…' }`), sin JS ni `matchMedia`.

@@ -1123,7 +1123,9 @@ Uso (ejemplo, extraído de `Tabs.stories.tsx`):
 </Tabs>
 ```
 
-**Cuando no entra:** `TabsList` no pasa del ancho de su contenedor y se desplaza en horizontal, sin barra visible, con la pestaña activa siempre a la vista al cambiar de valor. Cuando entra, se ajusta a sus pestañas como siempre. El contenedor debe limitar su ancho: dentro de un flex, agrégale `min-w-0`.
+**Cuando no entra:** `TabsList` no pasa del ancho de su contenedor y se desplaza en horizontal, sin barra visible, con la pestaña activa a la vista. Cuando entra, se ajusta a sus pestañas como siempre. El contenedor debe limitar su ancho: dentro de un flex, agrégale `min-w-0`.
+
+**Cuándo se muestra la pestaña activa:** la lista se desplaza hasta ella al montarse, al cambiar el valor, al terminar de cargar las fuentes _(desde 0.13)_ y al cambiar el tamaño de la lista _(desde 0.13)_, por ejemplo al rotar el dispositivo. Desplaza solo la lista, nunca la página. Un cambio en el contenido de una pestaña (un contador que sube, un texto que cambia) no la vuelve a mostrar, a propósito: movería la lista mientras el usuario la desplaza a mano.
 
 **Con un contador:** usa `Badge` con `size="icon"`. Su número entra en el nombre accesible, en este caso "Mensajes 3". El `{' '}` separa las palabras en ese nombre, y sin él podrían quedar pegadas.
 
