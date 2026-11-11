@@ -1,11 +1,11 @@
 # Core UI Design System
 
-![Version](https://img.shields.io/badge/version-0.12.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.13.0-blue.svg)
 ![React](https://img.shields.io/badge/react-19.0.0+-61DAFB.svg)
 ![TypeScript](https://img.shields.io/badge/typescript-5.9+-3178C6.svg)
 ![Registry](https://img.shields.io/badge/registry-npm-CB3837.svg)
 
-**Última versión publicada:** `0.12.0`. `main` tiene cambios sin publicar: ver [CHANGELOG § Unreleased](./CHANGELOG.md#unreleased).
+**Última versión publicada:** `0.13.0`.
 
 **Storybook:** [abelardo-salazar.github.io/core-ui-design-system](https://abelardo-salazar.github.io/core-ui-design-system/). Documenta la última versión publicada, no lo que aún está sin publicar en `main`.
 
@@ -1169,7 +1169,7 @@ Uso (ejemplo, extraído de `Tabs.stories.tsx`):
 - **Tamaño:** cada ítem mide al menos 56px de alto, y la barra, 64px más el safe area. Si una etiqueta ocupa dos líneas, la barra crece. Para que un toast no la tape, ver el ejemplo de `offset` en [Toast](#toast--uso-y-props).
 - **Cantidad de ítems:** está pensada para 3 a 5, pero el componente no lo valida. Con 5 ítems a 320px de ancho, cada uno mide 64px: usa etiquetas cortas, porque una palabra más larga se parte.
 - **`'horizontal'` sin espacio:** si los ítems no caben, la fila se desplaza de lado (`overflow-x-auto`) sin barra de scroll visible y sin JS. Al llegar con Tab a un ítem oculto, el navegador lo desplaza hasta mostrarlo; si el ítem ya se ve en parte, Chrome le da el foco sin desplazar la fila (el foco nunca queda oculto del todo). Las etiquetas no se parten.
-- **Ítem activo a la vista en `'horizontal'`:** si la fila se desplaza, arranca mostrando el ítem activo (`aria-current="page"`), sin JS. Lo aplican Chrome y Edge 133+; en Firefox y Safari la fila arranca al inicio. Solo actúa cuando la fila se renderiza por primera vez: en un layout persistente entre navegaciones, donde el `<nav>` no se desmonta al cambiar de página, la fila no se vuelve a desplazar hacia el nuevo activo. Para muchos ítems sigue siendo recomendable `'vertical'`.
+- **Ítem activo a la vista en `'horizontal'`** _(desde 0.13)_: si la fila se desplaza, arranca mostrando el ítem activo (`aria-current="page"`), sin JS. Lo aplican Chrome y Edge 133+; en Firefox y Safari la fila arranca al inicio. Solo actúa cuando la fila se renderiza por primera vez: en un layout persistente entre navegaciones, donde el `<nav>` no se desmonta al cambiar de página, la fila no se vuelve a desplazar hacia el nuevo activo. Para muchos ítems sigue siendo recomendable `'vertical'`.
 - **Cómo cambia cada ítem:** `NavigationBarItem` no recibe la variante. La lee del `<nav>` con atributos `data-*` y un grupo de Tailwind, sin Context, así que el ítem sigue siendo server-safe. En `'bottom'`, el `<nav>` no lleva esos atributos y su DOM es el de antes. Usa `NavigationBarItem` solo como hijo directo de un `NavigationBar`.
 - **Server Components:** es server-safe, sin hooks ni handlers propios. Saber cuál es la sección activa sí suele requerir un hook del router, como en los ejemplos: ese componente tuyo necesita `'use client'`.
 - **React Router:** usa `Link`, no `NavLink`: el `className` en forma de función de `NavLink` no se puede mezclar con `asChild`, y la píldora depende de `active`.
@@ -1544,7 +1544,7 @@ Es un `radiogroup` real: Tab entra al grupo, las flechas mueven la selección de
   - `onClear?: () => void` _(desde 0.5)_ — se llama después de vaciar el campo. Solo con `clearable`.
   - `clearLabel?: string` (default `'Clear'`) _(desde 0.5)_ — `aria-label` del botón de limpiar. Solo con `clearable`.
   - `variant?: 'default' | 'error'` — variantes visuales (definidas en `inputVariants.ts`).
-  - `size?: 'sm' | 'md' | 'lg'` (default `'md'`) — alturas: `sm` = 32px, `md` = 44px, `lg` = 48px; el texto mide 16px en los tres. Comparte escala con `Button` y el trigger de `Select` — ver la nota de alineación en la sección de `Button`.
+  - `size?: 'sm' | 'md' | 'lg'` (default `'md'`) — alturas: `sm` = 32px, `md` = 44px, `lg` = 48px; el texto mide 16px en los tres _(desde 0.13)_. Comparte escala con `Button` y el trigger de `Select` — ver la nota de alineación en la sección de `Button`.
   - `disabled?: boolean`, `className?: string` y el resto de `React.InputHTMLAttributes<HTMLInputElement>`.
 
 La implementación genera un `id` accesible si no se pasa uno y enlaza `aria-invalid` y `aria-describedby` según `error`/`helperText`. Usa `inputVariants` (class-variance-authority) para combinar `variant` y `size`.
@@ -1721,7 +1721,7 @@ const [fotos, setFotos] = useState<ImageUploaderItem[]>(
   - `variant?: 'default' | 'error'` — controla la apariencia visual (implementado en `textareaVariants.ts`).
   - `error?: string` — mensaje de error; activa la variante visual `error` y `aria-invalid`.
   - `helperText?: string` — texto de ayuda descriptivo (vinculado mediante `aria-describedby`).
-  - `className?: string` — clases Tailwind adicionales para ajustar tamaño/espaciado. El texto mide 16px; achicarlo por `className` vuelve a provocar el zoom de iOS al enfocar.
+  - `className?: string` — clases Tailwind adicionales para ajustar tamaño/espaciado. El texto mide 16px _(desde 0.13)_; achicarlo por `className` vuelve a provocar el zoom de iOS al enfocar.
   - Acepta `React.TextareaHTMLAttributes<HTMLTextAreaElement>` y `VariantProps<typeof textareaVariants>`.
 
 Descripción: textarea estilizada con `class-variance-authority` (`textareaVariants`) que aplica `min-h-[80px]`, bordes, padding y estados (`error`, `disabled`). Se usa para input multilinea en formularios y admite `rows`, `placeholder`, y otras props estándar de `textarea`.
@@ -1752,7 +1752,7 @@ const [value, setValue] = useState('');
 - **Props y comportamiento clave:**
   - `Select` (root): `value?: string`, `defaultValue?: string`, `onValueChange?: (value: string) => void` — API para controlado/no-controlado.
   - `SelectTrigger`: `className?: string`, `asChild?: boolean` — dispara el panel y puede renderizar elementos existentes como trigger.
-    - `size?: 'sm' | 'md' | 'lg'` _(desde 0.12)_ (default `'md'`) — 32 / 44 / 48px, la escala de `Input` y `Button`, para alinearlos en una misma fila (ver la nota de alineación en la sección de `Button`). El texto mide 16px en los tres tamaños, como en `Input`. `sm` es un tamaño compacto, por debajo del objetivo táctil de 44px y sin área táctil extendida, igual que en `Input`.
+    - `size?: 'sm' | 'md' | 'lg'` _(desde 0.12)_ (default `'md'`) — 32 / 44 / 48px, la escala de `Input` y `Button`, para alinearlos en una misma fila (ver la nota de alineación en la sección de `Button`). El texto mide 16px en los tres tamaños, como en `Input` _(desde 0.13)_. `sm` es un tamaño compacto, por debajo del objetivo táctil de 44px y sin área táctil extendida, igual que en `Input`.
     - Estado de error _(desde 0.12)_: con `aria-invalid="true"`, el trigger toma solo el borde, el texto y el anillo de foco de error. Es CSS (`aria-[invalid=true]:`), así que alcanza con pasar el atributo.
   - `SelectContent`: `position?: 'popper'` (usa `popper` por defecto en la implementación), `className?: string` — controla el panel desplegable (animaciones, tamaño mínimo).
   - `SelectItem`: `value: string`, `disabled?: boolean`, `className?: string` — representa una opción; usa `ItemIndicator` (check) cuando está seleccionada.
@@ -1952,7 +1952,7 @@ Con un `DayButton` propio en `components`, tu botón reemplaza al del DS: `rende
   - `dialogLabel?: string` (default `'Choose date'`) _(desde 0.5)_ — nombre accesible del popover.
   - `locale?: Locale` (de `date-fns`) _(desde 0.5)_ — se aplica a la fecha del disparador y al calendario. Con un locale de `date-fns` las etiquetas de navegación del calendario quedan en inglés; con los locales que exporta el DS desde el subpath `/locale` (`import { es } from '@abelardo-salazar/core-ui-design-system/locale'`) también se traducen. Ese subpath reexporta los locales de DayPicker (los de `date-fns` con las etiquetas traducidas), es server-safe y solo empaqueta los locales que se importan. No importar desde `@daypicker/react`: es dependencia del DS, no de la app (con pnpm no se resuelve).
   - `disabled?: boolean`.
-  - `className?: string` — se aplica al `Button` trigger. Su texto mide 16px, como el de los demás campos, en lugar de los 14px de `Button`.
+  - `className?: string` — se aplica al `Button` trigger. Su texto mide 16px, como el de los demás campos, en lugar de los 14px de `Button` _(desde 0.13)_.
   - `label?: string` _(desde 0.12)_ — nombre visible del campo. Nombra el disparador junto con su texto, así que se lee la etiqueta y la fecha elegida.
   - `error?: string` _(desde 0.12)_ — mensaje de error, con el mismo aspecto y los mismos atributos que en `SelectField`: `aria-invalid` y `aria-describedby` en el disparador. Reemplaza a `helperText`.
   - `helperText?: string` _(desde 0.12)_ — texto de ayuda, enlazado con `aria-describedby`.
@@ -1990,7 +1990,7 @@ function ControlledDatePicker() {
   - `placeholder?: string` (default `'Pick dates'`) y `dialogLabel?: string` (default `'Choose dates'`) — texto del disparador sin rango y nombre accesible del popover.
   - `locale?: Locale` (de `date-fns`) — como en [DatePicker](#datepicker--uso-y-props): se aplica a las dos fechas del disparador y al calendario.
   - `label?`, `error?` y `helperText?` — el mismo campo que `DatePicker`.
-  - `disabled?: boolean` y `className?: string` (se aplica al disparador, con texto de 16px como en `DatePicker`).
+  - `disabled?: boolean` y `className?: string` (se aplica al disparador, con texto de 16px como en `DatePicker` _(desde 0.13)_).
 
 Componente aparte de `DatePicker`, así los tipos de los dos siguen simples. Es controlado, sin estado propio del rango: compone `Popover`, `Button` y `Calendar` en `mode="range"`. El disparador muestra las dos fechas con el formato corto del locale (`Jan 12, 2026 – Jan 15, 2026`).
 
@@ -2068,7 +2068,7 @@ export function BookingDate() {
   - `filter?: (option: ComboboxOption, query: string) => boolean` _(desde 0.11)_ — decide qué opciones muestra la búsqueda; default `comboboxFilter`. `query` llega recortada y sin normalizar, y no se llama con el buscador vacío (se muestran todas). Para comparar texto igual que el default, `comboboxTextMatch(text, query)`: `true` si `query` aparece en `text` sin distinguir mayúsculas ni acentos. `comboboxFilter(option, query)` es `comboboxTextMatch(option.label, query)`. Ninguna de las dos depende de `'use client'`.
   - `onCreate?: (text: string) => void` _(desde 0.11)_ — ofrece la opción "crear" al final de la lista. Recibe el texto recortado y **no cambia el valor**: el consumidor agrega la opción a `options` y la selecciona con `value`. Por eso, con `onCreate` los tipos exigen `value` y `onValueChange` y no admiten `defaultValue`.
   - `createLabel?: (text: string) => string` _(desde 0.11)_ — texto y nombre accesible de la opción "crear"; default `` (text) => `Create "${text}"` ``. Solo con `onCreate`.
-  - `size?: 'sm' | 'md' | 'lg'` (32 / 44 / 48px, la escala de `Input` y `Select`; default `'md'`). El texto del disparador y del campo de búsqueda mide 16px en los tres; las opciones de la lista siguen el tamaño.
+  - `size?: 'sm' | 'md' | 'lg'` (32 / 44 / 48px, la escala de `Input` y `Select`; default `'md'`). El texto del disparador y del campo de búsqueda mide 16px en los tres _(desde 0.13)_; las opciones de la lista siguen el tamaño.
   - `disabled?: boolean` — deshabilita el disparador, el buscador y los Chips.
   - `id?: string` — id del botón (en `mode="inline"`, del contenedor). No se usa para etiquetar: usar `label`.
   - Textos, en inglés por defecto: `placeholder` (`'Select...'`), `searchPlaceholder` (`'Search...'`), `emptyLabel` (`'No results.'`), `removeLabel: (label: string) => string` (default `` (label) => `Remove ${label}` ``).
@@ -2205,8 +2205,8 @@ toast.warning('Ten cuidado');
   - `position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'top-center' | 'bottom-center'` (default `'bottom-right'`) — posición del contenedor.
   - `richColors?: boolean` — colores más vibrantes.
   - `closeButton?: boolean` — mostrar botón de cierre en cada toast.
-  - `offset?: string | number | { top?, right?, bottom?, left? }` (default `24px` más el safe area de cada lado) — distancia a los bordes de la ventana en anchos mayores a 600px. Un número son píxeles y un string, cualquier longitud CSS. El valor suelto se aplica a los cuatro lados; en el objeto, cada lado omitido queda en `24px`, sin el safe area.
-  - `mobileOffset?: string | number | { top?, right?, bottom?, left? }` (default `16px` más el safe area de cada lado) — igual que `offset`, para anchos de hasta 600px (un lado omitido queda en `16px`). No hereda de `offset`: si solo pasas `offset`, en móvil sigue el default.
+  - `offset?: string | number | { top?, right?, bottom?, left? }` (default `24px` más el safe area de cada lado _(desde 0.13)_) — distancia a los bordes de la ventana en anchos mayores a 600px. Un número son píxeles y un string, cualquier longitud CSS. El valor suelto se aplica a los cuatro lados; en el objeto, cada lado omitido queda en `24px`, sin el safe area.
+  - `mobileOffset?: string | number | { top?, right?, bottom?, left? }` (default `16px` más el safe area de cada lado _(desde 0.13)_) — igual que `offset`, para anchos de hasta 600px (un lado omitido queda en `16px`). No hereda de `offset`: si solo pasas `offset`, en móvil sigue el default.
   - Acepta `React.ComponentProps<typeof import('sonner').Toaster>` (props del `Toaster` de Sonner).
 
 Descripción: envoltorio ligero sobre `sonner` que provee un `Toaster` con tema y clases por defecto y el helper `toast` para disparar notificaciones. El componente `Toast` debe renderizarse una sola vez (por ejemplo en el `App` o en el layout global) para que los toasts se muestren correctamente.
@@ -2251,7 +2251,7 @@ toast('Evento creado', {
 
 En el ejemplo 4 hacen falta las dos props: solo con `offset`, el toast tapa la barra en anchos de hasta 600px. Usa la forma de objeto: con un valor suelto, `mobileOffset={80}` también se aplica a los lados y deja el toast en 215px de ancho en una pantalla de 375px, en lugar de 343px.
 
-**Comportamiento no obvio:** los offsets por defecto suman el safe area (`env(safe-area-inset-*)`) de cada lado, así que con `viewport-fit=cover` un toast arriba no queda bajo la muesca ni uno abajo sobre el indicador de inicio. Solo surte efecto si la app declara `viewport-fit=cover` (en Next.js: `export const viewport = { viewportFit: 'cover' }`); sin eso, `env()` vale 0 y la posición es la de Sonner. Pasar `offset` o `mobileOffset` reemplaza el default completo de esa prop: los lados que indiques llevan tu valor y los que omitas quedan en `24px` / `16px`, sin el safe area. Por eso un offset propio debería incluirlo también, con `calc()`, como en el ejemplo 4:
+**Comportamiento no obvio:** los offsets por defecto suman el safe area _(desde 0.13)_ (`env(safe-area-inset-*)`) de cada lado, así que con `viewport-fit=cover` un toast arriba no queda bajo la muesca ni uno abajo sobre el indicador de inicio. Solo surte efecto si la app declara `viewport-fit=cover` (en Next.js: `export const viewport = { viewportFit: 'cover' }`); sin eso, `env()` vale 0 y la posición es la de Sonner. Pasar `offset` o `mobileOffset` reemplaza el default completo de esa prop: los lados que indiques llevan tu valor y los que omitas quedan en `24px` / `16px`, sin el safe area. Por eso un offset propio debería incluirlo también, con `calc()`, como en el ejemplo 4:
 
 ```tsx
 <Toast position="top-center" mobileOffset={{ top: 'calc(8px + env(safe-area-inset-top))' }} />

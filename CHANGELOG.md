@@ -1,34 +1,14 @@
 # Changelog
 
-## [Unreleased]
+## [0.13.0] - 2026-11-10
+
+Adaptación a pantallas táctiles y a apps en WebView (Capacitor): campos sin zoom de iOS, respuesta
+al toque, sin selección de texto en los botones y safe area en los toasts. Lo que el DS hace y lo
+que le toca a la app está reunido en el README, en
+[Uso en WebView (Capacitor)](./README.md#uso-en-webview-capacitor). Ningún cambio de API.
 
 ### Changed
 
-- **Mantener presionado un botón ya no selecciona su texto.** En iOS, mantener presionado un
-  control mostraba la selección y los tiradores de copia. Ahora llevan `user-select: none`
-  `Button` (también con `asChild` sobre un `<a>`) y todo lo que usa `buttonVariants`
-  (días y navegación de `Calendar`, el botón de `FileInput`, `ImageUploader`, `ScrollRow`,
-  `QuantityStepper`, la paginación de `DataTable`, los disparadores de `DatePicker` y
-  `DateRangePicker`, `SkipToContent`), `Toggle`, `ToggleGroupItem`, `TabsTrigger`,
-  `NavigationBarItem`, `Badge` con `interactive`, el cuerpo y la ✕ de `Chip`, y `RadioCard`.
-  Los campos (`Input`, `Textarea`, la búsqueda de `Combobox`) siguen siendo seleccionables.
-  El DS no aplica `-webkit-touch-callout: none`, porque en la web quitaría el menú de
-  los enlaces al mantenerlos presionados. En una app con Capacitor, agrégalo en tu propio CSS.
-  Sin cambios de API. Para volver a permitir la selección en un caso puntual, pasa `select-text`
-  en `className`. En `Chip` no sirve, porque su `className` va al contenedor y no a los botones.
-- **`Toast` separa los toasts del safe area del dispositivo.** Los defaults de `offset` (24px)
-  y `mobileOffset` (16px) suman ahora `env(safe-area-inset-*)` en cada lado, así que con
-  `viewport-fit=cover` un toast arriba ya no queda bajo la muesca ni uno abajo sobre el
-  indicador de inicio. Sin `viewport-fit=cover` la posición no cambia. Sin cambios de API: si
-  pasas `offset` o `mobileOffset`, reemplazan el default de esa prop, y los lados que omitas
-  quedan en 24px / 16px sin el safe area; para conservarlo, inclúyelo en tu valor con
-  `calc()` (por ejemplo `bottom: 'calc(80px + env(safe-area-inset-bottom))'`).
-- **`NavigationBar` con `variant="horizontal"` arranca mostrando el ítem activo.** Si los ítems no
-  caben y la fila se desplaza, al renderizarse por primera vez queda desplazada hasta mostrar el
-  enlace con `aria-current="page"`, sin JS (`scroll-initial-target`). Lo aplican Chrome y Edge
-  133+; en Firefox y Safari la fila arranca al inicio, como antes. Si el activo cambia con el
-  `<nav>` ya montado, la fila no se vuelve a desplazar. Sin cambios de API ni en la forma
-  `'bottom'` (tampoco por debajo del breakpoint de `bottomBelow`).
 - **El texto de los campos de formulario mide 16px en todos los tamaños.** Safari en iOS (y la
   WebView de Capacitor) hace zoom al enfocar un campo editable con texto menor a 16px. Cambia en
   `Input` (antes 12px en `sm` y 14px en `md`, también el botón de `type="file"`), `Textarea`
@@ -37,8 +17,8 @@
   disparadores de `DatePicker` y `DateRangePicker` (antes 14px). Select y los pickers no hacen
   zoom, pero cambian para que el formulario se vea parejo. Las alturas (32 / 44 / 48px) no
   cambian, así que siguen alineados con `Button`, cuyo texto queda más chico. Las opciones de
-  las listas, los labels y los textos de ayuda no cambian. Sin cambios de API. Si achicabas el
-  texto de un campo con `className`, en iOS vuelve el zoom al enfocarlo.
+  las listas, los labels y los textos de ayuda no cambian. Si achicabas el texto de un campo con
+  `className`, en iOS vuelve el zoom al enfocarlo.
 - **Los componentes interactivos responden al presionarlos en pantallas táctiles.** En Tailwind
   v4, `hover:` solo aplica con mouse, así que en touch no había respuesta visual. Ahora cada
   elemento con hover se ve igual mientras se presiona, con el mismo color: `Button` (y lo que
@@ -47,14 +27,40 @@
   `ToggleGroupItem`, `TabsTrigger`, `NavigationBarItem`, `RadioCard`, la ✕ de `Chip`,
   `Dialog` y `Sheet`, y el botón de limpiar de `Input`. Los deshabilitados no cambian. En iOS,
   si al presionar no ves el estado, registra un listener vacío de `touchstart` en tu app
-  (pendiente de verificar en un dispositivo). Sin cambios de API.
+  (pendiente de verificar en un dispositivo).
 - **Sin el destello gris del navegador al tocar los elementos del DS.** Todo elemento del DS
   que responde a un toque lleva `-webkit-tap-highlight-color: transparent`: los de arriba y
   también `Checkbox`, `Switch`, `RadioGroupItem`, los campos de `Input` y `Textarea`, el
   disparador, la búsqueda y las opciones de `Combobox`, `SelectTrigger` y `SelectItem`, los
   ítems de `DropdownMenu`, las filas de `CheckboxField`, `SwitchField` y `RadioGroupItem`, el
   cuerpo de `Chip`, los encabezados ordenables de `DataTable` y los overlays de `Dialog` y
-  `Sheet`. Solo esos elementos: el resto de tu página no cambia. Sin cambios de API.
+  `Sheet`. Solo esos elementos: el resto de tu página no cambia.
+- **Mantener presionado un botón ya no selecciona su texto.** En iOS, mantener presionado un
+  control mostraba la selección y los tiradores de copia. Ahora llevan `user-select: none`
+  `Button` (también con `asChild` sobre un `<a>`) y todo lo que usa `buttonVariants` (días y
+  navegación de `Calendar`, el botón de `FileInput`, `ImageUploader`, `ScrollRow`,
+  `QuantityStepper`, la paginación de `DataTable`, los disparadores de `DatePicker` y
+  `DateRangePicker`, `SkipToContent`), `Toggle`, `ToggleGroupItem`, `TabsTrigger`,
+  `NavigationBarItem`, `Badge` con `interactive`, el cuerpo y la ✕ de `Chip`, y `RadioCard`.
+  Los campos (`Input`, `Textarea`, la búsqueda de `Combobox`) siguen siendo seleccionables. Para
+  volver a permitir la selección en un caso puntual, pasa `select-text` en `className`; en
+  `Chip` no sirve, porque su `className` va al contenedor y no a los botones. El DS no aplica
+  `-webkit-touch-callout: none`, porque en la web móvil quitaría el menú de los enlaces al
+  mantenerlos presionados (abrir en otra pestaña, vista previa). En una app con Capacitor,
+  agrégalo en tu propio CSS.
+- **`NavigationBar` con `variant="horizontal"` arranca mostrando el ítem activo.** Si los ítems no
+  caben y la fila se desplaza, al renderizarse por primera vez queda desplazada hasta mostrar el
+  enlace con `aria-current="page"`, sin JS (`scroll-initial-target`). Lo aplican Chrome y Edge
+  133+; en Firefox y Safari la fila arranca al inicio, como antes. Si el activo cambia con el
+  `<nav>` ya montado, la fila no se vuelve a desplazar. La forma `'bottom'` no cambia (tampoco
+  por debajo del breakpoint de `bottomBelow`).
+- **`Toast` separa los toasts del safe area del dispositivo.** Los defaults de `offset` (24px) y
+  `mobileOffset` (16px) suman ahora `env(safe-area-inset-*)` en cada lado, así que con
+  `viewport-fit=cover` un toast arriba ya no queda bajo la muesca ni uno abajo sobre el
+  indicador de inicio. Sin `viewport-fit=cover` la posición no cambia. Si pasas `offset` o
+  `mobileOffset`, reemplazan el default de esa prop, y los lados que omitas quedan en 24px / 16px
+  sin el safe area; para conservarlo, inclúyelo en tu valor con `calc()` (por ejemplo
+  `bottom: 'calc(80px + env(safe-area-inset-bottom))'`).
 
 ### Fixed
 
@@ -65,7 +71,7 @@
   ensanchaban y la activa quedaba cortada hasta el siguiente cambio de valor. Ahora también se
   vuelve a mostrar al terminar de cargar las fuentes y al cambiar el tamaño de la lista (por
   ejemplo, al rotar el dispositivo). Un cambio en el contenido de una pestaña, como un contador,
-  no la vuelve a mostrar, para no mover la lista mientras se desplaza a mano. Sin cambios de API.
+  no la vuelve a mostrar, para no mover la lista mientras se desplaza a mano.
 
 ## [0.12.0] - 2026-11-07
 
