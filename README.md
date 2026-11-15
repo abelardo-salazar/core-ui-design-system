@@ -1340,7 +1340,25 @@ function AppNavigationBar() {
 - **Separadores decorativos:** el chevron entre ítems es un SVG con `aria-hidden`, fuera del enlace: no entra en el nombre accesible ni lo lee un lector de pantalla. El primero se oculta con CSS, sin que el ítem conozca su posición. En RTL se invierte. No se puede personalizar.
 - **Se envuelve en varias líneas** cuando no cabe, sin colapso a "…", sin desplazamiento horizontal y sin estado. Una línea nueva empieza con "› Ítem", nunca termina en un chevron, y una etiqueta más ancha que la fila se parte dentro de su ítem. Entre líneas quedan 24px.
 - **Área táctil:** cada enlace responde en 44px de alto (su línea de 20px más 12px arriba y abajo) sin cambiar su aspecto; el ancho es el del texto, para no pisar al vecino. Esa área sobresale 12px por encima y por debajo del `<nav>`: deja al menos ese espacio con un control vecino.
-- **Enlace del router:** usa `asChild` con el `Link` de tu router (Next.js, React Router). Al recorrer una lista, elige la rama por ítem: `active` con un booleano dinámico junto a `href` no compila.
+- **Enlace del router:** usa `asChild` con el `Link` de tu router (Next.js, React Router), como en el ejemplo de abajo.
+- **`active` no admite un `boolean` junto a `href` o `asChild`:** `<BreadcrumbItem href={href} active={esUltimo}>` no compila. Como `esUltimo` puede ser `true`, y el ítem actual es texto y no un enlace, su `href` se perdería en silencio. Es estricto a propósito. Al recorrer una lista, bifurca en el JSX: el último es el ítem actual y los demás, enlaces.
+
+  ```tsx
+  {
+    trail.map(({ href, label }, index) =>
+      index === trail.length - 1 ? (
+        <BreadcrumbItem key={href} active>
+          {label}
+        </BreadcrumbItem>
+      ) : (
+        <BreadcrumbItem key={href} href={href}>
+          {label}
+        </BreadcrumbItem>
+      ),
+    );
+  }
+  ```
+
 - **Server Components:** es server-safe, sin hooks ni handlers propios.
 
 ```tsx
