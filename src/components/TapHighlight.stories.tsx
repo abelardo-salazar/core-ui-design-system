@@ -33,6 +33,7 @@ import { ScrollRow, ScrollRowItem } from './ScrollRow';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './Select';
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from './Sheet';
 import { Switch } from './Switch';
+import { SwitchField } from './SwitchField';
 import { Tabs, TabsList, TabsTrigger } from './Tabs';
 import { Textarea } from './Textarea';
 import { Toggle } from './Toggle';
@@ -138,6 +139,9 @@ export const InlineElements: StoryObj = {
       <Case name="CheckboxField">
         <CheckboxField label="Recordarme" />
       </Case>
+      <Case name="SwitchField">
+        <SwitchField label="Avisos por correo" />
+      </Case>
       <Case name="RadioGroupItem">
         <RadioGroup aria-label="Envío">
           <RadioGroupItem value="a" label="Estándar" />
@@ -215,6 +219,7 @@ export const InlineElements: StoryObj = {
       Checkbox: inCase('Checkbox', '[role=checkbox]'),
       Switch: inCase('Switch', '[role=switch]'),
       'CheckboxField row (SelectionField)': inCase('CheckboxField', 'label'),
+      'SwitchField row (SelectionField)': inCase('SwitchField', 'label'),
       RadioGroupItem: inCase('RadioGroupItem', '[role=radio]'),
       'RadioGroupItem row (SelectionField)': inCase('RadioGroupItem', 'label'),
       RadioCard: inCase('RadioCard', '[role=radio]'),
