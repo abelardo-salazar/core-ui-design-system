@@ -1,7 +1,7 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { createColumnHelper } from '@tanstack/react-table';
-import { expect } from 'storybook/test';
+import { expect, waitFor } from 'storybook/test';
 import { Badge } from './Badge';
 import { Button } from './Button';
 import { Calendar } from './Calendar';
@@ -36,6 +36,7 @@ import { Switch } from './Switch';
 import { SwitchField } from './SwitchField';
 import { Tabs, TabsList, TabsTrigger } from './Tabs';
 import { Textarea } from './Textarea';
+import { Toast, toast } from './Toast';
 import { Toggle } from './Toggle';
 import { ToggleGroup, ToggleGroupItem } from './ToggleGroup';
 
@@ -318,5 +319,34 @@ export const SheetOpen: StoryObj = {
       'Sheet overlay': '[data-state=open].fixed.inset-0:not([role=dialog])',
       'Sheet close': '[role=dialog] button[aria-label=Cerrar], [role=dialog] button',
     });
+  },
+};
+
+// 6. Toast: Sonner's action, cancel and close (✕) buttons.
+export const ToastOpen: StoryObj = {
+  render: () => (
+    <>
+      {redHighlight}
+      <Toast closeButton />
+    </>
+  ),
+  play: async ({ canvasElement }) => {
+    const body = canvasElement.ownerDocument.body;
+    toast('Se creó el evento', {
+      action: { label: 'Deshacer', onClick: () => {} },
+      cancel: { label: 'Descartar', onClick: () => {} },
+      duration: Infinity,
+    });
+    await waitFor(() => expect(body.querySelector('[data-sonner-toast]')).not.toBeNull());
+    try {
+      await checkTapHighlight(body, {
+        'Toast action': '[data-sonner-toast] [data-button]:not([data-cancel])',
+        'Toast cancel': '[data-sonner-toast] [data-cancel]',
+        'Toast close': '[data-sonner-toast] [data-close-button]',
+      });
+    } finally {
+      // Sonner's store is global: leave no toast behind for the next story.
+      toast.dismiss();
+    }
   },
 };

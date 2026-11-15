@@ -19,6 +19,10 @@ const safeAreaOffset = (base: string): Offset => ({
 const DEFAULT_OFFSET = safeAreaOffset('24px');
 const DEFAULT_MOBILE_OFFSET = safeAreaOffset('16px');
 
+// Sonner's buttons respond to a tap but its CSS keeps the browser's tap highlight: each one drops it
+// in its own class, never in a global rule (see TapHighlight.stories.tsx).
+const tapHighlight = '[-webkit-tap-highlight-color:transparent]';
+
 const Toast = ({ offset, mobileOffset, ...props }: ToasterProps) => {
   return (
     <Sonner
@@ -29,8 +33,9 @@ const Toast = ({ offset, mobileOffset, ...props }: ToasterProps) => {
           toast:
             'group toast group-[.toaster]:bg-base-100 group-[.toaster]:text-base-content group-[.toaster]:border-base-300 group-[.toaster]:shadow-lg',
           description: 'group-[.toast]:text-base-content/60',
-          actionButton: 'group-[.toast]:bg-neutral group-[.toast]:text-neutral-content',
-          cancelButton: 'group-[.toast]:bg-base-200 group-[.toast]:text-base-content/60',
+          actionButton: `group-[.toast]:bg-neutral group-[.toast]:text-neutral-content ${tapHighlight}`,
+          cancelButton: `group-[.toast]:bg-base-200 group-[.toast]:text-base-content/60 ${tapHighlight}`,
+          closeButton: tapHighlight,
         },
       }}
       offset={offset ?? DEFAULT_OFFSET}
