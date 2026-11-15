@@ -5,7 +5,7 @@
 ![TypeScript](https://img.shields.io/badge/typescript-5.9+-3178C6.svg)
 ![Registry](https://img.shields.io/badge/registry-npm-CB3837.svg)
 
-**Última versión publicada:** `0.13.0`.
+**Última versión publicada:** `0.13.0`. `main` tiene cambios sin publicar: ver [CHANGELOG § Unreleased](./CHANGELOG.md#unreleased).
 
 **Storybook:** [abelardo-salazar.github.io/core-ui-design-system](https://abelardo-salazar.github.io/core-ui-design-system/). Documenta la última versión publicada, no lo que aún está sin publicar en `main`.
 
@@ -1432,7 +1432,7 @@ Uso (ejemplo simplificado, extraído de `DropdownMenu.stories.tsx`):
 | `Calendar`        | Grilla de calendario                   | `mode`, `selected`, `onSelect`, `showOutsideDays?`, `size?`, `renderDayContent?` (todos los props de `DayPicker`)                                            |
 | `Combobox`        | Selección con buscador (cmdk)          | `options`, `label` o `aria-label`, `multiple?`, `value?`, `defaultValue?`, `onValueChange?`, `mode?`, `size?`, `disabled?`, `filter?`, `onCreate?`           |
 | `QuantityStepper` | Campo numérico con botones − / +       | `value?`, `defaultValue?`, `onChange?`, `min?`, `max?`, `step?`, `decrementLabel?`, `incrementLabel?`                                                        |
-| `DatePicker`      | Selector de fecha (Popover + Calendar) | `date?`, `onDateChange?`, `placeholder?`, `disabled?`, `className?`, `dialogLabel?`, `locale?`, `label?`, `error?`, `helperText?`                            |
+| `DatePicker`      | Selector de fecha (Popover + Calendar) | `date?`, `onDateChange?`, `minDate?`, `maxDate?`, `placeholder?`, `disabled?`, `className?`, `dialogLabel?`, `locale?`, `label?`, `error?`, `helperText?`    |
 | `DateRangePicker` | Selector de rango de fechas            | `range?`, `onRangeChange?`, `minDate?`, `maxDate?`, `placeholder?`, `locale?`, `label?`, `error?`, `helperText?`                                             |
 
 ### Checkbox — Uso y Props
@@ -1948,6 +1948,7 @@ Con un `DayButton` propio en `components`, tu botón reemplaza al del DS: `rende
 - **Props principales:**
   - `date?: Date` — fecha seleccionada.
   - `onDateChange?: (date: Date | undefined) => void`.
+  - `minDate?: Date` y `maxDate?: Date` _(desde 0.14)_ — los días antes de `minDate` y después de `maxDate` quedan deshabilitados; los dos límites se pueden elegir. Ver el comportamiento abajo.
   - `placeholder?: string` (default `'Pick a date'`).
   - `dialogLabel?: string` (default `'Choose date'`) _(desde 0.5)_ — nombre accesible del popover.
   - `locale?: Locale` (de `date-fns`) _(desde 0.5)_ — se aplica a la fecha del disparador y al calendario. Con un locale de `date-fns` las etiquetas de navegación del calendario quedan en inglés; con los locales que exporta el DS desde el subpath `/locale` (`import { es } from '@abelardo-salazar/core-ui-design-system/locale'`) también se traducen. Ese subpath reexporta los locales de DayPicker (los de `date-fns` con las etiquetas traducidas), es server-safe y solo empaqueta los locales que se importan. No importar desde `@daypicker/react`: es dependencia del DS, no de la app (con pnpm no se resuelve).
@@ -1960,6 +1961,32 @@ Con un `DayButton` propio en `components`, tu botón reemplaza al del DS: `rende
 **Campo:** sin `label`, `error` ni `helperText`, el disparador se ve como antes y su nombre accesible es su texto; queda dentro de un envoltorio con `display: contents`, que no participa del layout. Con alguna de ellas, ese envoltorio pasa a ser el campo (etiqueta, disparador y mensaje). Como el envoltorio está siempre, el disparador no se vuelve a montar al aparecer un error y no pierde el foco. La etiqueta es un `<span>` enlazado con `aria-labelledby`, no un `<label>`: hacer clic en ella no abre el calendario.
 
 **Comportamiento no obvio:** `DatePicker` es **100% controlado, sin estado interno propio** — compone `Popover` + `Button` (trigger) + `Calendar` (`mode="single"`) tal cual ya existen en el DS, no una API monolítica aparte. El consumidor maneja `date`/`onDateChange` desde afuera, igual que lo haría en una app real. Formatea la fecha visible con `date-fns` (`format(date, 'PPP', { locale })`). El calendario abre en el mes de `date` (sin `date`, en el mes actual) y la navegación sigue libre. Para el `locale`, ver [Locales](#locales--subpath-locale): no se puede pasar desde un Server Component.
+
+**Comportamiento no obvio de `minDate` y `maxDate`** _(desde 0.14)_:
+
+- **Los límites son inclusivos.** El día de `minDate` y el de `maxDate` se pueden elegir.
+- **La comparación es por día, en la zona horaria local.** La hora de `minDate` o `maxDate` no importa: un `minDate` a las 23:59 deja ese día habilitado.
+- **Una `date` fuera de rango no se corrige.** El disparador la muestra, el calendario la marca como seleccionada (y deshabilitada) y `onDateChange` no se llama. Marcarla como inválida le toca al consumidor, con `error`.
+- **Mes en que abre el calendario.** Con `date`, el de `date`, aunque esté fuera de rango. Sin `date`, el mes actual, acotado al rango: si hoy es anterior a `minDate`, abre en el mes de `minDate`; si es posterior a `maxDate`, en el de `maxDate`. Es distinto de `DateRangePicker`, que sin rango abre en `minDate`.
+- **Teclado.** Las flechas no se detienen en un día deshabilitado: en el borde del rango, el foco se queda en el último día habilitado. La navegación entre meses sigue libre.
+
+```tsx
+// "Arma tu viaje": salida desde mañana.
+const tomorrow = addDays(new Date(), 1); // trae la hora actual: no hace falta startOfDay
+const [departure, setDeparture] = useState<Date>();
+
+<DatePicker
+  label="Fecha de salida"
+  minDate={tomorrow}
+  date={departure}
+  onDateChange={setDeparture}
+  error={
+    departure && isBefore(departure, startOfDay(tomorrow))
+      ? 'Elige una fecha desde mañana'
+      : undefined
+  }
+/>;
+```
 
 Uso (ejemplo, extraído de `DatePicker.stories.tsx`):
 

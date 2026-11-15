@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { es } from 'date-fns/locale';
 // From the DS ./locale subpath (src/locale.ts), the way the consumer imports it.
 import { es as dayPickerEs } from '../../locale';
@@ -289,5 +289,157 @@ export const ErrorLook: Story = {
 
     const bare = canvas.getByRole('button', { name: 'Pick a date' });
     await expect(getComputedStyle(bare.parentElement!).display).toBe('contents');
+  },
+};
+
+// --- minDate / maxDate -------------------------------------------------------------------------
+// Fixed dates so no test depends on today: the cases without `date` use bounds in 2000 and 2099.
+
+const JAN = (day: number, hours = 0, minutes = 0) => new Date(2026, 0, day, hours, minutes);
+
+async function openCalendar(canvasElement: HTMLElement) {
+  await userEvent.click(within(canvasElement).getByRole('button'));
+  return within(document.body).findByRole('dialog', { name: 'Choose date' });
+}
+
+const dayButton = (content: HTMLElement, name: RegExp) =>
+  within(content).getByRole('button', { name });
+
+const caption = (content: HTMLElement) =>
+  within(content).getByRole('grid').getAttribute('aria-label');
+
+// 12. Bounds inclusive: minDate and maxDate can be picked, the days outside them are disabled and
+// a click on one does nothing.
+export const MinAndMaxDate: Story = {
+  args: { date: JAN(15), minDate: JAN(5), maxDate: JAN(25), onDateChange: fn() },
+  play: async ({ canvasElement, args }) => {
+    const content = await openCalendar(canvasElement);
+    await expect(dayButton(content, /January 4th, 2026/)).toBeDisabled();
+    await expect(dayButton(content, /January 5th, 2026/)).toBeEnabled();
+    await expect(dayButton(content, /January 25th, 2026/)).toBeEnabled();
+    await expect(dayButton(content, /January 26th, 2026/)).toBeDisabled();
+
+    await userEvent.click(dayButton(content, /January 4th, 2026/), { pointerEventsCheck: 0 });
+    await userEvent.click(dayButton(content, /January 26th, 2026/), { pointerEventsCheck: 0 });
+    await expect(args.onDateChange).not.toHaveBeenCalled();
+
+    await userEvent.click(dayButton(content, /January 5th, 2026/));
+    // Calendar forwards DayPicker's onSelect, which also passes the trigger day, modifiers and event.
+    await expect(args.onDateChange).toHaveBeenCalledWith(
+      JAN(5),
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+    );
+    await userEvent.keyboard('{Escape}');
+  },
+};
+
+// 13. The arrow keys never land on a disabled day: at the edge of the range the focus stays. Each
+// check presses the opposite arrow next: from the bound it reaches the day inside the range, which
+// it wouldn't if the focus had moved to the disabled day.
+export const KeyboardSkipsDisabledDays: Story = {
+  args: { date: JAN(15), minDate: JAN(5), maxDate: JAN(25) },
+  play: async ({ canvasElement }) => {
+    const content = await openCalendar(canvasElement);
+    const expectFocus = (name: RegExp) =>
+      waitFor(() => expect(dayButton(content, name)).toHaveFocus());
+
+    dayButton(content, /January 5th, 2026/).focus();
+    await userEvent.keyboard('{ArrowLeft}{ArrowRight}');
+    await expectFocus(/January 6th, 2026/);
+
+    dayButton(content, /January 5th, 2026/).focus();
+    await userEvent.keyboard('{ArrowUp}{ArrowDown}');
+    await expectFocus(/January 12th, 2026/);
+
+    dayButton(content, /January 25th, 2026/).focus();
+    await userEvent.keyboard('{ArrowRight}{ArrowLeft}');
+    await expectFocus(/January 24th, 2026/);
+
+    dayButton(content, /January 25th, 2026/).focus();
+    await userEvent.keyboard('{ArrowDown}{ArrowUp}');
+    await expectFocus(/January 18th, 2026/);
+    await userEvent.keyboard('{Escape}');
+  },
+};
+
+// 14. With a date, the calendar opens on its month, not on minDate (unlike DateRangePicker).
+export const InitialMonthWithDate: Story = {
+  args: { date: new Date(2026, 1, 10), minDate: JAN(5), maxDate: new Date(2026, 2, 31) },
+  play: async ({ canvasElement }) => {
+    const content = await openCalendar(canvasElement);
+    await expect(caption(content)).toBe('February 2026');
+  },
+};
+
+// 15. Without a date and with today before minDate, it opens on minDate's month.
+export const InitialMonthTodayBeforeMin: Story = {
+  args: { minDate: new Date(2099, 5, 15) },
+  play: async ({ canvasElement }) => {
+    const content = await openCalendar(canvasElement);
+    await expect(caption(content)).toBe('June 2099');
+    await expect(dayButton(content, /June 14th, 2099/)).toBeDisabled();
+    await expect(dayButton(content, /June 15th, 2099/)).toBeEnabled();
+  },
+};
+
+// 16. Without a date and with today after maxDate, it opens on maxDate's month.
+export const InitialMonthTodayAfterMax: Story = {
+  args: { maxDate: new Date(2000, 2, 15) },
+  play: async ({ canvasElement }) => {
+    const content = await openCalendar(canvasElement);
+    await expect(caption(content)).toBe('March 2000');
+    await expect(dayButton(content, /March 15th, 2000/)).toBeEnabled();
+    await expect(dayButton(content, /March 16th, 2000/)).toBeDisabled();
+  },
+};
+
+// 17. Compared by day: a minDate at 23:59 (e.g. "from tomorrow" built from a timestamp) still lets
+// its own day be picked.
+export const MinDateWithTime: Story = {
+  args: {
+    label: 'Fecha de salida',
+    date: JAN(10),
+    minDate: JAN(5, 23, 59),
+    onDateChange: fn(),
+  },
+  play: async ({ canvasElement, args }) => {
+    const content = await openCalendar(canvasElement);
+    await expect(dayButton(content, /January 4th, 2026/)).toBeDisabled();
+    await expect(dayButton(content, /January 5th, 2026/)).toBeEnabled();
+    await userEvent.click(dayButton(content, /January 5th, 2026/));
+    // Calendar forwards DayPicker's onSelect, which also passes the trigger day, modifiers and event.
+    await expect(args.onDateChange).toHaveBeenCalledWith(
+      JAN(5),
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+    );
+    await userEvent.keyboard('{Escape}');
+  },
+};
+
+// 18. A date out of range isn't corrected: the trigger shows it, the calendar opens on its month
+// with it selected (and disabled), and onDateChange isn't called. The consumer flags it with error.
+export const OutOfRangeDate: Story = {
+  args: {
+    date: new Date(2026, 2, 10),
+    minDate: JAN(5),
+    maxDate: JAN(25),
+    error: 'La fecha debe ser entre el 5 y el 25 de enero',
+    onDateChange: fn(),
+  },
+  play: async ({ canvasElement, args }) => {
+    const trigger = within(canvasElement).getByRole('button', { name: 'March 10th, 2026' });
+    await expect(trigger).toHaveAttribute('aria-invalid', 'true');
+
+    const content = await openCalendar(canvasElement);
+    await expect(caption(content)).toBe('March 2026');
+    const selected = dayButton(content, /March 10th, 2026, selected/);
+    await expect(selected).toBeDisabled();
+    await expect(args.onDateChange).not.toHaveBeenCalled();
+    await expect(trigger).toHaveTextContent('March 10th, 2026');
+    await userEvent.keyboard('{Escape}');
   },
 };
