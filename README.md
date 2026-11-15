@@ -384,6 +384,7 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
     - [ScrollRow — Uso y Props](#scrollrow--uso-y-props)
     - [Timeline — Uso y Props](#timeline--uso-y-props)
     - [Tabs — Uso y Props](#tabs--uso-y-props)
+    - [Mostrar y ocultar contenido — receta con `<details>`](#mostrar-y-ocultar-contenido--receta-con-details)
     - [NavigationBar — Uso y Props](#navigationbar--uso-y-props)
     - [Breadcrumb — Uso y Props](#breadcrumb--uso-y-props)
     - [Toggle — Uso y Props](#toggle--uso-y-props)
@@ -1140,6 +1141,52 @@ Uso (ejemplo, extraído de `Tabs.stories.tsx`):
   </Badge>
 </TabsTrigger>
 ```
+
+### Mostrar y ocultar contenido — receta con `<details>`
+
+No es un componente del DS ni agrega API: es HTML nativo (`<details>` y `<summary>`) con los tokens del DS. Cubre "Leer la historia completa", "Ver el mensaje que se enviará" y "Leer más" con un avance visible. Antes de pedir un `Collapsible`, revisa si esta receta alcanza.
+
+```tsx
+import { ChevronDownIcon } from '@radix-ui/react-icons';
+
+// The trigger: a native <summary> with the DS tokens. No JS: works in Server Components.
+const summaryClass = [
+  'flex w-fit min-h-11 cursor-pointer select-none list-none items-center gap-2 rounded-btn px-3',
+  // flex and list-none hide the native marker; ::-webkit-details-marker is for older Safari.
+  'text-sm font-medium text-base-content [&::-webkit-details-marker]:hidden',
+  '[-webkit-tap-highlight-color:transparent] pointer-fine:hover:bg-base-200 active:bg-base-200',
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+].join(' ');
+
+// "Read more": the first paragraph stays outside, the rest goes inside.
+<article className="max-w-prose space-y-3">
+  <p>Llegamos a Bacalar al atardecer…</p>
+  <details className="group">
+    <summary className={summaryClass}>
+      {/* display: none takes the hidden text out of the accessible name. */}
+      <span className="group-open:hidden">Leer la historia completa</span>
+      <span className="hidden group-open:inline">Leer menos</span>
+      <ChevronDownIcon aria-hidden className="size-4 group-open:rotate-180" />
+    </summary>
+    <div className="mt-3 space-y-3">
+      <p>Al día siguiente…</p>
+      <p>Antes de irnos…</p>
+    </div>
+  </details>
+</article>;
+```
+
+Sin avance visible ("Leer la historia completa"), todo el texto va dentro del `<details>`. Para "Ver el mensaje que se enviará", usa el mismo `<summary>` y pon el mensaje en un `div` con `rounded-box border border-base-300 bg-base-200 p-4`.
+
+**Comportamiento no obvio:**
+
+- **Server-safe:** es HTML nativo, sin JS ni `'use client'`.
+- **El navegador expone el estado:** el `<summary>` se anuncia como expandido o contraído sin `aria-expanded` ni `aria-controls`. Enter y Espacio lo abren y lo cierran.
+- **Texto que cambia con el estado:** el fragmento oculto con `display: none` sale del árbol de accesibilidad, así que el nombre del `<summary>` es solo el texto visible: "Leer la historia completa" cerrado y "Leer menos" abierto.
+- **Toque y foco:** mide 44px de alto, se ve igual al presionarlo que con el hover, sin destello de toque, y muestra el anillo `ring-primary` solo con el foco por teclado (no al hacer clic).
+- **Marcador:** el triángulo nativo no se ve; el chevron es decorativo (`aria-hidden`) y gira sin animación.
+- **Verificado en** Chromium y WebKit (con Playwright). No se verificó en Firefox ni en Safari de iOS.
+- **Lo que no cubre:** animación al abrir o cerrar, estado controlado (`open`/`onOpenChange`) y un grupo de secciones donde abrir una cierra las demás. Para eso todavía no hay componente: con un caso real (una animación, un estado controlado o unas preguntas frecuentes excluyentes, que serían un `Accordion`), propónlo y se evalúa.
 
 ### NavigationBar — Uso y Props
 
