@@ -40,6 +40,12 @@
   ahora abre en el mes actual en vez de en el de `minDate`. Migración: nada que cambiar en el
   código.
 
+### Fixed
+
+- **`Toast`: los botones ya no muestran el destello gris al tocarlos en móvil.** Los botones de
+  acción, cancelar y cerrar (✕) de los avisos mostraban el resaltado de toque del navegador, a
+  diferencia del resto de los controles del DS. Migración: nada que cambiar en el código.
+
 ## [0.13.0] - 2026-11-10
 
 Adaptación a pantallas táctiles y a apps en WebView (Capacitor): campos sin zoom de iOS, respuesta
