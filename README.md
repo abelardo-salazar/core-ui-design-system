@@ -1967,8 +1967,9 @@ Con un `DayButton` propio en `components`, tu botón reemplaza al del DS: `rende
 - **Los límites son inclusivos.** El día de `minDate` y el de `maxDate` se pueden elegir.
 - **La comparación es por día, en la zona horaria local.** La hora de `minDate` o `maxDate` no importa: un `minDate` a las 23:59 deja ese día habilitado.
 - **Una `date` fuera de rango no se corrige.** El disparador la muestra, el calendario la marca como seleccionada (y deshabilitada) y `onDateChange` no se llama. Marcarla como inválida le toca al consumidor, con `error`.
-- **Mes en que abre el calendario.** Con `date`, el de `date`, aunque esté fuera de rango. Sin `date`, el mes actual, acotado al rango: si hoy es anterior a `minDate`, abre en el mes de `minDate`; si es posterior a `maxDate`, en el de `maxDate`. Es distinto de `DateRangePicker`, que sin rango abre en `minDate`.
+- **Mes en que abre el calendario.** Con `date`, el de `date`, aunque esté fuera de rango. Sin `date`, el mes actual, acotado al rango: si hoy es anterior a `minDate`, abre en el mes de `minDate`; si es posterior a `maxDate`, en el de `maxDate`. `DateRangePicker` sigue la misma regla _(desde 0.14)_.
 - **Teclado.** Las flechas no se detienen en un día deshabilitado: en el borde del rango, el foco se queda en el último día habilitado. La navegación entre meses sigue libre.
+- **`minDate` posterior a `maxDate`:** el comportamiento no está definido. No se valida ni lanza un error; pasar límites coherentes le toca al consumidor.
 
 ```tsx
 // "Arma tu viaje": salida desde mañana.
@@ -2025,6 +2026,8 @@ Componente aparte de `DatePicker`, así los tipos de los dos siguen simples. Es 
 
 - **Cada apertura empieza un rango nuevo.** El primer día elegido es el inicio y el segundo, el fin; el popover se cierra al completar el rango. Si el segundo día es anterior al primero, pasa a ser el inicio (`to` nunca es anterior a `from`). Elegir el mismo día dos veces da un rango de un día.
 - **Cerrar a mitad de camino conserva el rango anterior.** Si se cierra el popover después de elegir solo el inicio, `onRangeChange` no se llama.
+- **Mes en que abre el calendario** _(desde 0.14)_. Con `range`, el de `range.from`, aunque esté fuera de rango. Sin `range`, el mes actual, acotado a los límites: si hoy es anterior a `minDate`, abre en el mes de `minDate`; si es posterior a `maxDate`, en el de `maxDate`. Es la misma regla que `DatePicker`. Antes abría siempre en el mes de `minDate`, aunque fuera de hace años.
+- **`minDate` posterior a `maxDate`:** el comportamiento no está definido. No se valida ni lanza un error; pasar límites coherentes le toca al consumidor.
 
 ```tsx
 const [rango, setRango] = useState<DateRange>();

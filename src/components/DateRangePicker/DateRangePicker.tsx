@@ -8,6 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../Popover';
 import { Button } from '../Button';
 import { Calendar } from '../Calendar';
 import { cn } from '../../utils/cn';
+import { getInitialMonth } from '../../utils/initialMonth';
 import { PickerField, type PickerFieldTextProps } from '../PickerField/PickerField';
 
 export type { DateRange };
@@ -114,13 +115,14 @@ function DateRangePicker({
         )}
       />
       <PopoverContent className="w-auto p-0" align="start" aria-label={dialogLabel}>
-        {/* defaultMonth: opens on the month of the range (see DatePicker). While picking, the
+        {/* defaultMonth: the same rule as DatePicker (see getInitialMonth): the month of
+            range.from; without a range, today clamped to [minDate, maxDate]. While picking, the
             calendar shows the draft; before the first pick, the current range. */}
         <Calendar
           mode="range"
           selected={draft ?? range}
           onSelect={handleSelect}
-          defaultMonth={range?.from ?? minDate}
+          defaultMonth={getInitialMonth(range?.from, minDate, maxDate)}
           disabled={disabledDays.length > 0 ? disabledDays : undefined}
           locale={locale}
         />

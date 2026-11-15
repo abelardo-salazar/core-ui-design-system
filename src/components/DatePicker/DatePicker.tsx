@@ -7,6 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../Popover';
 import { Button } from '../Button';
 import { Calendar } from '../Calendar';
 import { cn } from '../../utils/cn';
+import { getInitialMonth } from '../../utils/initialMonth';
 import { PickerField, type PickerFieldTextProps } from '../PickerField/PickerField';
 
 export interface DatePickerProps extends PickerFieldTextProps {
@@ -31,20 +32,6 @@ export interface DatePickerProps extends PickerFieldTextProps {
   locale?: Locale;
   // label, error and helperText come from PickerFieldTextProps: all optional, so a DatePicker
   // without them keeps its DOM and its name (the trigger's text).
-}
-
-/**
- * Month the calendar opens on: the chosen date's, even out of range (the consumer flags it with
- * `error`); without one, today clamped to [minDate, maxDate]. Comparing instants is enough: when
- * today and a bound fall on the same day, they are also in the same month. `undefined` lets
- * DayPicker open on today, as without bounds.
- */
-function getInitialMonth(date?: Date, minDate?: Date, maxDate?: Date): Date | undefined {
-  if (date) return date;
-  const today = new Date();
-  if (minDate && today < minDate) return minDate;
-  if (maxDate && today > maxDate) return maxDate;
-  return undefined;
 }
 
 function DatePicker({
