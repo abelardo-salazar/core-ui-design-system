@@ -220,6 +220,16 @@ Sonner, no Radix Toast: API más simple y estilizable con Tailwind.
 
 `@daypicker/react`, no `react-day-picker`: el paquete se renombró en v10 y el nombre viejo es solo un alias.
 
+### Mes inicial de los pickers
+
+`DatePicker` y `DateRangePicker` abren el calendario en el mes de `date` (o de `range.from`), aunque esté fuera de rango. Sin fecha, abren en hoy acotado a `[minDate, maxDate]`: si hoy es anterior a `minDate`, en el mes de `minDate`; si es posterior a `maxDate`, en el de `maxDate`. La regla vive en un helper privado compartido, `getInitialMonth` (`src/utils/initialMonth.ts`), que no se exporta del barrel. Decisión del 2026-11-15.
+
+**Por qué:** una fecha fuera de rango no se corrige: se muestra para que el consumidor la marque con `error`, y el calendario abre donde está. Sin fecha, abrir en un `minDate` antiguo obligaba a avanzar mes a mes hasta el presente. El helper compara instantes y no días: alcanza para elegir el mes, porque si hoy y un límite caen el mismo día, están en el mismo mes. La navegación sigue libre, sin `startMonth`/`endMonth`; si no, una fecha fuera de rango no podría abrir en su mes.
+
+**Alternativa descartada:**
+
+- **Copiar en DatePicker la regla anterior de DateRangePicker** (abrir siempre en `minDate`): mantenía el problema del límite antiguo y lo extendía a un segundo componente.
+
 ### `useId` para `aria-describedby`
 
 Input y Textarea generan con `useId()` el id que enlaza `aria-describedby`, así la accesibilidad no depende de que el consumidor pase un `id`.
@@ -273,6 +283,30 @@ En `variant="horizontal"`, el enlace con `aria-current="page"` lleva `scroll-ini
 
 **Cuándo pasar a la B:** si aparece un problema real en Safari o Firefox, o con un layout persistente, que justifique el JS.
 
+### Ítem de NavigationBar sin ícono
+
+`icon` es opcional en `NavigationBarItem`. El indicador del activo depende de la forma: `horizontal` y `vertical` conservan su borde de 2px, y la forma `bottom` (también bajo `bottomBelow`, por debajo del breakpoint) usa un subrayado con `text-decoration` en lugar de la píldora. `badge` exige `icon` por tipos. Mezclar ítems con y sin ícono en la misma barra no es un caso soportado. Decisión del 2026-11-15.
+
+**Por qué:** en `bottom`, el indicador era la píldora detrás del ícono; sin ícono, el activo quedaría marcado solo por color y peso, y el README promete un indicador que no dependa solo del color. El subrayado es `text-decoration` y no `border-b-2` por dos motivos. Primero, `border-b-2` repetiría la utilidad que `horizontal` ya aplica, entre la base y la variante. Segundo, en un ítem de 56px el borde quedaría al pie del ítem, lejos del texto. `horizontal` y `vertical` solo pisan `text-decoration-line`, y `bottomBelow` la restaura en cada breakpoint ([Breakpoints por mapa estático de clases](#breakpoints-por-mapa-estático-de-clases)). Como los bordes, el subrayado sobrevive en modo de colores forzados. `badge` exige `icon` porque el número se posiciona sobre el span del ícono: sin ícono no tiene dónde ir.
+
+**Alternativa descartada:**
+
+- **Prohibir por tipos "sin ícono en `bottom`":** el ítem no conoce la variante, que vive en el `<nav>` sin Context ([Variantes de NavigationBar](#variantes-de-navigationbar)). Los tipos del ítem no pueden depender de una prop del padre.
+
+### Breadcrumb
+
+`Breadcrumb` se envuelve en varias líneas cuando no cabe, sin estado. Cada enlace extiende su área táctil a 44px solo en vertical (un `::after` de 12px arriba y abajo de su línea de 20px), y la lista tiene `gap-y-6`, exactamente lo que agrega esa extensión. El separador va al inicio de cada ítem, y el del primero se oculta con `:first-child` desde el grupo del `<li>`, sin Context. El ítem actual es texto con `aria-current="page"`. Decisión del 2026-11-15.
+
+**Por qué:** envolver no necesita estado ni `'use client'`, y deja todo a la vista. Con `gap-y-6`, las áreas táctiles de dos líneas se tocan sin solaparse. No se extienden en horizontal para no pisar a los vecinos de la misma línea, y el área sobresale 12px del `<nav>`, lo que pide espacio alrededor (README). Con el separador al inicio, el chevron queda pegado al ítem que precede: una línea nueva empieza con "› Ítem" y nunca termina con un chevron colgando.
+
+**Contrato de tipos:** con `active`, los tipos excluyen `href` y `asChild`, y un ítem de enlace exige `href` o `asChild`; sin ellos sería un `<a>` sin `href`, que no es enlace ni recibe el foco. `active` no admite un `boolean`: al recorrer una lista, el consumidor bifurca en el JSX. No se afloja como `NavigationBarVariantProps`, porque allí las dos ramas renderizan el mismo elemento; aquí el ítem actual es texto, y un `href` pasado con `active={true}` se perdería en silencio.
+
+**Alternativas descartadas:**
+
+- **Colapso a "…":** expandir los ítems ocultos necesita estado, y con él `'use client'`, en un componente que hoy es server-safe.
+- **Desplazamiento horizontal:** deja fuera de la vista el ítem actual, que es el último.
+- **`min-h-11` en cada ítem:** cumple los 44px sin solapes, pero la miga mide 44px de alto aunque sea una sola línea y parece una barra de herramientas.
+
 ### Pestaña activa a la vista en Tabs
 
 `TabsList` desplaza solo la lista (no la página, por eso sin `scrollIntoView`) hasta la pestaña activa al montarse, cuando cambia `data-state` (`MutationObserver`), cuando termina una carga de fuentes (`document.fonts.ready` para la que está en curso al montar y el evento `loadingdone` para las posteriores) y cuando cambia el tamaño de la lista (`ResizeObserver`). Decisión del 2026-11-10 (opción A).
@@ -303,6 +337,20 @@ Todo control con aspecto de campo (`Input`, `Textarea`, `Combobox`, `SelectTrigg
 
 - **`pointer-coarse:text-base`:** limita el cambio a pantallas táctiles, pero el mismo formulario se vería distinto según el dispositivo, y la corrección dependería del puntero principal que informe cada uno, no del navegador que hace el zoom.
 - **Por breakpoint (`max-sm:text-base`):** el zoom depende del navegador, no del ancho. Un iPad o un iPhone en horizontal superan el breakpoint y vuelven a hacer zoom, y un escritorio angosto cambia de tamaño sin motivo.
+
+### Plataforma antes que componente: `<details>`
+
+Antes de agregar un componente, se revisa si la plataforma ya cubre el caso. Por eso no hay `Collapsible`: se rechazó en el triage del 2026-11-15 y en su lugar el README documenta una [receta con `<details>` y `<summary>`](./README.md#mostrar-y-ocultar-contenido--receta-con-details), estilizada con los tokens del DS.
+
+**Por qué:** `<details>` es HTML nativo: es server-safe, no tiene JS que mantener y el navegador expone el estado expandido sin `aria-expanded`. Cubre los tres usos que motivaron el pedido ("Leer la historia completa", "Ver el mensaje que se enviará" y "Leer más" con un avance visible). La exclusividad sola no justifica un componente: `<details name>` la da de forma nativa.
+
+**Cuándo reabrir:** con un caso de estado controlado (`open`/`onOpenChange`), o si un consumidor necesita un conjunto estilizado y animado que la receta no resuelva.
+
+### Fechas en las stories
+
+Las stories usan fechas fijas. La excepción son las que tienen una aserción que depende de hoy: esas calculan sus fechas desde `new Date()` dentro de la story.
+
+**Por qué:** una fecha fija es legible y determinista mientras la aserción no dependa de hoy. Cuando depende (por ejemplo, "sin fecha y hoy antes de `minDate`, abre en el mes de `minDate`"), una fecha fija futura deja de ser futura y el test se rompe solo, sin que nada haya cambiado en el código. Caso: las stories de mes inicial de DateRangePicker calculan sus fechas desde hoy. Las de DatePicker usan límites lejanos (2000 y 2099), que siguen siendo válidos mientras hoy caiga entre los dos.
 
 ### Fuera del DS
 

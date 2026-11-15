@@ -39,6 +39,7 @@ Las decisiones detrás de estas reglas, con su razón, están en [ARCHITECTURE.m
 ## Tests
 
 - Todo componente nuevo o modificado lleva test (play functions) antes de mergear.
+- Usar fechas fijas en las stories. Si la aserción depende de hoy, calcular las fechas desde `new Date()` dentro de la story, nunca con una fecha fija futura. [Decisión](../../ARCHITECTURE.md#fechas-en-las-stories)
 - En el proyecto `storybook` de vitest-browser no se aplican las utilidades de Tailwind: hacer aserciones sobre clases y DOM.
 - Marcar con `tags: ['real-css']` la story que necesita el CSS aplicado (posición, z-index, `elementFromPoint`): corre solo en el proyecto `storybook-css`, que sí lo aplica. Antes de darla por buena, verificar que falla sin el cambio.
 - En un `play` que compara valores de un token por tema, leerlos con `rootTokenIn` o `readInTheme` (`.storybook/rootTheme.ts`), sin tocar `.dark` a mano: la story debe pasar con cualquier tema del selector.
