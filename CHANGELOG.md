@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **`DatePicker`: `minDate` y `maxDate`.** Los días antes de `minDate` y después de `maxDate`
+  quedan deshabilitados en el calendario: no se pueden elegir con el mouse y las flechas del
+  teclado no se detienen en ellos. Los límites son inclusivos y se comparan por día en la zona
+  local, así que la hora no importa (un `minDate` a las 23:59 deja ese día habilitado). Sin
+  `date`, el calendario abre en el mes actual acotado al rango; con `date`, en su mes. Una
+  `date` fuera de rango no se corrige: se muestra tal cual y marcarla con `error` le toca al
+  consumidor. Props opcionales: sin ellas nada cambia.
+
 ## [0.13.0] - 2026-11-10
 
 Adaptación a pantallas táctiles y a apps en WebView (Capacitor): campos sin zoom de iOS, respuesta

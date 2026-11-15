@@ -14,6 +14,8 @@ const valid = [
     helperText="De lunes a sábado"
     date={new Date()}
     onDateChange={(date: Date | undefined) => void date}
+    minDate={new Date(2026, 0, 5, 23, 59)}
+    maxDate={new Date(2026, 0, 25)}
     placeholder="Elegir fecha"
     dialogLabel="Elegir fecha"
     disabled
@@ -28,6 +30,10 @@ const invalid = [
   <DatePicker key="c" label={<span />} />,
   // @ts-expect-error error is the message, not a flag
   <DatePicker key="d" error />,
+  // @ts-expect-error minDate is a Date, not an ISO string
+  <DatePicker key="e" minDate="2026-01-05" />,
+  // @ts-expect-error maxDate is a Date, not a timestamp
+  <DatePicker key="f" maxDate={Date.now()} />,
 ];
 
 void valid;

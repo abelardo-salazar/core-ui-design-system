@@ -1,6 +1,7 @@
 'use client';
 
 import { format, type Locale } from 'date-fns';
+import type { Matcher } from '@daypicker/react';
 import { CalendarIcon } from '@radix-ui/react-icons';
 import { Popover, PopoverContent, PopoverTrigger } from '../Popover';
 import { Button } from '../Button';
@@ -11,6 +12,13 @@ import { PickerField, type PickerFieldTextProps } from '../PickerField/PickerFie
 export interface DatePickerProps extends PickerFieldTextProps {
   date?: Date;
   onDateChange?: (date: Date | undefined) => void;
+  /**
+   * Days before it are disabled; its own day can be picked. Compared by day in local time, so
+   * its time of day doesn't matter. A `date` before it is shown as is, not corrected.
+   */
+  minDate?: Date;
+  /** Days after it are disabled; its own day can be picked. Same rules as `minDate`. */
+  maxDate?: Date;
   placeholder?: string;
   className?: string;
   disabled?: boolean;
@@ -25,9 +33,25 @@ export interface DatePickerProps extends PickerFieldTextProps {
   // without them keeps its DOM and its name (the trigger's text).
 }
 
+/**
+ * Month the calendar opens on: the chosen date's, even out of range (the consumer flags it with
+ * `error`); without one, today clamped to [minDate, maxDate]. Comparing instants is enough: when
+ * today and a bound fall on the same day, they are also in the same month. `undefined` lets
+ * DayPicker open on today, as without bounds.
+ */
+function getInitialMonth(date?: Date, minDate?: Date, maxDate?: Date): Date | undefined {
+  if (date) return date;
+  const today = new Date();
+  if (minDate && today < minDate) return minDate;
+  if (maxDate && today > maxDate) return maxDate;
+  return undefined;
+}
+
 function DatePicker({
   date,
   onDateChange,
+  minDate,
+  maxDate,
   placeholder = 'Pick a date',
   className,
   disabled,
@@ -37,6 +61,13 @@ function DatePicker({
   error,
   helperText,
 }: DatePickerProps) {
+  // DayPicker compares these matchers with differenceInCalendarDays: by local day, bounds
+  // inclusive, whatever the time of minDate/maxDate. Its arrow-key navigation never lands on a
+  // disabled day.
+  const disabledDays = [minDate && { before: minDate }, maxDate && { after: maxDate }].filter(
+    Boolean,
+  ) as Matcher[];
+
   return (
     <Popover>
       <PickerField
@@ -70,12 +101,14 @@ function DatePicker({
             without a cast. The navigation labels come from `labels`, which the date-fns locales
             don't have.
             defaultMonth (not month): PopoverContent mounts on each opening, so the
-            calendar opens on the month of the chosen date and navigation stays free. */}
+            calendar opens on getInitialMonth's month and navigation stays free, also past
+            minDate/maxDate (no startMonth/endMonth: an out-of-range date must open on its month). */}
         <Calendar
           mode="single"
           selected={date}
           onSelect={onDateChange}
-          defaultMonth={date}
+          defaultMonth={getInitialMonth(date, minDate, maxDate)}
+          disabled={disabledDays.length > 0 ? disabledDays : undefined}
           locale={locale}
         />
       </PopoverContent>
