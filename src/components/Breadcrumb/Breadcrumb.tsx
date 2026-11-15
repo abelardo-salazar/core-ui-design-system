@@ -29,11 +29,19 @@ const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(
 );
 Breadcrumb.displayName = 'Breadcrumb';
 
+// A link item needs a destination: its own href, or the child's with asChild (a router's Link
+// carries it). Without either it would render an <a> with no href, which isn't a link and can't
+// be focused. This also makes `active={boolean}` without href fail: its false half would be that.
 type BreadcrumbLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
   active?: false;
-  /** Merges the item's props into the single child, e.g. a router's Link. */
-  asChild?: boolean;
-};
+} & (
+    | {
+        /** Merges the item's props into the single child, e.g. a router's Link. */
+        asChild: true;
+        href?: string;
+      }
+    | { asChild?: false; href: string }
+  );
 
 type BreadcrumbCurrentProps = React.HTMLAttributes<HTMLSpanElement> & {
   /** Current page: renders text (not a link) with `aria-current="page"`. */
