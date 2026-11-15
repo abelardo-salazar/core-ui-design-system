@@ -1151,9 +1151,9 @@ import { ChevronDownIcon } from '@radix-ui/react-icons';
 
 // The trigger: a native <summary> with the DS tokens. No JS: works in Server Components.
 const summaryClass = [
+  // flex and list-none hide the native marker.
   'flex w-fit min-h-11 cursor-pointer select-none list-none items-center gap-2 rounded-btn px-3',
-  // flex and list-none hide the native marker; ::-webkit-details-marker is for older Safari.
-  'text-sm font-medium text-base-content [&::-webkit-details-marker]:hidden',
+  'text-sm font-medium text-base-content',
   '[-webkit-tap-highlight-color:transparent] pointer-fine:hover:bg-base-200 active:bg-base-200',
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
 ].join(' ');
@@ -1181,12 +1181,15 @@ Sin avance visible ("Leer la historia completa"), todo el texto va dentro del `<
 **Comportamiento no obvio:**
 
 - **Server-safe:** es HTML nativo, sin JS ni `'use client'`.
-- **El navegador expone el estado:** el `<summary>` se anuncia como expandido o contraído sin `aria-expanded` ni `aria-controls`. Enter y Espacio lo abren y lo cierran.
+- **El navegador expone el estado:** sin `aria-expanded` ni `aria-controls`, en el árbol de accesibilidad de Chromium el `<summary>` tiene el rol `DisclosureTriangle` y su estado expandido o contraído. No se probó con lectores de pantalla. Enter y Espacio lo abren y lo cierran.
 - **Texto que cambia con el estado:** el fragmento oculto con `display: none` sale del árbol de accesibilidad, así que el nombre del `<summary>` es solo el texto visible: "Leer la historia completa" cerrado y "Leer menos" abierto.
-- **Toque y foco:** mide 44px de alto, se ve igual al presionarlo que con el hover, sin destello de toque, y muestra el anillo `ring-primary` solo con el foco por teclado (no al hacer clic).
+- **Toque y foco:** mide 44px de alto, se ve igual al presionarlo que con el hover y muestra el anillo `ring-primary` solo con el foco por teclado (no al hacer clic). Lleva la regla `-webkit-tap-highlight-color: transparent` (en Chromium el valor calculado es transparente); el destello de toque en iOS no se verificó.
 - **Marcador:** el triángulo nativo no se ve; el chevron es decorativo (`aria-hidden`) y gira sin animación.
 - **Verificado en** Chromium y WebKit (con Playwright). No se verificó en Firefox ni en Safari de iOS.
-- **Lo que no cubre:** animación al abrir o cerrar, estado controlado (`open`/`onOpenChange`) y un grupo de secciones donde abrir una cierra las demás. Para eso todavía no hay componente: con un caso real (una animación, un estado controlado o unas preguntas frecuentes excluyentes, que serían un `Accordion`), propónlo y se evalúa.
+- **Lo que esta receta no muestra:**
+  - **Secciones excluyentes:** varios `<details>` con el mismo atributo `name` forman un grupo en el que abrir uno cierra los demás, sin JS (ver [`<details>` en MDN](https://developer.mozilla.org/es/docs/Web/HTML/Reference/Elements/details)). Se verificó en Chromium y WebKit, con clic y con Enter; no se verificó en Firefox.
+  - **Animación:** la receta no anima la apertura ni el cierre.
+  - **Estado controlado** (`open`/`onOpenChange`): es el único hueco sin cubrir, y todavía no hay componente para él. Si tienes un caso real, propónlo y se evalúa.
 
 ### NavigationBar — Uso y Props
 
