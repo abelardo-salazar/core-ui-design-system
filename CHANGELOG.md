@@ -11,6 +11,15 @@
   `date`, el calendario abre en el mes actual acotado al rango; con `date`, en su mes. Una
   `date` fuera de rango no se corrige: se muestra tal cual y marcarla con `error` le toca al
   consumidor. Props opcionales: sin ellas nada cambia.
+- **`NavigationBarItem`: `icon` es opcional.** Un ítem sin ícono es solo texto: no reserva
+  espacio para el ícono y mantiene la misma altura táctil (56px en `'bottom'`, 44px en
+  `'horizontal'` y `'vertical'`) y el mismo `aria-current="page"` con `active`. En
+  `'horizontal'` y `'vertical'` el activo conserva su borde de 2px; en `'bottom'` (y con
+  `bottomBelow`, por debajo del breakpoint), donde el indicador era la píldora detrás del
+  ícono, el activo sin ícono lleva un subrayado bajo el texto. `badge` sigue exigiendo `icon` por
+  tipos, porque el número se ubica sobre el ícono; `badgeLabel` sigue permitido sin `badge`.
+  Mezclar ítems con y sin ícono en la misma barra no es un caso soportado. Quien ya pasa
+  `icon` no tiene nada que cambiar.
 
 ### Changed
 

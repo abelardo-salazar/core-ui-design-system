@@ -22,6 +22,14 @@ const valid = [
   <NavigationBarItem key="e" href="/" icon={<svg />} badge={count} badgeLabel={badgeLabel}>
     Mensajes
   </NavigationBarItem>,
+  // icon is optional: a text-only item.
+  <NavigationBarItem key="k" href="/" active>
+    Inicio
+  </NavigationBarItem>,
+  // badgeLabel without badge is still allowed, also without icon.
+  <NavigationBarItem key="m" href="/" badgeLabel={badgeLabel}>
+    Inicio
+  </NavigationBarItem>,
 ];
 
 // --- Invalid cases -------------------------------------------------------------------------
@@ -41,9 +49,9 @@ const invalid = [
   <NavigationBarItem key="j" href="/" icon={<svg />} badge="3" badgeLabel={badgeLabel}>
     Mensajes
   </NavigationBarItem>,
-  // @ts-expect-error icon is required
-  <NavigationBarItem key="k" href="/">
-    Inicio
+  // @ts-expect-error badge requires icon: the badge is placed on it
+  <NavigationBarItem key="k" href="/" badge={3} badgeLabel={badgeLabel}>
+    Mensajes
   </NavigationBarItem>,
   // @ts-expect-error there is no orientation prop: the form is chosen with variant
   <NavigationBar key="l" aria-label="Principal" orientation="vertical" />,
