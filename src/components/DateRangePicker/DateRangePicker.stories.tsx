@@ -1,10 +1,13 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+import { addMonths, addYears, format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { DateRangePicker, type DateRange, type DateRangePickerProps } from './DateRangePicker';
 
-// Fixed dates (January 2026) so no test depends on today. minDate opens the calendar there.
+// Fixed dates (January 2026) so no test depends on today. Without a range, the calendar opens on
+// today clamped to [minDate, maxDate]: both bounds are in January 2026, so it opens there whatever
+// today is. The initial-month stories at the end are relative to today instead.
 const JAN = (day: number) => new Date(2026, 0, day);
 
 // Controlled, as in an app.
@@ -162,5 +165,60 @@ export const WithoutField: Story = {
     await expect(trigger.parentElement!.className).toBe('contents');
     await expect(trigger.parentElement!.parentElement).toBe(canvasElement);
     await expect(trigger).not.toHaveAttribute('aria-describedby');
+  },
+};
+
+// --- Initial month -----------------------------------------------------------------------------
+// The rule is relative to today, so these dates come from the real `new Date()`: a fixed future date
+// would stop being in the future. Month arithmetic clamps the day (Jan 31 + 1 month = Feb 28), so the
+// expected month is never off by one.
+
+const TODAY = new Date();
+const monthOf = (date: Date) => format(date, 'LLLL yyyy');
+const caption = (content: HTMLElement) =>
+  within(content).getByRole('grid').getAttribute('aria-label');
+
+// 8. With a range, the calendar opens on the month of range.from, even out of range.
+export const InitialMonthWithRange: Story = {
+  args: {
+    minDate: TODAY,
+    maxDate: addMonths(TODAY, 2),
+    range: { from: addMonths(TODAY, -14), to: addMonths(TODAY, -13) },
+  },
+  play: async ({ canvasElement }) => {
+    const content = await openCalendar(canvasElement);
+    await expect(caption(content)).toBe(monthOf(addMonths(TODAY, -14)));
+    await userEvent.keyboard('{Escape}');
+  },
+};
+
+// 9. Without a range and with today before minDate, it opens on minDate's month.
+export const InitialMonthTodayBeforeMin: Story = {
+  args: { minDate: addMonths(TODAY, 3), maxDate: addMonths(TODAY, 6) },
+  play: async ({ canvasElement }) => {
+    const content = await openCalendar(canvasElement);
+    await expect(caption(content)).toBe(monthOf(addMonths(TODAY, 3)));
+    await userEvent.keyboard('{Escape}');
+  },
+};
+
+// 10. Without a range and with today after maxDate, it opens on maxDate's month.
+export const InitialMonthTodayAfterMax: Story = {
+  args: { minDate: addMonths(TODAY, -6), maxDate: addMonths(TODAY, -3) },
+  play: async ({ canvasElement }) => {
+    const content = await openCalendar(canvasElement);
+    await expect(caption(content)).toBe(monthOf(addMonths(TODAY, -3)));
+    await userEvent.keyboard('{Escape}');
+  },
+};
+
+// 11. The fix: a minDate years ago, without a range, opens on the current month, not on minDate's
+// (before, the user had to page forward to the present).
+export const PastMinDateOpensOnCurrentMonth: Story = {
+  args: { minDate: addYears(TODAY, -3), maxDate: undefined },
+  play: async ({ canvasElement }) => {
+    const content = await openCalendar(canvasElement);
+    await expect(caption(content)).toBe(monthOf(new Date()));
+    await userEvent.keyboard('{Escape}');
   },
 };

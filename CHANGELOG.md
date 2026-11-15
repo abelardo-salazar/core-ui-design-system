@@ -12,6 +12,17 @@
   `date` fuera de rango no se corrige: se muestra tal cual y marcarla con `error` le toca al
   consumidor. Props opcionales: sin ellas nada cambia.
 
+### Changed
+
+- **`DateRangePicker` abre en el mes actual cuando no hay rango, acotado a `minDate` y
+  `maxDate`.** Antes, sin `range`, el calendario abría siempre en el mes de `minDate`: con un
+  `minDate` de hace años, había que avanzar mes a mes hasta el presente. Ahora sigue la misma
+  regla que `DatePicker`: con `range`, abre en el mes de `range.from` (como antes); sin `range`,
+  en el mes actual, salvo que hoy sea anterior a `minDate` (abre en el de `minDate`) o posterior
+  a `maxDate` (abre en el de `maxDate`). Si pasabas un `minDate` pasado sin rango, el calendario
+  ahora abre en el mes actual en vez de en el de `minDate`. Migración: nada que cambiar en el
+  código.
+
 ## [0.13.0] - 2026-11-10
 
 Adaptación a pantallas táctiles y a apps en WebView (Capacitor): campos sin zoom de iOS, respuesta
