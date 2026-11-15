@@ -760,19 +760,19 @@ Uso (ejemplos, extraídos de `Image.stories.tsx`):
 
 ### 🧬 Moléculas (Estructura)
 
-| Componente          | Descripción                           | API & Composición                                                                                                                                      |
-| ------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`Card`**          | Contenedor de información.            | **Subcomponentes:** `<CardHeader>`, `<CardTitle>`, `<CardDescription>`, `<CardContent>`, `<CardFooter>`                                                |
-| **`Dialog`**        | Modal accesible.                      | `open`: boolean; `onOpenChange`: (open: boolean) => void; **Subcomponentes:** `<DialogTrigger>`, `<DialogContent>`                                     |
-| **`Sheet`**         | Panel lateral (Drawer).               | `side`: "top" \| "right" \| "bottom" \| "left"; `closeLabel`; **Subcomponentes:** `<SheetHeader>`, `<SheetBody>` (scroll), `<SheetFooter>`             |
-| **`Container`**     | Wrapper de layout.                    | `size`: 'sm' \| 'md' \| 'lg' \| 'xl' \| 'full' — controla `max-width` (ver sección `Layout` para el detalle).                                          |
-| **`AspectRatio`**   | Fuerza una relación de aspecto.       | `ratio`: number (ej. `16 / 9`). Se compone con otro contenido (`Image`, etc.), no es una API todo-en-uno.                                              |
-| **`ScrollRow`**     | Fila con desplazamiento horizontal.   | `aria-label` (obligatorio), `controls?`, `labels?`; **Subcomponentes:** `<ScrollRowItem>`                                                              |
-| **`Timeline`**      | Secuencia de solo lectura.            | **Subcomponentes:** `<TimelineItem>` (`time?`, `dateTime?`), `<TimelineGroup>` (`title`, `headingLevel?`)                                              |
-| **`Tabs`**          | Navegación por pestañas.              | `defaultValue`/`value`/`onValueChange` en el root; **Subcomponentes:** `<TabsList>`, `<TabsTrigger>`, `<TabsContent>`                                  |
-| **`NavigationBar`** | Navegación principal entre secciones. | `aria-label` (obligatorio), `variant?`, `bottomBelow?`; **Subcomponentes:** `<NavigationBarItem>` (`icon`, `active`, `asChild`, `badge`, `badgeLabel`) |
-| **`Toggle`**        | Botón que queda encendido o apagado.  | `pressed`/`defaultPressed`/`onPressedChange`; `size`: 'sm'                                                                                             | 'md' | 'lg'; `icon`; `aria-label` (obligatorio sin `children`) |
-| **`ToggleGroup`**   | Opciones que cambian un valor.        | `type`: 'single' \| 'multiple'; `size`: 'sm' \| 'md' \| 'lg'; **Subcomponentes:** `<ToggleGroupItem>`                                                  |
+| Componente          | Descripción                           | API & Composición                                                                                                                                       |
+| ------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`Card`**          | Contenedor de información.            | **Subcomponentes:** `<CardHeader>`, `<CardTitle>`, `<CardDescription>`, `<CardContent>`, `<CardFooter>`                                                 |
+| **`Dialog`**        | Modal accesible.                      | `open`: boolean; `onOpenChange`: (open: boolean) => void; **Subcomponentes:** `<DialogTrigger>`, `<DialogContent>`                                      |
+| **`Sheet`**         | Panel lateral (Drawer).               | `side`: "top" \| "right" \| "bottom" \| "left"; `closeLabel`; **Subcomponentes:** `<SheetHeader>`, `<SheetBody>` (scroll), `<SheetFooter>`              |
+| **`Container`**     | Wrapper de layout.                    | `size`: 'sm' \| 'md' \| 'lg' \| 'xl' \| 'full' — controla `max-width` (ver sección `Layout` para el detalle).                                           |
+| **`AspectRatio`**   | Fuerza una relación de aspecto.       | `ratio`: number (ej. `16 / 9`). Se compone con otro contenido (`Image`, etc.), no es una API todo-en-uno.                                               |
+| **`ScrollRow`**     | Fila con desplazamiento horizontal.   | `aria-label` (obligatorio), `controls?`, `labels?`; **Subcomponentes:** `<ScrollRowItem>`                                                               |
+| **`Timeline`**      | Secuencia de solo lectura.            | **Subcomponentes:** `<TimelineItem>` (`time?`, `dateTime?`), `<TimelineGroup>` (`title`, `headingLevel?`)                                               |
+| **`Tabs`**          | Navegación por pestañas.              | `defaultValue`/`value`/`onValueChange` en el root; **Subcomponentes:** `<TabsList>`, `<TabsTrigger>`, `<TabsContent>`                                   |
+| **`NavigationBar`** | Navegación principal entre secciones. | `aria-label` (obligatorio), `variant?`, `bottomBelow?`; **Subcomponentes:** `<NavigationBarItem>` (`icon?`, `active`, `asChild`, `badge`, `badgeLabel`) |
+| **`Toggle`**        | Botón que queda encendido o apagado.  | `pressed`/`defaultPressed`/`onPressedChange`; `size`: 'sm'                                                                                              | 'md' | 'lg'; `icon`; `aria-label` (obligatorio sin `children`) |
+| **`ToggleGroup`**   | Opciones que cambian un valor.        | `type`: 'single' \| 'multiple'; `size`: 'sm' \| 'md' \| 'lg'; **Subcomponentes:** `<ToggleGroupItem>`                                                   |
 
 ### Layout — Uso y Props
 
@@ -1149,16 +1149,16 @@ Uso (ejemplo, extraído de `Tabs.stories.tsx`):
 
       | Valor          | Forma                                                                  | Ítem activo                                     |
       | -------------- | ---------------------------------------------------------------------- | ----------------------------------------------- |
-      | `'bottom'`     | Barra inferior: ícono sobre texto, ítems de 56px que reparten el ancho | Píldora detrás del ícono                        |
+      | `'bottom'`     | Barra inferior: ícono sobre texto, ítems de 56px que reparten el ancho | Píldora detrás del ícono; sin ícono, subrayado  |
       | `'horizontal'` | Fila: ícono y texto lado a lado, 44px de alto, en una sola línea       | Borde inferior de 2px y texto en negrita media  |
       | `'vertical'`   | Columna a ancho completo, ítems de al menos 44px, texto al inicio      | Borde de 2px al inicio y texto en negrita media |
 
     - `bottomBelow?: 'sm' | 'md' | 'lg'` _(desde 0.11)_ — solo con `'horizontal'` o `'vertical'` (con `'bottom'` no compila): por debajo de ese breakpoint (640 / 768 / 1024px) la barra toma la forma `'bottom'`, con el padding del safe area incluido.
   - `NavigationBarItem`:
-    - `icon: React.ReactNode` (obligatorio) — decorativo: el texto visible nombra al ítem.
-    - `active?: boolean` — sección actual: pone `aria-current="page"` y la píldora detrás del ícono, para que el indicador no dependa solo del color.
+    - `icon?: React.ReactNode` _(desde 0.14)_ — decorativo: el texto visible nombra al ítem. Sin `icon`, el ítem es solo texto. Obligatorio por tipos si hay `badge`.
+    - `active?: boolean` — sección actual: pone `aria-current="page"` y un indicador que no depende solo del color (la píldora detrás del ícono, o el borde de 2px en `'horizontal'` y `'vertical'`; ver la tabla).
     - `asChild?: boolean` — mete el ícono, el badge y las props del ítem dentro del único hijo, como el `Link` de tu router. Sin `asChild`, renderiza un `<a>` y acepta `href`.
-    - `badge?: number` — contador. Con `0` o `undefined` no se muestra.
+    - `badge?: number` — contador, sobre el ícono: exige `icon` por tipos. Con `0` o `undefined` no se muestra.
     - `badgeLabel?: (count: number) => string` — obligatorio por tipos si hay `badge`. Su texto entra en el nombre accesible ("Mensajes 3 sin leer"); el número visible queda oculto para los lectores de pantalla.
     - `className?: string` y `React.AnchorHTMLAttributes<HTMLAnchorElement>`.
 
@@ -1171,6 +1171,21 @@ Uso (ejemplo, extraído de `Tabs.stories.tsx`):
 - **`'horizontal'` sin espacio:** si los ítems no caben, la fila se desplaza de lado (`overflow-x-auto`) sin barra de scroll visible y sin JS. Al llegar con Tab a un ítem oculto, el navegador lo desplaza hasta mostrarlo; si el ítem ya se ve en parte, Chrome le da el foco sin desplazar la fila (el foco nunca queda oculto del todo). Las etiquetas no se parten.
 - **Ítem activo a la vista en `'horizontal'`** _(desde 0.13)_: si la fila se desplaza, arranca mostrando el ítem activo (`aria-current="page"`), sin JS. Lo aplican Chrome y Edge 133+; en Firefox y Safari la fila arranca al inicio. Solo actúa cuando la fila se renderiza por primera vez: en un layout persistente entre navegaciones, donde el `<nav>` no se desmonta al cambiar de página, la fila no se vuelve a desplazar hacia el nuevo activo. Para muchos ítems sigue siendo recomendable `'vertical'`.
 - **Cómo cambia cada ítem:** `NavigationBarItem` no recibe la variante. La lee del `<nav>` con atributos `data-*` y un grupo de Tailwind, sin Context, así que el ítem sigue siendo server-safe. En `'bottom'`, el `<nav>` no lleva esos atributos y su DOM es el de antes. Usa `NavigationBarItem` solo como hijo directo de un `NavigationBar`.
+- **Ítems solo texto** _(desde 0.14)_: sin `icon`, el ítem no reserva espacio para el ícono y mantiene la misma altura táctil: 56px en `'bottom'` y 44px en `'horizontal'` y `'vertical'`. En `'horizontal'` y `'vertical'`, el activo conserva su borde de 2px. En `'bottom'` (y con `bottomBelow`, por debajo del breakpoint), donde el indicador es la píldora detrás del ícono, el activo sin ícono lleva un subrayado de 2px bajo el texto, así que no depende solo del color ni del peso.
+- **`badge` exige `icon`:** el número se ubica sobre el ícono; sin ícono, no tiene dónde ir. `badgeLabel` sigue permitido sin `badge`.
+- **Mezclar ítems con y sin ícono** en la misma barra no es un caso soportado: en `'bottom'` las alturas y los indicadores quedarían desparejos. El componente no lo valida.
+
+```tsx
+<NavigationBar aria-label="Principal" variant="horizontal">
+  <NavigationBarItem href="/viajes">Viajes</NavigationBarItem>
+  <NavigationBarItem href="/destinos" active>
+    Destinos
+  </NavigationBarItem>
+  <NavigationBarItem href="/testimonios">Testimonios</NavigationBarItem>
+  <NavigationBarItem href="/nosotros">Nosotros</NavigationBarItem>
+</NavigationBar>
+```
+
 - **Server Components:** es server-safe, sin hooks ni handlers propios. Saber cuál es la sección activa sí suele requerir un hook del router, como en los ejemplos: ese componente tuyo necesita `'use client'`.
 - **React Router:** usa `Link`, no `NavLink`: el `className` en forma de función de `NavLink` no se puede mezclar con `asChild`, y la píldora depende de `active`.
 

@@ -248,6 +248,25 @@ const items = (count = sections.length, activeIndex = 0) =>
     </NavigationBarItem>
   ));
 
+// Text-only items, without icon: the navigation of a travel site, with Destinos as the current one.
+const textSections = ['Viajes', 'Destinos', 'Testimonios', 'Nosotros'];
+const textItems = () =>
+  textSections.map((label) => (
+    <NavigationBarItem key={label} href={`#${label.toLowerCase()}`} active={label === 'Destinos'}>
+      {label}
+    </NavigationBarItem>
+  ));
+
+// The underline of the active item without icon, from the compound variant.
+const underlineClasses = [
+  'underline',
+  'decoration-2',
+  'group-data-[variant]/navigation-bar:no-underline',
+  'group-data-[bottom-below=sm]/navigation-bar:max-sm:underline',
+  'group-data-[bottom-below=md]/navigation-bar:max-md:underline',
+  'group-data-[bottom-below=lg]/navigation-bar:max-lg:underline',
+];
+
 const classesOf = (element: Element) => element.className.split(' ').filter(Boolean);
 
 // 6. 'bottom' (default) keeps the <nav> and <ul> exactly as before the variants: no data
@@ -394,12 +413,17 @@ const frameContent = (
       {items(4)}
     </NavigationBar>
     <NavigationBar aria-label="Referencia">{items(4)}</NavigationBar>
+    <NavigationBar aria-label="Fila solo texto" variant="horizontal" bottomBelow="md">
+      {textItems()}
+    </NavigationBar>
+    <NavigationBar aria-label="Referencia solo texto">{textItems()}</NavigationBar>
   </div>
 );
 
 // 10. bottomBelow with the CSS applied. At 600px (below sm and lg), horizontal and vertical take
 // the 'bottom' form, item by item the same geometry as the default bar. At 1100px they keep
-// their own form.
+// their own form. A text-only row does the same: below the breakpoint, the underline of a
+// text-only bar; above it, its own border and no underline.
 export const BottomBelowLayout: Story = {
   tags: ['real-css'],
   render: () => (
@@ -457,7 +481,34 @@ export const BottomBelowLayout: Story = {
       }
     }
 
+    // Text only: below md the row takes the 'bottom' form of a text-only bar, underline included.
+    const textRow = narrow.getByRole('navigation', { name: 'Fila solo texto' });
+    const textReference = within(
+      narrow.getByRole('navigation', { name: 'Referencia solo texto' }),
+    ).getAllByRole('link');
+    for (const [index, link] of within(textRow).getAllByRole('link').entries()) {
+      const expected = textReference[index];
+      await expect(link.querySelector('[aria-hidden]')).toBeNull();
+      await expect(styleIn(link).flexDirection).toBe('column');
+      await expect(rect(expected).height).toBeGreaterThanOrEqual(56);
+      await expect(rect(link).height).toBe(rect(expected).height);
+      await expect(rect(link).width).toBe(rect(expected).width);
+      await expect(styleIn(link).borderBottomWidth).toBe('0px');
+      await expect(styleIn(link).textDecorationLine).toBe(styleIn(expected).textDecorationLine);
+    }
+    await expect(
+      styleIn(within(textRow).getByRole('link', { current: 'page' })).textDecorationLine,
+    ).toBe('underline');
+
     const wide = await frameBody('Ancho');
+    const wideTextRow = wide.getByRole('navigation', { name: 'Fila solo texto' });
+    const wideTextActive = within(wideTextRow).getByRole('link', { current: 'page' });
+    await expect(styleIn(wideTextActive).textDecorationLine).toBe('none');
+    await expect(styleIn(wideTextActive).borderBottomWidth).toBe('2px');
+    for (const link of within(wideTextRow).getAllByRole('link')) {
+      await expect(rect(link).height).toBe(44);
+    }
+
     const row = wide.getByRole('navigation', { name: 'Fila' });
     await expect(
       styleIn(within(row).getByRole('link', { current: 'page' })).getPropertyValue(
@@ -504,5 +555,146 @@ export const VerticalLayout: Story = {
     // The longest label wraps instead of being cut.
     const long = within(nav).getByRole('link', { name: 'Ajustes de la cuenta' });
     await expect(long.scrollWidth).toBeLessThanOrEqual(long.clientWidth);
+  },
+};
+
+// Text from a node's start, to check that no space is reserved before it.
+const textLeft = (link: Element) => {
+  const range = link.ownerDocument.createRange();
+  range.selectNodeContents(link);
+  return range.getBoundingClientRect().left;
+};
+
+// 12. Text only, in the three variants: no icon element, the current item keeps aria-current and
+// its indicator classes (in 'bottom', the underline; in horizontal/vertical, the border), and no
+// prop reaches the DOM as an attribute. An item with icon doesn't get the underline.
+export const TextOnly: Story = {
+  render: () => (
+    <div className="flex w-[480px] flex-col gap-6">
+      <NavigationBar aria-label="Inferior">{textItems()}</NavigationBar>
+      <NavigationBar aria-label="Fila" variant="horizontal">
+        {textItems()}
+      </NavigationBar>
+      <NavigationBar aria-label="Columna" variant="vertical">
+        {textItems()}
+      </NavigationBar>
+      <NavigationBar aria-label="Con ícono">{items(2)}</NavigationBar>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    for (const name of ['Inferior', 'Fila', 'Columna']) {
+      const nav = canvas.getByRole('navigation', { name });
+      const links = within(nav).getAllByRole('link');
+      await expect(links.map((link) => link.textContent)).toEqual(textSections);
+      for (const link of links) {
+        const active = link.getAttribute('aria-current') === 'page';
+        // Only the text: no icon span, so no space reserved for it.
+        await expect(link.children).toHaveLength(0);
+        await expect(link.getAttributeNames().sort()).toEqual(
+          active ? ['aria-current', 'class', 'href'] : ['class', 'href'],
+        );
+        if (active) {
+          await expect(classesOf(link)).toEqual(expect.arrayContaining(underlineClasses));
+        } else {
+          await expect(classesOf(link)).not.toContain('underline');
+        }
+      }
+      await expect(within(nav).getByRole('link', { current: 'page' })).toHaveTextContent(
+        'Destinos',
+      );
+    }
+    const withIcon = canvas.getByRole('navigation', { name: 'Con ícono' });
+    const iconActive = within(withIcon).getByRole('link', { current: 'page' });
+    await expect(iconActive.querySelector('[aria-hidden]')).not.toBeNull();
+    await expect(classesOf(iconActive)).not.toContain('underline');
+  },
+};
+
+// 13. Text only with asChild: the router's Link is the single <a>, with the item's props, the
+// underline classes and the consumer's className, and nothing else inside.
+export const TextOnlyAsChild: Story = {
+  render: () => (
+    <NavigationBar aria-label="Principal" variant="horizontal">
+      <NavigationBarItem asChild active>
+        <RouterLink to="#destinos" className="clase-del-consumidor">
+          Destinos
+        </RouterLink>
+      </NavigationBarItem>
+      <NavigationBarItem asChild>
+        <RouterLink to="#nosotros">Nosotros</RouterLink>
+      </NavigationBarItem>
+    </NavigationBar>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getAllByRole('link')).toHaveLength(2);
+
+    const active = canvas.getByRole('link', { name: 'Destinos' });
+    await expect(active).toHaveAttribute('href', '#destinos');
+    await expect(active).toHaveAttribute('aria-current', 'page');
+    await expect(active.children).toHaveLength(0);
+    await expect(active.parentElement?.tagName).toBe('LI');
+    await expect(active.getAttributeNames().sort()).toEqual([
+      'aria-current',
+      'class',
+      'data-router-link',
+      'href',
+    ]);
+    await expect(classesOf(active)).toEqual(
+      expect.arrayContaining([...underlineClasses, 'clase-del-consumidor']),
+    );
+
+    const other = canvas.getByRole('link', { name: 'Nosotros' });
+    await expect(other).not.toHaveAttribute('aria-current');
+    await expect(classesOf(other)).not.toContain('underline');
+  },
+};
+
+// 14. Text only with the CSS applied. 'bottom': 56px items and an underline under the current one
+// (not only color or weight). horizontal: 44px, 2px bottom border, no underline. vertical: at least
+// 44px, 2px start border, no underline. The text starts right after the padding: no gap for an
+// icon.
+export const TextOnlyLayout: Story = {
+  tags: ['real-css'],
+  render: () => (
+    <div className="flex w-[480px] flex-col gap-6">
+      <NavigationBar aria-label="Inferior">{textItems()}</NavigationBar>
+      <NavigationBar aria-label="Fila" variant="horizontal">
+        {textItems()}
+      </NavigationBar>
+      <div className="w-56">
+        <NavigationBar aria-label="Columna" variant="vertical">
+          {textItems()}
+        </NavigationBar>
+      </div>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const linksOf = (name: string) =>
+      within(canvas.getByRole('navigation', { name })).getAllByRole('link');
+    const isActive = (link: Element) => link.getAttribute('aria-current') === 'page';
+
+    for (const link of linksOf('Inferior')) {
+      await expect(rect(link).height).toBe(56);
+      await expect(style(link).textDecorationLine).toBe(isActive(link) ? 'underline' : 'none');
+      if (isActive(link)) await expect(style(link).textDecorationThickness).toBe('2px');
+    }
+
+    for (const link of linksOf('Fila')) {
+      await expect(rect(link).height).toBe(44);
+      await expect(style(link).textDecorationLine).toBe('none');
+      await expect(style(link).borderBottomWidth).toBe(isActive(link) ? '2px' : '0px');
+      await expect(textLeft(link) - rect(link).left).toBe(parseFloat(style(link).paddingLeft));
+    }
+
+    for (const link of linksOf('Columna')) {
+      await expect(rect(link).height).toBeGreaterThanOrEqual(44);
+      await expect(style(link).textDecorationLine).toBe('none');
+      await expect(style(link).borderInlineStartWidth).toBe(isActive(link) ? '2px' : '0px');
+      // ps-3, or ps-2.5 plus the 2px border on the current one: the text starts 12px in.
+      await expect(textLeft(link) - rect(link).left).toBe(12);
+    }
   },
 };

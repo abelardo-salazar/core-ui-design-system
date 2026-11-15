@@ -101,8 +101,29 @@ export const navigationBarLinkVariants = cva(
           // active: without pointer-fine: on touch, pressing gives the feedback hover gives with a mouse.
           'text-base-content/70 pointer-fine:hover:bg-base-200 pointer-fine:hover:text-base-content active:bg-base-200 active:text-base-content',
       },
+      // Without an icon there is no span to reserve space for, so neither branch needs classes
+      // of its own; it only matters for the active indicator in the 'bottom' form (below).
+      withIcon: { true: '', false: '' },
     },
-    defaultVariants: { active: false },
+    compoundVariants: [
+      {
+        active: true,
+        withIcon: false,
+        // The 'bottom' form's indicator is the pill behind the icon: without an icon, an
+        // underline under the text. Like the borders, it survives forced-colors mode (the
+        // system forces its color, it doesn't remove it). horizontal and vertical already have
+        // their 2px border, so only text-decoration-line is overridden there and restored per
+        // breakpoint; the thickness, color and offset stay inert while the line is none.
+        class: [
+          'underline decoration-2 decoration-primary underline-offset-4',
+          'group-data-[variant]/navigation-bar:no-underline',
+          'group-data-[bottom-below=sm]/navigation-bar:max-sm:underline',
+          'group-data-[bottom-below=md]/navigation-bar:max-md:underline',
+          'group-data-[bottom-below=lg]/navigation-bar:max-lg:underline',
+        ],
+      },
+    ],
+    defaultVariants: { active: false, withIcon: true },
   },
 );
 
