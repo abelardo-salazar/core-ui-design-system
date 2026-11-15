@@ -20,6 +20,13 @@
   tipos, porque el número se ubica sobre el ícono; `badgeLabel` sigue permitido sin `badge`.
   Mezclar ítems con y sin ícono en la misma barra no es un caso soportado. Quien ya pasa
   `icon` no tiene nada que cambiar.
+- **`Breadcrumb` y `BreadcrumbItem`: migas de pan.** Un `<nav>` con una lista ordenada que
+  muestra dónde está la página en una jerarquía (Destinos › Playa › Cancún). `aria-label` es
+  obligatorio y no tiene texto por defecto. Cada ítem es un enlace (`<a>`, o el `Link` de tu
+  router con `asChild`), salvo el actual: con `active` es texto con `aria-current="page"`, y
+  `href` y `asChild` no compilan. Los separadores son decorativos (no entran en el nombre
+  accesible) y se invierten en RTL. Cuando no caben, las migas se envuelven en varias líneas,
+  sin colapso a "…". Cada enlace responde en 44px de alto sin cambiar su aspecto. Server-safe.
 
 ### Changed
 

@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { expect, within } from 'storybook/test';
 import { forcePseudoState } from '../../.storybook/forcePseudoState';
 import { Badge } from './Badge';
+import { Breadcrumb, BreadcrumbItem } from './Breadcrumb';
 import { Button } from './Button';
 import { Calendar } from './Calendar';
 import { Chip } from './Chip';
@@ -145,6 +146,10 @@ export const PressedLooksLikeHover: StoryObj = {
           </NavigationBarItem>
         </NavigationBar>
       </div>
+      <Breadcrumb aria-label="Ruta">
+        <BreadcrumbItem href="#destinos">Destinos</BreadcrumbItem>
+        <BreadcrumbItem active>Cancún</BreadcrumbItem>
+      </Breadcrumb>
       <div className="w-64">
         <RadioGroup aria-label="Talla">
           <RadioCard value="s" title="Talla S" />
@@ -215,6 +220,7 @@ export const PressedLooksLikeHover: StoryObj = {
         hoverIsInert: true,
       },
       { name: 'NavigationBarItem', element: canvas.getByRole('link', { name: 'Perfil' }) },
+      { name: 'BreadcrumbItem', element: canvas.getByRole('link', { name: 'Destinos' }) },
       { name: 'RadioCard', element: canvas.getByRole('radio', { name: 'Talla S' }) },
       {
         name: 'RadioCard disabled',
