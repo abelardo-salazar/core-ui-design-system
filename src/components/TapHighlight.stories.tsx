@@ -26,6 +26,7 @@ import { FileInput } from './FileInput';
 import { ImageUploader } from './ImageUploader';
 import { Input } from './Input';
 import { NavigationBar, NavigationBarItem } from './NavigationBar';
+import { Breadcrumb, BreadcrumbItem } from './Breadcrumb';
 import { QuantityStepper } from './QuantityStepper';
 import { RadioCard, RadioGroup, RadioGroupItem } from './RadioGroup';
 import { ScrollRow, ScrollRowItem } from './ScrollRow';
@@ -110,6 +111,12 @@ export const InlineElements: StoryObj = {
             Inicio
           </NavigationBarItem>
         </NavigationBar>
+      </Case>
+      <Case name="BreadcrumbItem">
+        <Breadcrumb aria-label="Ruta">
+          <BreadcrumbItem href="#destinos">Destinos</BreadcrumbItem>
+          <BreadcrumbItem active>Cancún</BreadcrumbItem>
+        </Breadcrumb>
       </Case>
       <Case name="Chip">
         <Chip onPressedChange={() => {}} onRemove={() => {}} removeLabel="Quitar">
@@ -199,6 +206,7 @@ export const InlineElements: StoryObj = {
       ToggleGroupItem: inCase('ToggleGroupItem', '[role=radio]'),
       TabsTrigger: inCase('TabsTrigger', '[role=tab]'),
       NavigationBarItem: inCase('NavigationBarItem', 'a'),
+      BreadcrumbItem: inCase('BreadcrumbItem', 'a'),
       'Chip body': inCase('Chip', 'button[aria-pressed]'),
       'Chip remove': inCase('Chip', 'button:not([aria-pressed])'),
       'Input field': inCase('Input', 'input'),

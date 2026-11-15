@@ -137,6 +137,7 @@ Importar desde el barrel principal es seguro en un Server Component; el subpath 
 | `AspectRatio`                                                                                                                                                                                                                      | Sí               |
 | `Avatar`, `AvatarImage`, `AvatarFallback`                                                                                                                                                                                          | No               |
 | `Badge`                                                                                                                                                                                                                            | Sí               |
+| `Breadcrumb`, `BreadcrumbItem`                                                                                                                                                                                                     | Sí               |
 | `Button`                                                                                                                                                                                                                           | No               |
 | `Calendar`                                                                                                                                                                                                                         | No               |
 | `Card`, `CardHeader`, `CardFooter`, `CardTitle`, `CardDescription`, `CardContent`                                                                                                                                                  | Sí               |
@@ -384,6 +385,7 @@ Verificado en navegador real (misma configuración de prueba): un override en `@
     - [Timeline — Uso y Props](#timeline--uso-y-props)
     - [Tabs — Uso y Props](#tabs--uso-y-props)
     - [NavigationBar — Uso y Props](#navigationbar--uso-y-props)
+    - [Breadcrumb — Uso y Props](#breadcrumb--uso-y-props)
     - [Toggle — Uso y Props](#toggle--uso-y-props)
     - [ToggleGroup — Uso y Props](#togglegroup--uso-y-props)
     - [🔲 Overlays](#-overlays)
@@ -760,19 +762,20 @@ Uso (ejemplos, extraídos de `Image.stories.tsx`):
 
 ### 🧬 Moléculas (Estructura)
 
-| Componente          | Descripción                           | API & Composición                                                                                                                                       |
-| ------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`Card`**          | Contenedor de información.            | **Subcomponentes:** `<CardHeader>`, `<CardTitle>`, `<CardDescription>`, `<CardContent>`, `<CardFooter>`                                                 |
-| **`Dialog`**        | Modal accesible.                      | `open`: boolean; `onOpenChange`: (open: boolean) => void; **Subcomponentes:** `<DialogTrigger>`, `<DialogContent>`                                      |
-| **`Sheet`**         | Panel lateral (Drawer).               | `side`: "top" \| "right" \| "bottom" \| "left"; `closeLabel`; **Subcomponentes:** `<SheetHeader>`, `<SheetBody>` (scroll), `<SheetFooter>`              |
-| **`Container`**     | Wrapper de layout.                    | `size`: 'sm' \| 'md' \| 'lg' \| 'xl' \| 'full' — controla `max-width` (ver sección `Layout` para el detalle).                                           |
-| **`AspectRatio`**   | Fuerza una relación de aspecto.       | `ratio`: number (ej. `16 / 9`). Se compone con otro contenido (`Image`, etc.), no es una API todo-en-uno.                                               |
-| **`ScrollRow`**     | Fila con desplazamiento horizontal.   | `aria-label` (obligatorio), `controls?`, `labels?`; **Subcomponentes:** `<ScrollRowItem>`                                                               |
-| **`Timeline`**      | Secuencia de solo lectura.            | **Subcomponentes:** `<TimelineItem>` (`time?`, `dateTime?`), `<TimelineGroup>` (`title`, `headingLevel?`)                                               |
-| **`Tabs`**          | Navegación por pestañas.              | `defaultValue`/`value`/`onValueChange` en el root; **Subcomponentes:** `<TabsList>`, `<TabsTrigger>`, `<TabsContent>`                                   |
-| **`NavigationBar`** | Navegación principal entre secciones. | `aria-label` (obligatorio), `variant?`, `bottomBelow?`; **Subcomponentes:** `<NavigationBarItem>` (`icon?`, `active`, `asChild`, `badge`, `badgeLabel`) |
-| **`Toggle`**        | Botón que queda encendido o apagado.  | `pressed`/`defaultPressed`/`onPressedChange`; `size`: 'sm'                                                                                              | 'md' | 'lg'; `icon`; `aria-label` (obligatorio sin `children`) |
-| **`ToggleGroup`**   | Opciones que cambian un valor.        | `type`: 'single' \| 'multiple'; `size`: 'sm' \| 'md' \| 'lg'; **Subcomponentes:** `<ToggleGroupItem>`                                                   |
+| Componente          | Descripción                                          | API & Composición                                                                                                                                       |
+| ------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`Card`**          | Contenedor de información.                           | **Subcomponentes:** `<CardHeader>`, `<CardTitle>`, `<CardDescription>`, `<CardContent>`, `<CardFooter>`                                                 |
+| **`Dialog`**        | Modal accesible.                                     | `open`: boolean; `onOpenChange`: (open: boolean) => void; **Subcomponentes:** `<DialogTrigger>`, `<DialogContent>`                                      |
+| **`Sheet`**         | Panel lateral (Drawer).                              | `side`: "top" \| "right" \| "bottom" \| "left"; `closeLabel`; **Subcomponentes:** `<SheetHeader>`, `<SheetBody>` (scroll), `<SheetFooter>`              |
+| **`Container`**     | Wrapper de layout.                                   | `size`: 'sm' \| 'md' \| 'lg' \| 'xl' \| 'full' — controla `max-width` (ver sección `Layout` para el detalle).                                           |
+| **`AspectRatio`**   | Fuerza una relación de aspecto.                      | `ratio`: number (ej. `16 / 9`). Se compone con otro contenido (`Image`, etc.), no es una API todo-en-uno.                                               |
+| **`ScrollRow`**     | Fila con desplazamiento horizontal.                  | `aria-label` (obligatorio), `controls?`, `labels?`; **Subcomponentes:** `<ScrollRowItem>`                                                               |
+| **`Timeline`**      | Secuencia de solo lectura.                           | **Subcomponentes:** `<TimelineItem>` (`time?`, `dateTime?`), `<TimelineGroup>` (`title`, `headingLevel?`)                                               |
+| **`Tabs`**          | Navegación por pestañas.                             | `defaultValue`/`value`/`onValueChange` en el root; **Subcomponentes:** `<TabsList>`, `<TabsTrigger>`, `<TabsContent>`                                   |
+| **`NavigationBar`** | Navegación principal entre secciones.                | `aria-label` (obligatorio), `variant?`, `bottomBelow?`; **Subcomponentes:** `<NavigationBarItem>` (`icon?`, `active`, `asChild`, `badge`, `badgeLabel`) |
+| **`Breadcrumb`**    | Migas de pan: dónde está la página en una jerarquía. | `aria-label` (obligatorio); **Subcomponentes:** `<BreadcrumbItem>` (`href`, `asChild`, `active`)                                                        |
+| **`Toggle`**        | Botón que queda encendido o apagado.                 | `pressed`/`defaultPressed`/`onPressedChange`; `size`: 'sm'                                                                                              | 'md' | 'lg'; `icon`; `aria-label` (obligatorio sin `children`) |
+| **`ToggleGroup`**   | Opciones que cambian un valor.                       | `type`: 'single' \| 'multiple'; `size`: 'sm' \| 'md' \| 'lg'; **Subcomponentes:** `<ToggleGroupItem>`                                                   |
 
 ### Layout — Uso y Props
 
@@ -1264,6 +1267,55 @@ function AppNavigationBar() {
     </NavigationBar>
   );
 }
+```
+
+### Breadcrumb — Uso y Props
+
+**Desde 0.14.**
+
+- **Exports:** `Breadcrumb`, `BreadcrumbItem`; tipos `BreadcrumbProps` y `BreadcrumbItemProps`.
+- **Props principales:**
+  - `Breadcrumb`: `aria-label: string` (obligatorio por tipos, sin texto por defecto), `className?: string` y `React.HTMLAttributes<HTMLElement>`. Renderiza un `<nav>` con una lista ordenada (`<ol>`).
+  - `BreadcrumbItem`: renderiza un `<li>`.
+    - Sin `active`: un enlace. `href` y `React.AnchorHTMLAttributes<HTMLAnchorElement>` van al `<a>`.
+    - `asChild?: boolean` — mete las props y las clases del ítem en el único hijo, como el `Link` de tu router, que queda como el único `<a>` del ítem.
+    - `active?: true` — página actual: renderiza texto (un `<span>`, no un enlace) con `aria-current="page"`. Con `active`, `href` y `asChild` no compilan.
+    - `className?: string` — se aplica al enlace o al texto del ítem actual.
+
+**Comportamiento no obvio:**
+
+- **Cuándo usarlo:** para mostrar dónde está la página dentro de una jerarquía (Destinos › Playa › Cancún) y volver a un nivel superior. `NavigationBar` es la navegación principal entre secciones hermanas, y `Tabs` cambia paneles dentro de una misma vista. Las migas complementan a `NavigationBar`, no la reemplazan.
+- **`aria-label` obligatorio, sin texto por defecto:** una página puede tener varios `<nav>`, y cada uno necesita un nombre propio en el idioma de tu app (por ejemplo, `"Ruta de navegación"`).
+- **El ítem actual no es enlace:** es texto con `aria-current="page"`, en negrita media y con el color del texto; los enlaces van atenuados (`text-base-content/70`, al menos 4,5:1 en tema claro y oscuro) y se subrayan con hover o al presionarlos. Tab salta el ítem actual.
+- **Separadores decorativos:** el chevron entre ítems es un SVG con `aria-hidden`, fuera del enlace: no entra en el nombre accesible ni lo lee un lector de pantalla. El primero se oculta con CSS, sin que el ítem conozca su posición. En RTL se invierte. No se puede personalizar.
+- **Se envuelve en varias líneas** cuando no cabe, sin colapso a "…", sin desplazamiento horizontal y sin estado. Una línea nueva empieza con "› Ítem", nunca termina en un chevron, y una etiqueta más ancha que la fila se parte dentro de su ítem. Entre líneas quedan 24px.
+- **Área táctil:** cada enlace responde en 44px de alto (su línea de 20px más 12px arriba y abajo) sin cambiar su aspecto; el ancho es el del texto, para no pisar al vecino. Esa área sobresale 12px por encima y por debajo del `<nav>`: deja al menos ese espacio con un control vecino.
+- **Enlace del router:** usa `asChild` con el `Link` de tu router (Next.js, React Router). Al recorrer una lista, elige la rama por ítem: `active` con un booleano dinámico junto a `href` no compila.
+- **Server Components:** es server-safe, sin hooks ni handlers propios.
+
+```tsx
+import Link from 'next/link';
+import { Breadcrumb, BreadcrumbItem } from '@abelardo-salazar/core-ui-design-system';
+
+const trail = [
+  { href: '/destinos', label: 'Destinos' },
+  { href: '/destinos/playa', label: 'Playa' },
+  { href: '/destinos/playa/cancun', label: 'Cancún' },
+];
+
+<Breadcrumb aria-label="Ruta de navegación">
+  {trail.map(({ href, label }, index) =>
+    index === trail.length - 1 ? (
+      <BreadcrumbItem key={href} active>
+        {label}
+      </BreadcrumbItem>
+    ) : (
+      <BreadcrumbItem key={href} asChild>
+        <Link href={href}>{label}</Link>
+      </BreadcrumbItem>
+    ),
+  )}
+</Breadcrumb>;
 ```
 
 ### Toggle — Uso y Props
