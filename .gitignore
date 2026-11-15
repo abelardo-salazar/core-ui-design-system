@@ -34,3 +34,6 @@ storybook-static
 CONTEXT_SYNC.md
 STACK.md
 .npmrc
+
+# Claude Code: local settings of each developer
+/.claude/settings.local.json
