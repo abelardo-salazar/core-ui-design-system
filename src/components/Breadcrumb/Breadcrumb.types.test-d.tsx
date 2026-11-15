@@ -54,6 +54,12 @@ const invalid = [
   <BreadcrumbItem key="h" href="/cancun" active={isLast}>
     Cancún
   </BreadcrumbItem>,
+  // @ts-expect-error a link item needs href or asChild: without them it's an <a> with no href
+  <BreadcrumbItem key="i">Destinos</BreadcrumbItem>,
+  // @ts-expect-error a boolean active without href: its false half would be a link with no href
+  <BreadcrumbItem key="j" active={isLast}>
+    Cancún
+  </BreadcrumbItem>,
 ];
 
 void valid;

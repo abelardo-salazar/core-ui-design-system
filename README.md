@@ -1327,7 +1327,7 @@ function AppNavigationBar() {
 - **Props principales:**
   - `Breadcrumb`: `aria-label: string` (obligatorio por tipos, sin texto por defecto), `className?: string` y `React.HTMLAttributes<HTMLElement>`. Renderiza un `<nav>` con una lista ordenada (`<ol>`).
   - `BreadcrumbItem`: renderiza un `<li>`.
-    - Sin `active`: un enlace. `href` y `React.AnchorHTMLAttributes<HTMLAnchorElement>` van al `<a>`.
+    - Sin `active`: un enlace, con `href` obligatorio por tipos (o `asChild`, y el `href` va en tu `Link`). `href` y `React.AnchorHTMLAttributes<HTMLAnchorElement>` van al `<a>`.
     - `asChild?: boolean` — mete las props y las clases del ítem en el único hijo, como el `Link` de tu router, que queda como el único `<a>` del ítem.
     - `active?: true` — página actual: renderiza texto (un `<span>`, no un enlace) con `aria-current="page"`. Con `active`, `href` y `asChild` no compilan.
     - `className?: string` — se aplica al enlace o al texto del ítem actual.
@@ -1341,7 +1341,7 @@ function AppNavigationBar() {
 - **Se envuelve en varias líneas** cuando no cabe, sin colapso a "…", sin desplazamiento horizontal y sin estado. Una línea nueva empieza con "› Ítem", nunca termina en un chevron, y una etiqueta más ancha que la fila se parte dentro de su ítem. Entre líneas quedan 24px.
 - **Área táctil:** cada enlace responde en 44px de alto (su línea de 20px más 12px arriba y abajo) sin cambiar su aspecto; el ancho es el del texto, para no pisar al vecino. Esa área sobresale 12px por encima y por debajo del `<nav>`: deja al menos ese espacio con un control vecino.
 - **Enlace del router:** usa `asChild` con el `Link` de tu router (Next.js, React Router), como en el ejemplo de abajo.
-- **`active` no admite un `boolean` junto a `href` o `asChild`:** `<BreadcrumbItem href={href} active={esUltimo}>` no compila. Como `esUltimo` puede ser `true`, y el ítem actual es texto y no un enlace, su `href` se perdería en silencio. Es estricto a propósito. Al recorrer una lista, bifurca en el JSX: el último es el ítem actual y los demás, enlaces.
+- **`active` no admite un `boolean` junto a `href` o `asChild`:** `<BreadcrumbItem href={href} active={esUltimo}>` no compila. Como `esUltimo` puede ser `true`, y el ítem actual es texto y no un enlace, su `href` se perdería en silencio. Es estricto a propósito. Sin `href` tampoco compila (`<BreadcrumbItem active={esUltimo}>`): cuando `esUltimo` es `false`, sería un `<a>` sin `href`, que no es un enlace ni recibe el foco. Al recorrer una lista, bifurca en el JSX: el último es el ítem actual y los demás, enlaces.
 
   ```tsx
   {

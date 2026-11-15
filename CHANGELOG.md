@@ -23,8 +23,9 @@
 - **`Breadcrumb` y `BreadcrumbItem`: migas de pan.** Un `<nav>` con una lista ordenada que
   muestra dónde está la página en una jerarquía (Destinos › Playa › Cancún). `aria-label` es
   obligatorio y no tiene texto por defecto. Cada ítem es un enlace (`<a>`, o el `Link` de tu
-  router con `asChild`), salvo el actual: con `active` es texto con `aria-current="page"`, y
-  `href` y `asChild` no compilan. Los separadores son decorativos (no entran en el nombre
+  router con `asChild`), con `href` o `asChild` obligatorios por tipos, salvo el actual: con
+  `active` es texto con `aria-current="page"`, y `href` y `asChild` no compilan. `active` no
+  admite un `boolean`: al recorrer una lista, el último ítem va por una rama y los demás por otra. Los separadores son decorativos (no entran en el nombre
   accesible) y se invierten en RTL. Cuando no caben, las migas se envuelven en varias líneas,
   sin colapso a "…". Cada enlace responde en 44px de alto sin cambiar su aspecto. Server-safe.
 
