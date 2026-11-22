@@ -3,6 +3,7 @@ import { expect, within } from 'storybook/test';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './Card';
 import { Button } from '../Button';
 import { Input } from '../Input';
+import { Heading } from '../Typography';
 
 const meta: Meta<typeof Card> = {
   title: 'Components/Card',
@@ -109,6 +110,37 @@ export const BlogPost: Story = {
   ),
 };
 
+// 4. as: picks the heading tag without changing the look. Under an h1 the first card uses h2
+// (axe: heading-order); the second keeps the default h3, which follows the h2, to compare classes.
+export const HeadingLevel: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <Heading level="h1">Proyectos</Heading>
+      <Card className="w-72">
+        <CardHeader>
+          <CardTitle as="h2">Portafolio web</CardTitle>
+          <CardDescription>Título con nivel elegido.</CardDescription>
+        </CardHeader>
+      </Card>
+      <Card className="w-72">
+        <CardHeader>
+          <CardTitle>Nivel por defecto</CardTitle>
+          <CardDescription>Título con el h3 por defecto.</CardDescription>
+        </CardHeader>
+      </Card>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const chosen = canvas.getByRole('heading', { level: 2, name: 'Portafolio web' });
+    const byDefault = canvas.getByRole('heading', { level: 3, name: 'Nivel por defecto' });
+
+    await expect(chosen.tagName).toBe('H2');
+    await expect(chosen).not.toHaveAttribute('as');
+    await expect(chosen.className).toBe(byDefault.className);
+  },
+};
+
 const sizedCard = (size: 'md' | 'sm' | undefined, label: string) => (
   <Card size={size} aria-label={label} className="w-72">
     <CardHeader>
@@ -124,7 +156,7 @@ const sizedCard = (size: 'md' | 'sm' | undefined, label: string) => (
   </Card>
 );
 
-// 4. size: the root only gets data-size and the named group (size never reaches the DOM as an
+// 5. size: the root only gets data-size and the named group (size never reaches the DOM as an
 // attribute); each part carries its md padding and the sm override, active only under an sm Card.
 export const Sizes: Story = {
   render: () => (
@@ -164,7 +196,7 @@ const paddings = (element: Element) => {
   return [paddingTop, paddingRight, paddingBottom, paddingLeft].join(' ');
 };
 
-// 5. size with the CSS applied: md keeps 24px, sm is 16px, and content/footer keep no top padding
+// 6. size with the CSS applied: md keeps 24px, sm is 16px, and content/footer keep no top padding
 // in both.
 export const SizePadding: Story = {
   tags: ['real-css'],

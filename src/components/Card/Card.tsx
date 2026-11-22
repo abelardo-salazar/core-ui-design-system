@@ -53,12 +53,21 @@ const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
 CardHeader.displayName = 'CardHeader';
 
 // -----------------------------------------------------------------------------
-// Card Title (H3 typography)
+// Card Title (heading; h3 by default)
 // -----------------------------------------------------------------------------
-const CardTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLHeadingElement>>(
-  ({ className, ...props }, ref) => (
-    // eslint-disable-next-line jsx-a11y/heading-has-content
-    <h3
+export interface CardTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
+  /**
+   * Heading tag. `h3` by default only for DOM compatibility: a card doesn't know its context,
+   * so pass the level that follows the surrounding heading. Doesn't change the look.
+   * @default 'h3'
+   */
+  as?: 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+}
+
+// `as` is destructured so it never reaches the DOM.
+const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
+  ({ className, as: Component = 'h3', ...props }, ref) => (
+    <Component
       ref={ref}
       className={cn('font-semibold leading-none tracking-tight', className)}
       {...props}

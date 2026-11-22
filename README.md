@@ -5,7 +5,7 @@
 ![TypeScript](https://img.shields.io/badge/typescript-5.9+-3178C6.svg)
 ![Registry](https://img.shields.io/badge/registry-npm-CB3837.svg)
 
-**Última versión publicada:** `0.14.0`.
+**Última versión publicada:** `0.14.0`. `main` tiene cambios sin publicar: ver [CHANGELOG § Unreleased](./CHANGELOG.md#unreleased).
 
 **Storybook:** [abelardo-salazar.github.io/core-ui-design-system](https://abelardo-salazar.github.io/core-ui-design-system/). Documenta la última versión publicada, no lo que aún está sin publicar en `main`.
 
@@ -831,12 +831,13 @@ Notas:
 
 ### Card — Uso y Props
 
-- **Exports:** `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter` y el tipo `CardProps` _(desde 0.11)_.
+- **Exports:** `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter` y los tipos `CardProps` _(desde 0.11)_ y `CardTitleProps` _(desde 0.15)_.
 - **`Card` (root):** `className?: string` y acepta `React.HTMLAttributes<HTMLDivElement>` (atributos y eventos estándar). Renderiza un contenedor `div` con estilos base (`rounded-box border bg-base-100 text-base-content shadow-sm`).
   - `size?: 'md' | 'sm'` _(desde 0.11)_ (default `'md'`) — padding de `CardHeader`, `CardContent` y `CardFooter`: 24px en `md`, 16px en `sm`. `CardContent` y `CardFooter` siguen sin padding superior.
 - **Subcomponentes:**
   - `CardHeader`: contenedor para título y descripción. Props: `className?: string`.
-  - `CardTitle`: se renderiza como un `h3` (tipografía semántica). Props: `className?: string`.
+  - `CardTitle`: se renderiza como un `h3` por defecto. Props: `className?: string`.
+    - `as?: 'h2' | 'h3' | 'h4' | 'h5' | 'h6'` _(desde 0.15)_ (default `'h3'`) — etiqueta del título; el aspecto es el mismo con cualquier nivel. La tarjeta no conoce su contexto: elige el nivel que sigue al heading que la rodea (`as="h2"` tras el `h1` de la página) para no saltar niveles.
   - `CardDescription`: texto secundario/mutado. Props: `className?: string`.
   - `CardContent`: cuerpo principal (padding y layout). Props: `className?: string`.
   - `CardFooter`: área de acciones (botones, enlaces). Props: `className?: string`.

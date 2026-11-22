@@ -238,6 +238,12 @@ Input y Textarea generan con `useId()` el id que enlaza `aria-describedby`, así
 
 Tooltip no es apto para touch: Radix ignora los taps por diseño. Para contenido que tiene que llegar en touch, Popover. `pointer-coarse:hidden` en el contenido del Tooltip es una capa defensiva, no la solución.
 
+### Nivel de heading en títulos de componentes
+
+Un componente que no conoce su contexto no impone un nivel de heading: `AlertTitle` es un `div` y `EmptyStateTitle` es un `p` salvo que `as` pida un heading. `CardTitle` conserva `h3` por defecto solo por compatibilidad de DOM con quien ya lo usa, y ofrece `as` (`h2`–`h6`) para corregir el nivel. Decisión del 2026-11-22.
+
+**Por qué:** el nivel correcto depende de la página (una tarjeta va tras un `h2` en un listado y tras un `h1` en otro), y un nivel fijo rompe `heading-order`. El aspecto no cambia con el nivel, igual que en `Heading` con `level` y `as`. Se resuelve con `as` y una unión cerrada, no con `asChild`, como `Heading` y `EmptyStateTitle`.
+
 ### Badge `interactive`
 
 `interactive` (el literal `true`) hace que Badge renderice un `button`: un `div` con hover, foco y `onClick` no es operable por teclado. Las sobrecargas de tipos lo hacen cumplir: `onClick` sin `interactive` no compila.

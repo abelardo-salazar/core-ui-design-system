@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **`CardTitle`: `as` y el tipo `CardTitleProps`.** `as?: 'h2' | 'h3' | 'h4' | 'h5' | 'h6'`
+  elige la etiqueta del título sin cambiar su aspecto, para seguir el nivel del heading que
+  rodea a la tarjeta (por ejemplo, `as="h2"` tras el `h1` de la página). Sin `as` sigue siendo
+  un `h3`. El ref de `CardTitle` pasa a tiparse como `HTMLHeadingElement`, que es el elemento
+  que siempre renderizó; un ref existente sigue compilando, así que no hay nada que migrar.
+
 ## [0.14.0] - 2026-11-15
 
 Límites de fecha en `DatePicker`, ítems solo texto en `NavigationBar` y un componente nuevo,
