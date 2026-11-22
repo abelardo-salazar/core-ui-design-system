@@ -93,7 +93,7 @@ Alert.displayName = 'Alert';
 // -----------------------------------------------------------------------------
 // Alert Title
 // -----------------------------------------------------------------------------
-// Deliberately a <div>, not an <h*>: unlike CardTitle, an Alert can show up
+// Deliberately a <div>, not an <h*>: an Alert can show up
 // anywhere in the tree (injected by a form, a toast, etc.) without the
 // component being able to know which heading level belongs there. Forcing a fixed level
 // could break the heading order of the consuming page.
