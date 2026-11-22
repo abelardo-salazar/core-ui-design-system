@@ -1,6 +1,9 @@
 # Changelog
 
-## [Unreleased]
+## [0.15.0] - 2026-11-22
+
+`CardTitle` permite elegir el nivel de heading con `as`, sin cambiar su aspecto. La prop nueva
+es opcional y ningún cambio rompe la API.
 
 ### Added
 
